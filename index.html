@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Chaser - Find the Best Weather Near You</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>☀️ Weather Chaser</h1>
+            <p class="tagline">Find the best weather spots for your next adventure</p>
+        </header>
+
+        <div class="controls-section">
+            <div class="control-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" placeholder="City, postal code, or coordinates (lat,lon)">
+                <small>Examples: "Berlin", "10115", "52.52,13.405"</small>
+            </div>
+
+            <div class="control-row">
+                <div class="control-group">
+                    <label for="radius">Search Radius (km)</label>
+                    <input type="number" id="radius" value="100" min="10" max="500" step="10">
+                </div>
+
+                <div class="control-group">
+                    <label for="days">Forecast Days</label>
+                    <input type="number" id="days" value="7" min="1" max="14">
+                </div>
+
+                <div class="control-group">
+                    <label for="gridSize">Grid Points</label>
+                    <select id="gridSize">
+                        <option value="9">9 (3x3)</option>
+                        <option value="16">16 (4x4)</option>
+                        <option value="25" selected>25 (5x5)</option>
+                        <option value="36">36 (6x6)</option>
+                        <option value="49">49 (7x7)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="searchBtn" class="search-btn">Find Best Weather</button>
+            <div id="loadingIndicator" class="loading hidden">
+                <div class="spinner"></div>
+                <span>Analyzing weather patterns...</span>
+            </div>
+        </div>
+
+        <div id="mapContainer" class="map-container">
+            <div id="map"></div>
+        </div>
+
+        <div id="resultsSection" class="results-section hidden">
+            <h2>Weather Spots</h2>
+            <div class="legend">
+                <div class="legend-item">
+                    <span class="legend-color excellent"></span>
+                    <span>Excellent (90-100)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color good"></span>
+                    <span>Good (70-89)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color fair"></span>
+                    <span>Fair (50-69)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color poor"></span>
+                    <span>Poor (&lt;50)</span>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="rank">Rank</th>
+                            <th class="sortable" data-column="score">Score</th>
+                            <th class="sortable" data-column="location">Location</th>
+                            <th class="sortable" data-column="avgTemp">Avg Temp (°C)</th>
+                            <th class="sortable" data-column="sunHours">Sun Hours</th>
+                            <th class="sortable" data-column="rainChance">Rain Chance (%)</th>
+                            <th class="sortable" data-column="windSpeed">Wind (km/h)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer>
+            <p>Weather data provided by <a href="https://open-meteo.com/" target="_blank">Open-Meteo</a></p>
+        </footer>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

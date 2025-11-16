@@ -7,6 +7,8 @@
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet Draw CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -18,32 +20,56 @@
         </header>
 
         <div class="controls-section">
-            <div class="control-group">
-                <label for="location">Location</label>
-                <input type="text" id="location" placeholder="City, postal code, or coordinates (lat,lon)">
-                <small>Examples: "Berlin", "10115", "52.52,13.405"</small>
+            <div class="search-mode-tabs">
+                <button class="tab-btn active" data-mode="location">📍 Location Search</button>
+                <button class="tab-btn" data-mode="draw">✏️ Draw Area</button>
+            </div>
+
+            <div id="locationMode" class="search-mode active">
+                <div class="control-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" placeholder="City, postal code, or coordinates (lat,lon)">
+                    <small>Examples: "Berlin", "10115", "52.52,13.405"</small>
+                </div>
+
+                <div class="control-row">
+                    <div class="control-group">
+                        <label for="radius">Search Radius (km)</label>
+                        <input type="number" id="radius" value="100" min="10" max="500" step="10">
+                    </div>
+                    <div class="control-group">
+                        <label for="gridSize">Grid Points</label>
+                        <select id="gridSize">
+                            <option value="9">9 (3x3)</option>
+                            <option value="16">16 (4x4)</option>
+                            <option value="25" selected>25 (5x5)</option>
+                            <option value="36">36 (6x6)</option>
+                            <option value="49">49 (7x7)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="drawMode" class="search-mode">
+                <div class="draw-instructions">
+                    <p>📝 Click the draw tool on the map below to draw a rectangle or polygon around your area of interest.</p>
+                    <div class="control-group">
+                        <label for="drawGridSize">Grid Points in Area</label>
+                        <select id="drawGridSize">
+                            <option value="16">16 points</option>
+                            <option value="25" selected>25 points</option>
+                            <option value="36">36 points</option>
+                            <option value="49">49 points</option>
+                            <option value="64">64 points</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <div class="control-row">
                 <div class="control-group">
-                    <label for="radius">Search Radius (km)</label>
-                    <input type="number" id="radius" value="100" min="10" max="500" step="10">
-                </div>
-
-                <div class="control-group">
                     <label for="days">Forecast Days</label>
                     <input type="number" id="days" value="7" min="1" max="14">
-                </div>
-
-                <div class="control-group">
-                    <label for="gridSize">Grid Points</label>
-                    <select id="gridSize">
-                        <option value="9">9 (3x3)</option>
-                        <option value="16">16 (4x4)</option>
-                        <option value="25" selected>25 (5x5)</option>
-                        <option value="36">36 (6x6)</option>
-                        <option value="49">49 (7x7)</option>
-                    </select>
                 </div>
             </div>
 
@@ -83,13 +109,16 @@
                 <table id="resultsTable">
                     <thead>
                         <tr>
+                            <th></th>
                             <th class="sortable" data-column="rank">Rank</th>
                             <th class="sortable" data-column="score">Score</th>
                             <th class="sortable" data-column="location">Location</th>
-                            <th class="sortable" data-column="avgTemp">Avg Temp (°C)</th>
-                            <th class="sortable" data-column="sunHours">Sun Hours</th>
-                            <th class="sortable" data-column="rainChance">Rain Chance (%)</th>
+                            <th class="sortable" data-column="avgTemp">Temp (°C)</th>
+                            <th class="sortable" data-column="sunHours">Sun (h/day)</th>
+                            <th class="sortable" data-column="rainAmount">Rain (mm)</th>
+                            <th class="sortable" data-column="rainChance">Rain %</th>
                             <th class="sortable" data-column="windSpeed">Wind (km/h)</th>
+                            <th class="sortable" data-column="humidity">Humidity (%)</th>
                         </tr>
                     </thead>
                     <tbody id="resultsBody">
@@ -105,6 +134,8 @@
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet Draw JS -->
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

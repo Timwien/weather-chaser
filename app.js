@@ -563,6 +563,11 @@ class WeatherChaser {
             row.classList.add('data-row');
             row.dataset.index = index;
 
+            // Calculate bar widths for rain visualization
+            const maxRain = 50; // mm - max for visualization
+            const rainAmountBarWidth = Math.min((point.rainAmount / maxRain) * 100, 100);
+            const rainChanceBarWidth = Math.min(point.rainChance, 100);
+
             row.innerHTML = `
                 <td><span class="expand-icon">▶</span></td>
                 <td>${point.rank}</td>
@@ -570,8 +575,22 @@ class WeatherChaser {
                 <td>${point.lat.toFixed(4)}, ${point.lon.toFixed(4)}</td>
                 <td>${point.avgTemp}°C</td>
                 <td>${point.sunHours}h</td>
-                <td>${point.rainAmount}mm</td>
-                <td>${point.rainChance}%</td>
+                <td>
+                    <div class="table-rain-cell">
+                        <span class="rain-value">${point.rainAmount}mm</span>
+                        <div class="rain-bar-container">
+                            <div class="rain-bar" style="width: ${rainAmountBarWidth}%"></div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-rain-cell">
+                        <span class="rain-value">${point.rainChance}%</span>
+                        <div class="rain-bar-container">
+                            <div class="rain-bar" style="width: ${rainChanceBarWidth}%"></div>
+                        </div>
+                    </div>
+                </td>
                 <td>${point.windSpeed} km/h</td>
             `;
 
@@ -1161,14 +1180,13 @@ class WeatherChaser {
                 </div>
                 <div class="itinerary-header">
                     <div class="location-info">
-                        <h4>${emoji} ${stop.location.lat.toFixed(4)}, ${stop.location.lon.toFixed(4)}</h4>
-                        <a href="${mapsLink}" target="_blank" class="maps-link" title="Open in Google Maps">
+                        <h4>${emoji} Weather Score: ${stop.location.score}</h4>
+                        <a href="${mapsLink}" target="_blank" class="maps-link" title="${stop.location.lat.toFixed(4)}, ${stop.location.lon.toFixed(4)}">
                             📍 View on Map
                         </a>
                     </div>
                     <div class="travel-info">
                         ${stop.distance > 0 ? `<span class="travel-badge">🚗 <strong>${stop.distance} km</strong> (~${driveTimeStr})</span>` : '<span class="travel-badge">🎯 <strong>Starting Point</strong></span>'}
-                        <span class="travel-badge">⭐ Score: <strong>${stop.location.score}</strong></span>
                     </div>
                 </div>
                 <div class="weather-preview">

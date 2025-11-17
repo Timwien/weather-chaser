@@ -912,6 +912,25 @@ tr.detail-row td {
     background: linear-gradient(90deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
 }
 
+/* Table Rain Cell Styles */
+.table-rain-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 100px;
+}
+
+.table-rain-cell .rain-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.table-rain-cell .rain-bar-container {
+    height: 6px;
+    margin-top: 2px;
+}
+
 .score-badge {
     display: inline-block;
     padding: 6px 12px;

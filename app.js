@@ -297,7 +297,7 @@ class WeatherChaser {
         // Open-Meteo API with enhanced weather data
         const url = `https://api.open-meteo.com/v1/forecast?` +
             `latitude=${point.lat}&longitude=${point.lon}` +
-            `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunshine_duration,windspeed_10m_max,relative_humidity_2m_mean` +
+            `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunshine_duration,windspeed_10m_max` +
             `&timezone=auto&forecast_days=${days}`;
 
         try {
@@ -348,7 +348,6 @@ class WeatherChaser {
             const avgSunHours = totalSunHours / numDays;
 
             const avgWind = this.average(weather.windspeed_10m_max);
-            const avgHumidity = this.average(weather.relative_humidity_2m_mean);
 
             // Calculate score with weights:
             // Rain amount: 25% (less rain is better)
@@ -380,7 +379,6 @@ class WeatherChaser {
                 rainAmount: Math.round(totalRain * 10) / 10,
                 rainChance: Math.round(avgRainChance),
                 windSpeed: Math.round(avgWind * 10) / 10,
-                humidity: Math.round(avgHumidity),
                 rawData: weather
             });
         }
@@ -465,7 +463,6 @@ class WeatherChaser {
                     <p><strong>Total Rain:</strong> ${point.rainAmount}mm</p>
                     <p><strong>Rain Chance:</strong> ${point.rainChance}%</p>
                     <p><strong>Wind:</strong> ${point.windSpeed} km/h</p>
-                    <p><strong>Humidity:</strong> ${point.humidity}%</p>
                     <p><small>Lat: ${point.lat.toFixed(4)}, Lon: ${point.lon.toFixed(4)}</small></p>
                 </div>
             `;
@@ -510,7 +507,6 @@ class WeatherChaser {
                 <td>${point.rainAmount}mm</td>
                 <td>${point.rainChance}%</td>
                 <td>${point.windSpeed} km/h</td>
-                <td>${point.humidity}%</td>
             `;
 
             // Click to expand
@@ -533,7 +529,7 @@ class WeatherChaser {
             detailRow.dataset.index = index;
 
             const detailContent = this.generateDetailContent(point);
-            detailRow.innerHTML = `<td colspan="10">${detailContent}</td>`;
+            detailRow.innerHTML = `<td colspan="9">${detailContent}</td>`;
 
             tbody.appendChild(detailRow);
         });
@@ -549,26 +545,97 @@ class WeatherChaser {
 
             const tempMax = weather.temperature_2m_max[i];
             const tempMin = weather.temperature_2m_min[i];
-            const rain = weather.precipitation_sum[i];
-            const rainChance = weather.precipitation_probability_max[i];
-            const sun = (weather.sunshine_duration[i] / 3600).toFixed(1);
+            const avgTemp = (tempMax + tempMin) / 2;
+            const rain = weather.precipitation_sum[i] || 0;
+            const rainChance = weather.precipitation_probability_max[i] || 0;
+            const sunHours = (weather.sunshine_duration[i] / 3600);
             const wind = weather.windspeed_10m_max[i];
-            const humidity = weather.relative_humidity_2m_mean[i];
+
+            // Calculate daily score
+            const dailyScore = this.calculateDailyScore(rain, rainChance, sunHours, avgTemp, wind);
+
+            // Get weather emoji
+            const weatherEmoji = this.getWeatherEmoji(rain, rainChance, sunHours, tempMax, tempMin);
+
+            // Create precipitation bar
+            const maxRain = 50; // mm - max for visualization
+            const rainBarWidth = Math.min((rain / maxRain) * 100, 100);
 
             html += `
                 <div class="day-card">
-                    <h4>${dayName}</h4>
-                    <p><span>🌡️ Temp:</span> <strong>${tempMin}°C - ${tempMax}°C</strong></p>
-                    <p><span>☀️ Sun:</span> <strong>${sun}h</strong></p>
-                    <p><span>🌧️ Rain:</span> <strong>${rain}mm (${rainChance}%)</strong></p>
-                    <p><span>💨 Wind:</span> <strong>${wind} km/h</strong></p>
-                    <p><span>💧 Humidity:</span> <strong>${humidity}%</strong></p>
+                    <div class="day-header">
+                        <h4>${dayName}</h4>
+                        <div class="day-score">
+                            <span class="weather-emoji">${weatherEmoji}</span>
+                            <span class="score-badge ${this.getScoreClass(dailyScore)}">${dailyScore}</span>
+                        </div>
+                    </div>
+                    <div class="weather-details">
+                        <p><span>🌡️ Temp:</span> <strong>${tempMin}°C - ${tempMax}°C</strong></p>
+                        <p><span>☀️ Sun:</span> <strong>${sunHours.toFixed(1)}h</strong></p>
+                        <div class="rain-detail">
+                            <p><span>🌧️ Rain:</span> <strong>${rain}mm (${rainChance}%)</strong></p>
+                            <div class="rain-bar-container">
+                                <div class="rain-bar" style="width: ${rainBarWidth}%"></div>
+                            </div>
+                        </div>
+                        <p><span>💨 Wind:</span> <strong>${wind} km/h</strong></p>
+                    </div>
                 </div>
             `;
         }
 
         html += '</div></div>';
         return html;
+    }
+
+    calculateDailyScore(rain, rainChance, sunHours, avgTemp, wind) {
+        // Same weights as overall score
+        const rainAmountScore = Math.max(0, 100 - (rain * 10));
+        const rainChanceScore = Math.max(0, 100 - rainChance);
+        const sunScore = Math.min(100, (sunHours / 12) * 100);
+        const tempScore = this.calculateTempScore(avgTemp);
+        const windScore = Math.max(0, 100 - (wind * 2));
+
+        const totalScore = (
+            rainAmountScore * 0.25 +
+            rainChanceScore * 0.25 +
+            sunScore * 0.30 +
+            tempScore * 0.15 +
+            windScore * 0.05
+        );
+
+        return Math.round(totalScore);
+    }
+
+    getWeatherEmoji(rain, rainChance, sunHours, tempMax, tempMin) {
+        // Snow (cold + precipitation)
+        if (tempMax <= 2 && (rain > 0 || rainChance > 30)) {
+            return '❄️';
+        }
+
+        // Heavy rain
+        if (rain > 10 || rainChance > 70) {
+            return '🌧️';
+        }
+
+        // Light rain or drizzle
+        if (rain > 2 || rainChance > 40) {
+            return '🌦️';
+        }
+
+        // Cloudy (less sun)
+        if (sunHours < 4) {
+            return '☁️';
+        }
+
+        // Partly cloudy
+        if (sunHours < 8) {
+            return '⛅';
+        }
+
+        // Sunny
+        return '☀️';
     }
 
     toggleDetailRow(index) {

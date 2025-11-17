@@ -776,7 +776,7 @@ class WeatherChaser {
             }
 
             // Build optimized route
-            const route = this.optimizeRoute(this.weatherData, maxTravelPerDay, days, startPoint);
+            const route = await this.optimizeRoute(this.weatherData, maxTravelPerDay, days, startPoint);
 
             if (route.length === 0) {
                 alert('Could not build a valid route with the given constraints');
@@ -799,7 +799,7 @@ class WeatherChaser {
         }
     }
 
-    optimizeRoute(weatherData, maxTravelPerDay, totalDays, startPoint) {
+    async optimizeRoute(weatherData, maxTravelPerDay, totalDays, startPoint) {
         const route = [];
         const visited = new Set();
         const sortedSpots = [...weatherData].sort((a, b) => b.score - a.score);
@@ -815,6 +815,7 @@ class WeatherChaser {
                 day: 1,
                 location: currentPoint,
                 distance: 0,
+                driveTime: 0,
                 weather: currentPoint.rawData
             });
             visited.add(0);
@@ -822,7 +823,7 @@ class WeatherChaser {
 
         // Build route day by day
         for (let day = startPoint ? 1 : 2; day <= totalDays && route.length < sortedSpots.length; day++) {
-            const nextLocation = this.findNextBestLocation(
+            const nextLocation = await this.findNextBestLocation(
                 currentPoint,
                 sortedSpots,
                 visited,
@@ -834,17 +835,23 @@ class WeatherChaser {
                 break; // No more reachable locations
             }
 
-            const distance = this.calculateDistance(
+            // Get actual road distance and duration
+            const roadInfo = await this.calculateRoadDistance(
                 currentPoint.lat,
                 currentPoint.lon,
                 nextLocation.location.lat,
                 nextLocation.location.lon
             );
 
+            // Handle both object (with distance/duration) and number (fallback) returns
+            const distance = typeof roadInfo === 'object' ? roadInfo.distance : roadInfo;
+            const driveTime = typeof roadInfo === 'object' ? roadInfo.duration : (distance / 80 * 60);
+
             route.push({
                 day: day,
                 location: nextLocation.location,
                 distance: Math.round(distance),
+                driveTime: Math.round(driveTime),
                 weather: nextLocation.location.rawData
             });
 
@@ -855,20 +862,40 @@ class WeatherChaser {
         return route;
     }
 
-    findNextBestLocation(currentPoint, sortedSpots, visited, maxTravel, previousLocation) {
+    async findNextBestLocation(currentPoint, sortedSpots, visited, maxTravel, previousLocation) {
         let bestOption = null;
         let bestScore = -1;
 
+        // Use air distance for initial filtering to avoid too many API calls
+        const candidatesInRange = [];
         for (let i = 0; i < sortedSpots.length; i++) {
             if (visited.has(i)) continue;
 
             const candidate = sortedSpots[i];
-            const distance = this.calculateDistance(
+            const airDistance = this.calculateDistance(
                 currentPoint.lat,
                 currentPoint.lon,
                 candidate.lat,
                 candidate.lon
             );
+
+            // Filter by air distance (add 20% buffer for road distance)
+            if (airDistance <= maxTravel * 1.2) {
+                candidatesInRange.push({ candidate, index: i, airDistance });
+            }
+        }
+
+        // Check road distance for candidates in range
+        for (const { candidate, index, airDistance } of candidatesInRange) {
+            // Get actual road distance
+            const roadInfo = await this.calculateRoadDistance(
+                currentPoint.lat,
+                currentPoint.lon,
+                candidate.lat,
+                candidate.lon
+            );
+
+            const distance = typeof roadInfo === 'object' ? roadInfo.distance : roadInfo;
 
             // Check if within max travel distance
             if (distance > maxTravel) continue;
@@ -895,7 +922,7 @@ class WeatherChaser {
 
             if (totalScore > bestScore) {
                 bestScore = totalScore;
-                bestOption = { location: candidate, index: i };
+                bestOption = { location: candidate, index };
             }
         }
 
@@ -903,7 +930,7 @@ class WeatherChaser {
     }
 
     calculateDistance(lat1, lon1, lat2, lon2) {
-        // Haversine formula for distance in km
+        // Haversine formula for distance in km (air distance)
         const R = 6371; // Earth's radius in km
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -915,6 +942,40 @@ class WeatherChaser {
 
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
+    }
+
+    async calculateRoadDistance(lat1, lon1, lat2, lon2) {
+        // Use OSRM (Open Source Routing Machine) to get actual road distance
+        try {
+            const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=false`;
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                // Fallback to air distance if API fails
+                console.warn('OSRM API failed, using air distance');
+                return this.calculateDistance(lat1, lon1, lat2, lon2);
+            }
+
+            const data = await response.json();
+
+            if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                // OSRM returns distance in meters, convert to km
+                const distanceKm = data.routes[0].distance / 1000;
+                const durationSeconds = data.routes[0].duration;
+
+                return {
+                    distance: distanceKm,
+                    duration: durationSeconds / 60 // Convert to minutes
+                };
+            } else {
+                // Fallback to air distance
+                return this.calculateDistance(lat1, lon1, lat2, lon2);
+            }
+        } catch (error) {
+            console.warn('Error fetching road distance:', error);
+            // Fallback to air distance
+            return this.calculateDistance(lat1, lon1, lat2, lon2);
+        }
     }
 
     displayRoute(route) {
@@ -976,15 +1037,39 @@ class WeatherChaser {
         // Calculate statistics
         const totalDistance = route.reduce((sum, stop) => sum + stop.distance, 0);
         const avgScore = route.reduce((sum, stop) => sum + stop.location.score, 0) / route.length;
+        const avgSpeed = 80; // km/h average driving speed
+        const totalDriveTime = Math.round(totalDistance / avgSpeed * 60); // in minutes
 
         document.getElementById('totalDistance').textContent = `${totalDistance} km`;
         document.getElementById('tripDuration').textContent = `${route.length} days`;
         document.getElementById('avgScore').textContent = Math.round(avgScore);
 
+        // Find best weather day
+        const bestDayIndex = route.reduce((maxIdx, stop, idx, arr) =>
+            stop.location.score > arr[maxIdx].location.score ? idx : maxIdx, 0
+        );
+
+        // Get start date from first location's weather data
+        const startDate = new Date(route[0].weather.time[0]);
+
         // Generate timeline
         route.forEach((stop, index) => {
             const dayDiv = document.createElement('div');
             dayDiv.className = 'itinerary-day';
+
+            // Highlight best weather day
+            if (index === bestDayIndex) {
+                dayDiv.classList.add('best-day');
+            }
+
+            // Calculate date for this day
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + index);
+            const dateStr = currentDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'short',
+                day: 'numeric'
+            });
 
             const emoji = this.getWeatherEmoji(
                 this.average(stop.weather.precipitation_sum),
@@ -994,12 +1079,30 @@ class WeatherChaser {
                 this.average(stop.weather.temperature_2m_min)
             );
 
+            // Use actual drive time from OSRM or fallback calculation
+            const driveTime = stop.driveTime || (stop.distance > 0 ? Math.round(stop.distance / avgSpeed * 60) : 0);
+            const hours = Math.floor(driveTime / 60);
+            const minutes = driveTime % 60;
+            const driveTimeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+
+            // Create Google Maps link
+            const mapsLink = `https://www.google.com/maps?q=${stop.location.lat},${stop.location.lon}`;
+
             dayDiv.innerHTML = `
-                <span class="day-number">Day ${stop.day}</span>
+                <div class="day-header-full">
+                    <span class="day-number">Day ${stop.day}</span>
+                    <span class="day-date">${dateStr}</span>
+                    ${index === bestDayIndex ? '<span class="best-badge">⭐ Best Weather</span>' : ''}
+                </div>
                 <div class="itinerary-header">
-                    <h4>${emoji} ${stop.location.lat.toFixed(2)}, ${stop.location.lon.toFixed(2)}</h4>
+                    <div class="location-info">
+                        <h4>${emoji} ${stop.location.lat.toFixed(4)}, ${stop.location.lon.toFixed(4)}</h4>
+                        <a href="${mapsLink}" target="_blank" class="maps-link" title="Open in Google Maps">
+                            📍 View on Map
+                        </a>
+                    </div>
                     <div class="travel-info">
-                        ${stop.distance > 0 ? `<span class="travel-badge">🚗 <strong>${stop.distance} km</strong></span>` : '<span class="travel-badge">🎯 <strong>Starting Point</strong></span>'}
+                        ${stop.distance > 0 ? `<span class="travel-badge">🚗 <strong>${stop.distance} km</strong> (~${driveTimeStr})</span>` : '<span class="travel-badge">🎯 <strong>Starting Point</strong></span>'}
                         <span class="travel-badge">⭐ Score: <strong>${stop.location.score}</strong></span>
                     </div>
                 </div>

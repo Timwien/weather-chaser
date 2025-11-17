@@ -1024,6 +1024,9 @@ class WeatherChaser {
             const minutes = driveTime % 60;
             const driveTimeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 
+            // Create Google Maps link
+            const mapsLink = `https://www.google.com/maps?q=${stop.location.lat},${stop.location.lon}`;
+
             dayDiv.innerHTML = `
                 <div class="day-header-full">
                     <span class="day-number">Day ${stop.day}</span>
@@ -1031,7 +1034,12 @@ class WeatherChaser {
                     ${index === bestDayIndex ? '<span class="best-badge">⭐ Best Weather</span>' : ''}
                 </div>
                 <div class="itinerary-header">
-                    <h4>${emoji} ${stop.location.lat.toFixed(2)}, ${stop.location.lon.toFixed(2)}</h4>
+                    <div class="location-info">
+                        <h4>${emoji} ${stop.location.lat.toFixed(4)}, ${stop.location.lon.toFixed(4)}</h4>
+                        <a href="${mapsLink}" target="_blank" class="maps-link" title="Open in Google Maps">
+                            📍 View on Map
+                        </a>
+                    </div>
                     <div class="travel-info">
                         ${stop.distance > 0 ? `<span class="travel-badge">🚗 <strong>${stop.distance} km</strong> (~${driveTimeStr})</span>` : '<span class="travel-badge">🎯 <strong>Starting Point</strong></span>'}
                         <span class="travel-badge">⭐ Score: <strong>${stop.location.score}</strong></span>

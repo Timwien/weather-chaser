@@ -469,13 +469,35 @@ header h1 {
     align-items: center;
     margin-bottom: 15px;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 15px;
+}
+
+.location-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .itinerary-header h4 {
     color: var(--text-dark);
     font-size: 1.1rem;
     margin: 0;
+}
+
+.maps-link {
+    color: var(--primary-color);
+    font-size: 0.85rem;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.maps-link:hover {
+    color: var(--primary-hover);
+    transform: translateX(2px);
 }
 
 .travel-info {

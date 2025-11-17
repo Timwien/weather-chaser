@@ -6,13 +6,14 @@ class WeatherChaser {
         this.weatherData = [];
         this.currentSortColumn = null;
         this.currentSortDirection = 'desc';
-        this.searchMode = 'location'; // 'location' or 'draw'
+        this.searchMode = 'location'; // 'location', 'draw', or 'places'
         this.drawnItems = null;
         this.drawControl = null;
         this.drawnShape = null;
         this.routePolyline = null;
         this.routeMarkers = [];
         this.currentRoute = null;
+        this.manualPlaces = []; // Array of manually added places
 
         this.init();
     }
@@ -101,6 +102,30 @@ class WeatherChaser {
         if (buildRouteBtn) {
             buildRouteBtn.addEventListener('click', () => this.buildRoute());
         }
+
+        // Manual places mode
+        const addPlaceBtn = document.getElementById('addPlaceBtn');
+        const placeInput = document.getElementById('placeInput');
+        const clearPlacesBtn = document.getElementById('clearPlacesBtn');
+        const suggestNearbyBtn = document.getElementById('suggestNearbyBtn');
+
+        if (addPlaceBtn) {
+            addPlaceBtn.addEventListener('click', () => this.addPlace());
+        }
+
+        if (placeInput) {
+            placeInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.addPlace();
+            });
+        }
+
+        if (clearPlacesBtn) {
+            clearPlacesBtn.addEventListener('click', () => this.clearPlaces());
+        }
+
+        if (suggestNearbyBtn) {
+            suggestNearbyBtn.addEventListener('click', () => this.findNearbyLocations());
+        }
     }
 
     switchMode(mode) {
@@ -148,7 +173,7 @@ class WeatherChaser {
                 // Center map on location
                 this.map.setView([coords.lat, coords.lon], 8);
 
-            } else { // draw mode
+            } else if (this.searchMode === 'draw') {
                 if (!this.drawnShape) {
                     alert('Please draw an area on the map first');
                     return;
@@ -156,6 +181,25 @@ class WeatherChaser {
 
                 const gridSize = parseInt(document.getElementById('drawGridSize').value);
                 gridPoints = this.generateGridFromShape(this.drawnShape, gridSize);
+
+            } else if (this.searchMode === 'places') {
+                if (this.manualPlaces.length === 0) {
+                    alert('Please add at least one location');
+                    return;
+                }
+
+                // Use manual places as grid points
+                gridPoints = this.manualPlaces.map((place, index) => ({
+                    lat: place.lat,
+                    lon: place.lon,
+                    index: index,
+                    name: place.name
+                }));
+
+                // Center map on first place
+                if (gridPoints.length > 0) {
+                    this.map.setView([gridPoints[0].lat, gridPoints[0].lon], 6);
+                }
             }
 
             // Fetch weather data for all grid points
@@ -208,8 +252,200 @@ class WeatherChaser {
 
         return {
             lat: parseFloat(data[0].lat),
-            lon: parseFloat(data[0].lon)
+            lon: parseFloat(data[0].lon),
+            name: data[0].display_name
         };
+    }
+
+    // Manual Places Functions
+
+    async addPlace() {
+        const input = document.getElementById('placeInput');
+        const location = input.value.trim();
+
+        if (!location) {
+            alert('Please enter a location');
+            return;
+        }
+
+        if (this.manualPlaces.length >= 25) {
+            alert('Maximum 25 locations allowed');
+            return;
+        }
+
+        try {
+            // Check if already added
+            const existingPlace = this.manualPlaces.find(p =>
+                p.name.toLowerCase() === location.toLowerCase()
+            );
+
+            if (existingPlace) {
+                alert('This location has already been added');
+                return;
+            }
+
+            this.showLoading(true);
+
+            // Geocode the location
+            const coords = await this.geocodeLocation(location);
+
+            // Add to places list
+            this.manualPlaces.push({
+                name: coords.name || location,
+                lat: coords.lat,
+                lon: coords.lon
+            });
+
+            // Clear input
+            input.value = '';
+
+            // Update UI
+            this.updatePlacesList();
+
+            // Clear nearby suggestions
+            document.getElementById('nearbySuggestions').classList.add('hidden');
+
+        } catch (error) {
+            alert('Could not find location: ' + location);
+            console.error(error);
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    removePlace(index) {
+        this.manualPlaces.splice(index, 1);
+        this.updatePlacesList();
+    }
+
+    clearPlaces() {
+        if (this.manualPlaces.length === 0) return;
+
+        if (confirm('Are you sure you want to clear all locations?')) {
+            this.manualPlaces = [];
+            this.updatePlacesList();
+            document.getElementById('nearbySuggestions').classList.add('hidden');
+        }
+    }
+
+    updatePlacesList() {
+        const placesList = document.getElementById('placesList');
+        const placesCount = document.getElementById('placesCount');
+        const addPlaceBtn = document.getElementById('addPlaceBtn');
+        const placeInput = document.getElementById('placeInput');
+
+        // Update count
+        placesCount.textContent = this.manualPlaces.length;
+
+        // Disable add button if at max
+        const atMax = this.manualPlaces.length >= 25;
+        addPlaceBtn.disabled = atMax;
+        placeInput.disabled = atMax;
+
+        // Update list display
+        if (this.manualPlaces.length === 0) {
+            placesList.innerHTML = '<p class="empty-state">No locations added yet. Add your first location above!</p>';
+            return;
+        }
+
+        placesList.innerHTML = this.manualPlaces.map((place, index) => `
+            <div class="place-item">
+                <div class="place-info">
+                    <div class="place-name">${place.name}</div>
+                    <div class="place-coords">${place.lat.toFixed(4)}, ${place.lon.toFixed(4)}</div>
+                </div>
+                <button class="remove-place-btn" onclick="app.removePlace(${index})">Remove</button>
+            </div>
+        `).join('');
+    }
+
+    async findNearbyLocations() {
+        if (this.manualPlaces.length === 0) {
+            alert('Please add at least one location first');
+            return;
+        }
+
+        const suggestionsDiv = document.getElementById('nearbySuggestions');
+        suggestionsDiv.innerHTML = '<p>Searching for nearby locations...</p>';
+        suggestionsDiv.classList.remove('hidden');
+
+        try {
+            // Calculate center point from all places
+            const centerLat = this.manualPlaces.reduce((sum, p) => sum + p.lat, 0) / this.manualPlaces.length;
+            const centerLon = this.manualPlaces.reduce((sum, p) => sum + p.lon, 0) / this.manualPlaces.length;
+
+            // Use Overpass API to find nearby cities/towns
+            // Search for places within 200km radius
+            const radius = 200000; // 200km in meters
+            const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["place"~"city|town"](around:${radius},${centerLat},${centerLon}););out 20;`;
+
+            const response = await fetch(overpassUrl);
+            if (!response.ok) {
+                throw new Error('Failed to fetch nearby locations');
+            }
+
+            const data = await response.json();
+            const places = data.elements;
+
+            if (places.length === 0) {
+                suggestionsDiv.innerHTML = '<p>No nearby locations found. Try adding more locations first.</p>';
+                return;
+            }
+
+            // Filter out already added places and create suggestions
+            const suggestions = places
+                .filter(place => {
+                    const name = place.tags.name;
+                    return name && !this.manualPlaces.some(p =>
+                        p.name.toLowerCase().includes(name.toLowerCase())
+                    );
+                })
+                .slice(0, 15); // Limit to 15 suggestions
+
+            if (suggestions.length === 0) {
+                suggestionsDiv.innerHTML = '<p>All nearby locations are already in your list!</p>';
+                return;
+            }
+
+            suggestionsDiv.innerHTML = `
+                <div class="nearby-suggestions-header">Suggested Locations (click to add):</div>
+                ${suggestions.map(place => `
+                    <span class="suggestion-item" onclick="app.addSuggestedPlace('${place.tags.name}', ${place.lat}, ${place.lon})">
+                        ${place.tags.name}
+                    </span>
+                `).join('')}
+            `;
+
+        } catch (error) {
+            console.error('Error finding nearby locations:', error);
+            suggestionsDiv.innerHTML = '<p>Error finding nearby locations. Please try again.</p>';
+        }
+    }
+
+    async addSuggestedPlace(name, lat, lon) {
+        if (this.manualPlaces.length >= 25) {
+            alert('Maximum 25 locations allowed');
+            return;
+        }
+
+        // Check if already added
+        const exists = this.manualPlaces.some(p =>
+            p.name.toLowerCase() === name.toLowerCase()
+        );
+
+        if (exists) {
+            alert('This location has already been added');
+            return;
+        }
+
+        // Add place
+        this.manualPlaces.push({
+            name: name,
+            lat: lat,
+            lon: lon
+        });
+
+        this.updatePlacesList();
     }
 
     generateGridFromCenter(centerLat, centerLon, radiusKm, gridSize) {
@@ -1224,6 +1460,8 @@ class WeatherChaser {
 }
 
 // Initialize app when DOM is loaded
+let app; // Global app instance for onclick handlers
+
 document.addEventListener('DOMContentLoaded', () => {
-    new WeatherChaser();
+    app = new WeatherChaser();
 });

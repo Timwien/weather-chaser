@@ -362,6 +362,45 @@ header h1 {
     font-weight: 700;
 }
 
+/* Google Maps Link */
+.google-maps-container {
+    text-align: center;
+    margin: 30px 0;
+    padding: 25px;
+    background: linear-gradient(135deg, #e8f5e9 0%, #fff 100%);
+    border-radius: 12px;
+    border: 2px dashed var(--success-color);
+}
+
+.google-maps-btn {
+    display: inline-block;
+    padding: 16px 40px;
+    background: #1a73e8;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-md);
+}
+
+.google-maps-btn:hover {
+    background: #1557b0;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.google-maps-btn:active {
+    transform: translateY(0);
+}
+
+.maps-description {
+    margin-top: 12px;
+    color: var(--text-gray);
+    font-size: 0.9rem;
+}
+
 .itinerary-timeline {
     position: relative;
     padding-left: 40px;

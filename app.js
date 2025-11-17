@@ -1081,6 +1081,16 @@ class WeatherChaser {
         this.map.fitBounds(this.routePolyline.getBounds().pad(0.1));
     }
 
+    generateGoogleMapsUrl(route) {
+        // Google Maps directions URL format:
+        // https://www.google.com/maps/dir/origin/waypoint1/waypoint2/.../destination
+        const waypoints = route.map(stop =>
+            `${stop.location.lat},${stop.location.lon}`
+        ).join('/');
+
+        return `https://www.google.com/maps/dir/${waypoints}`;
+    }
+
     displayItinerary(route) {
         const timeline = document.getElementById('itineraryTimeline');
         timeline.innerHTML = '';
@@ -1094,6 +1104,10 @@ class WeatherChaser {
         document.getElementById('totalDistance').textContent = `${totalDistance} km`;
         document.getElementById('tripDuration').textContent = `${route.length} days`;
         document.getElementById('avgScore').textContent = Math.round(avgScore);
+
+        // Set Google Maps link
+        const googleMapsLink = document.getElementById('googleMapsLink');
+        googleMapsLink.href = this.generateGoogleMapsUrl(route);
 
         // Find best weather day
         const bestDayIndex = route.reduce((maxIdx, stop, idx, arr) =>

@@ -295,14 +295,36 @@ class WeatherChaser {
     }
 
     async fetchWeatherForGrid(gridPoints, days) {
-        const weatherPromises = gridPoints.map(point =>
-            this.fetchWeatherForPoint(point, days)
-        );
+        // Process requests in batches to avoid rate limiting
+        const batchSize = 5;
+        const delayBetweenBatches = 1000; // 1 second
+        const results = [];
 
-        return await Promise.all(weatherPromises);
+        for (let i = 0; i < gridPoints.length; i += batchSize) {
+            const batch = gridPoints.slice(i, i + batchSize);
+            const batchPromises = batch.map(point => this.fetchWeatherForPoint(point, days));
+
+            const batchResults = await Promise.all(batchPromises);
+            results.push(...batchResults);
+
+            // Add delay between batches (except for the last batch)
+            if (i + batchSize < gridPoints.length) {
+                await this.sleep(delayBetweenBatches);
+            }
+
+            // Update progress indicator if available
+            const progress = Math.min(100, Math.round((results.length / gridPoints.length) * 100));
+            console.log(`Weather data progress: ${progress}%`);
+        }
+
+        return results;
     }
 
-    async fetchWeatherForPoint(point, days) {
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async fetchWeatherForPoint(point, days, retryCount = 0) {
         // Open-Meteo API with enhanced weather data
         const url = `https://api.open-meteo.com/v1/forecast?` +
             `latitude=${point.lat}&longitude=${point.lon}` +
@@ -312,8 +334,16 @@ class WeatherChaser {
         try {
             const response = await fetch(url);
 
+            if (response.status === 429 && retryCount < 3) {
+                // Rate limited - wait and retry with exponential backoff
+                const waitTime = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+                console.log(`Rate limited for point ${point.index}, retrying in ${waitTime}ms...`);
+                await this.sleep(waitTime);
+                return this.fetchWeatherForPoint(point, days, retryCount + 1);
+            }
+
             if (!response.ok) {
-                throw new Error(`Weather API error for point ${point.index}`);
+                throw new Error(`Weather API error for point ${point.index}: ${response.status}`);
             }
 
             const data = await response.json();

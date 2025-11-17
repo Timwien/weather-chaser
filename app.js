@@ -545,24 +545,97 @@ class WeatherChaser {
 
             const tempMax = weather.temperature_2m_max[i];
             const tempMin = weather.temperature_2m_min[i];
-            const rain = weather.precipitation_sum[i];
-            const rainChance = weather.precipitation_probability_max[i];
-            const sun = (weather.sunshine_duration[i] / 3600).toFixed(1);
+            const avgTemp = (tempMax + tempMin) / 2;
+            const rain = weather.precipitation_sum[i] || 0;
+            const rainChance = weather.precipitation_probability_max[i] || 0;
+            const sunHours = (weather.sunshine_duration[i] / 3600);
             const wind = weather.windspeed_10m_max[i];
+
+            // Calculate daily score
+            const dailyScore = this.calculateDailyScore(rain, rainChance, sunHours, avgTemp, wind);
+
+            // Get weather emoji
+            const weatherEmoji = this.getWeatherEmoji(rain, rainChance, sunHours, tempMax, tempMin);
+
+            // Create precipitation bar
+            const maxRain = 50; // mm - max for visualization
+            const rainBarWidth = Math.min((rain / maxRain) * 100, 100);
 
             html += `
                 <div class="day-card">
-                    <h4>${dayName}</h4>
-                    <p><span>🌡️ Temp:</span> <strong>${tempMin}°C - ${tempMax}°C</strong></p>
-                    <p><span>☀️ Sun:</span> <strong>${sun}h</strong></p>
-                    <p><span>🌧️ Rain:</span> <strong>${rain}mm (${rainChance}%)</strong></p>
-                    <p><span>💨 Wind:</span> <strong>${wind} km/h</strong></p>
+                    <div class="day-header">
+                        <h4>${dayName}</h4>
+                        <div class="day-score">
+                            <span class="weather-emoji">${weatherEmoji}</span>
+                            <span class="score-badge ${this.getScoreClass(dailyScore)}">${dailyScore}</span>
+                        </div>
+                    </div>
+                    <div class="weather-details">
+                        <p><span>🌡️ Temp:</span> <strong>${tempMin}°C - ${tempMax}°C</strong></p>
+                        <p><span>☀️ Sun:</span> <strong>${sunHours.toFixed(1)}h</strong></p>
+                        <div class="rain-detail">
+                            <p><span>🌧️ Rain:</span> <strong>${rain}mm (${rainChance}%)</strong></p>
+                            <div class="rain-bar-container">
+                                <div class="rain-bar" style="width: ${rainBarWidth}%"></div>
+                            </div>
+                        </div>
+                        <p><span>💨 Wind:</span> <strong>${wind} km/h</strong></p>
+                    </div>
                 </div>
             `;
         }
 
         html += '</div></div>';
         return html;
+    }
+
+    calculateDailyScore(rain, rainChance, sunHours, avgTemp, wind) {
+        // Same weights as overall score
+        const rainAmountScore = Math.max(0, 100 - (rain * 10));
+        const rainChanceScore = Math.max(0, 100 - rainChance);
+        const sunScore = Math.min(100, (sunHours / 12) * 100);
+        const tempScore = this.calculateTempScore(avgTemp);
+        const windScore = Math.max(0, 100 - (wind * 2));
+
+        const totalScore = (
+            rainAmountScore * 0.25 +
+            rainChanceScore * 0.25 +
+            sunScore * 0.30 +
+            tempScore * 0.15 +
+            windScore * 0.05
+        );
+
+        return Math.round(totalScore);
+    }
+
+    getWeatherEmoji(rain, rainChance, sunHours, tempMax, tempMin) {
+        // Snow (cold + precipitation)
+        if (tempMax <= 2 && (rain > 0 || rainChance > 30)) {
+            return '❄️';
+        }
+
+        // Heavy rain
+        if (rain > 10 || rainChance > 70) {
+            return '🌧️';
+        }
+
+        // Light rain or drizzle
+        if (rain > 2 || rainChance > 40) {
+            return '🌦️';
+        }
+
+        // Cloudy (less sun)
+        if (sunHours < 4) {
+            return '☁️';
+        }
+
+        // Partly cloudy
+        if (sunHours < 8) {
+            return '⛅';
+        }
+
+        // Sunny
+        return '☀️';
     }
 
     toggleDetailRow(index) {

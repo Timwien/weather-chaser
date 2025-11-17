@@ -459,11 +459,12 @@ tr.detail-row td {
 
 .day-card {
     background: var(--bg-white);
-    padding: 15px;
+    padding: 0;
     border-radius: 8px;
     box-shadow: var(--shadow);
     border: 2px solid transparent;
     transition: all 0.2s ease;
+    overflow: hidden;
 }
 
 .day-card:hover {
@@ -472,15 +473,44 @@ tr.detail-row td {
     transform: translateY(-2px);
 }
 
-.day-card h4 {
-    color: var(--text-dark);
-    margin-bottom: 10px;
-    font-size: 0.95rem;
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg-light) 100%);
     border-bottom: 2px solid var(--border-color);
-    padding-bottom: 8px;
 }
 
-.day-card p {
+.day-header h4 {
+    color: var(--text-dark);
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.day-score {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.weather-emoji {
+    font-size: 1.5rem;
+    line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+}
+
+.day-score .score-badge {
+    font-size: 0.8rem;
+    padding: 4px 10px;
+}
+
+.weather-details {
+    padding: 15px;
+}
+
+.weather-details p {
     margin: 6px 0;
     font-size: 0.85rem;
     color: var(--text-gray);
@@ -488,8 +518,34 @@ tr.detail-row td {
     justify-content: space-between;
 }
 
-.day-card strong {
+.weather-details strong {
     color: var(--text-dark);
+}
+
+.rain-detail {
+    margin: 8px 0;
+}
+
+.rain-bar-container {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-light);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.rain-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.rain-bar-container:hover .rain-bar {
+    background: linear-gradient(90deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
 }
 
 .score-badge {

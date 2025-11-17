@@ -976,15 +976,39 @@ class WeatherChaser {
         // Calculate statistics
         const totalDistance = route.reduce((sum, stop) => sum + stop.distance, 0);
         const avgScore = route.reduce((sum, stop) => sum + stop.location.score, 0) / route.length;
+        const avgSpeed = 80; // km/h average driving speed
+        const totalDriveTime = Math.round(totalDistance / avgSpeed * 60); // in minutes
 
         document.getElementById('totalDistance').textContent = `${totalDistance} km`;
         document.getElementById('tripDuration').textContent = `${route.length} days`;
         document.getElementById('avgScore').textContent = Math.round(avgScore);
 
+        // Find best weather day
+        const bestDayIndex = route.reduce((maxIdx, stop, idx, arr) =>
+            stop.location.score > arr[maxIdx].location.score ? idx : maxIdx, 0
+        );
+
+        // Get start date from first location's weather data
+        const startDate = new Date(route[0].weather.time[0]);
+
         // Generate timeline
         route.forEach((stop, index) => {
             const dayDiv = document.createElement('div');
             dayDiv.className = 'itinerary-day';
+
+            // Highlight best weather day
+            if (index === bestDayIndex) {
+                dayDiv.classList.add('best-day');
+            }
+
+            // Calculate date for this day
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + index);
+            const dateStr = currentDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'short',
+                day: 'numeric'
+            });
 
             const emoji = this.getWeatherEmoji(
                 this.average(stop.weather.precipitation_sum),
@@ -994,12 +1018,22 @@ class WeatherChaser {
                 this.average(stop.weather.temperature_2m_min)
             );
 
+            // Calculate drive time for this leg
+            const driveTime = stop.distance > 0 ? Math.round(stop.distance / avgSpeed * 60) : 0;
+            const hours = Math.floor(driveTime / 60);
+            const minutes = driveTime % 60;
+            const driveTimeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+
             dayDiv.innerHTML = `
-                <span class="day-number">Day ${stop.day}</span>
+                <div class="day-header-full">
+                    <span class="day-number">Day ${stop.day}</span>
+                    <span class="day-date">${dateStr}</span>
+                    ${index === bestDayIndex ? '<span class="best-badge">⭐ Best Weather</span>' : ''}
+                </div>
                 <div class="itinerary-header">
                     <h4>${emoji} ${stop.location.lat.toFixed(2)}, ${stop.location.lon.toFixed(2)}</h4>
                     <div class="travel-info">
-                        ${stop.distance > 0 ? `<span class="travel-badge">🚗 <strong>${stop.distance} km</strong></span>` : '<span class="travel-badge">🎯 <strong>Starting Point</strong></span>'}
+                        ${stop.distance > 0 ? `<span class="travel-badge">🚗 <strong>${stop.distance} km</strong> (~${driveTimeStr})</span>` : '<span class="travel-badge">🎯 <strong>Starting Point</strong></span>'}
                         <span class="travel-badge">⭐ Score: <strong>${stop.location.score}</strong></span>
                     </div>
                 </div>

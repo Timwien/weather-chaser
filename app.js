@@ -469,12 +469,33 @@ class WeatherChaser {
         const routeSection = document.getElementById('routeBuilderSection');
         if (routeSection && this.weatherData.length >= 2) {
             routeSection.classList.remove('hidden');
+            // Populate start location dropdown with grid points
+            this.populateStartLocationDropdown();
         }
 
         // Scroll to results
         document.getElementById('resultsSection').scrollIntoView({
             behavior: 'smooth',
             block: 'start'
+        });
+    }
+
+    populateStartLocationDropdown() {
+        const dropdown = document.getElementById('startLocation');
+
+        // Clear existing options except the first (default) one
+        dropdown.innerHTML = '<option value="">Start from best weather spot</option>';
+
+        // Add an option for each weather data point
+        this.weatherData.forEach((point, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+
+            // Create a descriptive label with rank, location, and score
+            const locationLabel = point.location || `${point.lat.toFixed(2)}, ${point.lon.toFixed(2)}`;
+            option.textContent = `#${point.rank} - ${locationLabel} (Score: ${point.score})`;
+
+            dropdown.appendChild(option);
         });
     }
 
@@ -792,17 +813,17 @@ class WeatherChaser {
 
         const maxTravelPerDay = parseFloat(document.getElementById('maxTravelPerDay').value);
         const days = parseInt(document.getElementById('days').value);
-        const startLocationInput = document.getElementById('startLocation').value.trim();
+        const startLocationIndex = document.getElementById('startLocation').value;
 
         this.showLoading(true);
 
         try {
             let startPoint = null;
 
-            // Get start location if specified
-            if (startLocationInput) {
-                const coords = await this.geocodeLocation(startLocationInput);
-                startPoint = { lat: coords.lat, lon: coords.lon };
+            // Get start location if specified (from dropdown selection)
+            if (startLocationIndex !== '') {
+                const selectedPoint = this.weatherData[parseInt(startLocationIndex)];
+                startPoint = { lat: selectedPoint.lat, lon: selectedPoint.lon };
             }
 
             // Build optimized route

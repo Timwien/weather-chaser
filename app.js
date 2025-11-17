@@ -297,7 +297,7 @@ class WeatherChaser {
         // Open-Meteo API with enhanced weather data
         const url = `https://api.open-meteo.com/v1/forecast?` +
             `latitude=${point.lat}&longitude=${point.lon}` +
-            `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunshine_duration,windspeed_10m_max,relative_humidity_2m_mean` +
+            `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunshine_duration,windspeed_10m_max` +
             `&timezone=auto&forecast_days=${days}`;
 
         try {
@@ -348,7 +348,6 @@ class WeatherChaser {
             const avgSunHours = totalSunHours / numDays;
 
             const avgWind = this.average(weather.windspeed_10m_max);
-            const avgHumidity = this.average(weather.relative_humidity_2m_mean);
 
             // Calculate score with weights:
             // Rain amount: 25% (less rain is better)
@@ -380,7 +379,6 @@ class WeatherChaser {
                 rainAmount: Math.round(totalRain * 10) / 10,
                 rainChance: Math.round(avgRainChance),
                 windSpeed: Math.round(avgWind * 10) / 10,
-                humidity: Math.round(avgHumidity),
                 rawData: weather
             });
         }
@@ -465,7 +463,6 @@ class WeatherChaser {
                     <p><strong>Total Rain:</strong> ${point.rainAmount}mm</p>
                     <p><strong>Rain Chance:</strong> ${point.rainChance}%</p>
                     <p><strong>Wind:</strong> ${point.windSpeed} km/h</p>
-                    <p><strong>Humidity:</strong> ${point.humidity}%</p>
                     <p><small>Lat: ${point.lat.toFixed(4)}, Lon: ${point.lon.toFixed(4)}</small></p>
                 </div>
             `;
@@ -510,7 +507,6 @@ class WeatherChaser {
                 <td>${point.rainAmount}mm</td>
                 <td>${point.rainChance}%</td>
                 <td>${point.windSpeed} km/h</td>
-                <td>${point.humidity}%</td>
             `;
 
             // Click to expand
@@ -533,7 +529,7 @@ class WeatherChaser {
             detailRow.dataset.index = index;
 
             const detailContent = this.generateDetailContent(point);
-            detailRow.innerHTML = `<td colspan="10">${detailContent}</td>`;
+            detailRow.innerHTML = `<td colspan="9">${detailContent}</td>`;
 
             tbody.appendChild(detailRow);
         });
@@ -553,7 +549,6 @@ class WeatherChaser {
             const rainChance = weather.precipitation_probability_max[i];
             const sun = (weather.sunshine_duration[i] / 3600).toFixed(1);
             const wind = weather.windspeed_10m_max[i];
-            const humidity = weather.relative_humidity_2m_mean[i];
 
             html += `
                 <div class="day-card">
@@ -562,7 +557,6 @@ class WeatherChaser {
                     <p><span>☀️ Sun:</span> <strong>${sun}h</strong></p>
                     <p><span>🌧️ Rain:</span> <strong>${rain}mm (${rainChance}%)</strong></p>
                     <p><span>💨 Wind:</span> <strong>${wind} km/h</strong></p>
-                    <p><span>💧 Humidity:</span> <strong>${humidity}%</strong></p>
                 </div>
             `;
         }

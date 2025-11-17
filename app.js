@@ -10,6 +10,9 @@ class WeatherChaser {
         this.drawnItems = null;
         this.drawControl = null;
         this.drawnShape = null;
+        this.routePolyline = null;
+        this.routeMarkers = [];
+        this.currentRoute = null;
 
         this.init();
     }
@@ -92,6 +95,12 @@ class WeatherChaser {
         document.querySelectorAll('th.sortable').forEach(th => {
             th.addEventListener('click', () => this.handleSort(th.dataset.column));
         });
+
+        // Route builder
+        const buildRouteBtn = document.getElementById('buildRouteBtn');
+        if (buildRouteBtn) {
+            buildRouteBtn.addEventListener('click', () => this.buildRoute());
+        }
     }
 
     switchMode(mode) {
@@ -426,6 +435,12 @@ class WeatherChaser {
         // Show results section
         document.getElementById('resultsSection').classList.remove('hidden');
 
+        // Show route builder section if we have enough data
+        const routeSection = document.getElementById('routeBuilderSection');
+        if (routeSection && this.weatherData.length >= 2) {
+            routeSection.classList.remove('hidden');
+        }
+
         // Scroll to results
         document.getElementById('resultsSection').scrollIntoView({
             behavior: 'smooth',
@@ -735,6 +750,290 @@ class WeatherChaser {
             loading.classList.add('hidden');
             searchBtn.disabled = false;
         }
+    }
+
+    // Route Builder Functions
+
+    async buildRoute() {
+        if (!this.weatherData || this.weatherData.length < 2) {
+            alert('Need at least 2 weather spots to build a route');
+            return;
+        }
+
+        const maxTravelPerDay = parseFloat(document.getElementById('maxTravelPerDay').value);
+        const days = parseInt(document.getElementById('days').value);
+        const startLocationInput = document.getElementById('startLocation').value.trim();
+
+        this.showLoading(true);
+
+        try {
+            let startPoint = null;
+
+            // Get start location if specified
+            if (startLocationInput) {
+                const coords = await this.geocodeLocation(startLocationInput);
+                startPoint = { lat: coords.lat, lon: coords.lon };
+            }
+
+            // Build optimized route
+            const route = this.optimizeRoute(this.weatherData, maxTravelPerDay, days, startPoint);
+
+            if (route.length === 0) {
+                alert('Could not build a valid route with the given constraints');
+                return;
+            }
+
+            this.currentRoute = route;
+
+            // Display route on map
+            this.displayRoute(route);
+
+            // Display itinerary
+            this.displayItinerary(route);
+
+        } catch (error) {
+            console.error('Route building error:', error);
+            alert('Error building route: ' + error.message);
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    optimizeRoute(weatherData, maxTravelPerDay, totalDays, startPoint) {
+        const route = [];
+        const visited = new Set();
+        const sortedSpots = [...weatherData].sort((a, b) => b.score - a.score);
+
+        // Find starting point
+        let currentPoint;
+        if (startPoint) {
+            currentPoint = startPoint;
+        } else {
+            // Start from best weather spot
+            currentPoint = sortedSpots[0];
+            route.push({
+                day: 1,
+                location: currentPoint,
+                distance: 0,
+                weather: currentPoint.rawData
+            });
+            visited.add(0);
+        }
+
+        // Build route day by day
+        for (let day = startPoint ? 1 : 2; day <= totalDays && route.length < sortedSpots.length; day++) {
+            const nextLocation = this.findNextBestLocation(
+                currentPoint,
+                sortedSpots,
+                visited,
+                maxTravelPerDay,
+                route.length > 0 ? route[route.length - 1].location : null
+            );
+
+            if (!nextLocation) {
+                break; // No more reachable locations
+            }
+
+            const distance = this.calculateDistance(
+                currentPoint.lat,
+                currentPoint.lon,
+                nextLocation.location.lat,
+                nextLocation.location.lon
+            );
+
+            route.push({
+                day: day,
+                location: nextLocation.location,
+                distance: Math.round(distance),
+                weather: nextLocation.location.rawData
+            });
+
+            visited.add(nextLocation.index);
+            currentPoint = nextLocation.location;
+        }
+
+        return route;
+    }
+
+    findNextBestLocation(currentPoint, sortedSpots, visited, maxTravel, previousLocation) {
+        let bestOption = null;
+        let bestScore = -1;
+
+        for (let i = 0; i < sortedSpots.length; i++) {
+            if (visited.has(i)) continue;
+
+            const candidate = sortedSpots[i];
+            const distance = this.calculateDistance(
+                currentPoint.lat,
+                currentPoint.lon,
+                candidate.lat,
+                candidate.lon
+            );
+
+            // Check if within max travel distance
+            if (distance > maxTravel) continue;
+
+            // Calculate direction penalty to avoid zigzagging
+            let directionPenalty = 0;
+            if (previousLocation) {
+                const backtrackDistance = this.calculateDistance(
+                    candidate.lat,
+                    candidate.lon,
+                    previousLocation.lat,
+                    previousLocation.lon
+                );
+
+                // Penalty if going back towards previous location
+                if (backtrackDistance < distance) {
+                    directionPenalty = 20;
+                }
+            }
+
+            // Score: weather score + distance efficiency - direction penalty
+            const distanceScore = ((maxTravel - distance) / maxTravel) * 30;
+            const totalScore = candidate.score + distanceScore - directionPenalty;
+
+            if (totalScore > bestScore) {
+                bestScore = totalScore;
+                bestOption = { location: candidate, index: i };
+            }
+        }
+
+        return bestOption;
+    }
+
+    calculateDistance(lat1, lon1, lat2, lon2) {
+        // Haversine formula for distance in km
+        const R = 6371; // Earth's radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    displayRoute(route) {
+        // Clear previous route
+        if (this.routePolyline) {
+            this.map.removeLayer(this.routePolyline);
+        }
+        this.routeMarkers.forEach(marker => this.map.removeLayer(marker));
+        this.routeMarkers = [];
+
+        // Create route line
+        const routeCoords = route.map(stop => [stop.location.lat, stop.location.lon]);
+        this.routePolyline = L.polyline(routeCoords, {
+            color: '#10b981',
+            weight: 4,
+            opacity: 0.8,
+            dashArray: '10, 5'
+        }).addTo(this.map);
+
+        // Add numbered markers
+        route.forEach((stop, index) => {
+            const marker = L.marker([stop.location.lat, stop.location.lon], {
+                icon: L.divIcon({
+                    className: 'route-marker',
+                    html: `<div class="route-marker-inner">${index + 1}</div>`,
+                    iconSize: [32, 32]
+                })
+            }).addTo(this.map);
+
+            const emoji = this.getWeatherEmoji(
+                this.average(stop.weather.precipitation_sum),
+                this.average(stop.weather.precipitation_probability_max),
+                this.average(stop.weather.sunshine_duration) / 3600,
+                this.average(stop.weather.temperature_2m_max),
+                this.average(stop.weather.temperature_2m_min)
+            );
+
+            marker.bindPopup(`
+                <div class="weather-popup">
+                    <h3>Day ${stop.day} - ${emoji}</h3>
+                    <p><strong>Distance:</strong> ${stop.distance} km</p>
+                    <p><strong>Score:</strong> ${stop.location.score}</p>
+                    <p><strong>Temp:</strong> ${stop.location.avgTemp}°C</p>
+                    <p><strong>Rain:</strong> ${stop.location.rainAmount}mm</p>
+                </div>
+            `);
+
+            this.routeMarkers.push(marker);
+        });
+
+        // Fit map to route
+        this.map.fitBounds(this.routePolyline.getBounds().pad(0.1));
+    }
+
+    displayItinerary(route) {
+        const timeline = document.getElementById('itineraryTimeline');
+        timeline.innerHTML = '';
+
+        // Calculate statistics
+        const totalDistance = route.reduce((sum, stop) => sum + stop.distance, 0);
+        const avgScore = route.reduce((sum, stop) => sum + stop.location.score, 0) / route.length;
+
+        document.getElementById('totalDistance').textContent = `${totalDistance} km`;
+        document.getElementById('tripDuration').textContent = `${route.length} days`;
+        document.getElementById('avgScore').textContent = Math.round(avgScore);
+
+        // Generate timeline
+        route.forEach((stop, index) => {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'itinerary-day';
+
+            const emoji = this.getWeatherEmoji(
+                this.average(stop.weather.precipitation_sum),
+                this.average(stop.weather.precipitation_probability_max),
+                this.average(stop.weather.sunshine_duration) / 3600,
+                this.average(stop.weather.temperature_2m_max),
+                this.average(stop.weather.temperature_2m_min)
+            );
+
+            dayDiv.innerHTML = `
+                <span class="day-number">Day ${stop.day}</span>
+                <div class="itinerary-header">
+                    <h4>${emoji} ${stop.location.lat.toFixed(2)}, ${stop.location.lon.toFixed(2)}</h4>
+                    <div class="travel-info">
+                        ${stop.distance > 0 ? `<span class="travel-badge">🚗 <strong>${stop.distance} km</strong></span>` : '<span class="travel-badge">🎯 <strong>Starting Point</strong></span>'}
+                        <span class="travel-badge">⭐ Score: <strong>${stop.location.score}</strong></span>
+                    </div>
+                </div>
+                <div class="weather-preview">
+                    <div class="weather-mini-card">
+                        <div>🌡️</div>
+                        <strong>${stop.location.avgTemp}°C</strong>
+                    </div>
+                    <div class="weather-mini-card">
+                        <div>☀️</div>
+                        <strong>${stop.location.sunHours}h</strong>
+                    </div>
+                    <div class="weather-mini-card">
+                        <div>🌧️</div>
+                        <strong>${stop.location.rainAmount}mm</strong>
+                    </div>
+                    <div class="weather-mini-card">
+                        <div>💨</div>
+                        <strong>${stop.location.windSpeed} km/h</strong>
+                    </div>
+                </div>
+            `;
+
+            timeline.appendChild(dayDiv);
+        });
+
+        // Show itinerary section
+        document.getElementById('routeItinerarySection').classList.remove('hidden');
+
+        // Scroll to itinerary
+        document.getElementById('routeItinerarySection').scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
     }
 }
 

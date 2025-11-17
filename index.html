@@ -92,9 +92,13 @@
                     </div>
 
                     <div class="control-group">
-                        <label for="startLocation">Start From (optional)</label>
-                        <input type="text" id="startLocation" placeholder="Leave empty to start from best spot">
-                        <small>Or enter starting location: "Berlin" or "52.52,13.405"</small>
+                        <label>Start From (optional)</label>
+                        <button id="selectStartPointBtn" class="select-point-btn">
+                            📍 Click Map to Set Starting Point
+                        </button>
+                        <span id="startPointDisplay" class="start-point-display hidden"></span>
+                        <button id="clearStartPointBtn" class="clear-point-btn hidden">✕ Clear</button>
+                        <small>Click the button, then click anywhere on the map, or leave empty to start from best spot</small>
                     </div>
                 </div>
 

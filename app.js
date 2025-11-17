@@ -11,8 +11,11 @@ class WeatherChaser {
         this.drawControl = null;
         this.drawnShape = null;
         this.routePolyline = null;
+        this.routePolylines = [];
         this.routeMarkers = [];
         this.currentRoute = null;
+        this.startPoint = null;
+        this.startPointMarker = null;
 
         this.init();
     }
@@ -101,6 +104,71 @@ class WeatherChaser {
         if (buildRouteBtn) {
             buildRouteBtn.addEventListener('click', () => this.buildRoute());
         }
+
+        // Start point selection
+        const selectStartPointBtn = document.getElementById('selectStartPointBtn');
+        const clearStartPointBtn = document.getElementById('clearStartPointBtn');
+
+        if (selectStartPointBtn) {
+            selectStartPointBtn.addEventListener('click', () => this.enableStartPointSelection());
+        }
+
+        if (clearStartPointBtn) {
+            clearStartPointBtn.addEventListener('click', () => this.clearStartPoint());
+        }
+    }
+
+    enableStartPointSelection() {
+        const btn = document.getElementById('selectStartPointBtn');
+        btn.textContent = '🎯 Click on Map Now...';
+        btn.classList.add('active');
+
+        // Add one-time click listener to map
+        const clickHandler = (e) => {
+            this.setStartPoint(e.latlng.lat, e.latlng.lng);
+            this.map.off('click', clickHandler);
+            btn.textContent = '📍 Click Map to Set Starting Point';
+            btn.classList.remove('active');
+        };
+
+        this.map.on('click', clickHandler);
+    }
+
+    setStartPoint(lat, lng) {
+        this.startPoint = { lat, lon: lng };
+
+        // Remove old marker if exists
+        if (this.startPointMarker) {
+            this.map.removeLayer(this.startPointMarker);
+        }
+
+        // Add new marker
+        this.startPointMarker = L.marker([lat, lng], {
+            icon: L.divIcon({
+                className: 'start-point-marker',
+                html: '<div class="start-point-marker-inner">🏁</div>',
+                iconSize: [40, 40]
+            })
+        }).addTo(this.map);
+
+        this.startPointMarker.bindPopup('<strong>Starting Point</strong>');
+
+        // Update UI
+        document.getElementById('startPointDisplay').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        document.getElementById('startPointDisplay').classList.remove('hidden');
+        document.getElementById('clearStartPointBtn').classList.remove('hidden');
+    }
+
+    clearStartPoint() {
+        this.startPoint = null;
+
+        if (this.startPointMarker) {
+            this.map.removeLayer(this.startPointMarker);
+            this.startPointMarker = null;
+        }
+
+        document.getElementById('startPointDisplay').classList.add('hidden');
+        document.getElementById('clearStartPointBtn').classList.add('hidden');
     }
 
     switchMode(mode) {
@@ -792,18 +860,12 @@ class WeatherChaser {
 
         const maxTravelPerDay = parseFloat(document.getElementById('maxTravelPerDay').value);
         const days = parseInt(document.getElementById('days').value);
-        const startLocationInput = document.getElementById('startLocation').value.trim();
 
         this.showLoading(true);
 
         try {
-            let startPoint = null;
-
-            // Get start location if specified
-            if (startLocationInput) {
-                const coords = await this.geocodeLocation(startLocationInput);
-                startPoint = { lat: coords.lat, lon: coords.lon };
-            }
+            // Use the click-selected starting point (if set)
+            const startPoint = this.startPoint;
 
             // Build optimized route
             const route = await this.optimizeRoute(this.weatherData, maxTravelPerDay, days, startPoint);
@@ -834,115 +896,155 @@ class WeatherChaser {
         const visited = new Set();
         const sortedSpots = [...weatherData].sort((a, b) => b.score - a.score);
 
+        // Pre-calculate distance matrix for all locations to speed up route building
+        console.log('Pre-calculating distance matrix...');
+        const distanceMatrix = await this.buildDistanceMatrix(sortedSpots, startPoint);
+        console.log('Distance matrix ready!');
+
         // Find starting point
         let currentPoint;
+        let currentIndex = -1; // -1 for custom start point
+
         if (startPoint) {
             currentPoint = startPoint;
         } else {
             // Start from best weather spot
             currentPoint = sortedSpots[0];
+            currentIndex = 0;
             route.push({
                 day: 1,
                 location: currentPoint,
                 distance: 0,
                 driveTime: 0,
-                weather: currentPoint.rawData
+                weather: currentPoint.rawData,
+                routeGeometry: null
             });
             visited.add(0);
         }
 
         // Build route day by day
         for (let day = startPoint ? 1 : 2; day <= totalDays && route.length < sortedSpots.length; day++) {
-            const nextLocation = await this.findNextBestLocation(
+            const nextLocation = this.findNextBestLocationCached(
                 currentPoint,
+                currentIndex,
                 sortedSpots,
                 visited,
                 maxTravelPerDay,
-                route.length > 0 ? route[route.length - 1].location : null
+                route.length >= 2 ? route[route.length - 2].location : null,
+                route.length >= 1 ? route[route.length - 1].location : null,
+                distanceMatrix
             );
 
             if (!nextLocation) {
                 break; // No more reachable locations
             }
 
-            // Get actual road distance and duration
-            const roadInfo = await this.calculateRoadDistance(
-                currentPoint.lat,
-                currentPoint.lon,
-                nextLocation.location.lat,
-                nextLocation.location.lon
-            );
-
-            // Handle both object (with distance/duration) and number (fallback) returns
-            const distance = typeof roadInfo === 'object' ? roadInfo.distance : roadInfo;
-            const driveTime = typeof roadInfo === 'object' ? roadInfo.duration : (distance / 80 * 60);
+            // Get cached distance info
+            const roadInfo = distanceMatrix.get(this.getMatrixKey(currentPoint, nextLocation.location));
 
             route.push({
                 day: day,
                 location: nextLocation.location,
-                distance: Math.round(distance),
-                driveTime: Math.round(driveTime),
-                weather: nextLocation.location.rawData
+                distance: roadInfo.distance,
+                driveTime: roadInfo.duration,
+                weather: nextLocation.location.rawData,
+                routeGeometry: roadInfo.geometry
             });
 
             visited.add(nextLocation.index);
             currentPoint = nextLocation.location;
+            currentIndex = nextLocation.index;
         }
 
         return route;
     }
 
-    async findNextBestLocation(currentPoint, sortedSpots, visited, maxTravel, previousLocation) {
+    async buildDistanceMatrix(locations, startPoint) {
+        const matrix = new Map();
+        const allPoints = startPoint ? [startPoint, ...locations] : locations;
+
+        // Calculate distances between all pairs
+        const pairs = [];
+        for (let i = 0; i < allPoints.length; i++) {
+            for (let j = i + 1; j < allPoints.length; j++) {
+                pairs.push({ from: allPoints[i], to: allPoints[j] });
+            }
+        }
+
+        console.log(`Calculating ${pairs.length} route distances...`);
+
+        // Process in batches to avoid rate limiting
+        const batchSize = 5;
+        for (let i = 0; i < pairs.length; i += batchSize) {
+            const batch = pairs.slice(i, i + batchSize);
+            const promises = batch.map(async ({ from, to }) => {
+                const info = await this.calculateRoadDistance(from.lat, from.lon, to.lat, to.lon);
+                const key1 = this.getMatrixKey(from, to);
+                const key2 = this.getMatrixKey(to, from);
+                matrix.set(key1, info);
+                matrix.set(key2, info); // Distance is same both ways
+            });
+
+            await Promise.all(promises);
+
+            if (i + batchSize < pairs.length) {
+                await this.sleep(200); // Small delay between batches
+            }
+
+            const progress = Math.min(100, Math.round(((i + batchSize) / pairs.length) * 100));
+            console.log(`Route calculation progress: ${progress}%`);
+        }
+
+        return matrix;
+    }
+
+    getMatrixKey(point1, point2) {
+        return `${point1.lat.toFixed(4)},${point1.lon.toFixed(4)}-${point2.lat.toFixed(4)},${point2.lon.toFixed(4)}`;
+    }
+
+    findNextBestLocationCached(currentPoint, currentIndex, sortedSpots, visited, maxTravel, previousLocation, lastLocation, distanceMatrix) {
         let bestOption = null;
         let bestScore = -1;
 
-        // Use air distance for initial filtering to avoid too many API calls
-        const candidatesInRange = [];
         for (let i = 0; i < sortedSpots.length; i++) {
             if (visited.has(i)) continue;
 
             const candidate = sortedSpots[i];
-            const airDistance = this.calculateDistance(
-                currentPoint.lat,
-                currentPoint.lon,
-                candidate.lat,
-                candidate.lon
-            );
 
-            // Filter by air distance (add 20% buffer for road distance)
-            if (airDistance <= maxTravel * 1.2) {
-                candidatesInRange.push({ candidate, index: i, airDistance });
-            }
-        }
+            // Get cached distance
+            const roadInfo = distanceMatrix.get(this.getMatrixKey(currentPoint, candidate));
+            if (!roadInfo) continue;
 
-        // Check road distance for candidates in range
-        for (const { candidate, index, airDistance } of candidatesInRange) {
-            // Get actual road distance
-            const roadInfo = await this.calculateRoadDistance(
-                currentPoint.lat,
-                currentPoint.lon,
-                candidate.lat,
-                candidate.lon
-            );
-
-            const distance = typeof roadInfo === 'object' ? roadInfo.distance : roadInfo;
+            const distance = roadInfo.distance;
 
             // Check if within max travel distance
             if (distance > maxTravel) continue;
 
-            // Calculate direction penalty to avoid zigzagging
+            // Better zigzag prevention using bearings
             let directionPenalty = 0;
-            if (previousLocation) {
-                const backtrackDistance = this.calculateDistance(
-                    candidate.lat,
-                    candidate.lon,
-                    previousLocation.lat,
-                    previousLocation.lon
+
+            if (previousLocation && lastLocation) {
+                // Calculate bearing from previous to current
+                const prevBearing = this.calculateBearing(
+                    previousLocation.lat, previousLocation.lon,
+                    lastLocation.lat, lastLocation.lon
                 );
 
-                // Penalty if going back towards previous location
-                if (backtrackDistance < distance) {
-                    directionPenalty = 20;
+                // Calculate bearing from current to candidate
+                const nextBearing = this.calculateBearing(
+                    lastLocation.lat, lastLocation.lon,
+                    candidate.lat, candidate.lon
+                );
+
+                // Calculate angle difference
+                let angleDiff = Math.abs(nextBearing - prevBearing);
+                if (angleDiff > 180) angleDiff = 360 - angleDiff;
+
+                // Heavy penalty for sharp turns (> 90 degrees = backtracking)
+                if (angleDiff > 90) {
+                    directionPenalty = 30;
+                } else if (angleDiff > 60) {
+                    directionPenalty = 15;
                 }
             }
 
@@ -952,11 +1054,22 @@ class WeatherChaser {
 
             if (totalScore > bestScore) {
                 bestScore = totalScore;
-                bestOption = { location: candidate, index };
+                bestOption = { location: candidate, index: i };
             }
         }
 
         return bestOption;
+    }
+
+    calculateBearing(lat1, lon1, lat2, lon2) {
+        // Calculate bearing (direction) between two points
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const y = Math.sin(dLon) * Math.cos(lat2 * Math.PI / 180);
+        const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+                  Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLon);
+        let bearing = Math.atan2(y, x) * 180 / Math.PI;
+        bearing = (bearing + 360) % 360; // Normalize to 0-360
+        return bearing;
     }
 
     calculateDistance(lat1, lon1, lat2, lon2) {
@@ -977,13 +1090,18 @@ class WeatherChaser {
     async calculateRoadDistance(lat1, lon1, lat2, lon2) {
         // Use OSRM (Open Source Routing Machine) to get actual road distance
         try {
-            const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=false`;
+            const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;
             const response = await fetch(url);
 
             if (!response.ok) {
                 // Fallback to air distance if API fails
                 console.warn('OSRM API failed, using air distance');
-                return this.calculateDistance(lat1, lon1, lat2, lon2);
+                const airDist = this.calculateDistance(lat1, lon1, lat2, lon2);
+                return {
+                    distance: Math.round(airDist),
+                    duration: Math.round(airDist / 80 * 60),
+                    geometry: null
+                };
             }
 
             const data = await response.json();
@@ -992,19 +1110,31 @@ class WeatherChaser {
                 // OSRM returns distance in meters, convert to km
                 const distanceKm = data.routes[0].distance / 1000;
                 const durationSeconds = data.routes[0].duration;
+                const geometry = data.routes[0].geometry; // GeoJSON LineString
 
                 return {
-                    distance: distanceKm,
-                    duration: durationSeconds / 60 // Convert to minutes
+                    distance: Math.round(distanceKm),
+                    duration: Math.round(durationSeconds / 60), // Convert to minutes
+                    geometry: geometry
                 };
             } else {
                 // Fallback to air distance
-                return this.calculateDistance(lat1, lon1, lat2, lon2);
+                const airDist = this.calculateDistance(lat1, lon1, lat2, lon2);
+                return {
+                    distance: Math.round(airDist),
+                    duration: Math.round(airDist / 80 * 60),
+                    geometry: null
+                };
             }
         } catch (error) {
             console.warn('Error fetching road distance:', error);
             // Fallback to air distance
-            return this.calculateDistance(lat1, lon1, lat2, lon2);
+            const airDist = this.calculateDistance(lat1, lon1, lat2, lon2);
+            return {
+                distance: Math.round(airDist),
+                duration: Math.round(airDist / 80 * 60),
+                geometry: null
+            };
         }
     }
 
@@ -1013,24 +1143,37 @@ class WeatherChaser {
         if (this.routePolyline) {
             this.map.removeLayer(this.routePolyline);
         }
+        if (this.routePolylines) {
+            this.routePolylines.forEach(polyline => this.map.removeLayer(polyline));
+        }
+        this.routePolylines = [];
         this.routeMarkers.forEach(marker => this.map.removeLayer(marker));
         this.routeMarkers = [];
 
-        // Create route line
-        const routeCoords = route.map(stop => [stop.location.lat, stop.location.lon]);
-        this.routePolyline = L.polyline(routeCoords, {
-            color: '#10b981',
-            weight: 4,
-            opacity: 0.8,
-            dashArray: '10, 5'
-        }).addTo(this.map);
+        // Create actual road route segments using OSRM geometry
+        const allBounds = [];
 
-        // Add numbered markers
-        route.forEach((stop, index) => {
+        for (let i = 0; i < route.length; i++) {
+            const stop = route[i];
+
+            // Draw road segment if we have geometry
+            if (i > 0 && route[i].routeGeometry) {
+                const coords = route[i].routeGeometry.coordinates.map(coord => [coord[1], coord[0]]);
+                const polyline = L.polyline(coords, {
+                    color: '#10b981',
+                    weight: 4,
+                    opacity: 0.8
+                }).addTo(this.map);
+
+                this.routePolylines.push(polyline);
+                allBounds.push(...coords);
+            }
+
+            // Add numbered markers
             const marker = L.marker([stop.location.lat, stop.location.lon], {
                 icon: L.divIcon({
                     className: 'route-marker',
-                    html: `<div class="route-marker-inner">${index + 1}</div>`,
+                    html: `<div class="route-marker-inner">${i + 1}</div>`,
                     iconSize: [32, 32]
                 })
             }).addTo(this.map);
@@ -1047,6 +1190,7 @@ class WeatherChaser {
                 <div class="weather-popup">
                     <h3>Day ${stop.day} - ${emoji}</h3>
                     <p><strong>Distance:</strong> ${stop.distance} km</p>
+                    <p><strong>Drive Time:</strong> ${Math.floor(stop.driveTime / 60)}h ${stop.driveTime % 60}m</p>
                     <p><strong>Score:</strong> ${stop.location.score}</p>
                     <p><strong>Temp:</strong> ${stop.location.avgTemp}°C</p>
                     <p><strong>Rain:</strong> ${stop.location.rainAmount}mm</p>
@@ -1054,10 +1198,13 @@ class WeatherChaser {
             `);
 
             this.routeMarkers.push(marker);
-        });
+            allBounds.push([stop.location.lat, stop.location.lon]);
+        }
 
         // Fit map to route
-        this.map.fitBounds(this.routePolyline.getBounds().pad(0.1));
+        if (allBounds.length > 0) {
+            this.map.fitBounds(allBounds, { padding: [50, 50] });
+        }
     }
 
     displayItinerary(route) {

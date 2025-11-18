@@ -23,6 +23,7 @@
             <div class="search-mode-tabs">
                 <button class="tab-btn active" data-mode="location">📍 Location Search</button>
                 <button class="tab-btn" data-mode="draw">✏️ Draw Area</button>
+                <button class="tab-btn" data-mode="places">🏙️ Manual Places</button>
             </div>
 
             <div id="locationMode" class="search-mode active">
@@ -64,6 +65,34 @@
                         </select>
                     </div>
                 </div>
+            </div>
+
+            <div id="placesMode" class="search-mode">
+                <div class="places-instructions">
+                    <p>🏙️ Manually add cities or locations to compare their weather (max 25)</p>
+                </div>
+
+                <div class="control-group">
+                    <label for="placeInput">Add Location</label>
+                    <div class="place-input-row">
+                        <input type="text" id="placeInput" placeholder="Enter city name or coordinates">
+                        <button id="addPlaceBtn" class="add-place-btn">+ Add</button>
+                    </div>
+                    <small>Examples: "Paris", "New York", "Tokyo", "52.52,13.405"</small>
+                </div>
+
+                <div class="places-list-container">
+                    <div class="places-list-header">
+                        <span class="places-count">Locations: <strong id="placesCount">0</strong>/25</span>
+                        <button id="clearPlacesBtn" class="clear-places-btn">Clear All</button>
+                    </div>
+                    <div id="placesList" class="places-list">
+                        <p class="empty-state">No locations added yet. Add your first location above!</p>
+                    </div>
+                </div>
+
+                <button id="suggestNearbyBtn" class="suggest-nearby-btn">🔍 Suggest Nearby Locations</button>
+                <div id="nearbySuggestions" class="nearby-suggestions hidden"></div>
             </div>
 
             <div class="control-row">

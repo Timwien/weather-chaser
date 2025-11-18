@@ -367,6 +367,21 @@ header h1 {
     transform: translateY(-1px);
 }
 
+.suggestion-item.disabled {
+    opacity: 0.4;
+    background: var(--bg-light);
+    color: var(--text-light);
+    cursor: not-allowed;
+    text-decoration: line-through;
+    border-color: var(--border-color);
+}
+
+.suggestion-item.disabled:hover {
+    background: var(--bg-light);
+    color: var(--text-light);
+    transform: none;
+}
+
 .control-group {
     margin-bottom: 20px;
 }
@@ -460,11 +475,13 @@ header h1 {
 
 /* Route Builder Section */
 .route-builder-section {
-    margin-top: 30px;
-    padding: 25px;
+    margin: 30px auto;
+    padding: 30px;
+    max-width: 800px;
     background: linear-gradient(135deg, var(--success-light) 0%, var(--bg-white) 100%);
     border-radius: 12px;
     border: 2px solid var(--success-color);
+    box-shadow: var(--shadow-lg);
     animation: fadeIn 0.5s ease;
 }
 
@@ -776,6 +793,16 @@ header h1 {
     color: var(--text-dark);
 }
 
+.travel-badge.stayed {
+    background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
+    border-color: #3b82f6;
+    color: #1e40af;
+}
+
+.travel-badge.stayed strong {
+    color: #1e40af;
+}
+
 .weather-preview {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -886,19 +913,19 @@ header h1 {
 }
 
 .legend-color.excellent {
-    background: #10b981;
+    background: #059669; /* Dark Green */
 }
 
 .legend-color.good {
-    background: #3b82f6;
+    background: #84cc16; /* Yellow-Green (Lime) */
 }
 
 .legend-color.fair {
-    background: #f59e0b;
+    background: #eab308; /* Yellow */
 }
 
 .legend-color.poor {
-    background: #ef4444;
+    background: #dc2626; /* Red */
 }
 
 .table-container {
@@ -1156,19 +1183,19 @@ tr.detail-row td {
 }
 
 .score-excellent {
-    background: var(--success-color);
+    background: #059669; /* Dark Green */
 }
 
 .score-good {
-    background: var(--primary-color);
+    background: #84cc16; /* Yellow-Green (Lime) */
 }
 
 .score-fair {
-    background: var(--warning-color);
+    background: #eab308; /* Yellow */
 }
 
 .score-poor {
-    background: var(--danger-color);
+    background: #dc2626; /* Red */
 }
 
 footer {

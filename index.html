@@ -107,30 +107,6 @@
                 <div class="spinner"></div>
                 <span>Analyzing weather patterns...</span>
             </div>
-
-            <!-- Route Builder Section -->
-            <div id="routeBuilderSection" class="route-builder-section hidden">
-                <h3>🗺️ Build Smart Route</h3>
-                <p class="route-description">Create an optimal travel route through the best weather spots</p>
-
-                <div class="route-controls">
-                    <div class="control-group">
-                        <label for="maxTravelPerDay">Max Travel per Day (km)</label>
-                        <input type="number" id="maxTravelPerDay" value="200" min="50" max="1000" step="50">
-                        <small>Maximum distance you're willing to drive each day</small>
-                    </div>
-
-                    <div class="control-group">
-                        <label for="startLocation">Start From (optional)</label>
-                        <select id="startLocation">
-                            <option value="">Start from best weather spot</option>
-                        </select>
-                        <small>Select a starting point from your search results</small>
-                    </div>
-                </div>
-
-                <button id="buildRouteBtn" class="route-btn">🚐 Build Optimal Route</button>
-            </div>
         </div>
 
         <div id="mapContainer" class="map-container">
@@ -207,6 +183,30 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        <!-- Route Builder Section -->
+        <div id="routeBuilderSection" class="route-builder-section hidden">
+            <h3>🗺️ Build Smart Route</h3>
+            <p class="route-description">Create an optimal travel route through the best weather spots. You can stay in the same location for multiple days if it continues to have the best weather.</p>
+
+            <div class="route-controls">
+                <div class="control-group">
+                    <label for="maxTravelPerDay">Max Travel per Day (km)</label>
+                    <input type="number" id="maxTravelPerDay" value="200" min="50" max="1000" step="50">
+                    <small>Maximum distance you're willing to drive each day</small>
+                </div>
+
+                <div class="control-group">
+                    <label for="startLocation">Start From (optional)</label>
+                    <select id="startLocation">
+                        <option value="">Start from best weather spot</option>
+                    </select>
+                    <small>Select a starting point from your search results</small>
+                </div>
+            </div>
+
+            <button id="buildRouteBtn" class="route-btn">🚐 Build Optimal Route</button>
         </div>
 
         <footer>

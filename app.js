@@ -14,6 +14,7 @@ class WeatherChaser {
         this.routeMarkers = [];
         this.currentRoute = null;
         this.manualPlaces = []; // Array of manually added places
+        this.currentSuggestions = []; // Store current suggestions for dynamic updates
 
         this.init();
     }
@@ -316,6 +317,11 @@ class WeatherChaser {
     removePlace(index) {
         this.manualPlaces.splice(index, 1);
         this.updatePlacesList();
+
+        // Update suggestions display to re-enable the removed place
+        if (this.currentSuggestions.length > 0) {
+            this.renderSuggestions();
+        }
     }
 
     clearPlaces() {
@@ -324,7 +330,13 @@ class WeatherChaser {
         if (confirm('Are you sure you want to clear all locations?')) {
             this.manualPlaces = [];
             this.updatePlacesList();
-            document.getElementById('nearbySuggestions').classList.add('hidden');
+
+            // Update suggestions display to re-enable all places
+            if (this.currentSuggestions.length > 0) {
+                this.renderSuggestions();
+            } else {
+                document.getElementById('nearbySuggestions').classList.add('hidden');
+            }
         }
     }
 
@@ -357,6 +369,11 @@ class WeatherChaser {
                 <button class="remove-place-btn" onclick="app.removePlace(${index})">Remove</button>
             </div>
         `).join('');
+
+        // Auto-scroll to bottom to show the newly added place
+        setTimeout(() => {
+            placesList.scrollTop = placesList.scrollHeight;
+        }, 0);
     }
 
     async findNearbyLocations() {
@@ -375,9 +392,18 @@ class WeatherChaser {
             const centerLon = this.manualPlaces.reduce((sum, p) => sum + p.lon, 0) / this.manualPlaces.length;
 
             // Use Overpass API to find nearby cities/towns
-            // Search for places within 200km radius
-            const radius = 200000; // 200km in meters
-            const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["place"~"city|town"](around:${radius},${centerLat},${centerLon}););out 20;`;
+            // Search for places within 300km radius, prioritizing larger cities
+            const radius = 300000; // 300km in meters
+            // Include cities, towns, and villages with population data
+            const overpassQuery = `
+                [out:json][timeout:25];
+                (
+                    node["place"="city"](around:${radius},${centerLat},${centerLon});
+                    node["place"="town"](around:${radius},${centerLat},${centerLon});
+                );
+                out tags 50;
+            `;
+            const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
 
             const response = await fetch(overpassUrl);
             if (!response.ok) {
@@ -385,41 +411,78 @@ class WeatherChaser {
             }
 
             const data = await response.json();
-            const places = data.elements;
+            let places = data.elements;
 
             if (places.length === 0) {
                 suggestionsDiv.innerHTML = '<p>No nearby locations found. Try adding more locations first.</p>';
                 return;
             }
 
-            // Filter out already added places and create suggestions
-            const suggestions = places
-                .filter(place => {
-                    const name = place.tags.name;
-                    return name && !this.manualPlaces.some(p =>
-                        p.name.toLowerCase().includes(name.toLowerCase())
-                    );
-                })
-                .slice(0, 15); // Limit to 15 suggestions
+            // Sort by population (larger cities first) and filter invalid entries
+            places = places
+                .filter(place => place.tags && place.tags.name)
+                .map(place => ({
+                    ...place,
+                    population: parseInt(place.tags.population) || 0
+                }))
+                .sort((a, b) => b.population - a.population);
 
-            if (suggestions.length === 0) {
+            // Filter out already added places
+            const filteredPlaces = places.filter(place => {
+                const name = place.tags.name;
+                return !this.manualPlaces.some(p =>
+                    p.name.toLowerCase().includes(name.toLowerCase()) ||
+                    name.toLowerCase().includes(p.name.toLowerCase())
+                );
+            });
+
+            if (filteredPlaces.length === 0) {
                 suggestionsDiv.innerHTML = '<p>All nearby locations are already in your list!</p>';
+                this.currentSuggestions = [];
                 return;
             }
 
-            suggestionsDiv.innerHTML = `
-                <div class="nearby-suggestions-header">Suggested Locations (click to add):</div>
-                ${suggestions.map(place => `
-                    <span class="suggestion-item" onclick="app.addSuggestedPlace('${place.tags.name}', ${place.lat}, ${place.lon})">
-                        ${place.tags.name}
-                    </span>
-                `).join('')}
-            `;
+            // Store suggestions for dynamic updates (limit to 20)
+            this.currentSuggestions = filteredPlaces.slice(0, 20);
+
+            // Render suggestions
+            this.renderSuggestions();
 
         } catch (error) {
             console.error('Error finding nearby locations:', error);
             suggestionsDiv.innerHTML = '<p>Error finding nearby locations. Please try again.</p>';
         }
+    }
+
+    renderSuggestions() {
+        const suggestionsDiv = document.getElementById('nearbySuggestions');
+
+        if (this.currentSuggestions.length === 0) {
+            suggestionsDiv.innerHTML = '<p>All nearby locations are already in your list!</p>';
+            return;
+        }
+
+        suggestionsDiv.innerHTML = `
+            <div class="nearby-suggestions-header">
+                Suggested Locations (sorted by size, click to add):
+            </div>
+            ${this.currentSuggestions.map((place, index) => {
+                // Check if this place is already added
+                const isAdded = this.manualPlaces.some(p =>
+                    p.name.toLowerCase().includes(place.tags.name.toLowerCase()) ||
+                    place.tags.name.toLowerCase().includes(p.name.toLowerCase())
+                );
+
+                const className = isAdded ? 'suggestion-item disabled' : 'suggestion-item';
+                const onclick = isAdded ? '' : `onclick="app.addSuggestedPlace('${place.tags.name.replace(/'/g, "\\'")}', ${place.lat}, ${place.lon})"`;
+
+                return `
+                    <span class="${className}" ${onclick}>
+                        ${place.tags.name}${place.population > 0 ? ' (' + place.population.toLocaleString() + ')' : ''}
+                    </span>
+                `;
+            }).join('')}
+        `;
     }
 
     async addSuggestedPlace(name, lat, lon) {
@@ -446,6 +509,11 @@ class WeatherChaser {
         });
 
         this.updatePlacesList();
+
+        // Update suggestions display to grey out the added place
+        if (this.currentSuggestions.length > 0) {
+            this.renderSuggestions();
+        }
     }
 
     generateGridFromCenter(centerLat, centerLon, radiusKm, gridSize) {

@@ -367,6 +367,21 @@ header h1 {
     transform: translateY(-1px);
 }
 
+.suggestion-item.disabled {
+    opacity: 0.4;
+    background: var(--bg-light);
+    color: var(--text-light);
+    cursor: not-allowed;
+    text-decoration: line-through;
+    border-color: var(--border-color);
+}
+
+.suggestion-item.disabled:hover {
+    background: var(--bg-light);
+    color: var(--text-light);
+    transform: none;
+}
+
 .control-group {
     margin-bottom: 20px;
 }

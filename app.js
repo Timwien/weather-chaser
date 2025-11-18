@@ -1100,10 +1100,11 @@ class WeatherChaser {
     }
 
     getColorForScore(score) {
-        if (score >= 90) return '#10b981'; // Excellent - Green
-        if (score >= 70) return '#6366f1'; // Good - Indigo
-        if (score >= 50) return '#f59e0b'; // Fair - Orange
-        return '#ef4444'; // Poor - Red
+        // Red-Yellow-Green gradient
+        if (score >= 90) return '#059669'; // Excellent - Dark Green
+        if (score >= 70) return '#84cc16'; // Good - Yellow-Green (Lime)
+        if (score >= 50) return '#eab308'; // Fair - Yellow
+        return '#dc2626'; // Poor - Red
     }
 
     getScoreClass(score) {
@@ -1175,32 +1176,35 @@ class WeatherChaser {
 
     async optimizeRoute(weatherData, maxTravelPerDay, totalDays, startPoint) {
         const route = [];
-        const visited = new Set();
         const sortedSpots = [...weatherData].sort((a, b) => b.score - a.score);
 
         // Find starting point
         let currentPoint;
+        let currentIndex;
         if (startPoint) {
             currentPoint = startPoint;
+            // Find index of start point in sortedSpots
+            currentIndex = sortedSpots.findIndex(s => s.lat === startPoint.lat && s.lon === startPoint.lon);
         } else {
             // Start from best weather spot
             currentPoint = sortedSpots[0];
+            currentIndex = 0;
             route.push({
                 day: 1,
                 location: currentPoint,
                 distance: 0,
                 driveTime: 0,
-                weather: currentPoint.rawData
+                weather: currentPoint.rawData,
+                stayed: false
             });
-            visited.add(0);
         }
 
         // Build route day by day
-        for (let day = startPoint ? 1 : 2; day <= totalDays && route.length < sortedSpots.length; day++) {
+        for (let day = startPoint ? 1 : 2; day <= totalDays; day++) {
             const nextLocation = await this.findNextBestLocation(
                 currentPoint,
+                currentIndex,
                 sortedSpots,
-                visited,
                 maxTravelPerDay,
                 route.length > 0 ? route[route.length - 1].location : null
             );
@@ -1209,41 +1213,61 @@ class WeatherChaser {
                 break; // No more reachable locations
             }
 
-            // Get actual road distance and duration
-            const roadInfo = await this.calculateRoadDistance(
-                currentPoint.lat,
-                currentPoint.lon,
-                nextLocation.location.lat,
-                nextLocation.location.lon
-            );
+            // Check if staying in same location
+            const isStaying = nextLocation.index === currentIndex;
+            let distance = 0;
+            let driveTime = 0;
 
-            // Handle both object (with distance/duration) and number (fallback) returns
-            const distance = typeof roadInfo === 'object' ? roadInfo.distance : roadInfo;
-            const driveTime = typeof roadInfo === 'object' ? roadInfo.duration : (distance / 80 * 60);
+            if (!isStaying) {
+                // Get actual road distance and duration
+                const roadInfo = await this.calculateRoadDistance(
+                    currentPoint.lat,
+                    currentPoint.lon,
+                    nextLocation.location.lat,
+                    nextLocation.location.lon
+                );
+
+                // Handle both object (with distance/duration) and number (fallback) returns
+                distance = typeof roadInfo === 'object' ? roadInfo.distance : roadInfo;
+                driveTime = typeof roadInfo === 'object' ? roadInfo.duration : (distance / 80 * 60);
+            }
 
             route.push({
                 day: day,
                 location: nextLocation.location,
                 distance: Math.round(distance),
                 driveTime: Math.round(driveTime),
-                weather: nextLocation.location.rawData
+                weather: nextLocation.location.rawData,
+                stayed: isStaying
             });
 
-            visited.add(nextLocation.index);
+            currentIndex = nextLocation.index;
             currentPoint = nextLocation.location;
         }
 
         return route;
     }
 
-    async findNextBestLocation(currentPoint, sortedSpots, visited, maxTravel, previousLocation) {
+    async findNextBestLocation(currentPoint, currentIndex, sortedSpots, maxTravel, previousLocation) {
         let bestOption = null;
         let bestScore = -1;
+
+        // First, consider staying at current location
+        // Staying gets a bonus (no travel time/cost) but only if weather is still good
+        const currentLocation = sortedSpots[currentIndex];
+        const stayBonus = 35; // Bonus for not moving (saves time and money)
+        const stayScore = currentLocation.score + stayBonus;
+
+        if (stayScore > bestScore) {
+            bestScore = stayScore;
+            bestOption = { location: currentLocation, index: currentIndex };
+        }
 
         // Use air distance for initial filtering to avoid too many API calls
         const candidatesInRange = [];
         for (let i = 0; i < sortedSpots.length; i++) {
-            if (visited.has(i)) continue;
+            // Skip current location (already considered above)
+            if (i === currentIndex) continue;
 
             const candidate = sortedSpots[i];
             const airDistance = this.calculateDistance(
@@ -1490,7 +1514,9 @@ class WeatherChaser {
                         </a>
                     </div>
                     <div class="travel-info">
-                        ${stop.distance > 0 ? `<span class="travel-badge">🚗 <strong>${stop.distance} km</strong> (~${driveTimeStr})</span>` : '<span class="travel-badge">🎯 <strong>Starting Point</strong></span>'}
+                        ${stop.stayed ? '<span class="travel-badge stayed">🏖️ <strong>Stayed Here</strong></span>' :
+                          stop.distance > 0 ? `<span class="travel-badge">🚗 <strong>${stop.distance} km</strong> (~${driveTimeStr})</span>` :
+                          '<span class="travel-badge">🎯 <strong>Starting Point</strong></span>'}
                     </div>
                 </div>
                 <div class="weather-preview">

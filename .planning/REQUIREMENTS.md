@@ -149,70 +149,67 @@
 
 ## Traceability
 
-*Populated during roadmap creation.*
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ALGO-01 | — | Pending |
-| ALGO-02 | — | Pending |
-| ALGO-03 | — | Pending |
-| ALGO-04 | — | Pending |
-| ALGO-05 | — | Pending |
-| ALGO-06 | — | Pending |
-| LOC-01 | — | Pending |
-| LOC-02 | — | Pending |
-| LOC-03 | — | Pending |
-| TRIP-01 | — | Pending |
-| TRIP-02 | — | Pending |
-| TRIP-03 | — | Pending |
-| TRIP-04 | — | Pending |
-| ITIN-01 | — | Pending |
-| ITIN-02 | — | Pending |
-| ITIN-03 | — | Pending |
-| MAP-01 | — | Pending |
-| MAP-02 | — | Pending |
-| MAP-03 | — | Pending |
-| WTHR-01 | — | Pending |
-| WTHR-02 | — | Pending |
-| SHARE-01 | — | Pending |
-| SHARE-02 | — | Pending |
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| AUTH-03 | — | Pending |
-| AUTH-04 | — | Pending |
-| AUTH-05 | — | Pending |
-| AUTH-06 | — | Pending |
-| AUTH-07 | — | Pending |
-| AUTH-08 | — | Pending |
-| AUTH-09 | — | Pending |
-| PREM-01 | — | Pending |
-| PREM-02 | — | Pending |
-| PREM-03 | — | Pending |
-| PREM-04 | — | Pending |
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| INFRA-04 | — | Pending |
-| INFRA-05 | — | Pending |
-| PLAT-01 | — | Pending |
-| PLAT-02 | — | Pending |
-| PLAT-03 | — | Pending |
-
-| ENTRY-01 | — | Pending |
-| ENTRY-02 | — | Pending |
-| FIND-01 | — | Pending |
-| FIND-02 | — | Pending |
-| FIND-03 | — | Pending |
-| FIND-04 | — | Pending |
-| FIND-05 | — | Pending |
-| FIND-06 | — | Pending |
-| ALGO-07 | — | Pending |
+| ENTRY-01 | Phase 1 | Pending |
+| ENTRY-02 | Phase 1 | Pending |
+| ALGO-01 | Phase 1 | Pending |
+| ALGO-02 | Phase 1 | Pending |
+| ALGO-03 | Phase 1 | Pending |
+| ALGO-04 | Phase 1 | Pending |
+| ALGO-05 | Phase 1 | Pending |
+| ALGO-06 | Phase 1 | Pending |
+| ALGO-07 | Phase 1 | Pending |
+| LOC-01 | Phase 1 | Pending |
+| LOC-02 | Phase 1 | Pending |
+| LOC-03 | Phase 1 | Pending |
+| TRIP-01 | Phase 1 | Pending |
+| TRIP-02 | Phase 1 | Pending |
+| TRIP-03 | Phase 1 | Pending |
+| TRIP-04 | Phase 1 | Pending |
+| ITIN-01 | Phase 1 | Pending |
+| ITIN-02 | Phase 1 | Pending |
+| ITIN-03 | Phase 1 | Pending |
+| MAP-01 | Phase 1 | Pending |
+| MAP-02 | Phase 1 | Pending |
+| MAP-03 | Phase 1 | Pending |
+| WTHR-01 | Phase 1 | Pending |
+| SHARE-01 | Phase 1 | Pending |
+| SHARE-02 | Phase 1 | Pending |
+| INFRA-05 | Phase 1 | Pending |
+| FIND-01 | Phase 2 | Pending |
+| FIND-02 | Phase 2 | Pending |
+| FIND-03 | Phase 2 | Pending |
+| FIND-04 | Phase 2 | Pending |
+| FIND-05 | Phase 2 | Pending |
+| FIND-06 | Phase 2 | Pending |
+| AUTH-01 | Phase 3 | Pending |
+| AUTH-02 | Phase 3 | Pending |
+| AUTH-03 | Phase 3 | Pending |
+| AUTH-04 | Phase 3 | Pending |
+| AUTH-05 | Phase 3 | Pending |
+| AUTH-06 | Phase 3 | Pending |
+| AUTH-07 | Phase 3 | Pending |
+| WTHR-02 | Phase 3 | Pending |
+| INFRA-01 | Phase 3 | Pending |
+| INFRA-02 | Phase 3 | Pending |
+| INFRA-03 | Phase 3 | Pending |
+| INFRA-04 | Phase 3 | Pending |
+| PLAT-01 | Phase 3 | Pending |
+| AUTH-08 | Phase 4 | Pending |
+| AUTH-09 | Phase 4 | Pending |
+| PREM-01 | Phase 4 | Pending |
+| PREM-02 | Phase 4 | Pending |
+| PREM-03 | Phase 4 | Pending |
+| PREM-04 | Phase 4 | Pending |
+| PLAT-02 | Phase 5 | Pending |
+| PLAT-03 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 50 total
-- Mapped to phases: 0
-- Unmapped: 50 ⚠️
+- v1 requirements: 53 total
+- Mapped to phases: 53
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after adding Weather Finder mode, must-visit stops, shared entry point*
+*Last updated: 2026-02-26 — Traceability populated after roadmap creation*

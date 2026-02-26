@@ -1,13 +1,35 @@
 # Requirements: WeatherChaser
 
 **Defined:** 2026-02-26
-**Core Value:** Show campervan travelers exactly where to drive — and for how long to stay — to find the best weather, with a real optimized route through actual places, not dots on a grid.
+**Core Value:** Show travelers exactly where the best weather is — and for campervan trips, the optimal route to chase it — through real places, not dots on a grid.
 
 ---
 
 ## v1 Requirements
 
-### Algorithm & Route Optimization
+### Shared Entry Point
+
+- [ ] **ENTRY-01**: User defines a search area (by region/place name, radius from current location, or drawn polygon) — shared by both app modes
+- [ ] **ENTRY-02**: From the search area, user selects one of two modes: **Weather Finder** or **Route Planner**
+
+---
+
+### Mode 1: Weather Finder
+
+*Use case: "Where is the weather best on Saturday for a hike?" or "Where should I spend next week, max 500km from here?"*
+
+- [ ] **FIND-01**: User can search for the best weather in a defined area for a specific date or date range (up to 14-day forecast horizon)
+- [ ] **FIND-02**: User can set a maximum distance constraint (e.g. max 500km from starting point) to filter results
+- [ ] **FIND-03**: Results are displayed as a ranked list of top locations with weather scores
+- [ ] **FIND-04**: Results are simultaneously displayed on a map as color-coded markers (green = best weather)
+- [ ] **FIND-05**: User can toggle between morning and afternoon scoring for day-trip planning (e.g. "I'll arrive Saturday morning")
+- [ ] **FIND-06**: User can select a weather preset profile (Beach, Hiking, Sightseeing) to adjust scoring weights — free tier
+
+---
+
+### Mode 2: Route Planner
+
+*Use case: "Plan an optimal campervan route through the best weather over 10 days."*
 
 - [ ] **ALGO-01**: User can generate a weather-optimized multi-day route through real towns and villages in a chosen region
 - [ ] **ALGO-02**: Weather scoring is temporal — each location is scored for the specific day(s) the user would arrive and stay, not an average across the full forecast window
@@ -15,6 +37,7 @@
 - [ ] **ALGO-04**: Route optimizer minimizes backtracking and criss-crossing (geographic progression)
 - [ ] **ALGO-05**: No location is visited twice after leaving it
 - [ ] **ALGO-06**: Route optimizer pre-computes a full road-distance matrix per search session (replaces current per-step OSRM calls)
+- [ ] **ALGO-07**: User can designate one or more must-visit locations that the optimizer is required to include as stops in the route
 
 ### Location Data
 
@@ -175,11 +198,21 @@
 | PLAT-02 | — | Pending |
 | PLAT-03 | — | Pending |
 
+| ENTRY-01 | — | Pending |
+| ENTRY-02 | — | Pending |
+| FIND-01 | — | Pending |
+| FIND-02 | — | Pending |
+| FIND-03 | — | Pending |
+| FIND-04 | — | Pending |
+| FIND-05 | — | Pending |
+| FIND-06 | — | Pending |
+| ALGO-07 | — | Pending |
+
 **Coverage:**
-- v1 requirements: 41 total
+- v1 requirements: 50 total
 - Mapped to phases: 0
-- Unmapped: 41 ⚠️
+- Unmapped: 50 ⚠️
 
 ---
 *Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after initial definition*
+*Last updated: 2026-02-26 after adding Weather Finder mode, must-visit stops, shared entry point*

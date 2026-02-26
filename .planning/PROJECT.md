@@ -2,11 +2,11 @@
 
 ## What This Is
 
-WeatherChaser is a web and mobile app that helps campervan travelers plan multi-day routes optimized for the best weather. Users define a search region and trip parameters; the app calculates an optimized route visiting real towns and villages in the order that maximizes weather scores while minimizing unnecessary backtracking. Starting with the EU/German market and expanding globally.
+WeatherChaser is a web and mobile app with two core modes: a **Weather Finder** that shows users where the best weather is in their area for a given day or week, and a **Route Planner** that calculates an optimized multi-day campervan route through real towns and villages to maximize good weather while minimizing backtracking. Starting with the EU/German market and expanding globally.
 
 ## Core Value
 
-Show campervan travelers exactly where to drive — and for how long to stay — to find the best weather, with a real optimized route through actual places, not dots on a grid.
+Answer two questions no other app answers: "Where is the weather best near me this weekend?" and "Where should I drive my campervan over the next 10 days to find the best weather?" — through real places, not dots on a grid.
 
 ## Requirements
 

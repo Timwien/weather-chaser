@@ -30,7 +30,19 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. The route on the map follows geographic progression — it does not criss-cross or revisit locations, and numbered stops match the itinerary order
   4. User can export the route to Google Maps or Apple Maps via a single tap, or copy a shareable link that anyone can open without an account
   5. User can designate a must-visit town and the optimizer includes it as a stop in the generated route
-**Plans**: TBD
+**Plans**: 10 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Turborepo monorepo scaffold (packages/core skeleton + apps/web Vite+React skeleton)
+- [ ] 01-02-PLAN.md — TDD: Temporal weather scoring module (scoreLocation + PRESETS in packages/core)
+- [ ] 01-03-PLAN.md — TDD: Route optimizer (nearest-neighbor + 2-opt + assignStops in packages/core)
+- [ ] 01-04-PLAN.md — Web app shell (MapLibre full-screen map, TanStack Router, react-i18next, Zustand store)
+- [ ] 01-05-PLAN.md — Location services (Nominatim geocoding, Overpass town fetching, map polygon drawing)
+- [ ] 01-06-PLAN.md — Entry panel UI (shared config: dates + location + criteria + two CTAs + route-config second step)
+- [ ] 01-07-PLAN.md — Optimizer pipeline integration (Web Worker, weather fetch, OSRM matrix, loading overlay)
+- [ ] 01-08-PLAN.md — Results display (itinerary timeline, score-colored map markers, per-segment route line)
+- [ ] 01-09-PLAN.md — Share + export (Google Maps, Apple Maps deep links, shareable URL + /trip restore route)
+- [ ] 01-10-PLAN.md — End-to-end verification checkpoint (all 5 phase success criteria)
 
 ### Phase 2: Weather Finder Mode
 **Goal**: Users can ask "where is the weather best near me this weekend?" and receive a ranked list of real locations with color-coded map markers, filterable by date range, distance, time of day, and activity preset

@@ -1,3 +1,17 @@
+import { createRouter, RouterProvider } from '@tanstack/react-router';
+import { Route as rootRoute } from './routes/__root.tsx';
+import { Route as indexRoute } from './routes/index.tsx';
+
+const routeTree = rootRoute.addChildren([indexRoute]);
+
+const router = createRouter({ routeTree });
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router;
+  }
+}
+
 export function App() {
-  return <div>WeatherChaser — loading...</div>;
+  return <RouterProvider router={router} />;
 }

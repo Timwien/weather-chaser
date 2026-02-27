@@ -1,0 +1,71 @@
+{
+  "app": {
+    "title": "WeatherChaser",
+    "tagline": "Chase perfect weather"
+  },
+  "entry": {
+    "dates": "Trip dates",
+    "location": "Where",
+    "criteria": "What matters",
+    "cta": {
+      "findRoute": "Find Best Route",
+      "findWeather": "Find Best Weather"
+    },
+    "criteria_options": {
+      "sunshine": "Sunshine",
+      "precipitation": "Less rain",
+      "temperature": "Warmth",
+      "wind": "Calm wind"
+    }
+  },
+  "route_config": {
+    "start_location": "Start location",
+    "trip_duration": "Trip duration",
+    "max_stay": "Max nights per stop",
+    "must_visit": "Must-visit stops",
+    "add_must_visit": "Add a town",
+    "days_suffix": "days",
+    "nights_suffix": "nights"
+  },
+  "preset": {
+    "label": "Weather profile",
+    "beach": "Beach",
+    "hiking": "Hiking",
+    "sightseeing": "Sightseeing"
+  },
+  "itinerary": {
+    "title": "Your Route",
+    "day": "Day",
+    "nights": "nights",
+    "score": "Score",
+    "total_distance": "Total distance",
+    "stops": "stops",
+    "avg_score": "Avg score",
+    "score_breakdown": {
+      "sunshine": "Sun",
+      "precipitation": "Rain",
+      "temperature": "Temp",
+      "wind": "Wind"
+    }
+  },
+  "map": {
+    "stop_popup": "Score: {{score}}"
+  },
+  "share": {
+    "export_google": "Open in Google Maps",
+    "export_apple": "Open in Apple Maps",
+    "copy_link": "Copy shareable link",
+    "link_copied": "Link copied"
+  },
+  "loading": {
+    "finding_towns": "Finding towns...",
+    "fetching_weather": "Fetching weather...",
+    "optimizing_route": "Optimizing route..."
+  },
+  "errors": {
+    "no_towns": "No towns found in this area",
+    "no_towns_hint": "Try expanding your search area or drawing a larger polygon",
+    "poor_weather": "Weather looks unfavorable in this region for these dates",
+    "weather_unavailable": "Weather data unavailable for some stops"
+  }
+}

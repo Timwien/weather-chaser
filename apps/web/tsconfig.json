@@ -1,0 +1,11 @@
+{
+  "extends": "@weatherchaser/typescript-config/react-library.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "baseUrl": ".",
+    "paths": {}
+  },
+  "include": ["src", "vite.config.ts"],
+  "exclude": ["node_modules"]
+}

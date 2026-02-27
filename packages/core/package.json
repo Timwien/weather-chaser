@@ -1,0 +1,29 @@
+{
+  "name": "@weatherchaser/core",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./scoring": {
+      "types": "./src/scoring/index.ts",
+      "default": "./dist/scoring/index.js"
+    },
+    "./optimizer": {
+      "types": "./src/optimizer/index.ts",
+      "default": "./dist/optimizer/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@weatherchaser/typescript-config": "workspace:*",
+    "typescript": "^5.0.0"
+  }
+}

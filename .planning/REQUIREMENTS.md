@@ -99,7 +99,7 @@
 - [ ] **INFRA-02**: Web app is publicly hosted (Vercel or equivalent)
 - [ ] **INFRA-03**: All production API usage complies with provider ToS — no use of Nominatim/OSRM/Overpass public demo endpoints for production traffic
 - [ ] **INFRA-04**: Backend hosted in EU region (GDPR compliance for EU user data)
-- [ ] **INFRA-05**: Codebase is a Turborepo monorepo with shared TypeScript core library (scoring + optimization) used by web and mobile apps
+- [x] **INFRA-05**: Codebase is a Turborepo monorepo with shared TypeScript core library (scoring + optimization) used by web and mobile apps
 - [ ] **PLAT-01**: Web app is released as v1
 - [ ] **PLAT-02**: Native iOS app is released as v1 (Expo / React Native)
 - [ ] **PLAT-03**: Native Android app is released as v1 (Expo / React Native)
@@ -176,7 +176,7 @@
 | WTHR-01 | Phase 1 | Pending |
 | SHARE-01 | Phase 1 | Pending |
 | SHARE-02 | Phase 1 | Pending |
-| INFRA-05 | Phase 1 | Pending |
+| INFRA-05 | Phase 1 | Complete |
 | FIND-01 | Phase 2 | Pending |
 | FIND-02 | Phase 2 | Pending |
 | FIND-03 | Phase 2 | Pending |

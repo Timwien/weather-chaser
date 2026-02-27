@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 1 of 5 (Core Algorithm + Route Planner Web)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-26 — Roadmap created, STATE.md initialized
+Plan: 1 of 10 in current phase
+Status: In progress
+Last activity: 2026-02-27 — Plan 01-01 complete (monorepo scaffold)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 2%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: —
-- Total execution time: —
+- Total plans completed: 1
+- Average duration: 10 min
+- Total execution time: 10 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01-core-algorithm-route-planner-web | 1 | 10 min | 10 min |
 
 **Recent Trend:**
-- Last 5 plans: —
+- Last 5 plans: 01-01 (10 min)
 - Trend: —
 
 *Updated after each plan completion*
@@ -47,6 +47,8 @@ Recent decisions affecting current work:
 - [Init]: MapLibre GL JS on web, @rnmapbox/maps on native — two distinct map implementations, not shared
 - [Init]: Route optimizer runs client-side (fast, deterministic, no server round-trip)
 - [Init]: Supabase (Frankfurt region) for auth + Postgres + GDPR compliance
+- [01-01]: allowImportingTsExtensions: true added to apps/web tsconfig — required for .tsx imports with Bundler moduleResolution + noEmit; Vite handles bundling
+- [01-01]: packages/core exports map pre-declares ./scoring and ./optimizer sub-paths for Plans 02 and 03
 
 ### Pending Todos
 
@@ -61,6 +63,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-26
-Stopped at: Roadmap created and STATE.md initialized — no plans written yet
+Last session: 2026-02-27
+Stopped at: Completed 01-01-PLAN.md — monorepo scaffold, packages/core types, apps/web skeleton
 Resume file: None

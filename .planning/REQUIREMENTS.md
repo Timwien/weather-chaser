@@ -32,7 +32,7 @@
 *Use case: "Plan an optimal campervan route through the best weather over 10 days."*
 
 - [ ] **ALGO-01**: User can generate a weather-optimized multi-day route through real towns and villages in a chosen region
-- [ ] **ALGO-02**: Weather scoring is temporal — each location is scored for the specific day(s) the user would arrive and stay, not an average across the full forecast window
+- [x] **ALGO-02**: Weather scoring is temporal — each location is scored for the specific day(s) the user would arrive and stay, not an average across the full forecast window
 - [ ] **ALGO-03**: User can configure max-stay duration (maximum nights at each stop before moving on)
 - [ ] **ALGO-04**: Route optimizer minimizes backtracking and criss-crossing (geographic progression)
 - [ ] **ALGO-05**: No location is visited twice after leaving it
@@ -50,7 +50,7 @@
 - [ ] **TRIP-01**: User can set trip duration (number of days)
 - [ ] **TRIP-02**: User can set start location (address or place name)
 - [ ] **TRIP-03**: User can set max-stay constraint (y nights per stop)
-- [ ] **TRIP-04**: User can select a weather preset profile (Beach, Hiking, Sightseeing) — affects scoring weights, free tier
+- [x] **TRIP-04**: User can select a weather preset profile (Beach, Hiking, Sightseeing) — affects scoring weights, free tier
 
 ### Itinerary & Results
 
@@ -60,13 +60,13 @@
 
 ### Map & Visualization
 
-- [ ] **MAP-01**: Interactive map displays the optimized route with numbered stops
+- [x] **MAP-01**: Interactive map displays the optimized route with numbered stops
 - [ ] **MAP-02**: Map markers are color-coded by weather score (green = excellent, yellow = fair, red = poor)
-- [ ] **MAP-03**: Map works cross-platform (web, iOS, Android) using a single map library (MapLibre / @rnmapbox)
+- [x] **MAP-03**: Map works cross-platform (web, iOS, Android) using a single map library (MapLibre / @rnmapbox)
 
 ### Weather Data
 
-- [ ] **WTHR-01**: App fetches hourly weather data via Open-Meteo API (14-day horizon)
+- [x] **WTHR-01**: App fetches hourly weather data via Open-Meteo API (14-day horizon)
 - [ ] **WTHR-02**: Weather fetching is routed through a backend proxy with caching (~6h TTL) — no direct client-to-Open-Meteo calls in production
 
 ### Export & Sharing
@@ -154,7 +154,7 @@
 | ENTRY-01 | Phase 1 | Pending |
 | ENTRY-02 | Phase 1 | Pending |
 | ALGO-01 | Phase 1 | Pending |
-| ALGO-02 | Phase 1 | Pending |
+| ALGO-02 | Phase 1 | Complete |
 | ALGO-03 | Phase 1 | Pending |
 | ALGO-04 | Phase 1 | Pending |
 | ALGO-05 | Phase 1 | Pending |
@@ -166,14 +166,14 @@
 | TRIP-01 | Phase 1 | Pending |
 | TRIP-02 | Phase 1 | Pending |
 | TRIP-03 | Phase 1 | Pending |
-| TRIP-04 | Phase 1 | Pending |
+| TRIP-04 | Phase 1 | Complete |
 | ITIN-01 | Phase 1 | Pending |
 | ITIN-02 | Phase 1 | Pending |
 | ITIN-03 | Phase 1 | Pending |
-| MAP-01 | Phase 1 | Pending |
+| MAP-01 | Phase 1 | Complete |
 | MAP-02 | Phase 1 | Pending |
-| MAP-03 | Phase 1 | Pending |
-| WTHR-01 | Phase 1 | Pending |
+| MAP-03 | Phase 1 | Complete |
+| WTHR-01 | Phase 1 | Complete |
 | SHARE-01 | Phase 1 | Pending |
 | SHARE-02 | Phase 1 | Pending |
 | INFRA-05 | Phase 1 | Complete |

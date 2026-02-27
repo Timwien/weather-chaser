@@ -129,3 +129,16 @@ None - no external service configuration required.
 ---
 *Phase: 01-core-algorithm-route-planner-web*
 *Completed: 2026-02-27*
+
+## Self-Check: PASSED
+
+- FOUND: packages/core/src/scoring/weatherScore.ts
+- FOUND: packages/core/src/scoring/sliceHoursByDays.ts
+- FOUND: packages/core/src/scoring/presets.ts
+- FOUND: packages/core/src/scoring/index.ts
+- FOUND: packages/core/src/scoring/weatherScore.test.ts
+- FOUND: packages/core/dist/scoring/index.js
+- FOUND: commit 9713cb9 (RED — failing tests)
+- FOUND: commit 4be87e1 (GREEN — implementation)
+- FOUND: commit b2d42bc (REFACTOR — extract helper)
+- All 17 tests pass (pnpm test exits 0)

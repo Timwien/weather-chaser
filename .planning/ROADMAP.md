@@ -33,8 +33,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 10 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Turborepo monorepo scaffold (packages/core skeleton + apps/web Vite+React skeleton)
-- [ ] 01-02-PLAN.md — TDD: Temporal weather scoring module (scoreLocation + PRESETS in packages/core)
+- [x] 01-01-PLAN.md — Turborepo monorepo scaffold (packages/core skeleton + apps/web Vite+React skeleton)
+- [x] 01-02-PLAN.md — TDD: Temporal weather scoring module (scoreLocation + PRESETS in packages/core)
 - [ ] 01-03-PLAN.md — TDD: Route optimizer (nearest-neighbor + 2-opt + assignStops in packages/core)
 - [ ] 01-04-PLAN.md — Web app shell (MapLibre full-screen map, TanStack Router, react-i18next, Zustand store)
 - [ ] 01-05-PLAN.md — Location services (Nominatim geocoding, Overpass town fetching, map polygon drawing)
@@ -96,7 +96,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core Algorithm + Route Planner Web | 0/TBD | Not started | - |
+| 1. Core Algorithm + Route Planner Web | 2/10 | In progress | - |
 | 2. Weather Finder Mode | 0/TBD | Not started | - |
 | 3. Backend + Auth + Production Hosting | 0/TBD | Not started | - |
 | 4. Freemium + Monetization | 0/TBD | Not started | - |

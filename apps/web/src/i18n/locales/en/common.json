@@ -16,7 +16,9 @@
       "precipitation": "Less rain",
       "temperature": "Warmth",
       "wind": "Calm wind"
-    }
+    },
+    "draw_area": "Draw area",
+    "clear_area": "Clear area"
   },
   "route_config": {
     "start_location": "Start location",

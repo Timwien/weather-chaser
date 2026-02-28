@@ -16,7 +16,9 @@
       "precipitation": "Wenig Regen",
       "temperature": "Wärme",
       "wind": "Ruhiger Wind"
-    }
+    },
+    "draw_area": "Gebiet zeichnen",
+    "clear_area": "Gebiet löschen"
   },
   "route_config": {
     "start_location": "Startort",

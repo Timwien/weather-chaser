@@ -1,37 +1,60 @@
 /* =========================================================
    Design Tokens — WeatherChaser
-   Premium petrol/teal palette, Inter typography
+   Palette derived from primary #0d8f9f (H≈186°, teal-petrol)
+
+   Primary   #0d8f9f  — brand teal (H=186°)
+   Secondary #f5921e  — amber/sun (split-complementary, H=36°)
+   Tertiary  #0d619f  — ocean blue (analogous, H=216°)
+   Neutrals  — teal-tinted for cohesion
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..700;1,14..32,300..700&display=swap');
 
 :root {
-  /* Brand — rich petrol teal (reads premium, not turquoise-bright) */
-  --color-accent: #0E7490;          /* Cyan-700 petrol teal — primary CTA */
-  --color-accent-hover: #0c6476;    /* Darker petrol */
-  --color-accent-light: #ecfeff;    /* Cyan-50 — very light teal wash */
-  --color-accent-mid: rgba(14, 116, 144, 0.12); /* Semi-transparent for chips etc */
+  /* ── Primary: petrol teal ────────────────────────────── */
+  --color-primary:        #0d8f9f;   /* Brand teal, main CTAs */
+  --color-primary-hover:  #0b7a88;   /* 8% darker — hover */
+  --color-primary-active: #096474;   /* 15% darker — pressed */
+  --color-primary-light:  #e6f6f8;   /* 94% lightness tint — chip bg, subtle fills */
+  --color-primary-mid:    rgba(13, 143, 159, 0.14); /* Semi-transparent — selected states */
+  --color-primary-glow:   rgba(13, 143, 159, 0.20); /* Shadow tint */
 
-  /* Neutrals */
-  --color-bg: #ffffff;
-  --color-surface: #f8fafc;         /* Slate-50 */
-  --color-border: #e2e8f0;          /* Slate-200 */
-  --color-border-subtle: rgba(255, 255, 255, 0.3); /* For glass panels */
-  --color-text: #0f172a;            /* Slate-900 */
-  --color-text-muted: #64748b;      /* Slate-500 */
-  --color-text-light: #94a3b8;      /* Slate-400 */
+  /* ── Secondary: warm amber (split-complementary H=36°) ─ */
+  --color-secondary:      #f5921e;   /* Amber/sun — secondary actions, highlights */
+  --color-secondary-hover:#e07e10;
+  --color-secondary-light:#fef3e2;   /* Amber tint for backgrounds */
 
-  /* Glass panel — frosted glass backdrop */
-  --glass-bg: rgba(255, 255, 255, 0.82);
-  --glass-border: 1px solid rgba(255, 255, 255, 0.35);
-  --glass-blur: blur(20px) saturate(1.6);
+  /* ── Tertiary: ocean blue (analogous H=216°) ─────────── */
+  --color-tertiary:       #0d619f;   /* Info, links, cool accent */
+  --color-tertiary-light: #e6eff8;
 
-  /* Weather score gradient */
-  --score-poor: hsl(0, 80%, 50%);   /* Red */
-  --score-fair: hsl(45, 90%, 55%);  /* Yellow */
-  --score-good: hsl(120, 60%, 45%); /* Green */
+  /* ── Neutrals (teal-tinted, not pure gray) ───────────── */
+  --color-bg:             #f9fdfd;   /* Near-white with teal hint */
+  --color-surface:        #ffffff;   /* Pure white for cards */
+  --color-surface-raised: #f0f9fa;   /* Slightly lifted surfaces */
+  --color-border:         #d0e8eb;   /* Teal-tinted border */
+  --color-border-strong:  #a8d4d9;   /* Stronger border for inputs */
+  --color-text:           #0d2426;   /* Very dark teal-black — premium */
+  --color-text-secondary: #3d6b70;   /* Mid teal-gray */
+  --color-text-muted:     #6b9198;   /* Muted teal-gray */
+  --color-text-light:     #9dbfc4;   /* Light placeholder */
 
-  /* Spacing */
+  /* ── Semantic ─────────────────────────────────────────── */
+  --color-success:        #16a34a;
+  --color-warning:        #f5921e;   /* Reuse secondary amber */
+  --color-error:          #dc2626;
+
+  /* ── Glass panel (Apple liquid / Airbnb card feel) ────── */
+  --glass-bg:     rgba(249, 253, 253, 0.88);  /* Tinted near-white */
+  --glass-border: 1px solid rgba(255, 255, 255, 0.50);
+  --glass-blur:   blur(24px) saturate(1.8) brightness(1.02);
+
+  /* ── Weather score gradient (data vis — stays vivid) ──── */
+  --score-poor:   hsl(0,   80%, 50%);   /* Red   */
+  --score-fair:   hsl(45,  90%, 55%);   /* Amber */
+  --score-good:   hsl(152, 60%, 40%);   /* Green */
+
+  /* ── Spacing ──────────────────────────────────────────── */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -39,33 +62,46 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
+  --space-10: 40px;
 
-  /* Typography */
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-size-xs: 11px;
-  --font-size-sm: 13px;
+  /* ── Typography ───────────────────────────────────────── */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-size-xs:   11px;
+  --font-size-sm:   13px;
   --font-size-base: 15px;
-  --font-size-lg: 17px;
-  --font-size-xl: 21px;
-  --font-size-2xl: 26px;
+  --font-size-lg:   17px;
+  --font-size-xl:   20px;
+  --font-size-2xl:  26px;
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+  --tracking-tight: -0.5px;
+  --tracking-base:   0px;
+  --leading-tight:   1.2;
+  --leading-base:    1.5;
 
-  /* Letter spacing */
-  --tracking-tight: -0.4px;
-  --tracking-base: 0px;
-
-  /* Radius — generous and premium */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
+  /* ── Radius ───────────────────────────────────────────── */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+  --radius-2xl:  32px;
   --radius-full: 9999px;
 
-  /* Shadows — deeper for premium feel */
-  --shadow-sm: 0 1px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
-  --shadow-lg: 0 12px 40px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.08);
-  --shadow-glass: 0 8px 32px rgba(14, 116, 144, 0.08), 0 2px 8px rgba(0,0,0,0.06);
+  /* ── Shadows ──────────────────────────────────────────── */
+  --shadow-sm:    0 1px 3px rgba(13,143,159,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:    0 4px 16px rgba(13,143,159,0.10), 0 2px 6px rgba(0,0,0,0.05);
+  --shadow-lg:    0 12px 40px rgba(13,143,159,0.14), 0 4px 12px rgba(0,0,0,0.07);
+  --shadow-glass: 0 8px 32px rgba(13,143,159,0.12), 0 2px 8px rgba(0,0,0,0.06),
+                  inset 0 1px 0 rgba(255,255,255,0.65);
 
-  /* Panel */
+  /* ── Layout ───────────────────────────────────────────── */
   --panel-width: 390px;
+
+  /* ── Legacy aliases (backward compat with existing components) */
+  --color-accent:       var(--color-primary);
+  --color-accent-hover: var(--color-primary-hover);
+  --color-accent-light: var(--color-primary-light);
+  --color-accent-mid:   var(--color-primary-mid);
 }

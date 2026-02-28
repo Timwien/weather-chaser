@@ -4,6 +4,7 @@
   top: var(--space-4);
   bottom: var(--space-4);
   width: var(--panel-width);
+  pointer-events: auto;
   background: var(--color-bg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);

@@ -72,6 +72,7 @@ export function useOptimizer() {
         setMode('results');
         setLoadingStep(null);
       } else if (msg.type === 'error') {
+        console.error('[optimizer] worker error:', msg.message);
         setError(msg.message);
         setMode('idle');
         setLoadingStep(null);
@@ -79,6 +80,7 @@ export function useOptimizer() {
     };
 
     workerRef.current.onerror = (err) => {
+      console.error('[optimizer] worker onerror:', err);
       setError(err.message ?? 'Worker error');
       setMode('idle');
       setLoadingStep(null);

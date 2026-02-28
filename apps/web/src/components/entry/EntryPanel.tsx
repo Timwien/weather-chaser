@@ -9,7 +9,7 @@ import './EntryPanel.css';
 
 export function EntryPanel() {
   const { t } = useTranslation('common');
-  const { mode, setMode, loadingStep, tripConfig, searchAreas } = useAppStore();
+  const { mode, setMode, loadingStep, tripConfig, searchAreas, error, setError } = useAppStore();
   // Hoisted here so the worker ref survives when RouteConfigStep unmounts during loading
   const optimizer = useOptimizer();
 
@@ -78,6 +78,26 @@ export function EntryPanel() {
       {isWeatherFinder && (
         <div className="entry-panel-coming-soon">
           {t('route_config.coming_soon')}
+        </div>
+      )}
+
+      {/* Error banner — shown after a failed route calculation */}
+      {mode === 'idle' && error && (
+        <div className="entry-error-banner">
+          <span className="entry-error-text">
+            {error === 'no_towns'
+              ? t('errors.no_towns', 'Keine Orte gefunden. Bitte ein größeres Gebiet zeichnen.')
+              : error.startsWith('Overpass')
+                ? t('errors.overpass', 'Wetterdaten konnten nicht geladen werden (Overpass API). Bitte erneut versuchen.')
+                : error}
+          </span>
+          <button
+            type="button"
+            className="entry-error-dismiss"
+            onClick={() => setError(null)}
+          >
+            ✕
+          </button>
         </div>
       )}
     </aside>

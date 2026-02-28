@@ -91,7 +91,12 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
     const draw = controlRef.current.getTerraDrawInstance();
     if (!draw) return;
     try { draw.start(); } catch { /* already started */ }
-    draw.setMode('polygon');
+    try {
+      draw.setMode('polygon');
+    } catch (err) {
+      console.error('[DrawingControls] setMode polygon failed:', err);
+      return;
+    }
     disableMapInteraction();
     setIsDrawing(true);
   }, [map, disableMapInteraction, enableMapInteraction, onPolygonComplete]);

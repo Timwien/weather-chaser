@@ -31,13 +31,13 @@
 
 *Use case: "Plan an optimal campervan route through the best weather over 10 days."*
 
-- [ ] **ALGO-01**: User can generate a weather-optimized multi-day route through real towns and villages in a chosen region
+- [x] **ALGO-01**: User can generate a weather-optimized multi-day route through real towns and villages in a chosen region
 - [x] **ALGO-02**: Weather scoring is temporal — each location is scored for the specific day(s) the user would arrive and stay, not an average across the full forecast window
 - [ ] **ALGO-03**: User can configure max-stay duration (maximum nights at each stop before moving on)
-- [ ] **ALGO-04**: Route optimizer minimizes backtracking and criss-crossing (geographic progression)
-- [ ] **ALGO-05**: No location is visited twice after leaving it
-- [ ] **ALGO-06**: Route optimizer pre-computes a full road-distance matrix per search session (replaces current per-step OSRM calls)
-- [ ] **ALGO-07**: User can designate one or more must-visit locations that the optimizer is required to include as stops in the route
+- [x] **ALGO-04**: Route optimizer minimizes backtracking and criss-crossing (geographic progression)
+- [x] **ALGO-05**: No location is visited twice after leaving it
+- [x] **ALGO-06**: Route optimizer pre-computes a full road-distance matrix per search session (replaces current per-step OSRM calls)
+- [x] **ALGO-07**: User can designate one or more must-visit locations that the optimizer is required to include as stops in the route
 
 ### Location Data
 
@@ -153,13 +153,13 @@
 |-------------|-------|--------|
 | ENTRY-01 | Phase 1 | Complete |
 | ENTRY-02 | Phase 1 | Pending |
-| ALGO-01 | Phase 1 | Pending |
+| ALGO-01 | Phase 1 | Complete |
 | ALGO-02 | Phase 1 | Complete |
 | ALGO-03 | Phase 1 | Pending |
-| ALGO-04 | Phase 1 | Pending |
-| ALGO-05 | Phase 1 | Pending |
-| ALGO-06 | Phase 1 | Pending |
-| ALGO-07 | Phase 1 | Pending |
+| ALGO-04 | Phase 1 | Complete |
+| ALGO-05 | Phase 1 | Complete |
+| ALGO-06 | Phase 1 | Complete |
+| ALGO-07 | Phase 1 | Complete |
 | LOC-01 | Phase 1 | Complete |
 | LOC-02 | Phase 1 | Complete |
 | LOC-03 | Phase 1 | Complete |

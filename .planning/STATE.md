@@ -12,26 +12,26 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 Phase: 1 of 5 (Core Algorithm + Route Planner Web)
 Plan: 6 of 10 in current phase
 Status: In progress
-Last activity: 2026-02-28 — Plan 01-05 complete (Nominatim geocoding, Overpass town fetching, DrawingControls polygon drawing)
+Last activity: 2026-02-28 — Plan 01-03 complete (nearest-neighbor tour, 2-opt improvement, route stop assignment)
 
-Progress: [████░░░░░░] 8%
+Progress: [█████░░░░░] 10%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 7 min
-- Total execution time: 31 min
+- Total plans completed: 5
+- Average duration: 13 min
+- Total execution time: 61 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-core-algorithm-route-planner-web | 4 | 31 min | 7.8 min |
+| 01-core-algorithm-route-planner-web | 5 | 61 min | 12.2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (10 min), 01-02 (3 min), 01-04 (3 min), 01-05 (15 min)
-- Trend: Stable at ~3-15 min depending on task complexity
+- Last 5 plans: 01-01 (10 min), 01-02 (3 min), 01-04 (3 min), 01-05 (15 min), 01-03 (30 min)
+- Trend: Stable at ~3-30 min depending on task complexity (TDD plans take longer)
 
 *Updated after each plan completion*
 
@@ -59,6 +59,9 @@ Recent decisions affecting current work:
 - [01-05]: MaplibreTerradrawControl (IControl) used — plan referenced fictional MaplibreGlTerradraw class; drawing activated via getTerraDrawInstance().setMode('polygon')
 - [01-05]: useMap() destructured as { current: map } — hook returns { current?: MapRef } not { map: MapRef }
 - [01-05]: Phase 1 uses public Nominatim and Overpass endpoints directly — Phase 3 adds server-side proxy
+- [01-03]: distanceMatrix is km (per type definition // km distances NxN) — no /1000 conversion in assignStops
+- [01-03]: addDays extracted to optimizer/dateUtils.ts when assignStops.ts exceeded 100 lines
+- [01-03]: Must-visit anchoring is two-stage: NN 2x-threshold preference + post-2-opt explicit swap to boundary
 
 ### Pending Todos
 
@@ -74,5 +77,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 01-05-PLAN.md — Nominatim geocoding, Overpass town fetching, DrawingControls polygon drawing, useLocationSearch hook
+Stopped at: Completed 01-03-PLAN.md — nearest-neighbor tour, 2-opt improvement, assignStops, optimizeRoute (TDD, 38 tests)
 Resume file: None

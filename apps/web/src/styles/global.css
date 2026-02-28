@@ -14,6 +14,8 @@ html, body, #root {
   font-size: var(--font-size-base);
   color: var(--color-text);
   background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* maplibre-gl container reset */

@@ -1,15 +1,30 @@
+/* =========================================================
+   Design Tokens — WeatherChaser
+   Premium petrol/teal palette, Inter typography
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
-  /* Brand */
-  --color-accent: #2563eb;          /* Blue-600 — primary CTA */
-  --color-accent-hover: #1d4ed8;    /* Blue-700 */
-  --color-accent-light: #eff6ff;    /* Blue-50 */
+  /* Brand — rich petrol teal (reads premium, not turquoise-bright) */
+  --color-accent: #0E7490;          /* Cyan-700 petrol teal — primary CTA */
+  --color-accent-hover: #0c6476;    /* Darker petrol */
+  --color-accent-light: #ecfeff;    /* Cyan-50 — very light teal wash */
+  --color-accent-mid: rgba(14, 116, 144, 0.12); /* Semi-transparent for chips etc */
 
   /* Neutrals */
   --color-bg: #ffffff;
   --color-surface: #f8fafc;         /* Slate-50 */
   --color-border: #e2e8f0;          /* Slate-200 */
+  --color-border-subtle: rgba(255, 255, 255, 0.3); /* For glass panels */
   --color-text: #0f172a;            /* Slate-900 */
   --color-text-muted: #64748b;      /* Slate-500 */
+  --color-text-light: #94a3b8;      /* Slate-400 */
+
+  /* Glass panel — frosted glass backdrop */
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.35);
+  --glass-blur: blur(20px) saturate(1.6);
 
   /* Weather score gradient */
   --score-poor: hsl(0, 80%, 50%);   /* Red */
@@ -26,25 +41,31 @@
   --space-8: 32px;
 
   /* Typography */
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-size-xs: 11px;
   --font-size-sm: 13px;
   --font-size-base: 15px;
   --font-size-lg: 17px;
-  --font-size-xl: 20px;
-  --font-size-2xl: 24px;
+  --font-size-xl: 21px;
+  --font-size-2xl: 26px;
 
-  /* Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  /* Letter spacing */
+  --tracking-tight: -0.4px;
+  --tracking-base: 0px;
+
+  /* Radius — generous and premium */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
+  /* Shadows — deeper for premium feel */
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-glass: 0 8px 32px rgba(14, 116, 144, 0.08), 0 2px 8px rgba(0,0,0,0.06);
 
   /* Panel */
-  --panel-width: 380px;
+  --panel-width: 390px;
 }

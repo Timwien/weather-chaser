@@ -5,7 +5,14 @@
   },
   "entry": {
     "dates": "Reisedaten",
+    "dates_placeholder": "Daten auswählen",
+    "dates_select_end": "Enddatum auswählen",
     "location": "Wo",
+    "location_placeholder": "Ort hinzufügen...",
+    "location_add": "Hinzufügen",
+    "location_pick_map": "Auf Karte wählen",
+    "location_radius_label": "Suchradius",
+    "location_radius_km": "{{km}} km",
     "criteria": "Was ist wichtig",
     "cta": {
       "findRoute": "Beste Route finden",

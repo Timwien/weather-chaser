@@ -8,10 +8,10 @@ import './EntryPanel.css';
 
 export function EntryPanel() {
   const { t } = useTranslation('common');
-  const { mode, setMode, tripConfig, searchArea } = useAppStore();
+  const { mode, setMode, tripConfig, searchAreas } = useAppStore();
 
-  // Show CTAs when both date range AND search area are filled
-  const showCTAs = Boolean(tripConfig.startDate && searchArea);
+  // Show CTAs when dates are set AND at least one location is added
+  const showCTAs = Boolean(tripConfig.startDate && searchAreas.length > 0);
 
   const isRouteConfig = mode === 'route-config';
   const isWeatherFinder = mode === 'weather-finder';
@@ -31,7 +31,7 @@ export function EntryPanel() {
         <CriteriaSelector />
       </div>
 
-      {/* CTAs — shown when dates + location filled */}
+      {/* CTAs — shown when dates + at least one location filled */}
       {showCTAs && (
         <div className="entry-panel-ctas">
           <button

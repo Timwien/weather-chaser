@@ -3,10 +3,9 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { DrawingControls } from './DrawingControls.tsx';
 import './MapContainer.css';
 
-// OpenStreetMap-based free tile style from MapLibre demo
-// Using MapLibre's demo tiles — no token required for development
-// Production: point to self-hosted or tile provider (Phase 3)
-const MAP_STYLE = 'https://demotiles.maplibre.org/style.json';
+// CartoDB Positron GL — clean Google Maps-like style, free, no API key required
+// Light grey roads, white background, subtle labels — professional look
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 
 interface MapContainerProps {
   onDrawComplete?: (polygon: [number, number][]) => void;

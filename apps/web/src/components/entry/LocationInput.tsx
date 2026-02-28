@@ -4,34 +4,87 @@ import { useAppStore } from '../../stores/appStore.ts';
 import { useLocationSearch } from '../../hooks/useLocationSearch.ts';
 import { parseBbox } from '../../services/nominatim.ts';
 import type { NominatimResult } from '../../services/nominatim.ts';
+import type { SearchAreaItem } from '../../stores/appStore.ts';
 
-interface LocationInputProps {
-  /** Optional override label key — defaults to 'entry.location' */
-  labelKey?: string;
-  /** Called when a result is selected, in addition to store write */
-  onSelect?: (result: NominatimResult) => void;
-  /** Optional placeholder override */
-  placeholder?: string;
+/* ── Remove icon ────────────────────────────────────────── */
+function RemoveIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <line x1="2" y1="2" x2="10" y2="10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="10" y1="2" x2="2" y2="10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
 }
 
-export function LocationInput({ labelKey = 'entry.location', onSelect, placeholder }: LocationInputProps) {
+/* ── Map pin icon (for "Pick on map" button) ────────────── */
+function MapPinIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 14 16" fill="none" aria-hidden="true">
+      <path d="M7 1C4.24 1 2 3.24 2 6C2 9.5 7 15 7 15C7 15 12 9.5 12 6C12 3.24 9.76 1 7 1Z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="7" cy="6" r="1.8" stroke="currentColor" strokeWidth="1.4"/>
+    </svg>
+  );
+}
+
+/* ── Radius slider ──────────────────────────────────────── */
+
+function RadiusSlider() {
   const { t } = useTranslation('common');
-  const { setSearchArea } = useAppStore();
+  const { searchRadiusKm, setSearchRadiusKm } = useAppStore();
+
+  const STEPS = [10, 25, 50, 100, 150, 200, 300, 500];
+  const idx = STEPS.findIndex((v) => v >= searchRadiusKm) ?? STEPS.length - 1;
+
+  function handleSlider(e: React.ChangeEvent<HTMLInputElement>) {
+    const i = Number(e.target.value);
+    setSearchRadiusKm(STEPS[i] ?? 50);
+  }
+
+  return (
+    <div className="loc-radius-wrapper">
+      <div className="loc-radius-header">
+        <span className="loc-radius-label">{t('entry.location_radius_label')}</span>
+        <span className="loc-radius-value">{searchRadiusKm} km</span>
+      </div>
+      <input
+        type="range"
+        className="loc-radius-slider"
+        min={0}
+        max={STEPS.length - 1}
+        step={1}
+        value={Math.max(0, STEPS.indexOf(searchRadiusKm))}
+        onChange={handleSlider}
+        aria-label={t('entry.location_radius_label')}
+      />
+      <div className="loc-radius-ticks">
+        <span>10 km</span>
+        <span>500 km</span>
+      </div>
+    </div>
+  );
+}
+
+/* ── Main LocationInput component ───────────────────────── */
+
+export function LocationInput() {
+  const { t } = useTranslation('common');
+  const { searchAreas, addSearchArea, removeSearchArea, searchRadiusKm } = useAppStore();
   const { search, results, loading } = useLocationSearch();
 
   const [inputValue, setInputValue] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
+    function handleMouseDown(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => document.removeEventListener('mousedown', handleMouseDown);
   }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -51,35 +104,76 @@ export function LocationInput({ labelKey = 'entry.location', onSelect, placehold
 
   function selectResult(result: NominatimResult) {
     const bbox = parseBbox(result);
-    // Trim display name to first segment (before first comma)
     const shortName = result.display_name.split(',')[0].trim();
-    setInputValue(shortName);
-    setDropdownOpen(false);
-    setSearchArea({
+
+    const area: SearchAreaItem = {
       type: 'place',
-      name: result.display_name,
+      id: String(result.place_id),
+      name: shortName,
+      fullName: result.display_name,
       bbox: [bbox.west, bbox.south, bbox.east, bbox.north],
-    });
-    if (onSelect) onSelect(result);
+    };
+
+    addSearchArea(area);
+    setInputValue('');
+    setDropdownOpen(false);
+    inputRef.current?.focus();
   }
 
   const showDropdown = dropdownOpen && results.length > 0;
+  const showRadius = searchAreas.filter((a) => a.type === 'place').length === 1 && searchAreas.length === 1;
 
   return (
     <div className="location-input-wrapper" ref={containerRef}>
-      <label className="input-label">{t(labelKey)}</label>
-      <div className="location-input-container">
-        <input
-          type="text"
-          className="text-input"
-          value={inputValue}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder ?? t(labelKey)}
-          autoComplete="off"
-        />
-        {loading && <div className="loading-bar" aria-hidden="true" />}
+      <label className="input-label">{t('entry.location')}</label>
+
+      {/* Tag list of selected places */}
+      {searchAreas.length > 0 && (
+        <div className="loc-tags">
+          {searchAreas.map((area) => (
+            <span key={area.id} className="loc-tag">
+              <span className="loc-tag-name">
+                {'name' in area ? area.name : t('entry.draw_area')}
+              </span>
+              <button
+                type="button"
+                className="loc-tag-remove"
+                onClick={() => removeSearchArea(area.id)}
+                aria-label={`Remove ${'name' in area ? area.name : 'area'}`}
+              >
+                <RemoveIcon />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Search input row */}
+      <div className="loc-input-row">
+        <div className="location-input-container">
+          <input
+            ref={inputRef}
+            type="text"
+            className="text-input"
+            value={inputValue}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            placeholder={t('entry.location_placeholder')}
+            autoComplete="off"
+          />
+          {loading && <div className="loading-bar" aria-hidden="true" />}
+        </div>
+        <button
+          type="button"
+          className="loc-pick-map-btn"
+          title={t('entry.location_pick_map')}
+          aria-label={t('entry.location_pick_map')}
+        >
+          <MapPinIcon />
+        </button>
       </div>
+
+      {/* Autocomplete dropdown */}
       {showDropdown && (
         <ul className="autocomplete-dropdown" role="listbox">
           {results.slice(0, 5).map((result) => (
@@ -94,6 +188,9 @@ export function LocationInput({ labelKey = 'entry.location', onSelect, placehold
           ))}
         </ul>
       )}
+
+      {/* Radius selector — only when exactly one place */}
+      {showRadius && <RadiusSlider />}
     </div>
   );
 }

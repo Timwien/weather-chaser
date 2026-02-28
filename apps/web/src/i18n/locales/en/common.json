@@ -4,8 +4,15 @@
     "tagline": "Chase perfect weather"
   },
   "entry": {
-    "dates": "Trip dates",
+    "dates": "Travel dates",
+    "dates_placeholder": "Select dates",
+    "dates_select_end": "Select end date",
     "location": "Where",
+    "location_placeholder": "Add a place...",
+    "location_add": "Add",
+    "location_pick_map": "Pick on map",
+    "location_radius_label": "Search radius",
+    "location_radius_km": "{{km}} km",
     "criteria": "What matters",
     "cta": {
       "findRoute": "Find Best Route",

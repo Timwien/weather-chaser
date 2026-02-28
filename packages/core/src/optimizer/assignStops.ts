@@ -1,4 +1,5 @@
 import type { OptimizerInput, Route, Stop } from '../types/index.js';
+import { addDays } from './dateUtils.js';
 
 /**
  * assignStops
@@ -62,7 +63,7 @@ export function assignStops(tour: number[], input: OptimizerInput): Route {
     }
 
     // Arrival date: startDate + dayOffset calendar days
-    const arrivalDate = new Date(startDate.getTime() + dayOffset * 24 * 60 * 60 * 1000);
+    const arrivalDate = addDays(startDate, dayOffset);
 
     // Score from pre-computed weatherScores
     const score = weatherScores[townIndex];

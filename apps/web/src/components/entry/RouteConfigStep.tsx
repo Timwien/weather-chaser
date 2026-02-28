@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useLocationSearch } from '../../hooks/useLocationSearch.ts';
-import { useOptimizer } from '../../hooks/useOptimizer.ts';
 import type { NominatimResult } from '../../services/nominatim.ts';
 import type { WeatherPreset } from '@weatherchaser/core';
 
@@ -121,10 +120,9 @@ function StartLocationSearch() {
   );
 }
 
-export function RouteConfigStep() {
+export function RouteConfigStep({ onGenerate }: { onGenerate: () => void }) {
   const { t } = useTranslation('common');
   const { tripConfig, setTripConfig, searchAreas } = useAppStore();
-  const optimizer = useOptimizer();
   const [mustVisitInput, setMustVisitInput] = useState('');
 
   // Quick-add: place names from searchAreas not yet in mustVisitNames
@@ -298,7 +296,7 @@ export function RouteConfigStep() {
       <button
         type="button"
         className="cta-btn cta-btn--primary"
-        onClick={() => optimizer.run()}
+        onClick={onGenerate}
       >
         {t('route_config.generate')}
       </button>

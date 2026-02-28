@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
+import { useOptimizer } from '../../hooks/useOptimizer.ts';
 import { DateRangePicker } from './DateRangePicker.tsx';
 import { LocationInput } from './LocationInput.tsx';
 import { CriteriaSelector } from './CriteriaSelector.tsx';
@@ -9,6 +10,8 @@ import './EntryPanel.css';
 export function EntryPanel() {
   const { t } = useTranslation('common');
   const { mode, setMode, loadingStep, tripConfig, searchAreas } = useAppStore();
+  // Hoisted here so the worker ref survives when RouteConfigStep unmounts during loading
+  const optimizer = useOptimizer();
 
   // Show CTAs only in idle mode — once user picks a mode the step expands instead
   const showCTAs = Boolean(tripConfig.startDate && searchAreas.length > 0 && mode === 'idle');
@@ -52,7 +55,7 @@ export function EntryPanel() {
       )}
 
       {/* Route config second step — expands inline when mode is route-config */}
-      {isRouteConfig && <RouteConfigStep />}
+      {isRouteConfig && <RouteConfigStep onGenerate={optimizer.run} />}
 
       {/* Loading state */}
       {mode === 'loading' && (

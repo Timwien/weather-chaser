@@ -54,6 +54,7 @@ async function runOverpassQuery(query: string): Promise<Town[]> {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: `data=${encodeURIComponent(query)}`,
+    signal: AbortSignal.timeout(35000),
   });
 
   if (!res.ok) throw new Error(`Overpass error: ${res.status}`);

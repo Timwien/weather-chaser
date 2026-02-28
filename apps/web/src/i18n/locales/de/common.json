@@ -62,6 +62,10 @@
       "wind": "Wind"
     }
   },
+  "nav": {
+    "itinerary": "Reiseplan",
+    "map": "Karte"
+  },
   "map": {
     "stop_popup": "Score: {{score}}"
   },

@@ -62,6 +62,10 @@
       "wind": "Wind"
     }
   },
+  "nav": {
+    "itinerary": "Itinerary",
+    "map": "Map"
+  },
   "map": {
     "stop_popup": "Score: {{score}}"
   },

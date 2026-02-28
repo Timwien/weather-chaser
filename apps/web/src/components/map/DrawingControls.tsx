@@ -19,23 +19,26 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
   /** Disable map interactions so drawing clicks/touches don't pan the map */
   const disableMapInteraction = useCallback(() => {
     if (!map) return;
-    map.dragPan.disable();
-    map.scrollZoom.disable();
-    map.touchZoomRotate.disable();
-    map.touchPitch?.disable();
-    map.boxZoom.disable();
-    map.doubleClickZoom.disable();
+    // MapRef only proxies methods, not handler objects — use getMap() for native access
+    const m = map.getMap();
+    m.dragPan.disable();
+    m.scrollZoom.disable();
+    m.touchZoomRotate.disable();
+    m.touchPitch?.disable();
+    m.boxZoom.disable();
+    m.doubleClickZoom.disable();
   }, [map]);
 
   /** Re-enable normal map interaction */
   const enableMapInteraction = useCallback(() => {
     if (!map) return;
-    map.dragPan.enable();
-    map.scrollZoom.enable();
-    map.touchZoomRotate.enable();
-    map.touchPitch?.enable();
-    map.boxZoom.enable();
-    map.doubleClickZoom.enable();
+    const m = map.getMap();
+    m.dragPan.enable();
+    m.scrollZoom.enable();
+    m.touchZoomRotate.enable();
+    m.touchPitch?.enable();
+    m.boxZoom.enable();
+    m.doubleClickZoom.enable();
   }, [map]);
 
   useEffect(() => {

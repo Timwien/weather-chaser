@@ -10,34 +10,35 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 1 of 5 (Core Algorithm + Route Planner Web)
-Plan: 7 of 10 in current phase
+Plan: 10 of 10 in current phase
 Status: In progress
-Last activity: 2026-02-28 — Plan 01-06 complete (entry panel redesign, petrol teal design system, date picker popover, multi-location, CartoDB tiles)
+Last activity: 2026-02-28 — Plan 01-09 complete (share/export: Google Maps + Apple Maps deep links, clipboard shareable URL, /trip restoration route, ShareBar + ItineraryPanel)
 
-Progress: [██████░░░░] 12%
+Progress: [████████░░] 16%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 33 min
-- Total execution time: 181 min
+- Total plans completed: 7
+- Average duration: ~35 min
+- Total execution time: ~221 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-core-algorithm-route-planner-web | 6 | 181 min | 30.2 min |
+| 01-core-algorithm-route-planner-web | 7 | ~221 min | ~31.6 min |
 
 **Recent Trend:**
-- Last 6 plans: 01-01 (10 min), 01-02 (3 min), 01-04 (3 min), 01-05 (15 min), 01-03 (30 min), 01-06 (120 min)
-- Trend: 01-06 longer due to human-verify checkpoint + full design feedback round
+- Last 7 plans: 01-01 (10 min), 01-02 (3 min), 01-04 (3 min), 01-05 (15 min), 01-03 (30 min), 01-06 (120 min), 01-07 (~40 min)
+- Trend: 01-07 included several bug fixes + pipeline implementation across multiple sessions
 
 *Updated after each plan completion*
 
 | Phase/Plan | Duration | Tasks | Files |
 |-----------|---------|-------|-------|
 | Phase 01 P06 | 120 min | 3 tasks | 10 files |
+| Phase 01 P09 | 15 | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,14 @@ Recent decisions affecting current work:
 - [Phase 01]: Calendar popover built custom (no library) — 2-month grid in ~150 lines avoids dependency for Phase 1
 - [Phase 01]: CartoDB Positron GL replaces demotiles.maplibre.org — free, no API key, clean Google Maps aesthetic
 - [Phase 01]: searchAreas[] array added alongside legacy searchArea in store — polygon draw callbacks use legacy; Plan 07 migrates
+- [01-07]: @vis.gl/react-maplibre MapRef only proxies functions — handler objects (dragPan, scrollZoom, etc.) require map.getMap() to access the native maplibre-gl Map instance
+- [01-07]: CartoDB Positron GL labels switched to German via setLayoutProperty on all symbol layers in onLoad callback using ['coalesce', ['get', 'name:de'], ['get', 'name']]
+- [01-07]: OSRM /table endpoint used with 8s AbortSignal timeout; Haversine fallback at 70 km/h average driving speed when OSRM unavailable
+- [01-07]: Towns capped at MAX_TOWNS=120, sorted by population desc before cap — ensures most relevant towns fit
+- [01-07]: Dev search area defaults (6 Bavarian/Austrian/Swiss places) gated behind import.meta.env.DEV; requires vite-env.d.ts triple-slash reference
+- [Phase 01-09]: createRoute (with getParentRoute) used for /trip route — consistent with index.tsx pattern; createFileRoute requires Vite codegen plugin
+- [Phase 01-09]: btoa(encodeURIComponent(JSON.stringify(payload))) encoding for share URLs — handles Unicode town names (e.g. München, Zürich) that plain btoa would fail on
+- [Phase 01-09]: ItineraryPanel created as stub here (Plan 09) with ShareBar included — Plan 08 expands it without import conflicts
 
 ### Pending Todos
 
@@ -85,5 +94,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 01-06-PLAN.md — entry panel redesign, petrol teal design system, date picker popover, multi-location tags, CartoDB tiles
+Stopped at: Completed 01-09-PLAN.md — share/export (Google Maps + Apple Maps deep links, clipboard shareable URL with base64 encoding, /trip restoration route, ShareBar, ItineraryPanel stub)
 Resume file: None

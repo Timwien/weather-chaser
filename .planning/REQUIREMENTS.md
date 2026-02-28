@@ -71,8 +71,8 @@
 
 ### Export & Sharing
 
-- [ ] **SHARE-01**: User can export route to Google Maps / Apple Maps via deep link
-- [ ] **SHARE-02**: User can generate a shareable link to their trip (URL-encoded, readable by anyone without an account)
+- [x] **SHARE-01**: User can export route to Google Maps / Apple Maps via deep link
+- [x] **SHARE-02**: User can generate a shareable link to their trip (URL-encoded, readable by anyone without an account)
 
 ### User Accounts — Three Tiers
 
@@ -174,8 +174,8 @@
 | MAP-02 | Phase 1 | Pending |
 | MAP-03 | Phase 1 | Complete |
 | WTHR-01 | Phase 1 | Complete |
-| SHARE-01 | Phase 1 | Pending |
-| SHARE-02 | Phase 1 | Pending |
+| SHARE-01 | Phase 1 | Complete |
+| SHARE-02 | Phase 1 | Complete |
 | INFRA-05 | Phase 1 | Complete |
 | FIND-01 | Phase 2 | Pending |
 | FIND-02 | Phase 2 | Pending |

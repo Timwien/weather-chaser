@@ -2,6 +2,7 @@ import { createRoute } from '@tanstack/react-router';
 import { Route as rootRoute } from './__root.tsx';
 import { MapContainer } from '../components/map/MapContainer.tsx';
 import { EntryPanel } from '../components/entry/EntryPanel.tsx';
+import { LoadingOverlay } from '../components/loading/LoadingOverlay.tsx';
 import { useAppStore } from '../stores/appStore.ts';
 
 export const Route = createRoute({
@@ -20,6 +21,7 @@ function IndexPage() {
         onDrawClear={() => setSearchArea(null)}
       />
       <EntryPanel />
+      <LoadingOverlay />
     </div>
   );
 }

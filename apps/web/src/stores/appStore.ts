@@ -103,10 +103,24 @@ const defaultTripConfig: TripConfig = {
   mustVisitCoords: [],
 };
 
+// ── DEV DEFAULTS — remove before shipping ─────────────────────────────────
+// Pre-fill search areas so you don't have to type them during every test session.
+const DEV_SEARCH_AREAS: SearchAreaItem[] = import.meta.env.DEV
+  ? [
+      { type: 'place', id: 'dev-berchtesgaden', name: 'Berchtesgaden', fullName: 'Berchtesgaden, Bayern, Deutschland', bbox: [12.89, 47.59, 13.12, 47.78] },
+      { type: 'place', id: 'dev-chiemsee',      name: 'Chiemsee',      fullName: 'Chiemsee, Bayern, Deutschland',      bbox: [12.28, 47.82, 12.62, 47.99] },
+      { type: 'place', id: 'dev-muenchen',       name: 'München',       fullName: 'München, Bayern, Deutschland',       bbox: [11.36, 48.06, 11.72, 48.25] },
+      { type: 'place', id: 'dev-fuessen',        name: 'Füssen',        fullName: 'Füssen, Bayern, Deutschland',        bbox: [10.60, 47.54, 10.84, 47.69] },
+      { type: 'place', id: 'dev-wien',           name: 'Wien',          fullName: 'Wien, Österreich',                  bbox: [16.18, 48.11, 16.58, 48.32] },
+      { type: 'place', id: 'dev-zuerich',        name: 'Zürich',        fullName: 'Zürich, Schweiz',                   bbox: [8.45,  47.32, 8.62,  47.43] },
+    ]
+  : [];
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const useAppStore = create<AppState>((set) => ({
   mode: 'idle',
   loadingStep: null,
-  searchAreas: [],
+  searchAreas: DEV_SEARCH_AREAS,
   searchRadiusKm: 50,
   searchArea: null,
   tripConfig: defaultTripConfig,

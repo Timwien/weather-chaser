@@ -10,30 +10,34 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 1 of 5 (Core Algorithm + Route Planner Web)
-Plan: 6 of 10 in current phase
+Plan: 7 of 10 in current phase
 Status: In progress
-Last activity: 2026-02-28 — Plan 01-03 complete (nearest-neighbor tour, 2-opt improvement, route stop assignment)
+Last activity: 2026-02-28 — Plan 01-06 complete (entry panel redesign, petrol teal design system, date picker popover, multi-location, CartoDB tiles)
 
-Progress: [█████░░░░░] 10%
+Progress: [██████░░░░] 12%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 13 min
-- Total execution time: 61 min
+- Total plans completed: 6
+- Average duration: 33 min
+- Total execution time: 181 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-core-algorithm-route-planner-web | 5 | 61 min | 12.2 min |
+| 01-core-algorithm-route-planner-web | 6 | 181 min | 30.2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (10 min), 01-02 (3 min), 01-04 (3 min), 01-05 (15 min), 01-03 (30 min)
-- Trend: Stable at ~3-30 min depending on task complexity (TDD plans take longer)
+- Last 6 plans: 01-01 (10 min), 01-02 (3 min), 01-04 (3 min), 01-05 (15 min), 01-03 (30 min), 01-06 (120 min)
+- Trend: 01-06 longer due to human-verify checkpoint + full design feedback round
 
 *Updated after each plan completion*
+
+| Phase/Plan | Duration | Tasks | Files |
+|-----------|---------|-------|-------|
+| Phase 01 P06 | 120 min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -62,6 +66,10 @@ Recent decisions affecting current work:
 - [01-03]: distanceMatrix is km (per type definition // km distances NxN) — no /1000 conversion in assignStops
 - [01-03]: addDays extracted to optimizer/dateUtils.ts when assignStops.ts exceeded 100 lines
 - [01-03]: Must-visit anchoring is two-stage: NN 2x-threshold preference + post-2-opt explicit swap to boundary
+- [Phase 01]: Petrol teal #0E7490 chosen as primary accent — Cyan-700 reads premium without being turquoise-bright
+- [Phase 01]: Calendar popover built custom (no library) — 2-month grid in ~150 lines avoids dependency for Phase 1
+- [Phase 01]: CartoDB Positron GL replaces demotiles.maplibre.org — free, no API key, clean Google Maps aesthetic
+- [Phase 01]: searchAreas[] array added alongside legacy searchArea in store — polygon draw callbacks use legacy; Plan 07 migrates
 
 ### Pending Todos
 
@@ -77,5 +85,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 01-03-PLAN.md — nearest-neighbor tour, 2-opt improvement, assignStops, optimizeRoute (TDD, 38 tests)
+Stopped at: Completed 01-06-PLAN.md — entry panel redesign, petrol teal design system, date picker popover, multi-location tags, CartoDB tiles
 Resume file: None

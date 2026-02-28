@@ -10,7 +10,7 @@
 ### Shared Entry Point
 
 - [x] **ENTRY-01**: User defines a search area (by region/place name, radius from current location, or drawn polygon) — shared by both app modes
-- [ ] **ENTRY-02**: From the search area, user selects one of two modes: **Weather Finder** or **Route Planner**
+- [x] **ENTRY-02**: From the search area, user selects one of two modes: **Weather Finder** or **Route Planner**
 
 ---
 
@@ -33,7 +33,7 @@
 
 - [x] **ALGO-01**: User can generate a weather-optimized multi-day route through real towns and villages in a chosen region
 - [x] **ALGO-02**: Weather scoring is temporal — each location is scored for the specific day(s) the user would arrive and stay, not an average across the full forecast window
-- [ ] **ALGO-03**: User can configure max-stay duration (maximum nights at each stop before moving on)
+- [x] **ALGO-03**: User can configure max-stay duration (maximum nights at each stop before moving on)
 - [x] **ALGO-04**: Route optimizer minimizes backtracking and criss-crossing (geographic progression)
 - [x] **ALGO-05**: No location is visited twice after leaving it
 - [x] **ALGO-06**: Route optimizer pre-computes a full road-distance matrix per search session (replaces current per-step OSRM calls)
@@ -47,9 +47,9 @@
 
 ### Trip Configuration
 
-- [ ] **TRIP-01**: User can set trip duration (number of days)
-- [ ] **TRIP-02**: User can set start location (address or place name)
-- [ ] **TRIP-03**: User can set max-stay constraint (y nights per stop)
+- [x] **TRIP-01**: User can set trip duration (number of days)
+- [x] **TRIP-02**: User can set start location (address or place name)
+- [x] **TRIP-03**: User can set max-stay constraint (y nights per stop)
 - [x] **TRIP-04**: User can select a weather preset profile (Beach, Hiking, Sightseeing) — affects scoring weights, free tier
 
 ### Itinerary & Results
@@ -152,10 +152,10 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | ENTRY-01 | Phase 1 | Complete |
-| ENTRY-02 | Phase 1 | Pending |
+| ENTRY-02 | Phase 1 | Complete |
 | ALGO-01 | Phase 1 | Complete |
 | ALGO-02 | Phase 1 | Complete |
-| ALGO-03 | Phase 1 | Pending |
+| ALGO-03 | Phase 1 | Complete |
 | ALGO-04 | Phase 1 | Complete |
 | ALGO-05 | Phase 1 | Complete |
 | ALGO-06 | Phase 1 | Complete |
@@ -163,9 +163,9 @@
 | LOC-01 | Phase 1 | Complete |
 | LOC-02 | Phase 1 | Complete |
 | LOC-03 | Phase 1 | Complete |
-| TRIP-01 | Phase 1 | Pending |
-| TRIP-02 | Phase 1 | Pending |
-| TRIP-03 | Phase 1 | Pending |
+| TRIP-01 | Phase 1 | Complete |
+| TRIP-02 | Phase 1 | Complete |
+| TRIP-03 | Phase 1 | Complete |
 | TRIP-04 | Phase 1 | Complete |
 | ITIN-01 | Phase 1 | Pending |
 | ITIN-02 | Phase 1 | Pending |

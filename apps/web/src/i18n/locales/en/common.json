@@ -69,7 +69,8 @@
     "export_google": "Open in Google Maps",
     "export_apple": "Open in Apple Maps",
     "copy_link": "Copy shareable link",
-    "link_copied": "Link copied"
+    "link_copied": "Link copied",
+    "google_limit": "Google Maps supports up to 9 stops"
   },
   "loading": {
     "finding_towns": "Finding towns...",

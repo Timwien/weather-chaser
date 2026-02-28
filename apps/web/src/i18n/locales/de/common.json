@@ -69,7 +69,8 @@
     "export_google": "In Google Maps öffnen",
     "export_apple": "In Apple Maps öffnen",
     "copy_link": "Link kopieren",
-    "link_copied": "Link kopiert"
+    "link_copied": "Link kopiert",
+    "google_limit": "Google Maps unterstützt bis zu 9 Stopps"
   },
   "loading": {
     "finding_towns": "Orte werden gesucht...",

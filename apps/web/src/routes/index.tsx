@@ -42,8 +42,8 @@ function IndexPage() {
         <MapContainer
           selectedStopIndex={selectedStopIndex}
           onStopClick={setSelectedStopIndex}
-          onDrawComplete={(polygon) => setSearchArea({ type: 'polygon', polygon })}
-          onDrawClear={() => setSearchArea(null)}
+          onDrawComplete={!showResults ? (polygon) => setSearchArea({ type: 'polygon', polygon }) : undefined}
+          onDrawClear={!showResults ? () => setSearchArea(null) : undefined}
         />
       </div>
 

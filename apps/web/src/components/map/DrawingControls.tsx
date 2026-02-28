@@ -62,6 +62,8 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
     const draw = control.getTerraDrawInstance();
     if (draw) {
       try { draw.start(); } catch { /* already started */ }
+      // Start in static mode so TerraDraw doesn't intercept map events by default
+      try { draw.setMode('static'); } catch { /* ignore */ }
 
       draw.on('finish', (_id, context) => {
         if (context?.action !== 'draw') return;

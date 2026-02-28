@@ -16,10 +16,8 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
   const [hasPolygon, setHasPolygon] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
 
-  /** Disable map interactions so drawing clicks/touches don't pan the map */
   const disableMapInteraction = useCallback(() => {
     if (!map) return;
-    // MapRef only proxies methods, not handler objects — use getMap() for native access
     const m = map.getMap();
     m.dragPan.disable();
     m.scrollZoom.disable();
@@ -29,7 +27,6 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
     m.doubleClickZoom.disable();
   }, [map]);
 
-  /** Re-enable normal map interaction */
   const enableMapInteraction = useCallback(() => {
     if (!map) return;
     const m = map.getMap();
@@ -41,68 +38,63 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
     m.doubleClickZoom.enable();
   }, [map]);
 
+  // Cleanup only — TerraDraw is never initialized on mount
   useEffect(() => {
-    if (!map) return;
-
-    // Hide the built-in terradraw toolbar (we use our own buttons)
-    const hideNativeUI = () => {
-      const toolbar = map.getContainer().querySelector('.maplibre-terradraw-control') as HTMLElement | null;
-      if (toolbar) toolbar.style.display = 'none';
-    };
-
-    const control = new MaplibreTerradrawControl({
-      modes: ['polygon'],
-      open: false,
-    });
-    controlRef.current = control;
-    map.addControl(control, 'top-right');
-    setTimeout(hideNativeUI, 100);
-
-    // Start TerraDraw immediately so the instance is ready to use
-    const draw = control.getTerraDrawInstance();
-    if (draw) {
-      try { draw.start(); } catch { /* already started */ }
-      // Start in static mode so TerraDraw doesn't intercept map events by default
-      try { draw.setMode('static'); } catch { /* ignore */ }
-
-      draw.on('finish', (_id, context) => {
-        if (context?.action !== 'draw') return;
-        const features = draw.getSnapshot();
-        const polygon = features.find(
-          (f) => f.geometry.type === 'Polygon',
-        );
-        if (polygon?.geometry.type === 'Polygon') {
-          const coords = polygon.geometry.coordinates[0] as [number, number][];
-          setIsDrawing(false);
-          setHasPolygon(true);
-          enableMapInteraction();
-          onPolygonComplete(coords);
-        }
-      });
-
-      // Re-enable map interaction if user cancels drawing (switches back to static mode)
-      draw.on('change', (_ids, type) => {
-        if (type === 'delete') {
-          setHasPolygon(false);
-        }
-      });
-    }
-
     return () => {
       enableMapInteraction();
-      try { map.removeControl(control); } catch { /* already removed */ }
-      controlRef.current = null;
+      if (controlRef.current && map) {
+        try { map.removeControl(controlRef.current); } catch { /* already removed */ }
+        controlRef.current = null;
+      }
     };
-  }, [map, onPolygonComplete, enableMapInteraction]);
+  }, [map, enableMapInteraction]);
 
-  const handleStartDrawing = () => {
-    const draw = controlRef.current?.getTerraDrawInstance();
+  const handleStartDrawing = useCallback(() => {
+    if (!map) return;
+
+    // Lazy-initialize TerraDraw only when the user actually wants to draw.
+    // Initializing on mount registers event listeners that block all map clicks.
+    if (!controlRef.current) {
+      const control = new MaplibreTerradrawControl({ modes: ['polygon'], open: false });
+      controlRef.current = control;
+      map.addControl(control, 'top-right');
+
+      // Hide the built-in toolbar — we use our own buttons
+      setTimeout(() => {
+        const toolbar = map.getContainer().querySelector('.maplibre-terradraw-control') as HTMLElement | null;
+        if (toolbar) toolbar.style.display = 'none';
+      }, 100);
+
+      const draw = control.getTerraDrawInstance();
+      if (draw) {
+        try { draw.start(); } catch { /* already started */ }
+
+        draw.on('finish', (_id, context) => {
+          if (context?.action !== 'draw') return;
+          const features = draw.getSnapshot();
+          const polygon = features.find((f) => f.geometry.type === 'Polygon');
+          if (polygon?.geometry.type === 'Polygon') {
+            const coords = polygon.geometry.coordinates[0] as [number, number][];
+            setIsDrawing(false);
+            setHasPolygon(true);
+            enableMapInteraction();
+            onPolygonComplete(coords);
+          }
+        });
+
+        draw.on('change', (_ids, type) => {
+          if (type === 'delete') setHasPolygon(false);
+        });
+      }
+    }
+
+    const draw = controlRef.current.getTerraDrawInstance();
     if (!draw) return;
     try { draw.start(); } catch { /* already started */ }
     draw.setMode('polygon');
     disableMapInteraction();
     setIsDrawing(true);
-  };
+  }, [map, disableMapInteraction, enableMapInteraction, onPolygonComplete]);
 
   const handleCancelDrawing = () => {
     const draw = controlRef.current?.getTerraDrawInstance();

@@ -96,7 +96,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core Algorithm + Route Planner Web | 2/10 | In progress | - |
+| 1. Core Algorithm + Route Planner Web | 4/10 | In Progress|  |
 | 2. Weather Finder Mode | 0/TBD | Not started | - |
 | 3. Backend + Auth + Production Hosting | 0/TBD | Not started | - |
 | 4. Freemium + Monetization | 0/TBD | Not started | - |

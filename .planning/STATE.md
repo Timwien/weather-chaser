@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 1 of 5 (Core Algorithm + Route Planner Web)
-Plan: 5 of 10 in current phase
+Plan: 6 of 10 in current phase
 Status: In progress
-Last activity: 2026-02-27 — Plan 01-04 complete (web app shell: map, i18n, store, CSS tokens)
+Last activity: 2026-02-28 — Plan 01-05 complete (Nominatim geocoding, Overpass town fetching, DrawingControls polygon drawing)
 
-Progress: [███░░░░░░░] 6%
+Progress: [████░░░░░░] 8%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 5 min
-- Total execution time: 16 min
+- Total plans completed: 4
+- Average duration: 7 min
+- Total execution time: 31 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-core-algorithm-route-planner-web | 3 | 16 min | 5.3 min |
+| 01-core-algorithm-route-planner-web | 4 | 31 min | 7.8 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (10 min), 01-02 (3 min), 01-04 (3 min)
-- Trend: Stable at ~3 min for focused plans
+- Last 5 plans: 01-01 (10 min), 01-02 (3 min), 01-04 (3 min), 01-05 (15 min)
+- Trend: Stable at ~3-15 min depending on task complexity
 
 *Updated after each plan completion*
 
@@ -56,6 +56,9 @@ Recent decisions affecting current work:
 - [01-04]: createRoute (with getParentRoute) used instead of createFileRoute in TanStack Router v1 — createFileRoute requires Vite codegen plugin for correct types in manual route tree construction
 - [01-04]: MapLibre demotiles.maplibre.org used as dev tile style — no token required; production tile provider is Phase 3
 - [01-04]: Zustand store fully shaped from day one — all Phase 1 UI plans can use useAppStore without store changes
+- [01-05]: MaplibreTerradrawControl (IControl) used — plan referenced fictional MaplibreGlTerradraw class; drawing activated via getTerraDrawInstance().setMode('polygon')
+- [01-05]: useMap() destructured as { current: map } — hook returns { current?: MapRef } not { map: MapRef }
+- [01-05]: Phase 1 uses public Nominatim and Overpass endpoints directly — Phase 3 adds server-side proxy
 
 ### Pending Todos
 
@@ -70,6 +73,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-27
-Stopped at: Completed 01-04-PLAN.md — web app shell (MapLibre map, TanStack Router, i18n, CSS tokens, Zustand store)
+Last session: 2026-02-28
+Stopped at: Completed 01-05-PLAN.md — Nominatim geocoding, Overpass town fetching, DrawingControls polygon drawing, useLocationSearch hook
 Resume file: None

@@ -9,7 +9,7 @@
 
 ### Shared Entry Point
 
-- [ ] **ENTRY-01**: User defines a search area (by region/place name, radius from current location, or drawn polygon) — shared by both app modes
+- [x] **ENTRY-01**: User defines a search area (by region/place name, radius from current location, or drawn polygon) — shared by both app modes
 - [ ] **ENTRY-02**: From the search area, user selects one of two modes: **Weather Finder** or **Route Planner**
 
 ---
@@ -41,9 +41,9 @@
 
 ### Location Data
 
-- [ ] **LOC-01**: Route stops are real named towns and villages — not arbitrary grid points landing in fields or water
-- [ ] **LOC-02**: User can search by region or place name to define the search area (e.g. "Bavaria", "Black Forest", "Germany")
-- [ ] **LOC-03**: User can draw a custom polygon on the map to define the search region
+- [x] **LOC-01**: Route stops are real named towns and villages — not arbitrary grid points landing in fields or water
+- [x] **LOC-02**: User can search by region or place name to define the search area (e.g. "Bavaria", "Black Forest", "Germany")
+- [x] **LOC-03**: User can draw a custom polygon on the map to define the search region
 
 ### Trip Configuration
 
@@ -151,7 +151,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ENTRY-01 | Phase 1 | Pending |
+| ENTRY-01 | Phase 1 | Complete |
 | ENTRY-02 | Phase 1 | Pending |
 | ALGO-01 | Phase 1 | Pending |
 | ALGO-02 | Phase 1 | Complete |
@@ -160,9 +160,9 @@
 | ALGO-05 | Phase 1 | Pending |
 | ALGO-06 | Phase 1 | Pending |
 | ALGO-07 | Phase 1 | Pending |
-| LOC-01 | Phase 1 | Pending |
-| LOC-02 | Phase 1 | Pending |
-| LOC-03 | Phase 1 | Pending |
+| LOC-01 | Phase 1 | Complete |
+| LOC-02 | Phase 1 | Complete |
+| LOC-03 | Phase 1 | Complete |
 | TRIP-01 | Phase 1 | Pending |
 | TRIP-02 | Phase 1 | Pending |
 | TRIP-03 | Phase 1 | Pending |

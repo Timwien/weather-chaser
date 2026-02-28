@@ -25,6 +25,8 @@
       "wind": "Ruhiger Wind"
     },
     "draw_area": "Gebiet zeichnen",
+    "draw_hint": "Klicken um Punkte zu setzen, doppelklicken zum Abschließen",
+    "cancel_draw": "Abbrechen",
     "clear_area": "Gebiet löschen"
   },
   "route_config": {

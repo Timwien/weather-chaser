@@ -49,9 +49,14 @@ function PresetIcon({ preset }: { preset: WeatherPreset }) {
 /** Simplified location search for start location — writes to tripConfig, not searchArea */
 function StartLocationSearch() {
   const { t } = useTranslation('common');
-  const { setTripConfig } = useAppStore();
+  const { setTripConfig, searchAreas, tripConfig } = useAppStore();
   const { search, results, loading } = useLocationSearch();
-  const [inputValue, setInputValue] = useState('');
+
+  // Pre-populate from the first named place in searchAreas if no start set
+  const firstPlace = searchAreas.find((a) => a.type === 'place');
+  const defaultValue = tripConfig.startLocation || (firstPlace && 'name' in firstPlace ? firstPlace.name : '');
+
+  const [inputValue, setInputValue] = useState(defaultValue);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -117,8 +122,14 @@ function StartLocationSearch() {
 
 export function RouteConfigStep() {
   const { t } = useTranslation('common');
-  const { tripConfig, setTripConfig, setMode } = useAppStore();
+  const { tripConfig, setTripConfig, setMode, searchAreas } = useAppStore();
   const [mustVisitInput, setMustVisitInput] = useState('');
+
+  // Quick-add: place names from searchAreas not yet in mustVisitNames
+  const mustVisitSuggestions = searchAreas
+    .filter((a) => a.type === 'place' && 'name' in a)
+    .map((a) => (a as { name: string }).name)
+    .filter((name) => !tripConfig.mustVisitNames.includes(name));
 
   function addMustVisit() {
     const name = mustVisitInput.trim();
@@ -230,6 +241,20 @@ export function RouteConfigStep() {
       {/* Must-visit stops */}
       <div className="route-config-field">
         <label className="input-label">{t('route_config.must_visit')}</label>
+        {mustVisitSuggestions.length > 0 && (
+          <div className="must-visit-suggestions">
+            {mustVisitSuggestions.map((name) => (
+              <button
+                key={name}
+                type="button"
+                className="suggestion-pill"
+                onClick={() => setTripConfig({ mustVisitNames: [...tripConfig.mustVisitNames, name] })}
+              >
+                + {name}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="must-visit-input-row">
           <input
             type="text"

@@ -25,6 +25,8 @@
       "wind": "Calm wind"
     },
     "draw_area": "Draw area",
+    "draw_hint": "Click to set points, double-click to finish",
+    "cancel_draw": "Cancel",
     "clear_area": "Clear area"
   },
   "route_config": {

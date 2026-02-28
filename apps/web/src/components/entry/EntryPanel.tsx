@@ -8,10 +8,10 @@ import './EntryPanel.css';
 
 export function EntryPanel() {
   const { t } = useTranslation('common');
-  const { mode, setMode, tripConfig, searchAreas } = useAppStore();
+  const { mode, setMode, loadingStep, tripConfig, searchAreas } = useAppStore();
 
-  // Show CTAs when dates are set AND at least one location is added
-  const showCTAs = Boolean(tripConfig.startDate && searchAreas.length > 0);
+  // Show CTAs only in idle mode — once user picks a mode the step expands instead
+  const showCTAs = Boolean(tripConfig.startDate && searchAreas.length > 0 && mode === 'idle');
 
   const isRouteConfig = mode === 'route-config';
   const isWeatherFinder = mode === 'weather-finder';
@@ -53,6 +53,23 @@ export function EntryPanel() {
 
       {/* Route config second step — expands inline when mode is route-config */}
       {isRouteConfig && <RouteConfigStep />}
+
+      {/* Loading state */}
+      {mode === 'loading' && (
+        <div className="entry-panel-loading">
+          <div className="entry-loading-spinner" />
+          <p className="entry-loading-text">
+            {t(`loading.${loadingStep ?? 'optimizing_route'}`)}
+          </p>
+          <button
+            type="button"
+            className="entry-loading-cancel"
+            onClick={() => setMode('route-config')}
+          >
+            {t('entry.cancel_draw', 'Abbrechen')}
+          </button>
+        </div>
+      )}
 
       {/* Weather finder placeholder — Phase 2 */}
       {isWeatherFinder && (

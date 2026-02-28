@@ -1,12 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useMap } from '@vis.gl/react-maplibre';
 import { useTranslation } from 'react-i18next';
 import { MaplibreTerradrawControl } from '@watergis/maplibre-gl-terradraw';
 import '@watergis/maplibre-gl-terradraw/dist/maplibre-gl-terradraw.css';
-
-// Note: plan referenced MaplibreGlTerradraw (fictional) — actual export is MaplibreTerradrawControl (IControl).
-// Drawing is activated programmatically via getTerraDrawInstance().setMode('polygon').
-// TerraDraw 'finish' event fires when polygon is completed.
 
 interface DrawingControlsProps {
   onPolygonComplete: (polygon: [number, number][]) => void;
@@ -18,76 +14,110 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
   const { current: map } = useMap();
   const controlRef = useRef<MaplibreTerradrawControl | null>(null);
   const [hasPolygon, setHasPolygon] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  /** Disable map interactions so drawing clicks/touches don't pan the map */
+  const disableMapInteraction = useCallback(() => {
+    if (!map) return;
+    map.dragPan.disable();
+    map.scrollZoom.disable();
+    map.touchZoomRotate.disable();
+    map.touchPitch?.disable();
+    map.boxZoom.disable();
+    map.doubleClickZoom.disable();
+  }, [map]);
+
+  /** Re-enable normal map interaction */
+  const enableMapInteraction = useCallback(() => {
+    if (!map) return;
+    map.dragPan.enable();
+    map.scrollZoom.enable();
+    map.touchZoomRotate.enable();
+    map.touchPitch?.enable();
+    map.boxZoom.enable();
+    map.doubleClickZoom.enable();
+  }, [map]);
 
   useEffect(() => {
     if (!map) return;
 
-    // Initialize control with polygon mode only
+    // Hide the built-in terradraw toolbar (we use our own buttons)
+    const hideNativeUI = () => {
+      const toolbar = map.getContainer().querySelector('.maplibre-terradraw-control') as HTMLElement | null;
+      if (toolbar) toolbar.style.display = 'none';
+    };
+
     const control = new MaplibreTerradrawControl({
       modes: ['polygon'],
       open: false,
     });
     controlRef.current = control;
-
-    // Add control to the map (renders built-in terradraw toolbar; we also provide our own buttons)
     map.addControl(control, 'top-right');
+    setTimeout(hideNativeUI, 100);
 
-    // Wait for control to be fully added before accessing TerraDraw instance
-    const onLoad = () => {
-      const draw = control.getTerraDrawInstance();
-      if (!draw) return;
+    // Start TerraDraw immediately so the instance is ready to use
+    const draw = control.getTerraDrawInstance();
+    if (draw) {
+      try { draw.start(); } catch { /* already started */ }
 
-      // Listen for polygon completion
-      draw.on('finish', (id, context) => {
-        if (context.action !== 'draw') return;
+      draw.on('finish', (_id, context) => {
+        if (context?.action !== 'draw') return;
         const features = draw.getSnapshot();
         const polygon = features.find(
-          (f) => f.id === id && f.geometry.type === 'Polygon',
+          (f) => f.geometry.type === 'Polygon',
         );
-        if (polygon && polygon.geometry.type === 'Polygon') {
+        if (polygon?.geometry.type === 'Polygon') {
           const coords = polygon.geometry.coordinates[0] as [number, number][];
+          setIsDrawing(false);
           setHasPolygon(true);
+          enableMapInteraction();
           onPolygonComplete(coords);
         }
       });
-    };
 
-    // The control's TerraDraw instance is available after onAdd() completes (synchronous)
-    onLoad();
+      // Re-enable map interaction if user cancels drawing (switches back to static mode)
+      draw.on('change', (_ids, type) => {
+        if (type === 'delete') {
+          setHasPolygon(false);
+        }
+      });
+    }
 
     return () => {
-      if (map && control) {
-        try {
-          map.removeControl(control);
-        } catch {
-          // Control may already be removed
-        }
-      }
+      enableMapInteraction();
+      try { map.removeControl(control); } catch { /* already removed */ }
       controlRef.current = null;
     };
-  }, [map, onPolygonComplete]);
+  }, [map, onPolygonComplete, enableMapInteraction]);
 
   const handleStartDrawing = () => {
     const draw = controlRef.current?.getTerraDrawInstance();
     if (!draw) return;
-    // Ensure drawing is started before switching mode
-    if (!draw.enabled) {
-      draw.start();
-    }
+    try { draw.start(); } catch { /* already started */ }
     draw.setMode('polygon');
+    disableMapInteraction();
+    setIsDrawing(true);
+  };
+
+  const handleCancelDrawing = () => {
+    const draw = controlRef.current?.getTerraDrawInstance();
+    if (draw) {
+      try { draw.setMode('static'); } catch { /* ignore */ }
+    }
+    enableMapInteraction();
+    setIsDrawing(false);
   };
 
   const handleClear = () => {
     const draw = controlRef.current?.getTerraDrawInstance();
     if (draw) {
+      try { draw.setMode('static'); } catch { /* ignore */ }
       const features = draw.getSnapshot();
-      const ids = features
-        .map((f) => f.id)
-        .filter((id): id is string | number => id !== undefined);
-      if (ids.length > 0) {
-        draw.removeFeatures(ids);
-      }
+      const ids = features.map((f) => f.id).filter((id): id is string | number => id !== undefined);
+      if (ids.length > 0) draw.removeFeatures(ids);
     }
+    enableMapInteraction();
+    setIsDrawing(false);
     setHasPolygon(false);
     onClear();
   };
@@ -102,40 +132,77 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
         flexDirection: 'column',
         gap: 'var(--space-2)',
         zIndex: 10,
+        pointerEvents: 'all',
       }}
     >
-      {!hasPolygon && (
+      {!isDrawing && !hasPolygon && (
         <button
           onClick={handleStartDrawing}
           style={{
-            background: 'var(--color-bg)',
-            border: '1px solid var(--color-border)',
+            background: 'var(--glass-bg)',
+            backdropFilter: 'var(--glass-blur)',
+            border: 'var(--glass-border)',
             borderRadius: 'var(--radius-md)',
-            padding: 'var(--space-2) var(--space-3)',
+            padding: 'var(--space-2) var(--space-4)',
             fontSize: 'var(--font-size-sm)',
-            color: 'var(--color-text)',
+            fontWeight: 'var(--font-weight-medium)',
+            color: 'var(--color-primary)',
             cursor: 'pointer',
-            boxShadow: 'var(--shadow-sm)',
+            boxShadow: 'var(--shadow-md)',
           }}
         >
-          {t('entry.draw_area', 'Draw area')}
+          {t('entry.draw_area', 'Gebiet zeichnen')}
         </button>
+      )}
+      {isDrawing && (
+        <>
+          <div style={{
+            background: 'var(--color-primary)',
+            borderRadius: 'var(--radius-md)',
+            padding: 'var(--space-2) var(--space-4)',
+            fontSize: 'var(--font-size-sm)',
+            fontWeight: 'var(--font-weight-medium)',
+            color: '#fff',
+            boxShadow: 'var(--shadow-md)',
+            textAlign: 'center',
+          }}>
+            {t('entry.draw_hint', 'Klicken um Punkte zu setzen, doppelklicken zum Abschließen')}
+          </div>
+          <button
+            onClick={handleCancelDrawing}
+            style={{
+              background: 'var(--glass-bg)',
+              backdropFilter: 'var(--glass-blur)',
+              border: 'var(--glass-border)',
+              borderRadius: 'var(--radius-md)',
+              padding: 'var(--space-2) var(--space-4)',
+              fontSize: 'var(--font-size-sm)',
+              color: 'var(--color-text-secondary)',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-sm)',
+            }}
+          >
+            {t('entry.cancel_draw', 'Abbrechen')}
+          </button>
+        </>
       )}
       {hasPolygon && (
         <button
           onClick={handleClear}
           style={{
-            background: 'var(--color-bg)',
-            border: '1px solid var(--color-border)',
+            background: 'var(--glass-bg)',
+            backdropFilter: 'var(--glass-blur)',
+            border: 'var(--glass-border)',
             borderRadius: 'var(--radius-md)',
-            padding: 'var(--space-2) var(--space-3)',
+            padding: 'var(--space-2) var(--space-4)',
             fontSize: 'var(--font-size-sm)',
-            color: 'var(--color-text)',
+            fontWeight: 'var(--font-weight-medium)',
+            color: 'var(--color-error)',
             cursor: 'pointer',
             boxShadow: 'var(--shadow-sm)',
           }}
         >
-          {t('entry.clear_area', 'Clear area')}
+          {t('entry.clear_area', 'Gebiet löschen')}
         </button>
       )}
     </div>

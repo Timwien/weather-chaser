@@ -27,7 +27,10 @@
     "must_visit": "Must-visit stops",
     "add_must_visit": "Add a town",
     "days_suffix": "days",
-    "nights_suffix": "nights"
+    "nights_suffix": "nights",
+    "generate": "Generate Route",
+    "add": "Add",
+    "coming_soon": "Coming soon"
   },
   "preset": {
     "label": "Weather profile",

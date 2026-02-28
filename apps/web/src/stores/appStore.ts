@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { Route, WeatherPreset, ScoringWeights } from '@weatherchaser/core';
 
-type AppMode = 'idle' | 'route-config' | 'loading' | 'results';
+type AppMode = 'idle' | 'route-config' | 'weather-finder' | 'loading' | 'results';
 type LoadingStep = 'finding_towns' | 'fetching_weather' | 'optimizing_route' | null;
 
 interface SearchArea {
@@ -39,7 +39,7 @@ interface AppState {
   // Actions
   setMode: (mode: AppMode) => void;
   setLoadingStep: (step: LoadingStep) => void;
-  setSearchArea: (area: SearchArea) => void;
+  setSearchArea: (area: SearchArea | null) => void;
   setTripConfig: (config: Partial<TripConfig>) => void;
   setRoute: (route: Route | null) => void;
   setError: (error: string | null) => void;
@@ -70,7 +70,7 @@ export const useAppStore = create<AppState>((set) => ({
 
   setMode: (mode) => set({ mode }),
   setLoadingStep: (step) => set({ loadingStep: step }),
-  setSearchArea: (area) => set({ searchArea: area }),
+  setSearchArea: (area) => set({ searchArea: area ?? null }),
   setTripConfig: (config) =>
     set((state) => ({ tripConfig: { ...state.tripConfig, ...config } })),
   setRoute: (route) => set({ route }),

@@ -1,0 +1,480 @@
+/* =========================================================
+   Entry Panel — floating overlay on the left side of the map
+   ========================================================= */
+
+.entry-panel {
+  position: fixed;
+  left: var(--space-4);
+  top: var(--space-4);
+  bottom: var(--space-4);
+  width: var(--panel-width);
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  /* Only show scrollbar when content overflows */
+  scrollbar-gutter: stable;
+}
+
+/* =========================================================
+   Header
+   ========================================================= */
+
+.entry-panel-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.entry-panel-title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-accent);
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.entry-panel-tagline {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* =========================================================
+   Input sections
+   ========================================================= */
+
+.entry-panel-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Shared label style */
+.input-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+  letter-spacing: 0.1px;
+}
+
+/* =========================================================
+   Date range picker
+   ========================================================= */
+
+.date-range-picker {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-inputs-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.date-input {
+  flex: 1;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.date-input:focus {
+  border-color: var(--color-accent);
+}
+
+.date-separator {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   Location input
+   ========================================================= */
+
+.location-input-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.location-input-container {
+  position: relative;
+}
+
+.text-input {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.text-input:focus {
+  border-color: var(--color-accent);
+}
+
+/* Thin animated loading bar below input */
+.loading-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  background: var(--color-accent);
+  animation: loading-sweep 1.2s ease-in-out infinite;
+}
+
+@keyframes loading-sweep {
+  0%   { width: 0%; left: 0%; }
+  50%  { width: 70%; left: 15%; }
+  100% { width: 0%; left: 100%; }
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 50;
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1) 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.autocomplete-option {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.autocomplete-option:hover {
+  background: var(--color-surface);
+}
+
+/* =========================================================
+   Criteria chips
+   ========================================================= */
+
+.criteria-selector {
+  display: flex;
+  flex-direction: column;
+}
+
+.criteria-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.criteria-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  line-height: 1;
+}
+
+.criteria-chip:hover {
+  border-color: var(--color-accent);
+}
+
+.criteria-chip--selected {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #ffffff;
+}
+
+.criteria-chip-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   CTAs
+   ========================================================= */
+
+.entry-panel-ctas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.cta-btn {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, opacity 0.12s;
+  border: none;
+  line-height: 1.3;
+}
+
+.cta-btn--primary {
+  background: var(--color-accent);
+  color: #ffffff;
+  border: none;
+}
+
+.cta-btn--primary:hover {
+  background: var(--color-accent-hover);
+}
+
+.cta-btn--secondary {
+  background: transparent;
+  color: var(--color-accent);
+  border: 1.5px solid var(--color-accent);
+}
+
+.cta-btn--secondary:hover {
+  background: var(--color-accent-light);
+}
+
+/* =========================================================
+   Route config step
+   ========================================================= */
+
+.route-config-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.route-config-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 0 calc(-1 * var(--space-1));
+}
+
+.route-config-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.route-config-duration-display {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  padding: var(--space-2) 0;
+}
+
+/* Stepper row */
+.stepper-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stepper-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.1s;
+}
+
+.stepper-btn:hover:not(:disabled) {
+  background: var(--color-border);
+}
+
+.stepper-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stepper-value {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text);
+  min-width: 24px;
+  text-align: center;
+}
+
+.input-suffix {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* Preset buttons */
+.preset-buttons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.preset-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-2);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+
+.preset-btn:hover {
+  border-color: var(--color-accent);
+}
+
+.preset-btn--active {
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+  color: var(--color-accent);
+}
+
+/* Must-visit stops */
+.must-visit-input-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.must-visit-input {
+  flex: 1;
+}
+
+.add-btn {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s;
+  flex-shrink: 0;
+}
+
+.add-btn:hover:not(:disabled) {
+  background: var(--color-accent-light);
+}
+
+.add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.must-visit-list {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.must-visit-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.must-visit-name {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.must-visit-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 var(--space-2);
+  flex-shrink: 0;
+  transition: color 0.1s;
+}
+
+.must-visit-remove:hover {
+  color: var(--color-text);
+}
+
+/* =========================================================
+   Coming soon placeholder
+   ========================================================= */
+
+.entry-panel-coming-soon {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  padding: var(--space-4) 0;
+}
+
+/* =========================================================
+   Mobile — panel hidden behind map; Plan 08 adds mobile tabs
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .entry-panel {
+    display: none;
+  }
+}

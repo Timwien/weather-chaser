@@ -27,7 +27,10 @@
     "must_visit": "Pflichtstopps",
     "add_must_visit": "Ort hinzufügen",
     "days_suffix": "Tage",
-    "nights_suffix": "Nächte"
+    "nights_suffix": "Nächte",
+    "generate": "Route generieren",
+    "add": "Hinzufügen",
+    "coming_soon": "Kommt bald"
   },
   "preset": {
     "label": "Wetterprofil",

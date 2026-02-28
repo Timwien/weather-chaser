@@ -26,3 +26,19 @@ html, body, #root {
   width: 100%;
   height: 100%;
 }
+
+/* Mobile two-screen layout: hide inactive screen */
+@media (max-width: 768px) {
+  /* When map is the active mobile screen, hide the panel overlay */
+  [data-mobile-view="map"] .screen-panel {
+    display: none;
+  }
+
+  /* When itinerary is the active mobile screen, hide the map visually
+     but keep it mounted (display:none would unmount MapLibre).
+     Use visibility:hidden + pointer-events:none to keep the map alive but invisible. */
+  [data-mobile-view="itinerary"] .screen-map {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}

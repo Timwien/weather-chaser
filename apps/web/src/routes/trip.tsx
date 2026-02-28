@@ -33,7 +33,10 @@ function TripPage() {
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-      <MapContainer />
+      <MapContainer
+        selectedStopIndex={selectedStopIndex}
+        onStopClick={setSelectedStopIndex}
+      />
       <ItineraryPanel
         selectedStopIndex={selectedStopIndex}
         onStopSelect={setSelectedStopIndex}

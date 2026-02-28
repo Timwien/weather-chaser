@@ -2,7 +2,10 @@ import { useCallback } from 'react';
 import { Map } from '@vis.gl/react-maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Map as MaplibreMap } from 'maplibre-gl';
+import { useAppStore } from '../../stores/appStore.ts';
 import { DrawingControls } from './DrawingControls.tsx';
+import { RouteLayer } from './RouteLayer.tsx';
+import { StopMarkers } from './StopMarkers.tsx';
 import './MapContainer.css';
 
 // CartoDB Positron GL — clean Google Maps-like style, free, no API key required
@@ -10,6 +13,9 @@ import './MapContainer.css';
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 
 interface MapContainerProps {
+  selectedStopIndex: number | null;
+  onStopClick: (index: number) => void;
+  // Draw props added in Plan 06 — retained here
   onDrawComplete?: (polygon: [number, number][]) => void;
   onDrawClear?: () => void;
 }
@@ -30,7 +36,9 @@ function switchLabelsToGerman(map: MaplibreMap) {
   }
 }
 
-export function MapContainer({ onDrawComplete, onDrawClear }: MapContainerProps) {
+export function MapContainer({ selectedStopIndex, onStopClick, onDrawComplete, onDrawClear }: MapContainerProps) {
+  const { route } = useAppStore();
+
   const handleLoad = useCallback((event: { target: MaplibreMap }) => {
     switchLabelsToGerman(event.target);
   }, []);
@@ -53,6 +61,16 @@ export function MapContainer({ onDrawComplete, onDrawClear }: MapContainerProps)
             onPolygonComplete={onDrawComplete}
             onClear={onDrawClear}
           />
+        )}
+        {route && (
+          <>
+            <RouteLayer route={route} />
+            <StopMarkers
+              route={route}
+              selectedStopIndex={selectedStopIndex}
+              onStopClick={onStopClick}
+            />
+          </>
         )}
       </Map>
     </div>

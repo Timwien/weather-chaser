@@ -1,7 +1,8 @@
 import type { Town } from '@weatherchaser/core';
 
-// Set VITE_OSRM_URL in apps/web/.env.local to override (e.g. own proxy)
-const OSRM_URL = import.meta.env.VITE_OSRM_URL ?? 'http://localhost:5000';
+// In dev: proxied through Vite server (/osrm → localhost:5000) to avoid CORS.
+// In production: set VITE_OSRM_URL to the real OSRM endpoint.
+const OSRM_URL = import.meta.env.VITE_OSRM_URL ?? '/osrm';
 
 export interface DistanceMatrix {
   durations: number[][];  // seconds NxN

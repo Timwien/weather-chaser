@@ -23,29 +23,40 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
   // Keep callback ref in sync
   useEffect(() => { onCompleteRef.current = onPolygonComplete; }, [onPolygonComplete]);
 
-  // Add GeoJSON source + layers once map mounts; remove on unmount
+  // Add GeoJSON source + layers once the map style is ready; remove on unmount
   useEffect(() => {
     if (!map) return;
     const m = map.getMap();
 
-    m.addSource(SOURCE_ID, {
-      type: 'geojson',
-      data: { type: 'FeatureCollection', features: [] },
-    });
-    m.addLayer({
-      id: FILL_LAYER,
-      type: 'fill',
-      source: SOURCE_ID,
-      paint: { 'fill-color': '#3f97e0', 'fill-opacity': 0.25 },
-    });
-    m.addLayer({
-      id: LINE_LAYER,
-      type: 'line',
-      source: SOURCE_ID,
-      paint: { 'line-color': '#3f97e0', 'line-width': 2, 'line-opacity': 1 },
-    });
+    const addLayers = () => {
+      if (m.getSource(SOURCE_ID)) return; // guard against double-registration
+      m.addSource(SOURCE_ID, {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      });
+      m.addLayer({
+        id: FILL_LAYER,
+        type: 'fill',
+        source: SOURCE_ID,
+        paint: { 'fill-color': '#3f97e0', 'fill-opacity': 0.25 },
+      });
+      m.addLayer({
+        id: LINE_LAYER,
+        type: 'line',
+        source: SOURCE_ID,
+        paint: { 'line-color': '#3f97e0', 'line-width': 2, 'line-opacity': 1 },
+      });
+    };
+
+    // addSource/addLayer require the style to be fully loaded first
+    if (m.isStyleLoaded()) {
+      addLayers();
+    } else {
+      m.once('load', addLayers);
+    }
 
     return () => {
+      m.off('load', addLayers);
       if (m.getLayer(FILL_LAYER)) m.removeLayer(FILL_LAYER);
       if (m.getLayer(LINE_LAYER)) m.removeLayer(LINE_LAYER);
       if (m.getSource(SOURCE_ID)) m.removeSource(SOURCE_ID);

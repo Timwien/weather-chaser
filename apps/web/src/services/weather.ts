@@ -52,7 +52,6 @@ async function fetchBatch(
   url.searchParams.set('start_date', startDate);
   url.searchParams.set('end_date', endDate);
   url.searchParams.set('timezone', 'auto');
-  url.searchParams.set('forecast_days', '16'); // max allowed without subscription
 
   const res = await fetch(url.toString());
   if (!res.ok) throw new Error(`Open-Meteo error: ${res.status}`);

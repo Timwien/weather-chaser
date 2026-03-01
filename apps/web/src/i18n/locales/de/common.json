@@ -50,6 +50,8 @@
   "itinerary": {
     "title": "Deine Route",
     "back": "Zurück",
+    "day_label_one": "Tag",
+    "day_label_other": "Tage",
     "day": "Tag",
     "nights": "Nächte",
     "score": "Score",

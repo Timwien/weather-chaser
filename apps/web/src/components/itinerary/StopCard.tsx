@@ -52,10 +52,10 @@ export function StopCard({ stop, stopNumber, isSelected, onClick }: StopCardProp
         lineHeight: 1,
         gap: '1px',
       }}>
-        <span style={{ fontSize: '15px', fontWeight: 700 }}>{stopNumber}</span>
         <span style={{ fontSize: '8px', fontWeight: 400, opacity: 0.9, letterSpacing: '0.02em' }}>
-          {t('itinerary.day')}
+          {t('itinerary.day_label', { count: stopNumber })}
         </span>
+        <span style={{ fontSize: '15px', fontWeight: 700 }}>{stopNumber}</span>
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>

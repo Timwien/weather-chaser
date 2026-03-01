@@ -87,6 +87,24 @@ async function runOverpassQuery(query: string): Promise<Town[]> {
   throw new Error('Overpass error: all endpoints unavailable');
 }
 
+function buildAroundQuery(lat: number, lng: number, radiusM: number): string {
+  return `
+    [out:json][timeout:30];
+    (
+      node["place"~"^(city|town|village)$"]["name"](around:${radiusM},${lat},${lng});
+    );
+    out body;
+  `.trim();
+}
+
+export async function fetchTownsInRadius(
+  lat: number,
+  lng: number,
+  radiusKm: number,
+): Promise<Town[]> {
+  return runOverpassQuery(buildAroundQuery(lat, lng, radiusKm * 1000));
+}
+
 export async function fetchTownsInArea(bbox: BoundingBox): Promise<Town[]> {
   return runOverpassQuery(buildBboxQuery(bbox));
 }

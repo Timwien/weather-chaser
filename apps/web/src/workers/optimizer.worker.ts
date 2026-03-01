@@ -10,9 +10,13 @@ import type { BoundingBox } from '../services/nominatim.ts';
 const MAX_TOWNS = 120;
 
 export interface SearchAreaSpec {
-  type: 'place' | 'polygon' | 'radius';
+  type: 'place' | 'polygon' | 'radius' | 'pinned';
   bbox?: [number, number, number, number]; // [west, south, east, north]
   polygon?: [number, number][];
+  /** For pinned: exact city coordinates (skip Overpass, use only this town) */
+  lat?: number;
+  lng?: number;
+  name?: string;
 }
 
 export interface OptimizerWorkerInput {
@@ -45,6 +49,10 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
 
     const townArrays = await Promise.all(
       searchAreas.map(async (area) => {
+        if (area.type === 'pinned' && area.lat !== undefined && area.lng !== undefined && area.name) {
+          // Exact city — skip Overpass, use the supplied coordinates directly
+          return [{ id: `pinned-${area.name}`, name: area.name, lat: area.lat, lng: area.lng }] as Town[];
+        }
         if (area.type === 'polygon' && area.polygon) {
           return fetchTownsInPolygon(area.polygon);
         }

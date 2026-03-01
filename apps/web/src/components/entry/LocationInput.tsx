@@ -112,6 +112,8 @@ export function LocationInput() {
       name: shortName,
       fullName: result.display_name,
       bbox: [bbox.west, bbox.south, bbox.east, bbox.north],
+      lat: Number(result.lat),
+      lng: Number(result.lon),
     };
 
     addSearchArea(area);

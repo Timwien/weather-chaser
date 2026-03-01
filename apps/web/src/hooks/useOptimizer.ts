@@ -20,9 +20,18 @@ export function useOptimizer() {
     // Build search area specs from the multi-area store
     const specs: SearchAreaSpec[] = [];
 
+    // Multiple named places → pinned mode (only route through the exact entered cities)
+    const placeAreas = searchAreas.filter((a) => a.type === 'place');
+    const usesPinnedMode = placeAreas.length > 1 &&
+      placeAreas.every((a) => 'lat' in a && a.lat !== undefined);
+
     for (const area of searchAreas) {
-      if (area.type === 'place' && 'bbox' in area && area.bbox) {
-        specs.push({ type: 'place', bbox: area.bbox });
+      if (area.type === 'place' && 'bbox' in area) {
+        if (usesPinnedMode && 'lat' in area && area.lat !== undefined) {
+          specs.push({ type: 'pinned', lat: area.lat, lng: area.lng, name: area.name });
+        } else if (area.bbox) {
+          specs.push({ type: 'place', bbox: area.bbox });
+        }
       } else if (area.type === 'polygon' && 'polygon' in area) {
         specs.push({ type: 'polygon', polygon: area.polygon as [number, number][] });
       } else if (area.type === 'radius' && 'centerLat' in area) {
@@ -38,6 +47,17 @@ export function useOptimizer() {
             area.centerLat + dLat,
           ],
         });
+      }
+    }
+
+    // If start location wasn't explicitly picked, derive from first place area
+    let startLat = tripConfig.startLat;
+    let startLng = tripConfig.startLng;
+    if (startLat === null) {
+      const firstPlace = searchAreas.find((a) => a.type === 'place' && 'lat' in a && a.lat !== undefined);
+      if (firstPlace && 'lat' in firstPlace && firstPlace.lat !== undefined) {
+        startLat = firstPlace.lat;
+        startLng = firstPlace.lng ?? null;
       }
     }
 
@@ -95,8 +115,8 @@ export function useOptimizer() {
         totalDays: tripConfig.totalDays,
         maxStay: tripConfig.maxStay,
         preset: tripConfig.preset,
-        startLat: tripConfig.startLat,
-        startLng: tripConfig.startLng,
+        startLat,
+        startLng,
         mustVisitCoords: tripConfig.mustVisitCoords,
       },
     };

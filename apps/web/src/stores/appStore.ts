@@ -4,13 +4,15 @@ import type { Route, WeatherPreset, ScoringWeights } from '@weatherchaser/core';
 type AppMode = 'idle' | 'route-config' | 'weather-finder' | 'loading' | 'results';
 type LoadingStep = 'finding_towns' | 'fetching_weather' | 'optimizing_route' | null;
 
-/** A single named place with optional bbox. */
+/** A single named place with optional bbox and center coordinates. */
 interface PlaceArea {
   type: 'place';
   id: string;           // Unique id (nominatim place_id as string)
   name: string;         // Short display name (first segment, e.g. "Bavaria")
   fullName: string;     // Full Nominatim display_name
   bbox?: [number, number, number, number]; // [west, south, east, north]
+  lat?: number;         // Center latitude (from Nominatim)
+  lng?: number;         // Center longitude (from Nominatim)
 }
 
 /** A hand-drawn polygon area. */
@@ -107,12 +109,12 @@ const defaultTripConfig: TripConfig = {
 // Pre-fill search areas so you don't have to type them during every test session.
 const DEV_SEARCH_AREAS: SearchAreaItem[] = import.meta.env.DEV
   ? [
-      { type: 'place', id: 'dev-berchtesgaden', name: 'Berchtesgaden', fullName: 'Berchtesgaden, Bayern, Deutschland', bbox: [12.89, 47.59, 13.12, 47.78] },
-      { type: 'place', id: 'dev-chiemsee',      name: 'Chiemsee',      fullName: 'Chiemsee, Bayern, Deutschland',      bbox: [12.28, 47.82, 12.62, 47.99] },
-      { type: 'place', id: 'dev-muenchen',       name: 'München',       fullName: 'München, Bayern, Deutschland',       bbox: [11.36, 48.06, 11.72, 48.25] },
-      { type: 'place', id: 'dev-fuessen',        name: 'Füssen',        fullName: 'Füssen, Bayern, Deutschland',        bbox: [10.60, 47.54, 10.84, 47.69] },
-      { type: 'place', id: 'dev-wien',           name: 'Wien',          fullName: 'Wien, Österreich',                  bbox: [16.18, 48.11, 16.58, 48.32] },
-      { type: 'place', id: 'dev-zuerich',        name: 'Zürich',        fullName: 'Zürich, Schweiz',                   bbox: [8.45,  47.32, 8.62,  47.43] },
+      { type: 'place', id: 'dev-berchtesgaden', name: 'Berchtesgaden', fullName: 'Berchtesgaden, Bayern, Deutschland', bbox: [12.89, 47.59, 13.12, 47.78], lat: 47.685, lng: 13.005 },
+      { type: 'place', id: 'dev-chiemsee',      name: 'Chiemsee',      fullName: 'Chiemsee, Bayern, Deutschland',      bbox: [12.28, 47.82, 12.62, 47.99], lat: 47.905, lng: 12.450 },
+      { type: 'place', id: 'dev-muenchen',       name: 'München',       fullName: 'München, Bayern, Deutschland',       bbox: [11.36, 48.06, 11.72, 48.25], lat: 48.155, lng: 11.540 },
+      { type: 'place', id: 'dev-fuessen',        name: 'Füssen',        fullName: 'Füssen, Bayern, Deutschland',        bbox: [10.60, 47.54, 10.84, 47.69], lat: 47.615, lng: 10.720 },
+      { type: 'place', id: 'dev-wien',           name: 'Wien',          fullName: 'Wien, Österreich',                  bbox: [16.18, 48.11, 16.58, 48.32], lat: 48.215, lng: 16.380 },
+      { type: 'place', id: 'dev-zuerich',        name: 'Zürich',        fullName: 'Zürich, Schweiz',                   bbox: [8.45,  47.32, 8.62,  47.43], lat: 47.375, lng: 8.535  },
     ]
   : [];
 // ─────────────────────────────────────────────────────────────────────────────

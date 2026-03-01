@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 Phase: 1 of 5 (Core Algorithm + Route Planner Web)
 Plan: 10 of 10 in current phase
 Status: In progress
-Last activity: 2026-02-28 — Plan 01-09 complete (share/export: Google Maps + Apple Maps deep links, clipboard shareable URL, /trip restoration route, ShareBar + ItineraryPanel)
+Last activity: 2026-03-01 — Plan 01-09 confirmed; bug fixes: Overpass XML fallback, pinned-city mode (2+ cities = exact coords only), start location auto-derive from first place, map fitBounds on stop click
 
 Progress: [████████░░] 16%
 

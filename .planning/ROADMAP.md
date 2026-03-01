@@ -40,8 +40,8 @@ Plans:
 - [x] 01-05-PLAN.md — Location services (Nominatim geocoding, Overpass town fetching, map polygon drawing)
 - [x] 01-06-PLAN.md — Entry panel UI (shared config: dates + location + criteria + two CTAs + route-config second step)
 - [x] 01-07-PLAN.md — Optimizer pipeline integration (Web Worker, weather fetch, OSRM matrix, loading overlay)
-- [ ] 01-08-PLAN.md — Results display (itinerary timeline, score-colored map markers, per-segment route line)
-- [ ] 01-09-PLAN.md — Share + export (Google Maps, Apple Maps deep links, shareable URL + /trip restore route)
+- [x] 01-08-PLAN.md — Results display (itinerary timeline, score-colored map markers, per-segment route line)
+- [x] 01-09-PLAN.md — Share + export (Google Maps, Apple Maps deep links, shareable URL + /trip restore route)
 - [ ] 01-10-PLAN.md — End-to-end verification checkpoint (all 5 phase success criteria)
 
 ### Phase 2: Weather Finder Mode
@@ -96,7 +96,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core Algorithm + Route Planner Web | 8/10 | In Progress|  |
+| 1. Core Algorithm + Route Planner Web | 9/10 | In Progress|  |
 | 2. Weather Finder Mode | 0/TBD | Not started | - |
 | 3. Backend + Auth + Production Hosting | 0/TBD | Not started | - |
 | 4. Freemium + Monetization | 0/TBD | Not started | - |

@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { Map } from '@vis.gl/react-maplibre';
+import { useCallback, useEffect, useRef } from 'react';
+import { Map, useMap } from '@vis.gl/react-maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Map as MaplibreMap } from 'maplibre-gl';
 import { useAppStore } from '../../stores/appStore.ts';
@@ -36,6 +36,29 @@ function switchLabelsToGerman(map: MaplibreMap) {
   }
 }
 
+/** Fits the map to the full route bounding box when a stop is selected. */
+function FitRouteOnSelection({ selectedStopIndex }: { selectedStopIndex: number | null }) {
+  const { current: map } = useMap();
+  const { route } = useAppStore();
+  const prevIndexRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!map || !route || selectedStopIndex === null) return;
+    if (prevIndexRef.current === selectedStopIndex) return;
+    prevIndexRef.current = selectedStopIndex;
+
+    if (route.stops.length === 0) return;
+    const lngs = route.stops.map((s) => s.town.lng);
+    const lats = route.stops.map((s) => s.town.lat);
+    map.getMap().fitBounds(
+      [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+      { padding: 60, maxZoom: 9, duration: 600 },
+    );
+  }, [map, route, selectedStopIndex]);
+
+  return null;
+}
+
 export function MapContainer({ selectedStopIndex, onStopClick, onDrawComplete, onDrawClear }: MapContainerProps) {
   const { route } = useAppStore();
 
@@ -55,6 +78,8 @@ export function MapContainer({ selectedStopIndex, onStopClick, onDrawComplete, o
         style={{ width: '100%', height: '100%' }}
         onLoad={handleLoad}
       >
+        {/* FitRouteOnSelection must live inside <Map> so useMap() has a provider */}
+        <FitRouteOnSelection selectedStopIndex={selectedStopIndex} />
         {/* DrawingControls must live inside <Map> so useMap() has a provider */}
         {onDrawComplete && onDrawClear && (
           <DrawingControls

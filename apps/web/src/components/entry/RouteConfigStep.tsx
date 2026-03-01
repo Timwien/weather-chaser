@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useLocationSearch } from '../../hooks/useLocationSearch.ts';
@@ -58,6 +58,18 @@ function StartLocationSearch() {
 
   const [inputValue, setInputValue] = useState(defaultValue);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // Auto-set start coords from first place area if not yet set
+  useEffect(() => {
+    if (tripConfig.startLat === null && firstPlace && 'lat' in firstPlace && firstPlace.lat !== undefined) {
+      setTripConfig({
+        startLocation: firstPlace.name,
+        startLat: firstPlace.lat,
+        startLng: (firstPlace as { lat: number; lng?: number }).lng ?? null,
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;

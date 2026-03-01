@@ -74,7 +74,8 @@ async function tryEndpoint(url: string, query: string): Promise<Town[] | null> {
     // Network or timeout errors — try next endpoint
     if (e instanceof Error && (e.name === 'TimeoutError' || e.name === 'AbortError')) return null;
     if (e instanceof TypeError) return null; // fetch network failure
-    throw e; // re-throw 4xx and parse errors
+    if (e instanceof SyntaxError) return null; // Overpass returned XML/HTML instead of JSON (overloaded)
+    throw e; // re-throw 4xx and unexpected errors
   }
 }
 

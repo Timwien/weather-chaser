@@ -54,7 +54,15 @@ Plans:
   3. User can set a maximum distance constraint and the results update to show only locations within that radius
   4. User can toggle between morning and afternoon scoring and the rankings and scores update immediately without re-fetching weather data
   5. User can select a preset profile (Beach, Hiking, Sightseeing) and the scores recalculate using that profile's weights
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Store finder slice + Overpass radius query + hourly weather service
+- [ ] 02-02-PLAN.md — Finder Web Worker + useFinder hook
+- [ ] 02-03-PLAN.md — WeatherFinderStep entry UI + FinderFilterBar + FinderEmptyState + EntryPanel patch
+- [ ] 02-04-PLAN.md — FinderResultRow + WeatherFinderPanel (ranked list + sort buttons + useMemo re-scoring)
+- [ ] 02-05-PLAN.md — FinderMarkers (map) + MapContainer finder integration
+- [ ] 02-06-PLAN.md — routes/index.tsx wiring + end-to-end verification checkpoint
 
 ### Phase 3: Backend + Auth + Production Hosting
 **Goal**: Users can create accounts, save routes, and favorite locations — and the app runs safely in production with all public API dependencies proxied and cached server-side

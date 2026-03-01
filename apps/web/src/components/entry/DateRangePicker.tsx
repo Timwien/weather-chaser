@@ -4,9 +4,18 @@ import { useAppStore } from '../../stores/appStore.ts';
 
 /* ── helpers ────────────────────────────────────────────── */
 
+// Open-Meteo free tier: /v1/forecast supports up to 16 days ahead
+const OPENMETEO_FORECAST_DAYS = 16;
+
 function today(): Date {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function addDays(date: Date, n: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() + n);
   return d;
 }
 
@@ -76,6 +85,7 @@ interface CalendarMonthProps {
   onDayClick: (d: Date) => void;
   onDayHover: (d: Date | null) => void;
   minDate: Date;
+  maxDate: Date;
   locale: string;
 }
 
@@ -87,6 +97,7 @@ function CalendarMonth({
   onDayClick,
   onDayHover,
   minDate,
+  maxDate,
   locale,
 }: CalendarMonthProps) {
   const year = month.getFullYear();
@@ -109,8 +120,7 @@ function CalendarMonth({
 
   function classForDay(d: number): string {
     const date = new Date(year, monthIdx, d);
-    const isMin = isBefore(date, minDate);
-    if (isMin) return 'drp-day drp-day--disabled';
+    if (isBefore(date, minDate) || isBefore(maxDate, date)) return 'drp-day drp-day--disabled';
 
     const isStart = start && isSameDay(date, start);
     const isEnd = end && isSameDay(date, end);
@@ -139,7 +149,7 @@ function CalendarMonth({
           if (!cell.day) return <div key={`e${idx}`} />;
           const d = cell.day;
           const date = new Date(year, monthIdx, d);
-          const disabled = isBefore(date, minDate);
+          const disabled = isBefore(date, minDate) || isBefore(maxDate, date);
           return (
             <button
               key={d}
@@ -148,6 +158,7 @@ function CalendarMonth({
               disabled={disabled}
               onClick={() => !disabled && onDayClick(date)}
               onMouseEnter={() => !disabled && onDayHover(date)}
+              title={isBefore(maxDate, date) ? `Max. ${OPENMETEO_FORECAST_DAYS} days ahead` : undefined}
               onMouseLeave={() => onDayHover(null)}
               aria-label={date.toLocaleDateString(locale, { dateStyle: 'medium' })}
             >
@@ -179,6 +190,8 @@ export function DateRangePicker() {
   const endDate = tripConfig.endDate ? new Date(tripConfig.endDate + 'T00:00:00') : null;
 
   const minDate = today();
+  // Open-Meteo free tier supports up to OPENMETEO_FORECAST_DAYS days ahead
+  const maxDate = addDays(today(), OPENMETEO_FORECAST_DAYS - 1);
   const locale = i18n.language ?? 'en';
 
   // Close popover on outside click
@@ -293,6 +306,7 @@ export function DateRangePicker() {
               onDayClick={handleDayClick}
               onDayHover={setHovered}
               minDate={minDate}
+              maxDate={maxDate}
               locale={locale}
             />
             <CalendarMonth
@@ -303,6 +317,7 @@ export function DateRangePicker() {
               onDayClick={handleDayClick}
               onDayHover={setHovered}
               minDate={minDate}
+              maxDate={maxDate}
               locale={locale}
             />
           </div>

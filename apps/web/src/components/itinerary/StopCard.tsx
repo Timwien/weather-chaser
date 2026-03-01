@@ -49,11 +49,13 @@ export function StopCard({ stop, stopNumber, isSelected, onClick }: StopCardProp
         alignItems: 'center',
         justifyContent: 'center',
         color: 'white',
-        fontSize: 'var(--font-size-xs)',
-        fontWeight: 700,
-        lineHeight: 1.1,
+        lineHeight: 1,
+        gap: '1px',
       }}>
-        {stopNumber}
+        <span style={{ fontSize: '15px', fontWeight: 700 }}>{stopNumber}</span>
+        <span style={{ fontSize: '8px', fontWeight: 400, opacity: 0.9, letterSpacing: '0.02em' }}>
+          {t('itinerary.day')}
+        </span>
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>

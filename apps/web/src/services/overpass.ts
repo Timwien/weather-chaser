@@ -1,11 +1,15 @@
-// Overpass API — uses public overpass-api.de for Phase 1 dev only
+// Overpass API — tries primary endpoint first, falls back to mirror on 429/5xx
 // Production (Phase 3): must proxy through own server
 // Only fetches city/town/village nodes with name tags — excludes hamlets, isolated_dwelling, farm
 
 import type { Town } from '@weatherchaser/core';
 import type { BoundingBox } from './nominatim.ts';
 
-const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+/** Endpoints tried in order; the first one to succeed wins */
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+];
 
 function buildBboxQuery(bbox: BoundingBox): string {
   const { south, west, north, east } = bbox;
@@ -49,17 +53,37 @@ function parseTowns(nodes: OverpassNode[]): Town[] {
     }));
 }
 
-async function runOverpassQuery(query: string): Promise<Town[]> {
-  const res = await fetch(OVERPASS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `data=${encodeURIComponent(query)}`,
-    signal: AbortSignal.timeout(35000),
-  });
+async function tryEndpoint(url: string, query: string): Promise<Town[] | null> {
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `data=${encodeURIComponent(query)}`,
+      signal: AbortSignal.timeout(35000),
+    });
 
-  if (!res.ok) throw new Error(`Overpass error: ${res.status}`);
-  const data: { elements: OverpassNode[] } = await res.json();
-  return parseTowns(data.elements);
+    if (!res.ok) {
+      // Only retry on rate-limiting or server errors; fail fast on 4xx
+      if (res.status === 429 || res.status >= 500) return null;
+      throw new Error(`Overpass error: ${res.status}`);
+    }
+
+    const data: { elements: OverpassNode[] } = await res.json();
+    return parseTowns(data.elements);
+  } catch (e) {
+    // Network or timeout errors — try next endpoint
+    if (e instanceof Error && (e.name === 'TimeoutError' || e.name === 'AbortError')) return null;
+    if (e instanceof TypeError) return null; // fetch network failure
+    throw e; // re-throw 4xx and parse errors
+  }
+}
+
+async function runOverpassQuery(query: string): Promise<Town[]> {
+  for (const url of OVERPASS_ENDPOINTS) {
+    const result = await tryEndpoint(url, query);
+    if (result !== null) return result;
+  }
+  throw new Error('Overpass error: all endpoints unavailable');
 }
 
 export async function fetchTownsInArea(bbox: BoundingBox): Promise<Town[]> {

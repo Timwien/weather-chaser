@@ -49,6 +49,7 @@
   },
   "itinerary": {
     "title": "Your Route",
+    "back": "Back",
     "day": "Day",
     "nights": "nights",
     "score": "Score",

@@ -1,23 +1,28 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { useMap, Source, Layer } from '@vis.gl/react-maplibre';
+import { useMap } from '@vis.gl/react-maplibre';
 import { useTranslation } from 'react-i18next';
-import type { MapMouseEvent } from 'maplibre-gl';
-import type { FeatureCollection } from 'geojson';
+import type { GeoJSONSource, MapMouseEvent } from 'maplibre-gl';
+
+const SOURCE_ID = 'draw-polygon';
+const FILL_LAYER  = 'draw-polygon-fill';
+const LINE_LAYER  = 'draw-polygon-outline';
 
 interface DrawingControlsProps {
   onPolygonComplete: (polygon: [number, number][]) => void;
   onClear: () => void;
 }
 
-const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] };
+type Verts = [number, number][];
 
-function buildFC(verts: [number, number][]): FeatureCollection {
-  if (verts.length < 2) return EMPTY_FC;
+function toFeatureCollection(verts: Verts) {
+  if (verts.length < 2) {
+    return { type: 'FeatureCollection' as const, features: [] };
+  }
   return {
-    type: 'FeatureCollection',
+    type: 'FeatureCollection' as const,
     features: [{
-      type: 'Feature',
-      geometry: { type: 'Polygon', coordinates: [[...verts, verts[0]]] },
+      type: 'Feature' as const,
+      geometry: { type: 'Polygon' as const, coordinates: [[...verts, verts[0]]] },
       properties: {},
     }],
   };
@@ -28,14 +33,62 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
   const { current: map } = useMap();
   const [hasPolygon, setHasPolygon] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [geojson, setGeojson] = useState<FeatureCollection>(EMPTY_FC);
-  const verticesRef = useRef<[number, number][]>([]);
+  const verticesRef = useRef<Verts>([]);
   const onCompleteRef = useRef(onPolygonComplete);
 
-  // Keep callback ref in sync
   useEffect(() => { onCompleteRef.current = onPolygonComplete; }, [onPolygonComplete]);
 
-  // Attach / detach click handlers while drawing
+  // ── Source + Layers ────────────────────────────────────────────────────────
+  // Mirror what react-maplibre's <Source>/<Layer> does internally:
+  // subscribe to 'styledata' and (re-)add source/layers on every style event.
+  // This handles initial load, style reloads, and late mounts correctly.
+  useEffect(() => {
+    if (!map) return;
+    const m = map.getMap();
+
+    const ensureLayers = () => {
+      if (!m.style?._loaded) return;
+      if (m.getSource(SOURCE_ID)) return; // already set up
+
+      m.addSource(SOURCE_ID, {
+        type: 'geojson',
+        data: toFeatureCollection(verticesRef.current),
+      });
+      m.addLayer({
+        id: FILL_LAYER,
+        type: 'fill',
+        source: SOURCE_ID,
+        paint: { 'fill-color': '#3f97e0', 'fill-opacity': 0.25 },
+      });
+      m.addLayer({
+        id: LINE_LAYER,
+        type: 'line',
+        source: SOURCE_ID,
+        paint: { 'line-color': '#3f97e0', 'line-width': 2, 'line-opacity': 1 },
+      });
+    };
+
+    m.on('styledata', ensureLayers);
+    ensureLayers(); // run immediately in case style is already loaded
+
+    return () => {
+      m.off('styledata', ensureLayers);
+      if (m.style?._loaded) {
+        if (m.getLayer(LINE_LAYER))  m.removeLayer(LINE_LAYER);
+        if (m.getLayer(FILL_LAYER))  m.removeLayer(FILL_LAYER);
+        if (m.getSource(SOURCE_ID)) m.removeSource(SOURCE_ID);
+      }
+    };
+  }, [map]);
+
+  // ── Keep source data in sync with vertices ─────────────────────────────────
+  const syncSource = useCallback((verts: Verts) => {
+    if (!map) return;
+    const src = map.getMap().getSource(SOURCE_ID) as GeoJSONSource | undefined;
+    src?.setData(toFeatureCollection(verts));
+  }, [map]);
+
+  // ── Click handlers while drawing ───────────────────────────────────────────
   useEffect(() => {
     if (!map || !isDrawing) return;
     const m = map.getMap();
@@ -44,11 +97,11 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
       const pt: [number, number] = [e.lngLat.lng, e.lngLat.lat];
       const newVerts = [...verticesRef.current, pt];
       verticesRef.current = newVerts;
-      setGeojson(buildFC(newVerts));
+      syncSource(newVerts);
     };
 
     const onDblClick = () => {
-      // MapLibre fires click then dblclick — drop the extra vertex added by the second click
+      // MapLibre fires click then dblclick — strip the extra vertex from the second click
       const verts = verticesRef.current.slice(0, -1);
       if (verts.length < 3) return;
 
@@ -57,7 +110,7 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
       m.doubleClickZoom.enable();
       m.getCanvas().style.cursor = '';
 
-      setGeojson(buildFC(verts));
+      syncSource(verts);
       setIsDrawing(false);
       setHasPolygon(true);
       onCompleteRef.current([...verts, verts[0]]);
@@ -69,72 +122,90 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
       m.off('click', onClick);
       m.off('dblclick', onDblClick);
     };
-  }, [map, isDrawing]);
+  }, [map, isDrawing, syncSource]);
 
+  // ── Handlers ───────────────────────────────────────────────────────────────
   const handleStartDrawing = useCallback(() => {
     if (!map) return;
     const m = map.getMap();
     verticesRef.current = [];
-    setGeojson(EMPTY_FC);
+    syncSource([]);
     m.doubleClickZoom.disable();
     m.getCanvas().style.cursor = 'crosshair';
     setIsDrawing(true);
-  }, [map]);
+  }, [map, syncSource]);
 
   const handleCancelDrawing = useCallback(() => {
     if (!map) return;
     const m = map.getMap();
     verticesRef.current = [];
-    setGeojson(EMPTY_FC);
+    syncSource([]);
     m.doubleClickZoom.enable();
     m.getCanvas().style.cursor = '';
     setIsDrawing(false);
-  }, [map]);
+  }, [map, syncSource]);
 
   const handleClear = useCallback(() => {
     if (!map) return;
     const m = map.getMap();
     verticesRef.current = [];
-    setGeojson(EMPTY_FC);
+    syncSource([]);
     m.doubleClickZoom.enable();
     m.getCanvas().style.cursor = '';
     setIsDrawing(false);
     setHasPolygon(false);
     onClear();
-  }, [map, onClear]);
+  }, [map, syncSource, onClear]);
 
+  // ── UI ─────────────────────────────────────────────────────────────────────
   return (
-    <>
-      {/* Source + Layers rendered declaratively — react-maplibre handles styledata timing */}
-      <Source id="draw-polygon" type="geojson" data={geojson}>
-        <Layer
-          id="draw-polygon-fill"
-          type="fill"
-          paint={{ 'fill-color': '#3f97e0', 'fill-opacity': 0.25 }}
-        />
-        <Layer
-          id="draw-polygon-outline"
-          type="line"
-          paint={{ 'line-color': '#3f97e0', 'line-width': 2, 'line-opacity': 1 }}
-        />
-      </Source>
-
-      {/* Floating UI controls */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 'var(--space-4)',
-          right: 'var(--space-4)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--space-2)',
-          zIndex: 10,
-          pointerEvents: 'all',
-        }}
-      >
-        {!isDrawing && !hasPolygon && (
+    <div
+      style={{
+        position: 'absolute',
+        top: 'var(--space-4)',
+        right: 'var(--space-4)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--space-2)',
+        zIndex: 10,
+        pointerEvents: 'auto',
+      }}
+    >
+      {!isDrawing && !hasPolygon && (
+        <button
+          onClick={handleStartDrawing}
+          style={{
+            background: 'var(--glass-bg)',
+            backdropFilter: 'var(--glass-blur)',
+            border: 'var(--glass-border)',
+            borderRadius: 'var(--radius-md)',
+            padding: 'var(--space-2) var(--space-4)',
+            fontSize: 'var(--font-size-sm)',
+            fontWeight: 'var(--font-weight-medium)',
+            color: 'var(--color-primary)',
+            cursor: 'pointer',
+            boxShadow: 'var(--shadow-md)',
+          }}
+        >
+          {t('entry.draw_area', 'Gebiet zeichnen')}
+        </button>
+      )}
+      {isDrawing && (
+        <>
+          <div style={{
+            background: 'var(--color-primary)',
+            borderRadius: 'var(--radius-md)',
+            padding: 'var(--space-2) var(--space-4)',
+            fontSize: 'var(--font-size-sm)',
+            fontWeight: 'var(--font-weight-medium)',
+            color: '#fff',
+            boxShadow: 'var(--shadow-md)',
+            textAlign: 'center',
+          }}>
+            {t('entry.draw_hint', 'Klicken um Punkte zu setzen, doppelklicken zum Abschließen')}
+          </div>
           <button
-            onClick={handleStartDrawing}
+            onClick={handleCancelDrawing}
             style={{
               background: 'var(--glass-bg)',
               backdropFilter: 'var(--glass-blur)',
@@ -142,67 +213,34 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
               borderRadius: 'var(--radius-md)',
               padding: 'var(--space-2) var(--space-4)',
               fontSize: 'var(--font-size-sm)',
-              fontWeight: 'var(--font-weight-medium)',
-              color: 'var(--color-primary)',
-              cursor: 'pointer',
-              boxShadow: 'var(--shadow-md)',
-            }}
-          >
-            {t('entry.draw_area', 'Gebiet zeichnen')}
-          </button>
-        )}
-        {isDrawing && (
-          <>
-            <div style={{
-              background: 'var(--color-primary)',
-              borderRadius: 'var(--radius-md)',
-              padding: 'var(--space-2) var(--space-4)',
-              fontSize: 'var(--font-size-sm)',
-              fontWeight: 'var(--font-weight-medium)',
-              color: '#fff',
-              boxShadow: 'var(--shadow-md)',
-              textAlign: 'center',
-            }}>
-              {t('entry.draw_hint', 'Klicken um Punkte zu setzen, doppelklicken zum Abschließen')}
-            </div>
-            <button
-              onClick={handleCancelDrawing}
-              style={{
-                background: 'var(--glass-bg)',
-                backdropFilter: 'var(--glass-blur)',
-                border: 'var(--glass-border)',
-                borderRadius: 'var(--radius-md)',
-                padding: 'var(--space-2) var(--space-4)',
-                fontSize: 'var(--font-size-sm)',
-                color: 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                boxShadow: 'var(--shadow-sm)',
-              }}
-            >
-              {t('entry.cancel_draw', 'Abbrechen')}
-            </button>
-          </>
-        )}
-        {hasPolygon && (
-          <button
-            onClick={handleClear}
-            style={{
-              background: 'var(--glass-bg)',
-              backdropFilter: 'var(--glass-blur)',
-              border: 'var(--glass-border)',
-              borderRadius: 'var(--radius-md)',
-              padding: 'var(--space-2) var(--space-4)',
-              fontSize: 'var(--font-size-sm)',
-              fontWeight: 'var(--font-weight-medium)',
-              color: 'var(--color-error)',
+              color: 'var(--color-text-secondary)',
               cursor: 'pointer',
               boxShadow: 'var(--shadow-sm)',
             }}
           >
-            {t('entry.clear_area', 'Gebiet löschen')}
+            {t('entry.cancel_draw', 'Abbrechen')}
           </button>
-        )}
-      </div>
-    </>
+        </>
+      )}
+      {hasPolygon && (
+        <button
+          onClick={handleClear}
+          style={{
+            background: 'var(--glass-bg)',
+            backdropFilter: 'var(--glass-blur)',
+            border: 'var(--glass-border)',
+            borderRadius: 'var(--radius-md)',
+            padding: 'var(--space-2) var(--space-4)',
+            fontSize: 'var(--font-size-sm)',
+            fontWeight: 'var(--font-weight-medium)',
+            color: 'var(--color-error)',
+            cursor: 'pointer',
+            boxShadow: 'var(--shadow-sm)',
+          }}
+        >
+          {t('entry.clear_area', 'Gebiet löschen')}
+        </button>
+      )}
+    </div>
   );
 }

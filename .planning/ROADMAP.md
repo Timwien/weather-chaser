@@ -12,7 +12,7 @@ WeatherChaser is rebuilt from a static HTML/JS prototype into a production-grade
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Core Algorithm + Route Planner Web** - Working web app with real town data, temporal weather scoring, anti-backtracking optimizer, day-by-day itinerary, and shareable trip link — no backend required
+- [x] **Phase 1: Core Algorithm + Route Planner Web** - Working web app with real town data, temporal weather scoring, anti-backtracking optimizer, day-by-day itinerary, and shareable trip link — no backend required
 - [ ] **Phase 2: Weather Finder Mode** - Second product mode: ranked best-weather locations for a given date range with map visualization and time-of-day scoring
 - [ ] **Phase 3: Backend + Auth + Production Hosting** - API server with weather/Overpass/OSRM proxies and caching, user accounts (email + OAuth), saved routes, favorites, preferences, and public web hosting
 - [ ] **Phase 4: Freemium + Monetization** - Stripe subscription, premium feature enforcement server-side, custom weight sliders, and clear free vs. premium UX
@@ -42,7 +42,7 @@ Plans:
 - [x] 01-07-PLAN.md — Optimizer pipeline integration (Web Worker, weather fetch, OSRM matrix, loading overlay)
 - [x] 01-08-PLAN.md — Results display (itinerary timeline, score-colored map markers, per-segment route line)
 - [x] 01-09-PLAN.md — Share + export (Google Maps, Apple Maps deep links, shareable URL + /trip restore route)
-- [ ] 01-10-PLAN.md — End-to-end verification checkpoint (all 5 phase success criteria)
+- [x] 01-10-PLAN.md — End-to-end verification checkpoint (all 5 phase success criteria)
 
 ### Phase 2: Weather Finder Mode
 **Goal**: Users can ask "where is the weather best near me this weekend?" and receive a ranked list of real locations with color-coded map markers, filterable by date range, distance, time of day, and activity preset
@@ -96,7 +96,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core Algorithm + Route Planner Web | 9/10 | In Progress|  |
+| 1. Core Algorithm + Route Planner Web | 10/10 | Complete | 2026-03-01 |
 | 2. Weather Finder Mode | 0/TBD | Not started | - |
 | 3. Backend + Auth + Production Hosting | 0/TBD | Not started | - |
 | 4. Freemium + Monetization | 0/TBD | Not started | - |

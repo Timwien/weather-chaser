@@ -9,12 +9,11 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 
 ## Current Position
 
-Phase: 1 of 5 (Core Algorithm + Route Planner Web)
-Plan: 10 of 10 in current phase
-Status: In progress
-Last activity: 2026-03-01 — Plan 01-09 confirmed; bug fixes: Overpass XML fallback, pinned-city mode (2+ cities = exact coords only), start location auto-derive from first place, map fitBounds on stop click
+Phase: 1 of 5 — **COMPLETE** ✅
+Next: Phase 2 — Weather Finder Mode
+Last activity: 2026-03-01 — Phase 1 verified and closed (all 5 success criteria passed)
 
-Progress: [████████░░] 16%
+Progress: [██░░░░░░░░] 20% (Phase 1 of 5 complete)
 
 ## Performance Metrics
 

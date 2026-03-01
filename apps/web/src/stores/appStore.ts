@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Route, WeatherPreset, ScoringWeights } from '@weatherchaser/core';
+import type { Route, WeatherPreset, ScoringWeights, Town, HourlyWeather } from '@weatherchaser/core';
 
 type AppMode = 'idle' | 'route-config' | 'weather-finder' | 'loading' | 'results';
 type LoadingStep = 'finding_towns' | 'fetching_weather' | 'optimizing_route' | null;
@@ -59,6 +59,29 @@ interface TripConfig {
   mustVisitCoords: Array<{ lat: number; lng: number; name: string }>;
 }
 
+interface FinderConfig {
+  startLat: number | null;
+  startLng: number | null;
+  startLocation: string;
+  radiusKm: number;           // default 200
+  preset: WeatherPreset;      // default 'sightseeing'
+  timeOfDay: 'morning' | 'afternoon' | 'full';  // default 'full'
+  sortBy: 'score' | 'sunshine' | 'temperature' | 'precipitation';
+}
+
+export type FinderTimeOfDay = 'morning' | 'afternoon' | 'full';
+export type FinderSortBy = 'score' | 'sunshine' | 'temperature' | 'precipitation';
+
+const defaultFinderConfig: FinderConfig = {
+  startLat: null,
+  startLng: null,
+  startLocation: '',
+  radiusKm: 200,
+  preset: 'sightseeing',
+  timeOfDay: 'full',
+  sortBy: 'score',
+};
+
 interface AppState {
   mode: AppMode;
   loadingStep: LoadingStep;
@@ -71,6 +94,19 @@ interface AppState {
   tripConfig: TripConfig;
   route: Route | null;
   error: string | null;
+
+  // Finder state slice
+  finderConfig: FinderConfig;
+  finderLoading: boolean;
+  finderError: string | null;
+  finderTowns: Town[] | null;
+  finderHourlyCache: Record<string, HourlyWeather>;  // townId → hourly data
+  // Finder actions
+  setFinderConfig: (config: Partial<FinderConfig>) => void;
+  setFinderLoading: (v: boolean) => void;
+  setFinderError: (e: string | null) => void;
+  setFinderData: (towns: Town[], hourly: Record<string, HourlyWeather>) => void;
+  clearFinderData: () => void;
 
   // Actions
   setMode: (mode: AppMode) => void;
@@ -128,6 +164,11 @@ export const useAppStore = create<AppState>((set) => ({
   tripConfig: defaultTripConfig,
   route: null,
   error: null,
+  finderConfig: defaultFinderConfig,
+  finderLoading: false,
+  finderError: null,
+  finderTowns: null,
+  finderHourlyCache: {},
 
   setMode: (mode) => set({ mode }),
   setLoadingStep: (step) => set({ loadingStep: step }),
@@ -144,6 +185,15 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({ tripConfig: { ...state.tripConfig, ...config } })),
   setRoute: (route) => set({ route }),
   setError: (error) => set({ error }),
+  setFinderConfig: (config) =>
+    set((state) => ({ finderConfig: { ...state.finderConfig, ...config } })),
+  setFinderLoading: (v) => set({ finderLoading: v }),
+  setFinderError: (e) => set({ finderError: e }),
+  setFinderData: (towns, hourly) =>
+    set({ finderTowns: towns, finderHourlyCache: hourly, finderLoading: false, finderError: null }),
+  clearFinderData: () =>
+    set({ finderTowns: null, finderHourlyCache: {}, finderLoading: false, finderError: null }),
   reset: () =>
-    set({ mode: 'idle', loadingStep: null, route: null, error: null }),
+    set({ mode: 'idle', loadingStep: null, route: null, error: null,
+          finderTowns: null, finderHourlyCache: {}, finderLoading: false, finderError: null }),
 }));

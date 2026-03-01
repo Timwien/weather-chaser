@@ -42,12 +42,20 @@ export interface ScoringWeights {
 
 export type WeatherPreset = 'beach' | 'hiking' | 'sightseeing';
 
+export interface StopWeatherAvg {
+  sunshineHoursPerDay: number;   // average daily sunshine in hours
+  precipitationMmPerDay: number; // average daily precipitation in mm
+  tempMaxC: number;              // average daily max temperature in °C
+  windKmh: number;               // average daily max wind speed in km/h
+}
+
 export interface Stop {
   town: Town;
   arrivalDate: Date;
   nights: number;
   score: WeatherScore;
   distanceToNextKm?: number;
+  weatherAvg?: StopWeatherAvg;
 }
 
 export interface Route {

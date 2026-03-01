@@ -145,7 +145,31 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
     };
 
     const result = optimizeRoute(optimizerInput);
-    self.postMessage({ type: 'complete', result } satisfies OptimizerWorkerOutput);
+
+    // Attach real weather averages to each stop so the UI can show
+    // actual values (°C, mm, km/h, hours) instead of 0–100 scores.
+    const avg = (arr: number[]) =>
+      arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+
+    const stopsWithWeather = result.stops.map((stop) => {
+      const wd = weatherData.find((d) => d.townId === stop.town.id);
+      if (!wd || wd.daily.time.length === 0) return stop;
+      const { daily } = wd;
+      return {
+        ...stop,
+        weatherAvg: {
+          sunshineHoursPerDay: avg(daily.sunshine_duration) / 3600,
+          precipitationMmPerDay: avg(daily.precipitation_sum),
+          tempMaxC: avg(daily.temperature_2m_max),
+          windKmh: avg(daily.wind_speed_10m_max),
+        },
+      };
+    });
+
+    self.postMessage({
+      type: 'complete',
+      result: { ...result, stops: stopsWithWeather },
+    } satisfies OptimizerWorkerOutput);
   } catch (err) {
     self.postMessage({
       type: 'error',

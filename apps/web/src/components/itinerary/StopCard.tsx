@@ -16,7 +16,7 @@ function scoreColor(value: number): string {
 
 export function StopCard({ stop, stopNumber, isSelected, onClick }: StopCardProps) {
   const { t } = useTranslation('common');
-  const { town, arrivalDate, nights, score } = stop;
+  const { town, arrivalDate, nights, score, weatherAvg } = stop;
 
   // Format arrival date as "Mon 10 Jul"
   const dateStr = arrivalDate.toLocaleDateString('en-GB', {
@@ -74,7 +74,7 @@ export function StopCard({ stop, stopNumber, isSelected, onClick }: StopCardProp
         }}>
           {dateStr} &middot; {nights} {t('itinerary.nights')}
         </div>
-        <ScoreBar score={score} />
+        <ScoreBar score={score} weatherAvg={weatherAvg} />
       </div>
     </div>
   );

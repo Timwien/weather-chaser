@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useMap } from '@vis.gl/react-maplibre';
 import { useTranslation } from 'react-i18next';
-import { MaplibreTerradrawControl } from '@watergis/maplibre-gl-terradraw';
-import '@watergis/maplibre-gl-terradraw/dist/maplibre-gl-terradraw.css';
+import type { Map as MaplibreMap, GeoJSONSource, MapMouseEvent } from 'maplibre-gl';
+
+const SOURCE_ID = 'draw-polygon';
+const FILL_LAYER  = 'draw-polygon-fill';
+const LINE_LAYER  = 'draw-polygon-outline';
 
 interface DrawingControlsProps {
   onPolygonComplete: (polygon: [number, number][]) => void;
@@ -12,117 +15,126 @@ interface DrawingControlsProps {
 export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsProps) {
   const { t } = useTranslation('common');
   const { current: map } = useMap();
-  const controlRef = useRef<MaplibreTerradrawControl | null>(null);
   const [hasPolygon, setHasPolygon] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
+  const verticesRef = useRef<[number, number][]>([]);
+  const onCompleteRef = useRef(onPolygonComplete);
 
-  const disableMapInteraction = useCallback(() => {
-    if (!map) return;
-    const m = map.getMap();
-    m.dragPan.disable();
-    m.scrollZoom.disable();
-    m.touchZoomRotate.disable();
-    m.touchPitch?.disable();
-    m.boxZoom.disable();
-    m.doubleClickZoom.disable();
-  }, [map]);
+  // Keep callback ref in sync
+  useEffect(() => { onCompleteRef.current = onPolygonComplete; }, [onPolygonComplete]);
 
-  const enableMapInteraction = useCallback(() => {
-    if (!map) return;
-    const m = map.getMap();
-    m.dragPan.enable();
-    m.scrollZoom.enable();
-    m.touchZoomRotate.enable();
-    m.touchPitch?.enable();
-    m.boxZoom.enable();
-    m.doubleClickZoom.enable();
-  }, [map]);
-
-  // Cleanup only — TerraDraw is never initialized on mount
+  // Add GeoJSON source + layers once map mounts; remove on unmount
   useEffect(() => {
+    if (!map) return;
+    const m = map.getMap();
+
+    m.addSource(SOURCE_ID, {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] },
+    });
+    m.addLayer({
+      id: FILL_LAYER,
+      type: 'fill',
+      source: SOURCE_ID,
+      paint: { 'fill-color': '#3f97e0', 'fill-opacity': 0.25 },
+    });
+    m.addLayer({
+      id: LINE_LAYER,
+      type: 'line',
+      source: SOURCE_ID,
+      paint: { 'line-color': '#3f97e0', 'line-width': 2, 'line-opacity': 1 },
+    });
+
     return () => {
-      enableMapInteraction();
-      if (controlRef.current && map) {
-        try { map.removeControl(controlRef.current); } catch { /* already removed */ }
-        controlRef.current = null;
-      }
+      if (m.getLayer(FILL_LAYER)) m.removeLayer(FILL_LAYER);
+      if (m.getLayer(LINE_LAYER)) m.removeLayer(LINE_LAYER);
+      if (m.getSource(SOURCE_ID)) m.removeSource(SOURCE_ID);
     };
-  }, [map, enableMapInteraction]);
+  }, [map]);
+
+  const updateSource = useCallback((m: MaplibreMap, verts: [number, number][]) => {
+    const src = m.getSource(SOURCE_ID) as GeoJSONSource | undefined;
+    if (!src) return;
+    if (verts.length < 2) {
+      src.setData({ type: 'FeatureCollection', features: [] });
+      return;
+    }
+    src.setData({
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [[...verts, verts[0]]] },
+        properties: {},
+      }],
+    });
+  }, []);
+
+  // Attach / detach click handlers while drawing
+  useEffect(() => {
+    if (!map || !isDrawing) return;
+    const m = map.getMap();
+
+    const onClick = (e: MapMouseEvent) => {
+      const pt: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+      verticesRef.current = [...verticesRef.current, pt];
+      updateSource(m, verticesRef.current);
+    };
+
+    const onDblClick = (e: MapMouseEvent) => {
+      // MapLibre fires click then dblclick — drop the extra vertex from the second click
+      const verts = verticesRef.current.slice(0, -1);
+      if (verts.length < 3) return;
+
+      m.off('click', onClick);
+      m.off('dblclick', onDblClick);
+      m.doubleClickZoom.enable();
+      m.getCanvas().style.cursor = '';
+
+      updateSource(m, verts);
+      setIsDrawing(false);
+      setHasPolygon(true);
+      onCompleteRef.current([...verts, verts[0]]);
+    };
+
+    m.on('click', onClick);
+    m.on('dblclick', onDblClick);
+    return () => {
+      m.off('click', onClick);
+      m.off('dblclick', onDblClick);
+    };
+  }, [map, isDrawing, updateSource]);
 
   const handleStartDrawing = useCallback(() => {
     if (!map) return;
-
-    // Lazy-initialize TerraDraw only when the user actually wants to draw.
-    // Initializing on mount registers event listeners that block all map clicks.
-    if (!controlRef.current) {
-      const control = new MaplibreTerradrawControl({ modes: ['polygon'], open: false });
-      controlRef.current = control;
-      map.addControl(control, 'top-right');
-
-      // Hide the built-in toolbar — we use our own buttons
-      setTimeout(() => {
-        const toolbar = map.getContainer().querySelector('.maplibre-terradraw-control') as HTMLElement | null;
-        if (toolbar) toolbar.style.display = 'none';
-      }, 100);
-
-      const draw = control.getTerraDrawInstance();
-      if (draw) {
-        try { draw.start(); } catch { /* already started */ }
-
-        draw.on('finish', (_id, context) => {
-          if (context?.action !== 'draw') return;
-          const features = draw.getSnapshot();
-          const polygon = features.find((f) => f.geometry.type === 'Polygon');
-          if (polygon?.geometry.type === 'Polygon') {
-            const coords = polygon.geometry.coordinates[0] as [number, number][];
-            setIsDrawing(false);
-            setHasPolygon(true);
-            enableMapInteraction();
-            onPolygonComplete(coords);
-          }
-        });
-
-        draw.on('change', (_ids, type) => {
-          if (type === 'delete') setHasPolygon(false);
-        });
-      }
-    }
-
-    const draw = controlRef.current.getTerraDrawInstance();
-    if (!draw) return;
-    try { draw.start(); } catch { /* already started */ }
-    try {
-      draw.setMode('polygon');
-    } catch (err) {
-      console.error('[DrawingControls] setMode polygon failed:', err);
-      return;
-    }
-    disableMapInteraction();
+    const m = map.getMap();
+    verticesRef.current = [];
+    updateSource(m, []);
+    m.doubleClickZoom.disable();
+    m.getCanvas().style.cursor = 'crosshair';
     setIsDrawing(true);
-  }, [map, disableMapInteraction, enableMapInteraction, onPolygonComplete]);
+  }, [map, updateSource]);
 
-  const handleCancelDrawing = () => {
-    const draw = controlRef.current?.getTerraDrawInstance();
-    if (draw) {
-      try { draw.setMode('static'); } catch { /* ignore */ }
-    }
-    enableMapInteraction();
+  const handleCancelDrawing = useCallback(() => {
+    if (!map) return;
+    const m = map.getMap();
+    verticesRef.current = [];
+    updateSource(m, []);
+    m.doubleClickZoom.enable();
+    m.getCanvas().style.cursor = '';
     setIsDrawing(false);
-  };
+  }, [map, updateSource]);
 
-  const handleClear = () => {
-    const draw = controlRef.current?.getTerraDrawInstance();
-    if (draw) {
-      try { draw.setMode('static'); } catch { /* ignore */ }
-      const features = draw.getSnapshot();
-      const ids = features.map((f) => f.id).filter((id): id is string | number => id !== undefined);
-      if (ids.length > 0) draw.removeFeatures(ids);
-    }
-    enableMapInteraction();
+  const handleClear = useCallback(() => {
+    if (!map) return;
+    const m = map.getMap();
+    verticesRef.current = [];
+    updateSource(m, []);
+    m.doubleClickZoom.enable();
+    m.getCanvas().style.cursor = '';
     setIsDrawing(false);
     setHasPolygon(false);
     onClear();
-  };
+  }, [map, updateSource, onClear]);
 
   return (
     <div

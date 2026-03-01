@@ -14,8 +14,10 @@ export const Route = createRoute({
   component: IndexPage,
 });
 
+const DRAWN_AREA_ID = 'drawn-polygon';
+
 function IndexPage() {
-  const { setSearchArea, mode } = useAppStore();
+  const { addSearchArea, removeSearchArea, mode } = useAppStore();
   const [selectedStopIndex, setSelectedStopIndex] = useState<number | null>(null);
   // Mobile: 'itinerary' is the default view; 'map' is second screen
   const [mobileView, setMobileView] = useState<'itinerary' | 'map'>('itinerary');
@@ -42,8 +44,8 @@ function IndexPage() {
         <MapContainer
           selectedStopIndex={selectedStopIndex}
           onStopClick={setSelectedStopIndex}
-          onDrawComplete={!showResults ? (polygon) => setSearchArea({ type: 'polygon', polygon }) : undefined}
-          onDrawClear={!showResults ? () => setSearchArea(null) : undefined}
+          onDrawComplete={!showResults ? (polygon) => addSearchArea({ type: 'polygon', id: DRAWN_AREA_ID, polygon }) : undefined}
+          onDrawClear={!showResults ? () => removeSearchArea(DRAWN_AREA_ID) : undefined}
         />
       </div>
 

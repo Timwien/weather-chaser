@@ -14,6 +14,15 @@ export interface HourlyWeather {
   wind_speed_10m: number[];      // km/h
 }
 
+export interface DailyWeather {
+  time: string[];                // YYYY-MM-DD date strings
+  temperature_2m_max: number[];  // °C
+  temperature_2m_min: number[];  // °C
+  precipitation_sum: number[];   // mm total per day
+  sunshine_duration: number[];   // seconds per day
+  wind_speed_10m_max: number[];  // km/h
+}
+
 export interface WeatherScore {
   composite: number;             // 0–100
   breakdown: {

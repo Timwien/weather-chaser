@@ -1,5 +1,5 @@
 // Vite module worker — can import from packages/core and services
-import { optimizeRoute, scoreLocation, PRESETS } from '@weatherchaser/core';
+import { optimizeRoute, scoreDailyLocation, PRESETS } from '@weatherchaser/core';
 import type { Town, OptimizerInput, WeatherScore, ScoringWeights } from '@weatherchaser/core';
 import { fetchWeatherBatch } from '../services/weather.ts';
 import { fetchDistanceMatrix } from '../services/osrm.ts';
@@ -104,7 +104,7 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
       if (!data) {
         return { composite: 0, breakdown: { sunshine: 0, precipitation: 0, temperature: 0, wind: 0 } };
       }
-      return scoreLocation(data.hourly, new Date(config.startDate), 1, weights);
+      return scoreDailyLocation(data.daily, new Date(config.startDate), 1, weights);
     });
 
     // ── Step 3: Distance matrix + optimize ─────────────────────────────────

@@ -1,20 +1,21 @@
-import type { Town, HourlyWeather } from '@weatherchaser/core';
+import type { Town, DailyWeather } from '@weatherchaser/core';
 
 export interface WeatherData {
   townId: string;
-  hourly: HourlyWeather;
+  daily: DailyWeather;
 }
 
-const EMPTY_HOURLY: HourlyWeather = {
+const EMPTY_DAILY: DailyWeather = {
   time: [],
-  temperature_2m: [],
-  precipitation: [],
+  temperature_2m_max: [],
+  temperature_2m_min: [],
+  precipitation_sum: [],
   sunshine_duration: [],
-  wind_speed_10m: [],
+  wind_speed_10m_max: [],
 };
 
 /**
- * Fetch hourly weather for a list of towns from Open-Meteo.
+ * Fetch daily weather aggregates for a list of towns from Open-Meteo.
  * Batches requests in groups of 50 (API practical limit).
  */
 export async function fetchWeatherBatch(
@@ -44,7 +45,10 @@ async function fetchBatch(
   const url = new URL('https://api.open-meteo.com/v1/forecast');
   url.searchParams.set('latitude', towns.map((t) => t.lat.toFixed(4)).join(','));
   url.searchParams.set('longitude', towns.map((t) => t.lng.toFixed(4)).join(','));
-  url.searchParams.set('hourly', 'temperature_2m,precipitation,sunshine_duration,wind_speed_10m');
+  url.searchParams.set(
+    'daily',
+    'temperature_2m_max,temperature_2m_min,precipitation_sum,sunshine_duration,wind_speed_10m_max',
+  );
   url.searchParams.set('start_date', startDate);
   url.searchParams.set('end_date', endDate);
   url.searchParams.set('timezone', 'auto');
@@ -55,10 +59,10 @@ async function fetchBatch(
 
   // Single location → object; multiple → array
   const raw: unknown = await res.json();
-  const dataArray: Array<{ hourly?: HourlyWeather }> = Array.isArray(raw) ? raw : [raw];
+  const dataArray: Array<{ daily?: DailyWeather }> = Array.isArray(raw) ? raw : [raw];
 
   return towns.map((town, idx) => ({
     townId: town.id,
-    hourly: dataArray[idx]?.hourly ?? EMPTY_HOURLY,
+    daily: dataArray[idx]?.daily ?? EMPTY_DAILY,
   }));
 }

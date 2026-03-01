@@ -120,26 +120,30 @@ export function LocationInput() {
     inputRef.current?.focus();
   }
 
-  const showDropdown = dropdownOpen && results.length > 0;
+  const hasDrawnPolygon = searchAreas.some((a) => a.type === 'polygon');
+  const showDropdown = dropdownOpen && results.length > 0 && !hasDrawnPolygon;
   const showRadius = searchAreas.filter((a) => a.type === 'place').length === 1 && searchAreas.length === 1;
 
   return (
     <div className="location-input-wrapper" ref={containerRef}>
       <label className="input-label">{t('entry.location')}</label>
 
-      {/* Tag list of selected places */}
+      {/* Tag list of selected places / drawn areas */}
       {searchAreas.length > 0 && (
         <div className="loc-tags">
           {searchAreas.map((area) => (
-            <span key={area.id} className="loc-tag">
+            <span
+              key={area.id}
+              className={`loc-tag${area.type === 'polygon' ? ' loc-tag--polygon' : ''}`}
+            >
               <span className="loc-tag-name">
-                {'name' in area ? area.name : t('entry.draw_area')}
+                {area.type === 'polygon' ? t('entry.drawn_area', 'Gezeichnetes Gebiet') : ('name' in area ? area.name : '')}
               </span>
               <button
                 type="button"
                 className="loc-tag-remove"
                 onClick={() => removeSearchArea(area.id)}
-                aria-label={`Remove ${'name' in area ? area.name : 'area'}`}
+                aria-label={`Remove ${area.type === 'polygon' ? 'drawn area' : ('name' in area ? area.name : 'area')}`}
               >
                 <RemoveIcon />
               </button>
@@ -148,18 +152,19 @@ export function LocationInput() {
         </div>
       )}
 
-      {/* Search input row */}
-      <div className="loc-input-row">
+      {/* Search input row — dimmed when a drawn polygon is active */}
+      <div className={`loc-input-row${hasDrawnPolygon ? ' loc-input-row--disabled' : ''}`}>
         <div className="location-input-container">
           <input
             ref={inputRef}
             type="text"
             className="text-input"
             value={inputValue}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            placeholder={t('entry.location_placeholder')}
+            onChange={hasDrawnPolygon ? undefined : handleChange}
+            onKeyDown={hasDrawnPolygon ? undefined : handleKeyDown}
+            placeholder={hasDrawnPolygon ? t('entry.polygon_active_placeholder', 'Gebiet gezeichnet') : t('entry.location_placeholder')}
             autoComplete="off"
+            disabled={hasDrawnPolygon}
           />
           {loading && <div className="loading-bar" aria-hidden="true" />}
         </div>

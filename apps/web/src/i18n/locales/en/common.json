@@ -88,6 +88,7 @@
     "start_label": "Starting point",
     "start_placeholder": "Town or city...",
     "use_location": "Use my location",
+    "no_location": "Please first add a place in \u2018Where?\u2019",
     "search": "Find best weather",
     "searching": "Searching...",
     "radius_label": "Radius",
@@ -95,6 +96,28 @@
     "time_morning": "Morning",
     "time_full": "All day",
     "time_afternoon": "Afternoon",
+    "time": {
+      "full": "All day",
+      "morning": "Morning",
+      "evening": "Evening"
+    },
+    "day_label": "Day",
+    "day": {
+      "all": "\u00d8 All days",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "kpi": {
+      "sun": "Sunshine",
+      "temp": "Temperature",
+      "precip": "Precipitation",
+      "wind": "Wind"
+    },
     "empty_no_towns": "No towns found.",
     "empty_no_results": "No results.",
     "empty_hint": "Try expanding the radius.",

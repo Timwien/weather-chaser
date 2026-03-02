@@ -14,11 +14,11 @@ import './WeatherFinderPanel.css';
 // We parse the hour by slicing chars 11–12 directly.
 function filterHoursByTimeOfDay(
   hourly: HourlyWeather,
-  timeOfDay: 'morning' | 'afternoon' | 'full',
+  timeOfDay: 'morning' | 'evening' | 'full',
 ): HourlyWeather {
   if (timeOfDay === 'full') return hourly;
-  const startHour = timeOfDay === 'morning' ? 6 : 12;
-  const endHour   = timeOfDay === 'morning' ? 12 : 18;
+  const startHour = timeOfDay === 'morning' ? 6 : 17;
+  const endHour   = timeOfDay === 'morning' ? 12 : 22;  // 17:00–21:59 inclusive
 
   const indices = hourly.time
     .map((t, i) => ({ i, hour: parseInt(t.slice(11, 13), 10) }))
@@ -73,9 +73,15 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
     if (!tripConfig.startDate || !tripConfig.endDate) return [];
 
     const startDate = new Date(tripConfig.startDate + 'T00:00:00Z');
-    const dayCount = Math.max(1, Math.round(
-      (new Date(tripConfig.endDate + 'T00:00:00Z').getTime() - startDate.getTime()) / 86_400_000
+    const endDate   = new Date(tripConfig.endDate   + 'T00:00:00Z');
+    const fullDayCount = Math.max(1, Math.round(
+      (endDate.getTime() - startDate.getTime()) / 86_400_000
     ) + 1);
+
+    // Determine whether to show a single day or the full range
+    const isSingleDay = finderConfig.selectedDay !== 'all' && finderConfig.selectedDay !== undefined;
+    const sliceStart  = isSingleDay ? new Date(finderConfig.selectedDay + 'T00:00:00Z') : startDate;
+    const sliceDays   = isSingleDay ? 1 : fullDayCount;
 
     // Origin from the first named place in "Wo?" (same source useFinder uses)
     const firstPlace = searchAreas.find(
@@ -84,27 +90,40 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
     ) as { lat?: number; lng?: number } | undefined;
     const startLat = firstPlace?.lat ?? null;
     const startLng = firstPlace?.lng ?? null;
-    if (startLat === null || startLng === null) return [];
+
+    // In multi-place mode (>1 searchArea) there is no "origin" to filter by distance.
+    // We show all finder towns regardless of distance.
+    const isMultiPlace = searchAreas.length > 1;
+
+    if (!isMultiPlace && (startLat === null || startLng === null)) return [];
+
+    const avg = (arr: number[]) => arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : 0;
 
     const scored = finderTowns
       .map((town) => {
         const hourly = finderHourlyCache[town.id];
         if (!hourly) return null;
 
-        const distanceKm = haversineKm(startLat, startLng, town.lat, town.lng);
-        // Filter by current radius from store (uses "Wo?" radius slider — no re-fetch)
-        if (distanceKm > searchRadiusKm) return null;
+        let distanceKm = 0;
+        if (!isMultiPlace && startLat !== null && startLng !== null) {
+          distanceKm = haversineKm(startLat, startLng, town.lat, town.lng);
+          // Filter by current radius from store (uses "Wo?" radius slider — no re-fetch)
+          if (distanceKm > searchRadiusKm) return null;
+        }
 
-        const sliced   = sliceHoursByDays(hourly, startDate, dayCount);
+        const sliced   = sliceHoursByDays(hourly, sliceStart, sliceDays);
         const filtered = filterHoursByTimeOfDay(sliced, finderConfig.timeOfDay);
-        const score    = scoreLocation(filtered, startDate, dayCount, PRESETS[finderConfig.preset]);
+        const score    = scoreLocation(filtered, sliceStart, sliceDays, PRESETS[finderConfig.preset]);
 
-        const avg = (arr: number[]) => arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : 0;
-        const sunshineHoursPerDay = avg(filtered.sunshine_duration) / 3600;
+        // sunshine_duration is in seconds per hour — sum then divide by 3600 for total hours,
+        // then divide by day count for per-day average.
+        const totalSunSeconds = filtered.sunshine_duration.reduce((s, v) => s + v, 0);
+        const sunshineHoursPerDay = (totalSunSeconds / 3600) / sliceDays;
         const tempC               = avg(filtered.temperature_2m);
         const precipMm            = filtered.precipitation.reduce((s, v) => s + v, 0);
+        const windAvgKmh          = avg(filtered.wind_speed_10m);
 
-        return { town, score, distanceKm, sunshineHoursPerDay, tempC, precipMm };
+        return { town, score, distanceKm, sunshineHoursPerDay, tempC, precipMm, windAvgKmh };
       })
       .filter(Boolean) as Array<{
         town: typeof finderTowns[0];
@@ -113,6 +132,7 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
         sunshineHoursPerDay: number;
         tempC: number;
         precipMm: number;
+        windAvgKmh: number;
       }>;
 
     // Sort
@@ -135,6 +155,7 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
       sunshineHoursPerDay: r.sunshineHoursPerDay,
       tempC: r.tempC,
       precipMm: r.precipMm,
+      windAvgKmh: r.windAvgKmh,
       distanceKm: r.distanceKm,
     }));
   }, [finderTowns, finderHourlyCache, finderConfig, tripConfig.startDate, tripConfig.endDate, searchAreas, searchRadiusKm]);

@@ -30,6 +30,18 @@
   gap: var(--space-1);
 }
 
+/* Scrollable variant for day picker with many buttons */
+.finder-filter-toggle--scroll {
+  overflow-x: auto;
+  scrollbar-width: none;   /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+  flex-wrap: nowrap;
+}
+
+.finder-filter-toggle--scroll::-webkit-scrollbar {
+  display: none; /* Chrome / Safari */
+}
+
 .finder-filter-toggle-btn {
   flex: 1;
   padding: var(--space-1) var(--space-2);

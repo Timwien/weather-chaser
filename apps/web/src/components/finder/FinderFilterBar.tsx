@@ -3,9 +3,9 @@ import { useAppStore } from '../../stores/appStore.ts';
 import './FinderFilterBar.css';
 
 const TIME_OPTIONS = [
-  { value: 'morning',   labelKey: 'finder.time_morning',   default: 'Morgen' },
-  { value: 'full',      labelKey: 'finder.time_full',       default: 'Ganzer Tag' },
-  { value: 'afternoon', labelKey: 'finder.time_afternoon',  default: 'Nachmittag' },
+  { value: 'full',    labelKey: 'finder.time.full',    default: 'Ganzer Tag' },
+  { value: 'morning', labelKey: 'finder.time.morning', default: 'Morgen' },
+  { value: 'evening', labelKey: 'finder.time.evening', default: 'Abend' },
 ] as const;
 
 const PRESET_OPTIONS = [
@@ -14,12 +14,64 @@ const PRESET_OPTIONS = [
   { value: 'sightseeing', labelKey: 'preset.sightseeing', default: 'Sightseeing' },
 ] as const;
 
+/** Generate an array of ISO date strings between startDate and endDate (inclusive) */
+function dateRange(startDate: string, endDate: string): string[] {
+  const dates: string[] = [];
+  const start = new Date(startDate + 'T00:00:00Z');
+  const end   = new Date(endDate   + 'T00:00:00Z');
+  const cur   = new Date(start);
+  while (cur <= end) {
+    dates.push(cur.toISOString().slice(0, 10));
+    cur.setUTCDate(cur.getUTCDate() + 1);
+  }
+  return dates;
+}
+
+/** Format a date string as short weekday + day number in German, e.g. "Mo 3" */
+function formatDayLabel(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00Z');
+  const weekday = new Intl.DateTimeFormat('de', { weekday: 'short', timeZone: 'UTC' }).format(d);
+  const day = d.getUTCDate();
+  return `${weekday} ${day}`;
+}
+
 export function FinderFilterBar() {
   const { t } = useTranslation('common');
-  const { finderConfig, setFinderConfig } = useAppStore();
+  const { finderConfig, setFinderConfig, tripConfig } = useAppStore();
+
+  const days =
+    tripConfig.startDate && tripConfig.endDate
+      ? dateRange(tripConfig.startDate, tripConfig.endDate)
+      : [];
 
   return (
     <div className="finder-filter-bar">
+      {/* Day picker row */}
+      {days.length > 0 && (
+        <div className="finder-filter-group">
+          <span className="finder-filter-label">{t('finder.day_label', 'Tag')}</span>
+          <div className="finder-filter-toggle finder-filter-toggle--scroll">
+            <button
+              type="button"
+              className={`finder-filter-toggle-btn${finderConfig.selectedDay === 'all' ? ' finder-filter-toggle-btn--active' : ''}`}
+              onClick={() => setFinderConfig({ selectedDay: 'all' })}
+            >
+              {t('finder.day.all', '\u00d8 Alle Tage')}
+            </button>
+            {days.map((dateStr) => (
+              <button
+                key={dateStr}
+                type="button"
+                className={`finder-filter-toggle-btn${finderConfig.selectedDay === dateStr ? ' finder-filter-toggle-btn--active' : ''}`}
+                onClick={() => setFinderConfig({ selectedDay: dateStr })}
+              >
+                {formatDayLabel(dateStr)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Time-of-day toggle */}
       <div className="finder-filter-group">
         <span className="finder-filter-label">{t('finder.time_label', 'Tageszeit')}</span>

@@ -1,0 +1,100 @@
+/* WeatherFinderPanel — left-side results panel, mirrors ItineraryPanel aesthetic */
+
+.weather-finder-panel {
+  position: fixed;
+  left: var(--space-4);
+  top: var(--space-4);
+  bottom: var(--space-4);
+  width: var(--panel-width);
+  pointer-events: auto;
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+  padding: var(--space-6);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+
+.finder-panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.finder-panel-title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+/* ── Sort bar ───────────────────────────────────────────────── */
+
+.finder-sort-bar {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  padding-bottom: var(--space-1);
+}
+
+.finder-sort-btn {
+  padding: var(--space-1) var(--space-3);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.finder-sort-btn:hover:not(.finder-sort-btn--active) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.finder-sort-btn--active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+/* ── Results list ───────────────────────────────────────────── */
+
+.finder-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ── Mobile ─────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .weather-finder-panel {
+    position: fixed;
+    inset: 0;
+    bottom: 48px;
+    width: 100%;
+    left: 0;
+    top: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: var(--space-4);
+  }
+
+  .mobile-screen-map-active .weather-finder-panel {
+    display: none;
+  }
+}

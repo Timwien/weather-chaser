@@ -81,7 +81,7 @@ function FlyToFinderRank1({ finderResults }: { finderResults: FinderResultData[]
     if (rank1.townId === prevRank1IdRef.current) return;
     prevRank1IdRef.current = rank1.townId;
 
-    map.getMap().flyTo({ center: [rank1.lng, rank1.lat], zoom: 9, duration: 800 });
+    map.getMap().flyTo({ center: [rank1.lng, rank1.lat], zoom: 7, duration: 800 });
   }, [map, finderResults]);
 
   return null;
@@ -97,7 +97,7 @@ function FlyToCity({ target }: { target?: { lat: number; lng: number; token: num
     if (target.token === prevTokenRef.current) return;
     prevTokenRef.current = target.token;
 
-    map.getMap().flyTo({ center: [target.lng, target.lat], zoom: 10, duration: 600 });
+    map.getMap().flyTo({ center: [target.lng, target.lat], zoom: 8, duration: 600 });
   }, [map, target]);
 
   return null;

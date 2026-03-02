@@ -1,4 +1,4 @@
-/* WeatherFinderPanel — left-side results panel, mirrors ItineraryPanel aesthetic */
+/* WeatherFinderPanel — glass overlay panel, matches EntryPanel quality */
 
 .weather-finder-panel {
   position: fixed;
@@ -7,15 +7,30 @@
   bottom: var(--space-4);
   width: var(--panel-width);
   pointer-events: auto;
-  background: var(--color-bg);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  overflow-y: auto;
-  padding: var(--space-6);
   z-index: 20;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  padding: var(--space-6);
+  overflow-y: auto;
+
+  /* Frosted glass — same as EntryPanel */
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 12px 48px rgba(14, 116, 144, 0.10),
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.weather-finder-panel::-webkit-scrollbar { width: 4px; }
+.weather-finder-panel::-webkit-scrollbar-track { background: transparent; }
+.weather-finder-panel::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
 }
 
 /* ── Header ─────────────────────────────────────────────────── */
@@ -25,6 +40,8 @@
   align-items: center;
   gap: var(--space-3);
   flex-shrink: 0;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .finder-panel-title {
@@ -32,44 +49,45 @@
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
+  letter-spacing: var(--tracking-tight);
 }
 
-/* ── Sort bar ───────────────────────────────────────────────── */
+/* ── Sort bar — pill chips ──────────────────────────────────── */
 
 .finder-sort-bar {
   display: flex;
-  gap: var(--space-2);
+  gap: 5px;
   flex-wrap: wrap;
   flex-shrink: 0;
-  padding-bottom: var(--space-1);
 }
 
 .finder-sort-btn {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: var(--space-1) var(--space-3);
-  border: 1.5px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
+  padding: 5px 10px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: rgba(13, 36, 38, 0.06);
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-family: var(--font-sans);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  transition: background 0.12s, color 0.12s, box-shadow 0.12s;
+  white-space: nowrap;
 }
 
 .finder-sort-btn:hover:not(.finder-sort-btn--active) {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
   background: var(--color-primary-light);
+  color: var(--color-primary);
 }
 
 .finder-sort-btn--active {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  font-weight: 700;
+  background: var(--color-primary);
+  color: white;
+  font-weight: var(--font-weight-semibold);
+  box-shadow: 0 2px 8px rgba(13, 143, 159, 0.30);
 }
 
 /* ── Results list ───────────────────────────────────────────── */
@@ -77,7 +95,7 @@
 .finder-results-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 1px;
   overflow-y: auto;
   flex: 1;
 }
@@ -94,6 +112,9 @@
     top: 0;
     border-radius: 0;
     box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--color-bg);
     padding: var(--space-4);
   }
 

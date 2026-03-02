@@ -101,6 +101,11 @@ Recent decisions affecting current work:
 - [02-06]: Finder origin unified with Wo? location: searchAreas[0].lat/lng is single source — WeatherFinderStep is now a confirmation step, not an input step
 - [02-06]: Finder radius unified with Wo? radius slider: searchRadiusKm drives both use cases — FinderFilterBar no longer has its own distance slider
 - [02-06]: WeatherFinderPanel.tsx useMemo deps include searchAreas and searchRadiusKm so results refilter instantly when radius slider changes
+- [02-06-fixes]: Three finder modes: around (1 place), polygon (drawn polygon), multi-place (>1 places — Overpass skipped)
+- [02-06-fixes]: Continuous hsl score gradient replaces 3-band color coding everywhere in finder (matches StopMarkers)
+- [02-06-fixes]: FinderTimeOfDay: 'afternoon' replaced with 'evening' (17:00–21:59); order: full | morning | evening
+- [02-06-fixes]: selectedDay field in FinderConfig drives per-day slicing in panel without re-fetch; day picker UI in FinderFilterBar
+- [02-06-fixes]: windAvgKmh in FinderResultData; sunshine formula: sum(seconds)/3600/dayCount for true per-day hours
 
 ### Pending Todos
 
@@ -116,5 +121,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 02-06-PLAN.md — routes/index.tsx wired (WeatherFinderPanel, two-way finder selection); finder unified with Wo? origin (searchAreas[0]) and radius (searchRadiusKm); Phase 2 complete
+Stopped at: 02-06 post-verification fix pass — location modes (around/polygon/multi-place), continuous gradient, marker centering, day picker, wind KPI, time options, sunshine formula; Phase 2 complete
 Resume file: None

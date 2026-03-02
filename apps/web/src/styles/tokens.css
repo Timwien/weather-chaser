@@ -8,7 +8,7 @@
    Neutrals  — teal-tinted for cohesion
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..700;1,14..32,300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
 :root {
   /* ── Primary: petrol teal ────────────────────────────── */
@@ -28,12 +28,12 @@
   --color-tertiary:       #0d619f;   /* Info, links, cool accent */
   --color-tertiary-light: #e6eff8;
 
-  /* ── Neutrals (teal-tinted, not pure gray) ───────────── */
-  --color-bg:             #f9fdfd;   /* Near-white with teal hint */
+  /* ── Neutrals (warm, not teal-tinted) ────────────────── */
+  --color-bg:             #f7f7f5;   /* Warm off-white — neutral canvas */
   --color-surface:        #ffffff;   /* Pure white for cards */
-  --color-surface-raised: #f0f9fa;   /* Slightly lifted surfaces */
-  --color-border:         #d0e8eb;   /* Teal-tinted border */
-  --color-border-strong:  #a8d4d9;   /* Stronger border for inputs */
+  --color-surface-raised: #f2f4f4;   /* Slightly lifted surfaces */
+  --color-border:         #dde2e4;   /* Neutral blue-gray border */
+  --color-border-strong:  #b8c4c6;   /* Stronger border for inputs */
   --color-text:           #0d2426;   /* Very dark teal-black — premium */
   --color-text-secondary: #3d6b70;   /* Mid teal-gray */
   --color-text-muted:     #6b9198;   /* Muted teal-gray */
@@ -45,9 +45,9 @@
   --color-error:          #dc2626;
 
   /* ── Glass panel (Apple liquid / Airbnb card feel) ────── */
-  --glass-bg:     rgba(249, 253, 253, 0.88);  /* Tinted near-white */
-  --glass-border: 1px solid rgba(255, 255, 255, 0.50);
-  --glass-blur:   blur(24px) saturate(1.8) brightness(1.02);
+  --glass-bg:     rgba(255, 255, 255, 0.88);  /* Pure white — no teal tint */
+  --glass-border: 1px solid rgba(255, 255, 255, 0.55);
+  --glass-blur:   blur(20px) saturate(1.5) brightness(1.01);
 
   /* ── Weather score gradient (data vis — stays vivid) ──── */
   --score-poor:   hsl(0,   80%, 50%);   /* Red   */
@@ -65,7 +65,7 @@
   --space-10: 40px;
 
   /* ── Typography ───────────────────────────────────────── */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-size-xs:   11px;
   --font-size-sm:   13px;
   --font-size-base: 15px;

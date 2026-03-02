@@ -5,7 +5,7 @@
   top: 0;
   z-index: 10;
   /* Opaque panel-matched bg so content scrolling behind is hidden */
-  background: rgba(249, 253, 253, 0.97);
+  background: rgba(255, 255, 255, 0.97);
   border-bottom: 1px solid var(--color-border);
   padding: var(--space-3) 0 var(--space-2);
   display: flex;

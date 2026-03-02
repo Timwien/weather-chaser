@@ -6,6 +6,8 @@ import { useAppStore } from '../../stores/appStore.ts';
 import { DrawingControls } from './DrawingControls.tsx';
 import { RouteLayer } from './RouteLayer.tsx';
 import { StopMarkers } from './StopMarkers.tsx';
+import { FinderMarkers } from './FinderMarkers.tsx';
+import type { FinderResultData } from '../finder/FinderResultRow.tsx';
 import './MapContainer.css';
 
 // CartoDB Positron GL — clean Google Maps-like style, free, no API key required
@@ -18,6 +20,10 @@ interface MapContainerProps {
   // Draw props added in Plan 06 — retained here
   onDrawComplete?: (polygon: [number, number][]) => void;
   onDrawClear?: () => void;
+  // Finder mode props
+  finderResults?: FinderResultData[];
+  selectedFinderIndex?: number | null;
+  onFinderClick?: (index: number) => void;
 }
 
 /** Switch all symbol layers to prefer German names (name:de → name fallback) */
@@ -59,8 +65,38 @@ function FitRouteOnSelection({ selectedStopIndex }: { selectedStopIndex: number 
   return null;
 }
 
-export function MapContainer({ selectedStopIndex, onStopClick, onDrawComplete, onDrawClear }: MapContainerProps) {
-  const { route } = useAppStore();
+/** Fits the map to all finder result markers when results first load. */
+function FitFinderBounds({ finderResults }: { finderResults: FinderResultData[] | undefined }) {
+  const { current: map } = useMap();
+  const prevLengthRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (!map || !finderResults || finderResults.length === 0) return;
+    // Only trigger once when results first load (length goes from 0 to N)
+    if (finderResults.length === prevLengthRef.current) return;
+    prevLengthRef.current = finderResults.length;
+
+    const lngs = finderResults.map(r => r.lng);
+    const lats  = finderResults.map(r => r.lat);
+    map.getMap().fitBounds(
+      [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+      { padding: 80, maxZoom: 9, duration: 600 },
+    );
+  }, [map, finderResults]);
+
+  return null;
+}
+
+export function MapContainer({
+  selectedStopIndex,
+  onStopClick,
+  onDrawComplete,
+  onDrawClear,
+  finderResults,
+  selectedFinderIndex,
+  onFinderClick,
+}: MapContainerProps) {
+  const { route, mode } = useAppStore();
 
   const handleLoad = useCallback((event: { target: MaplibreMap }) => {
     switchLabelsToGerman(event.target);
@@ -78,8 +114,9 @@ export function MapContainer({ selectedStopIndex, onStopClick, onDrawComplete, o
         style={{ width: '100%', height: '100%' }}
         onLoad={handleLoad}
       >
-        {/* FitRouteOnSelection must live inside <Map> so useMap() has a provider */}
+        {/* Always-present: FitRoute and FitFinderBounds */}
         <FitRouteOnSelection selectedStopIndex={selectedStopIndex} />
+        <FitFinderBounds finderResults={finderResults} />
         {/* DrawingControls must live inside <Map> so useMap() has a provider */}
         {onDrawComplete && onDrawClear && (
           <DrawingControls
@@ -87,7 +124,9 @@ export function MapContainer({ selectedStopIndex, onStopClick, onDrawComplete, o
             onClear={onDrawClear}
           />
         )}
-        {route && (
+
+        {/* Route mode: StopMarkers + RouteLayer */}
+        {route && mode !== 'weather-finder' && (
           <>
             <RouteLayer route={route} />
             <StopMarkers
@@ -96,6 +135,15 @@ export function MapContainer({ selectedStopIndex, onStopClick, onDrawComplete, o
               onStopClick={onStopClick}
             />
           </>
+        )}
+
+        {/* Finder mode: FinderMarkers */}
+        {mode === 'weather-finder' && finderResults && finderResults.length > 0 && (
+          <FinderMarkers
+            results={finderResults}
+            selectedIndex={selectedFinderIndex ?? null}
+            onMarkerClick={onFinderClick ?? (() => {})}
+          />
         )}
       </Map>
     </div>

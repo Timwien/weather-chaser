@@ -23,6 +23,7 @@ function IndexPage() {
   const [selectedStopIndex, setSelectedStopIndex] = useState<number | null>(null);
   const [selectedFinderIndex, setSelectedFinderIndex] = useState<number | null>(null);
   const [computedFinderResults, setComputedFinderResults] = useState<FinderResultData[]>([]);
+  const [flyToCity, setFlyToCity] = useState<{ lat: number; lng: number; token: number } | null>(null);
   // Mobile: 'itinerary' is the default view; 'map' is second screen
   const [mobileView, setMobileView] = useState<'itinerary' | 'map'>('itinerary');
 
@@ -59,7 +60,12 @@ function IndexPage() {
           onDrawClear={!showResults ? () => removeSearchArea(DRAWN_AREA_ID) : undefined}
           finderResults={computedFinderResults.length > 0 ? computedFinderResults : undefined}
           selectedFinderIndex={selectedFinderIndex}
-          onFinderClick={(idx) => setSelectedFinderIndex(idx)}
+          onFinderClick={(idx) => {
+            setSelectedFinderIndex(idx);
+            const r = computedFinderResults[idx];
+            if (r) setFlyToCity(prev => ({ lat: r.lat, lng: r.lng, token: (prev?.token ?? 0) + 1 }));
+          }}
+          flyToCity={flyToCity}
         />
       </div>
 
@@ -88,7 +94,11 @@ function IndexPage() {
         {showFinderPanel && (
           <WeatherFinderPanel
             selectedFinderIndex={selectedFinderIndex}
-            onResultSelect={(idx) => setSelectedFinderIndex(idx)}
+            onResultSelect={(idx) => {
+              setSelectedFinderIndex(idx);
+              const r = computedFinderResults[idx];
+              if (r) setFlyToCity(prev => ({ lat: r.lat, lng: r.lng, token: (prev?.token ?? 0) + 1 }));
+            }}
             onBack={() => reset()}
             onResultsComputed={setComputedFinderResults}
           />

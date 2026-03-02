@@ -127,6 +127,7 @@
     "sort_sunshine": "Sonne",
     "sort_temperature": "Temp",
     "sort_precipitation": "Regen",
+    "sort_wind": "Wind",
     "rank_label": "#{{rank}}",
     "distance_label": "{{km}} km Luftlinie"
   },

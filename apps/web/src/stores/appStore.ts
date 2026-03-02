@@ -66,12 +66,12 @@ interface FinderConfig {
   radiusKm: number;           // default 200
   preset: WeatherPreset;      // default 'sightseeing'
   timeOfDay: 'morning' | 'evening' | 'full';  // default 'full'
-  sortBy: 'score' | 'sunshine' | 'temperature' | 'precipitation';
+  sortBy: 'score' | 'sunshine' | 'temperature' | 'precipitation' | 'wind';
   selectedDay: 'all' | string;  // 'all' = average across range; ISO date = single day
 }
 
 export type FinderTimeOfDay = 'morning' | 'evening' | 'full';
-export type FinderSortBy = 'score' | 'sunshine' | 'temperature' | 'precipitation';
+export type FinderSortBy = 'score' | 'sunshine' | 'temperature' | 'precipitation' | 'wind';
 
 const defaultFinderConfig: FinderConfig = {
   startLat: null,

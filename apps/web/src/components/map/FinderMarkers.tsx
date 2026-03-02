@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Marker, Popup } from '@vis.gl/react-maplibre';
 import { useTranslation } from 'react-i18next';
 import type { FinderResultData } from '../finder/FinderResultRow.tsx';
+import { TrophyIcon } from '../finder/FinderIcons.tsx';
 
 interface FinderMarkersProps {
   results: FinderResultData[];
@@ -36,32 +37,47 @@ export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderM
               setPopupIndex(idx);
             }}
           >
-            <div
-              style={{
-                width: isSelected ? '40px' : '34px',
-                height: isSelected ? '40px' : '34px',
-                borderRadius: '50%',
-                background: color,
-                border: isSelected ? '3px solid white' : '2px solid white',
-                boxShadow: 'var(--shadow-md)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'width 0.15s, height 0.15s',
-                userSelect: 'none',
-                padding: '2px',
-              }}
-            >
-              <span style={{ fontSize: '9px', fontWeight: 400, opacity: 0.85, lineHeight: 1 }}>
-                {t('finder.rank_label', '#{{rank}}', { rank: result.rank })}
-              </span>
-              <span style={{ fontSize: '13px', fontWeight: 700, lineHeight: 1 }}>
-                {Math.round(result.score.composite)}
-              </span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+              {/* Trophy above rank #1 */}
+              {result.rank === 1 && (
+                <div style={{
+                  position: 'absolute',
+                  top: isSelected ? '-22px' : '-20px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  pointerEvents: 'none',
+                  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))',
+                }}>
+                  <TrophyIcon size={16} />
+                </div>
+              )}
+              <div
+                style={{
+                  width: isSelected ? '40px' : '34px',
+                  height: isSelected ? '40px' : '34px',
+                  borderRadius: '50%',
+                  background: color,
+                  border: isSelected ? '3px solid white' : '2px solid white',
+                  boxShadow: 'var(--shadow-md)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'width 0.15s, height 0.15s',
+                  userSelect: 'none',
+                  padding: '2px',
+                }}
+              >
+                <span style={{ fontSize: '9px', fontWeight: 400, opacity: 0.85, lineHeight: 1 }}>
+                  {t('finder.rank_label', '#{{rank}}', { rank: result.rank })}
+                </span>
+                <span style={{ fontSize: '13px', fontWeight: 700, lineHeight: 1 }}>
+                  {Math.round(result.score.composite)}
+                </span>
+              </div>
             </div>
             {popupIndex === idx && (
               <Popup

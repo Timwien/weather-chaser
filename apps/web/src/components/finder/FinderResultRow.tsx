@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { WeatherScore } from '@weatherchaser/core';
+import { SunIcon, TempIcon, RainIcon, WindIcon } from './FinderIcons.tsx';
 
 export interface FinderResultData {
   rank: number;
@@ -100,28 +101,28 @@ export function FinderResultRow({ data, isSelected, onClick }: FinderResultRowPr
           maxWidth: '120px',
         }}>
           <span
-            style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}
+            style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '2px' }}
             aria-label={t('finder.kpi.sun', 'Sonne')}
           >
-            ☀ {sunshineHoursPerDay.toFixed(1)}h
+            <SunIcon size={11} /> {sunshineHoursPerDay.toFixed(1)}h
           </span>
           <span
-            style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}
+            style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '2px' }}
             aria-label={t('finder.kpi.temp', 'Temperatur')}
           >
-            🌡 {Math.round(tempC)}°C
+            <TempIcon size={11} /> {Math.round(tempC)}°C
           </span>
           <span
-            style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}
+            style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '2px' }}
             aria-label={t('finder.kpi.precip', 'Niederschlag')}
           >
-            💧 {precipMm.toFixed(1)}mm
+            <RainIcon size={11} /> {precipMm.toFixed(1)}mm
           </span>
           <span
-            style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}
+            style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '2px' }}
             aria-label={t('finder.kpi.wind', 'Wind')}
           >
-            💨 {Math.round(windAvgKmh)}km/h
+            <WindIcon size={11} /> {Math.round(windAvgKmh)}km/h
           </span>
         </div>
       </div>

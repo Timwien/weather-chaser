@@ -7,6 +7,7 @@ import { FinderResultRow } from './FinderResultRow.tsx';
 import { FinderFilterBar } from './FinderFilterBar.tsx';
 import { FinderEmptyState } from './FinderEmptyState.tsx';
 import type { FinderResultData } from './FinderResultRow.tsx';
+import { ScoreIcon, SunIcon, TempIcon, RainIcon, WindIcon } from './FinderIcons.tsx';
 import './WeatherFinderPanel.css';
 
 // Parse hour from ISO timestamp without new Date() to avoid timezone bugs.
@@ -56,7 +57,16 @@ const SORT_OPTIONS = [
   { value: 'sunshine',      labelKey: 'finder.sort_sunshine',      default: 'Sonne' },
   { value: 'temperature',   labelKey: 'finder.sort_temperature',   default: 'Temp' },
   { value: 'precipitation', labelKey: 'finder.sort_precipitation', default: 'Regen' },
+  { value: 'wind',          labelKey: 'finder.sort_wind',          default: 'Wind' },
 ] as const;
+
+const SORT_ICONS = {
+  score:         ScoreIcon,
+  sunshine:      SunIcon,
+  temperature:   TempIcon,
+  precipitation: RainIcon,
+  wind:          WindIcon,
+} as const;
 
 export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack, onResultsComputed }: WeatherFinderPanelProps) {
   const { t } = useTranslation('common');
@@ -141,7 +151,8 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
       if (sortBy === 'score')         return b.score.composite - a.score.composite;
       if (sortBy === 'sunshine')      return b.sunshineHoursPerDay - a.sunshineHoursPerDay;
       if (sortBy === 'temperature')   return b.tempC - a.tempC;
-      if (sortBy === 'precipitation') return a.precipMm - b.precipMm; // lower is better
+      if (sortBy === 'precipitation') return a.precipMm - b.precipMm;    // lower is better
+      if (sortBy === 'wind')          return a.windAvgKmh - b.windAvgKmh; // lower is better
       return b.score.composite - a.score.composite;
     });
 
@@ -177,16 +188,20 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
 
       {/* Sort buttons */}
       <div className="finder-sort-bar">
-        {SORT_OPTIONS.map(({ value, labelKey, default: def }) => (
-          <button
-            key={value}
-            type="button"
-            className={`finder-sort-btn${finderConfig.sortBy === value ? ' finder-sort-btn--active' : ''}`}
-            onClick={() => setFinderConfig({ sortBy: value })}
-          >
-            {t(labelKey, def)}
-          </button>
-        ))}
+        {SORT_OPTIONS.map(({ value, labelKey, default: def }) => {
+          const Icon = SORT_ICONS[value];
+          return (
+            <button
+              key={value}
+              type="button"
+              className={`finder-sort-btn${finderConfig.sortBy === value ? ' finder-sort-btn--active' : ''}`}
+              onClick={() => setFinderConfig({ sortBy: value })}
+            >
+              <Icon size={12} />
+              {t(labelKey, def)}
+            </button>
+          );
+        })}
       </div>
 
       {/* Pinned filter bar */}

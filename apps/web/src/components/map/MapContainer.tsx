@@ -24,6 +24,8 @@ interface MapContainerProps {
   finderResults?: FinderResultData[];
   selectedFinderIndex?: number | null;
   onFinderClick?: (index: number) => void;
+  /** When set, the map flies to this city. Increment token to re-fly to same coords. */
+  flyToCity?: { lat: number; lng: number; token: number } | null;
 }
 
 /** Switch all symbol layers to prefer German names (name:de → name fallback) */
@@ -65,24 +67,38 @@ function FitRouteOnSelection({ selectedStopIndex }: { selectedStopIndex: number 
   return null;
 }
 
-/** Fits the map to all finder result markers when results first load. */
-function FitFinderBounds({ finderResults }: { finderResults: FinderResultData[] | undefined }) {
+/**
+ * Flies the map to rank #1 whenever the top-ranked city changes.
+ * Fires on first results load (null → city) and on filter changes that change rank #1.
+ */
+function FlyToFinderRank1({ finderResults }: { finderResults: FinderResultData[] | undefined }) {
   const { current: map } = useMap();
-  const prevLengthRef = useRef<number>(0);
+  const prevRank1IdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!map || !finderResults || finderResults.length === 0) return;
-    // Only trigger once when results first load (length goes from 0 to N)
-    if (finderResults.length === prevLengthRef.current) return;
-    prevLengthRef.current = finderResults.length;
+    const rank1 = finderResults[0];
+    if (rank1.townId === prevRank1IdRef.current) return;
+    prevRank1IdRef.current = rank1.townId;
 
-    const lngs = finderResults.map(r => r.lng);
-    const lats  = finderResults.map(r => r.lat);
-    map.getMap().fitBounds(
-      [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
-      { padding: 80, maxZoom: 9, duration: 600 },
-    );
+    map.getMap().flyTo({ center: [rank1.lng, rank1.lat], zoom: 9, duration: 800 });
   }, [map, finderResults]);
+
+  return null;
+}
+
+/** Flies the map to an explicit target (e.g. user clicking a result row). */
+function FlyToCity({ target }: { target?: { lat: number; lng: number; token: number } | null }) {
+  const { current: map } = useMap();
+  const prevTokenRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!map || !target) return;
+    if (target.token === prevTokenRef.current) return;
+    prevTokenRef.current = target.token;
+
+    map.getMap().flyTo({ center: [target.lng, target.lat], zoom: 10, duration: 600 });
+  }, [map, target]);
 
   return null;
 }
@@ -95,6 +111,7 @@ export function MapContainer({
   finderResults,
   selectedFinderIndex,
   onFinderClick,
+  flyToCity,
 }: MapContainerProps) {
   const { route, mode } = useAppStore();
 
@@ -114,9 +131,10 @@ export function MapContainer({
         style={{ width: '100%', height: '100%' }}
         onLoad={handleLoad}
       >
-        {/* Always-present: FitRoute and FitFinderBounds */}
+        {/* Always-present: map-positioning helpers */}
         <FitRouteOnSelection selectedStopIndex={selectedStopIndex} />
-        <FitFinderBounds finderResults={finderResults} />
+        <FlyToFinderRank1 finderResults={finderResults} />
+        <FlyToCity target={flyToCity} />
         {/* DrawingControls must live inside <Map> so useMap() has a provider */}
         {onDrawComplete && onDrawClear && (
           <DrawingControls

@@ -10,10 +10,10 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 2 of 5 — **IN PROGRESS**
-Current plan: 02-04 complete; next: 02-05
-Last activity: 2026-03-02 — Phase 2 Plan 04 complete (FinderResultRow, WeatherFinderPanel with useMemo re-scoring, WeatherFinderPanel.css)
+Current plan: 02-05 complete; next: 02-06
+Last activity: 2026-03-02 — Phase 2 Plan 05 complete (FinderMarkers.tsx, MapContainer.tsx extended with FitFinderBounds)
 
-Progress: [████░░░░░░] 30% (Phase 1 complete; Phase 2 in progress — 4/6 plans done)
+Progress: [█████░░░░░] 35% (Phase 1 complete; Phase 2 in progress — 5/6 plans done)
 
 ## Performance Metrics
 
@@ -42,6 +42,7 @@ Progress: [████░░░░░░] 30% (Phase 1 complete; Phase 2 in pro
 | Phase 02-weather-finder-mode P02 | 7 | 2 tasks | 2 files |
 | Phase 02-weather-finder-mode P03 | 12 | 2 tasks | 8 files |
 | Phase 02-weather-finder-mode P04 | 8 | 2 tasks | 3 files |
+| Phase 02-weather-finder-mode P05 | 2 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,9 @@ Recent decisions affecting current work:
 - [02-04]: scoreLocation called with already-sliced+time-filtered data; internal re-slice safe (date prefix matching valid on time-filtered subset)
 - [02-04]: filterHoursByTimeOfDay uses t.slice(11,13) for hour parsing — avoids UTC conversion bug with Open-Meteo local-time timestamps
 - [02-04]: FinderResultData carries lat/lng fields for downstream marker highlighting (Plan 05)
+- [02-05]: FinderMarkers receives pre-scored results as prop — no re-scoring inside the component
+- [02-05]: FitFinderBounds prevLengthRef guard fires fitBounds only once when results first load, not on sort/filter changes
+- [02-05]: mode read from useAppStore() inside MapContainer — no prop drilling; StopMarkers+RouteLayer suppressed in weather-finder mode
 
 ### Pending Todos
 
@@ -108,5 +112,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 02-04-PLAN.md — FinderResultRow (rank bubble, score, metrics), WeatherFinderPanel (top-10 useMemo re-scoring, sort buttons, pinned FilterBar, empty state), WeatherFinderPanel.css
+Stopped at: Completed 02-05-PLAN.md — FinderMarkers.tsx (3-band color markers, rank/score label, popup), MapContainer.tsx extended (FitFinderBounds, conditional FinderMarkers vs StopMarkers)
 Resume file: None

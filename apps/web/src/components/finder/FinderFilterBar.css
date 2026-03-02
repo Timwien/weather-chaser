@@ -24,26 +24,6 @@
   color: var(--color-text-secondary);
 }
 
-.finder-filter-label strong {
-  color: var(--color-text);
-  font-weight: var(--font-weight-semibold);
-}
-
-/* Range slider */
-.finder-filter-slider {
-  width: 100%;
-  accent-color: var(--color-primary);
-  cursor: pointer;
-}
-
-.finder-filter-slider-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  margin-top: 2px;
-}
-
 /* Toggle button group */
 .finder-filter-toggle {
   display: flex;

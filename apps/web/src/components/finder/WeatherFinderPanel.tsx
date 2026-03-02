@@ -60,7 +60,7 @@ const SORT_OPTIONS = [
 
 export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack, onResultsComputed }: WeatherFinderPanelProps) {
   const { t } = useTranslation('common');
-  const { finderTowns, finderHourlyCache, finderConfig, finderError, tripConfig, setFinderConfig } = useAppStore();
+  const { finderTowns, finderHourlyCache, finderConfig, finderError, tripConfig, searchAreas, searchRadiusKm, setFinderConfig } = useAppStore();
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   // Scroll to selected row
@@ -77,8 +77,14 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
       (new Date(tripConfig.endDate + 'T00:00:00Z').getTime() - startDate.getTime()) / 86_400_000
     ) + 1);
 
-    const startLat = finderConfig.startLat!;
-    const startLng = finderConfig.startLng!;
+    // Origin from the first named place in "Wo?" (same source useFinder uses)
+    const firstPlace = searchAreas.find(
+      (a): a is Extract<typeof searchAreas[number], { type: 'place' }> =>
+        a.type === 'place' && typeof (a as { lat?: number }).lat === 'number',
+    ) as { lat?: number; lng?: number } | undefined;
+    const startLat = firstPlace?.lat ?? null;
+    const startLng = firstPlace?.lng ?? null;
+    if (startLat === null || startLng === null) return [];
 
     const scored = finderTowns
       .map((town) => {
@@ -86,8 +92,8 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
         if (!hourly) return null;
 
         const distanceKm = haversineKm(startLat, startLng, town.lat, town.lng);
-        // Filter by current radius (instant — no re-fetch)
-        if (distanceKm > finderConfig.radiusKm) return null;
+        // Filter by current radius from store (uses "Wo?" radius slider — no re-fetch)
+        if (distanceKm > searchRadiusKm) return null;
 
         const sliced   = sliceHoursByDays(hourly, startDate, dayCount);
         const filtered = filterHoursByTimeOfDay(sliced, finderConfig.timeOfDay);
@@ -131,7 +137,7 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
       precipMm: r.precipMm,
       distanceKm: r.distanceKm,
     }));
-  }, [finderTowns, finderHourlyCache, finderConfig, tripConfig.startDate, tripConfig.endDate]);
+  }, [finderTowns, finderHourlyCache, finderConfig, tripConfig.startDate, tripConfig.endDate, searchAreas, searchRadiusKm]);
 
   // Share computed results upward so MapContainer can display matching markers
   useEffect(() => {

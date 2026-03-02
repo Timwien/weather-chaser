@@ -6,7 +6,8 @@ import type { HourlyWeatherData } from '../services/weatherHourly.ts';
 export function useFinder() {
   const workerRef = useRef<Worker | null>(null);
   const {
-    finderConfig,
+    searchAreas,
+    searchRadiusKm,
     tripConfig,
     setFinderLoading,
     setFinderError,
@@ -15,8 +16,18 @@ export function useFinder() {
   } = useAppStore();
 
   const run = useCallback(() => {
-    const { startLat, startLng, radiusKm } = finderConfig;
     const { startDate, endDate } = tripConfig;
+
+    // Derive origin from the first PlaceArea in searchAreas (the "Wo?" location).
+    // Fall back to undefined if there is no place with coordinates yet.
+    const firstPlace = searchAreas.find(
+      (a): a is Extract<typeof searchAreas[number], { type: 'place' }> =>
+        a.type === 'place' && typeof (a as { lat?: number }).lat === 'number',
+    ) as { lat?: number; lng?: number } | undefined;
+
+    const startLat = firstPlace?.lat ?? null;
+    const startLng = firstPlace?.lng ?? null;
+    const radiusKm = searchRadiusKm;
 
     if (startLat === null || startLng === null || !startDate || !endDate) {
       setFinderError('missing_config');
@@ -78,7 +89,7 @@ export function useFinder() {
       },
     };
     worker.postMessage(input);
-  }, [finderConfig, tripConfig, setFinderLoading, setFinderError, setFinderData, clearFinderData]);
+  }, [searchAreas, searchRadiusKm, tripConfig, setFinderLoading, setFinderError, setFinderData, clearFinderData]);
 
   return { run };
 }

@@ -20,26 +20,6 @@ export function FinderFilterBar() {
 
   return (
     <div className="finder-filter-bar">
-      {/* Distance slider */}
-      <div className="finder-filter-group">
-        <label className="finder-filter-label" htmlFor="finder-radius">
-          {t('finder.radius_label', 'Radius')}: <strong>{finderConfig.radiusKm} km</strong>
-        </label>
-        <input
-          id="finder-radius"
-          type="range"
-          className="finder-filter-slider"
-          min={50}
-          max={500}
-          step={25}
-          value={finderConfig.radiusKm}
-          onChange={(e) => setFinderConfig({ radiusKm: Number(e.target.value) })}
-        />
-        <div className="finder-filter-slider-labels">
-          <span>50</span><span>500 km</span>
-        </div>
-      </div>
-
       {/* Time-of-day toggle */}
       <div className="finder-filter-group">
         <span className="finder-filter-label">{t('finder.time_label', 'Tageszeit')}</span>

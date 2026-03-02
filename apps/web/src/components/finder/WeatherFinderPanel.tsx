@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { HourlyWeather } from '@weatherchaser/core';
 import { scoreLocation, PRESETS, sliceHoursByDays } from '@weatherchaser/core';
@@ -48,6 +48,7 @@ interface WeatherFinderPanelProps {
   selectedFinderIndex: number | null;
   onResultSelect: (index: number) => void;
   onBack: () => void;
+  onResultsComputed: (results: FinderResultData[]) => void;
 }
 
 const SORT_OPTIONS = [
@@ -57,7 +58,7 @@ const SORT_OPTIONS = [
   { value: 'precipitation', labelKey: 'finder.sort_precipitation', default: 'Regen' },
 ] as const;
 
-export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack }: WeatherFinderPanelProps) {
+export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack, onResultsComputed }: WeatherFinderPanelProps) {
   const { t } = useTranslation('common');
   const { finderTowns, finderHourlyCache, finderConfig, finderError, tripConfig, setFinderConfig } = useAppStore();
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -131,6 +132,11 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
       distanceKm: r.distanceKm,
     }));
   }, [finderTowns, finderHourlyCache, finderConfig, tripConfig.startDate, tripConfig.endDate]);
+
+  // Share computed results upward so MapContainer can display matching markers
+  useEffect(() => {
+    onResultsComputed(finderResults);
+  }, [finderResults, onResultsComputed]);
 
   return (
     <div className="weather-finder-panel">

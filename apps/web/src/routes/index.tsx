@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createRoute } from '@tanstack/react-router';
 import { Route as rootRoute } from './__root.tsx';
 import { useAppStore } from '../stores/appStore.ts';
@@ -7,6 +7,8 @@ import { EntryPanel } from '../components/entry/EntryPanel.tsx';
 import { ItineraryPanel } from '../components/itinerary/ItineraryPanel.tsx';
 import { LoadingOverlay } from '../components/loading/LoadingOverlay.tsx';
 import { MobileTabBar } from '../components/common/MobileTabBar.tsx';
+import { WeatherFinderPanel } from '../components/finder/WeatherFinderPanel.tsx';
+import type { FinderResultData } from '../components/finder/FinderResultRow.tsx';
 
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
@@ -17,12 +19,21 @@ export const Route = createRoute({
 const DRAWN_AREA_ID = 'drawn-polygon';
 
 function IndexPage() {
-  const { addSearchArea, removeSearchArea, mode } = useAppStore();
+  const { addSearchArea, removeSearchArea, mode, finderTowns, reset } = useAppStore();
   const [selectedStopIndex, setSelectedStopIndex] = useState<number | null>(null);
+  const [selectedFinderIndex, setSelectedFinderIndex] = useState<number | null>(null);
+  const [computedFinderResults, setComputedFinderResults] = useState<FinderResultData[]>([]);
   // Mobile: 'itinerary' is the default view; 'map' is second screen
   const [mobileView, setMobileView] = useState<'itinerary' | 'map'>('itinerary');
 
-  const showResults = mode === 'results';
+  // Reset selection when a new search loads
+  useEffect(() => {
+    setSelectedFinderIndex(null);
+  }, [finderTowns]);
+
+  const showResults     = mode === 'results';
+  const showFinderPanel = mode === 'weather-finder' && finderTowns !== null;
+  const showEntryPanel  = !showResults && !showFinderPanel;
 
   return (
     <div
@@ -46,11 +57,14 @@ function IndexPage() {
           onStopClick={setSelectedStopIndex}
           onDrawComplete={!showResults ? (polygon) => addSearchArea({ type: 'polygon', id: DRAWN_AREA_ID, polygon }) : undefined}
           onDrawClear={!showResults ? () => removeSearchArea(DRAWN_AREA_ID) : undefined}
+          finderResults={computedFinderResults.length > 0 ? computedFinderResults : undefined}
+          selectedFinderIndex={selectedFinderIndex}
+          onFinderClick={(idx) => setSelectedFinderIndex(idx)}
         />
       </div>
 
       {/*
-        Itinerary / EntryPanel overlay:
+        Itinerary / EntryPanel / WeatherFinderPanel overlay:
         On mobile when showResults: itinerary is default screen (mobileView === 'itinerary').
         On mobile when not showResults: entry panel always shown (no tab bar needed until results).
         On desktop: always rendered as a fixed overlay panel.
@@ -59,11 +73,24 @@ function IndexPage() {
         className="screen-panel"
         style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
       >
-        {!showResults && <EntryPanel />}
+        {/* Entry panel: shown during idle/config/finder-config */}
+        {showEntryPanel && <EntryPanel />}
+
+        {/* Route planner results */}
         {showResults && (
           <ItineraryPanel
             selectedStopIndex={selectedStopIndex}
             onStopSelect={setSelectedStopIndex}
+          />
+        )}
+
+        {/* Finder results panel */}
+        {showFinderPanel && (
+          <WeatherFinderPanel
+            selectedFinderIndex={selectedFinderIndex}
+            onResultSelect={(idx) => setSelectedFinderIndex(idx)}
+            onBack={() => reset()}
+            onResultsComputed={setComputedFinderResults}
           />
         )}
       </div>

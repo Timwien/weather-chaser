@@ -65,11 +65,12 @@ interface FinderConfig {
   startLocation: string;
   radiusKm: number;           // default 200
   preset: WeatherPreset;      // default 'sightseeing'
-  timeOfDay: 'morning' | 'afternoon' | 'full';  // default 'full'
+  timeOfDay: 'morning' | 'evening' | 'full';  // default 'full'
   sortBy: 'score' | 'sunshine' | 'temperature' | 'precipitation';
+  selectedDay: 'all' | string;  // 'all' = average across range; ISO date = single day
 }
 
-export type FinderTimeOfDay = 'morning' | 'afternoon' | 'full';
+export type FinderTimeOfDay = 'morning' | 'evening' | 'full';
 export type FinderSortBy = 'score' | 'sunshine' | 'temperature' | 'precipitation';
 
 const defaultFinderConfig: FinderConfig = {
@@ -80,6 +81,7 @@ const defaultFinderConfig: FinderConfig = {
   preset: 'sightseeing',
   timeOfDay: 'full',
   sortBy: 'score',
+  selectedDay: 'all',
 };
 
 interface AppState {

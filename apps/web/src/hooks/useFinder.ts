@@ -1,4 +1,5 @@
 import { useRef, useCallback } from 'react';
+import type { Town } from '@weatherchaser/core';
 import { useAppStore } from '../stores/appStore.ts';
 import type { FinderWorkerInput, FinderWorkerOutput } from '../workers/finder.worker.ts';
 import type { HourlyWeatherData } from '../services/weatherHourly.ts';
@@ -18,19 +19,13 @@ export function useFinder() {
   const run = useCallback(() => {
     const { startDate, endDate } = tripConfig;
 
-    // Derive origin from the first PlaceArea in searchAreas (the "Wo?" location).
-    // Fall back to undefined if there is no place with coordinates yet.
-    const firstPlace = searchAreas.find(
-      (a): a is Extract<typeof searchAreas[number], { type: 'place' }> =>
-        a.type === 'place' && typeof (a as { lat?: number }).lat === 'number',
-    ) as { lat?: number; lng?: number } | undefined;
-
-    const startLat = firstPlace?.lat ?? null;
-    const startLng = firstPlace?.lng ?? null;
-    const radiusKm = searchRadiusKm;
-
-    if (startLat === null || startLng === null || !startDate || !endDate) {
+    if (!startDate || !endDate) {
       setFinderError('missing_config');
+      return;
+    }
+
+    if (searchAreas.length === 0) {
+      setFinderError('no_location');
       return;
     }
 
@@ -78,16 +73,84 @@ export function useFinder() {
       workerRef.current = null;
     };
 
-    const input: FinderWorkerInput = {
-      type: 'run',
-      config: {
-        startLat,
-        startLng,
-        radiusKm,
-        startDate,
-        endDate,
-      },
-    };
+    // Detect mode from searchAreas
+    let input: FinderWorkerInput;
+
+    if (searchAreas.length > 1) {
+      // Mode C: multiple named places — score them directly, skip Overpass
+      const towns: Town[] = searchAreas
+        .filter((a): a is Extract<typeof searchAreas[number], { type: 'place' }> =>
+          a.type === 'place' &&
+          typeof (a as { lat?: number }).lat === 'number' &&
+          typeof (a as { lng?: number }).lng === 'number',
+        )
+        .map((a) => ({
+          id: a.id,
+          name: a.name,
+          lat: (a as { lat: number }).lat,
+          lng: (a as { lng: number }).lng,
+        }));
+
+      input = {
+        type: 'run',
+        config: {
+          mode: 'multi-place',
+          towns,
+          startDate,
+          endDate,
+        },
+      };
+    } else {
+      const area = searchAreas[0];
+      if (area.type === 'polygon') {
+        // Mode B: drawn polygon
+        const polygon = area.polygon as [number, number][];
+        input = {
+          type: 'run',
+          config: {
+            mode: 'polygon',
+            polygon,
+            startDate,
+            endDate,
+          },
+        };
+      } else if (area.type === 'place' || area.type === 'radius') {
+        // Mode A: single place + radius
+        const lat = area.type === 'place'
+          ? (area as { lat?: number }).lat
+          : (area as { centerLat: number }).centerLat;
+        const lng = area.type === 'place'
+          ? (area as { lng?: number }).lng
+          : (area as { centerLng: number }).centerLng;
+
+        if (lat === undefined || lat === null || lng === undefined || lng === null) {
+          setFinderError('missing_config');
+          setFinderLoading(false);
+          worker.terminate();
+          workerRef.current = null;
+          return;
+        }
+
+        input = {
+          type: 'run',
+          config: {
+            mode: 'around',
+            startLat: lat,
+            startLng: lng,
+            radiusKm: searchRadiusKm,
+            startDate,
+            endDate,
+          },
+        };
+      } else {
+        setFinderError('missing_config');
+        setFinderLoading(false);
+        worker.terminate();
+        workerRef.current = null;
+        return;
+      }
+    }
+
     worker.postMessage(input);
   }, [searchAreas, searchRadiusKm, tripConfig, setFinderLoading, setFinderError, setFinderData, clearFinderData]);
 

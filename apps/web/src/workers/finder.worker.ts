@@ -1,7 +1,7 @@
 // Vite module worker — fetches towns + hourly weather for the finder mode
 import type { Town } from '@weatherchaser/core';
 import { fetchHourlyWeatherBatch } from '../services/weatherHourly.ts';
-import { fetchTownsInRadius } from '../services/overpass.ts';
+import { fetchTownsInRadius, fetchTownsInPolygon } from '../services/overpass.ts';
 import type { HourlyWeatherData } from '../services/weatherHourly.ts';
 
 const MAX_TOWNS = 120;
@@ -9,9 +9,15 @@ const MAX_TOWNS = 120;
 export interface FinderWorkerInput {
   type: 'run';
   config: {
-    startLat: number;
-    startLng: number;
-    radiusKm: number;
+    mode: 'around' | 'polygon' | 'multi-place';
+    // 'around' mode fields
+    startLat?: number;
+    startLng?: number;
+    radiusKm?: number;
+    // 'polygon' mode fields
+    polygon?: [number, number][];
+    // 'multi-place' mode fields — towns passed directly, Overpass skipped
+    towns?: Town[];
     startDate: string;   // ISO YYYY-MM-DD
     endDate: string;     // ISO YYYY-MM-DD
   };
@@ -27,31 +33,35 @@ self.onmessage = async (event: MessageEvent<FinderWorkerInput>) => {
   const { config } = event.data;
 
   try {
-    // Step 1: fetch all towns within radius
+    // Step 1: resolve town list based on mode
     self.postMessage({ type: 'progress', step: 'finding_towns' } satisfies FinderWorkerOutput);
 
-    const allTowns = await fetchTownsInRadius(
-      config.startLat,
-      config.startLng,
-      config.radiusKm,
-    );
+    let towns: Town[];
 
-    if (allTowns.length === 0) {
+    if (config.mode === 'multi-place') {
+      // Use the exact places the user entered — no Overpass call
+      towns = config.towns ?? [];
+    } else if (config.mode === 'polygon') {
+      if (!config.polygon || config.polygon.length === 0) {
+        self.postMessage({ type: 'error', message: 'missing_polygon' } satisfies FinderWorkerOutput);
+        return;
+      }
+      const allTowns = await fetchTownsInPolygon(config.polygon);
+      towns = deduplicateAndCap(allTowns);
+    } else {
+      // 'around' mode
+      if (config.startLat === undefined || config.startLng === undefined || config.radiusKm === undefined) {
+        self.postMessage({ type: 'error', message: 'missing_coords' } satisfies FinderWorkerOutput);
+        return;
+      }
+      const allTowns = await fetchTownsInRadius(config.startLat, config.startLng, config.radiusKm);
+      towns = deduplicateAndCap(allTowns);
+    }
+
+    if (towns.length === 0) {
       self.postMessage({ type: 'error', message: 'no_towns' } satisfies FinderWorkerOutput);
       return;
     }
-
-    // Deduplicate by id, sort by population desc, cap at MAX_TOWNS
-    const seen = new Set<string>();
-    const unique: Town[] = [];
-    for (const town of allTowns) {
-      if (!seen.has(town.id)) {
-        seen.add(town.id);
-        unique.push(town);
-      }
-    }
-    unique.sort((a, b) => (b.population ?? 0) - (a.population ?? 0));
-    const towns = unique.slice(0, MAX_TOWNS);
 
     // Step 2: fetch hourly weather for all towns
     self.postMessage({ type: 'progress', step: 'fetching_weather' } satisfies FinderWorkerOutput);
@@ -76,3 +86,16 @@ self.onmessage = async (event: MessageEvent<FinderWorkerInput>) => {
     } satisfies FinderWorkerOutput);
   }
 };
+
+function deduplicateAndCap(allTowns: Town[]): Town[] {
+  const seen = new Set<string>();
+  const unique: Town[] = [];
+  for (const town of allTowns) {
+    if (!seen.has(town.id)) {
+      seen.add(town.id);
+      unique.push(town);
+    }
+  }
+  unique.sort((a, b) => (b.population ?? 0) - (a.population ?? 0));
+  return unique.slice(0, MAX_TOWNS);
+}

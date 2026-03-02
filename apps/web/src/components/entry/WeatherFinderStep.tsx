@@ -8,24 +8,13 @@ export function WeatherFinderStep() {
   const { searchAreas, finderLoading, setMode } = useAppStore();
   const { run } = useFinder();
 
-  // Derive origin location from the first named place in searchAreas (same as "Wo?" input)
-  const firstPlace = searchAreas.find(
-    (a): a is Extract<typeof searchAreas[number], { type: 'place' }> => a.type === 'place',
-  );
-  const hasLocation = firstPlace !== undefined && typeof (firstPlace as { lat?: number }).lat === 'number';
-  const locationName = firstPlace?.name ?? null;
-
-  const canSearch = hasLocation && !finderLoading;
+  const hasAreas = searchAreas.length > 0;
+  const canSearch = hasAreas && !finderLoading;
 
   return (
     <div className="finder-step">
-      {/* Show which location will be used — derived from "Wo?" at the top */}
-      <div className="finder-step-label">{t('finder.start_label', 'Startpunkt')}</div>
-      {hasLocation ? (
-        <div className="finder-step-location-display">
-          {locationName}
-        </div>
-      ) : (
+      {/* Helper text when no location has been set in "Wo?" */}
+      {!hasAreas && (
         <div className="finder-step-no-location">
           {t('finder.no_location', 'Bitte zuerst einen Ort in \u201eWo?\u201c eingeben')}
         </div>

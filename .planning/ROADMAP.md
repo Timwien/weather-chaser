@@ -105,7 +105,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Core Algorithm + Route Planner Web | 10/10 | Complete | 2026-03-01 |
-| 2. Weather Finder Mode | 2/6 | In Progress|  |
+| 2. Weather Finder Mode | 4/6 | In Progress|  |
 | 3. Backend + Auth + Production Hosting | 0/TBD | Not started | - |
 | 4. Freemium + Monetization | 0/TBD | Not started | - |
 | 5. Native Mobile Apps | 0/TBD | Not started | - |

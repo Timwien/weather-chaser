@@ -10,10 +10,10 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 2 of 5 — **IN PROGRESS**
-Current plan: 02-02 complete; next: 02-03
-Last activity: 2026-03-02 — Phase 2 Plan 02 complete (finder.worker.ts, useFinder.ts hook)
+Current plan: 02-03 complete; next: 02-04
+Last activity: 2026-03-02 — Phase 2 Plan 03 complete (WeatherFinderStep, FinderFilterBar, FinderEmptyState, EntryPanel patch, i18n finder namespace)
 
-Progress: [██░░░░░░░░] 20% (Phase 1 complete; Phase 2 in progress — 2/N plans done)
+Progress: [███░░░░░░░] 25% (Phase 1 complete; Phase 2 in progress — 3/6 plans done)
 
 ## Performance Metrics
 
@@ -40,6 +40,7 @@ Progress: [██░░░░░░░░] 20% (Phase 1 complete; Phase 2 in pro
 | Phase 01 P09 | 15 | 2 tasks | 10 files |
 | Phase 02 P01 | 15 min | 2 tasks | 3 files |
 | Phase 02-weather-finder-mode P02 | 7 | 2 tasks | 2 files |
+| Phase 02-weather-finder-mode P03 | 12 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,8 @@ Recent decisions affecting current work:
 - [02-01]: FinderTimeOfDay and FinderSortBy exported as union types so UI components can type-check without reaching into store internals
 - [Phase 02-weather-finder-mode]: finder.worker.ts has no scoring step — all filter/preset/sort changes re-applied in memory; worker only runs on initial search
 - [Phase 02-weather-finder-mode]: useFinder does not auto-run on mount — explicit run() call required (WeatherFinderStep in Plan 03 triggers it)
+- [Phase 02-weather-finder-mode]: searchPlace() used instead of searchNominatim() — plan referenced non-existent export; nominatim.ts exports searchPlace() returning NominatimResult[]
+- [Phase 02-weather-finder-mode]: onMouseDown used for suggestion selection in WeatherFinderStep — prevents input blur from collapsing dropdown before click fires
 
 ### Pending Todos
 
@@ -100,5 +103,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 02-02-PLAN.md — finder.worker.ts (Vite module worker: Overpass radius query + hourly weather batch, posts progress/complete/error) and useFinder.ts hook (starts worker on run(), converts hourlyData to Record<townId,HourlyWeather>, writes to store)
+Stopped at: Completed 02-03-PLAN.md — WeatherFinderStep (location input + GPS + search trigger), FinderFilterBar (sticky filter row: distance slider 50-500km, time-of-day toggle, preset selector), FinderEmptyState (expand-radius CTA), EntryPanel 2-line patch, i18n finder namespace (de+en)
 Resume file: None

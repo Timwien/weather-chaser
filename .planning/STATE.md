@@ -5,15 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Show travelers where the best weather is — and for campervan trips, the optimal multi-day route to chase it — through real towns, not dots on a grid
-**Current focus:** Phase 1 — Core Algorithm + Route Planner Web
+**Current focus:** Phase 2 — Weather Finder Mode
 
 ## Current Position
 
-Phase: 1 of 5 — **COMPLETE** ✅
-Next: Phase 2 — Weather Finder Mode
-Last activity: 2026-03-01 — Phase 1 verified and closed (all 5 success criteria passed)
+Phase: 2 of 5 — **IN PROGRESS**
+Current plan: 02-01 complete; next: 02-02
+Last activity: 2026-03-01 — Phase 2 Plan 01 complete (finder state slice, Overpass radius query, hourly weather batch service)
 
-Progress: [██░░░░░░░░] 20% (Phase 1 of 5 complete)
+Progress: [██░░░░░░░░] 20% (Phase 1 complete; Phase 2 in progress — 1/N plans done)
 
 ## Performance Metrics
 
@@ -38,6 +38,7 @@ Progress: [██░░░░░░░░] 20% (Phase 1 of 5 complete)
 |-----------|---------|-------|-------|
 | Phase 01 P06 | 120 min | 3 tasks | 10 files |
 | Phase 01 P09 | 15 | 2 tasks | 10 files |
+| Phase 02 P01 | 15 min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,9 @@ Recent decisions affecting current work:
 - [Phase 01-09]: createRoute (with getParentRoute) used for /trip route — consistent with index.tsx pattern; createFileRoute requires Vite codegen plugin
 - [Phase 01-09]: btoa(encodeURIComponent(JSON.stringify(payload))) encoding for share URLs — handles Unicode town names (e.g. München, Zürich) that plain btoa would fail on
 - [Phase 01-09]: ItineraryPanel created as stub here (Plan 09) with ShareBar included — Plan 08 expands it without import conflicts
+- [02-01]: HourlyWeather imported from @weatherchaser/core instead of redefined locally — core type matches Open-Meteo hourly response shape exactly
+- [02-01]: fetchTownsInRadius reuses runOverpassQuery with endpoint fallback — no code duplication, same retry/timeout behavior as existing fetchTownsInArea
+- [02-01]: FinderTimeOfDay and FinderSortBy exported as union types so UI components can type-check without reaching into store internals
 
 ### Pending Todos
 
@@ -92,6 +96,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-28
-Stopped at: Completed 01-09-PLAN.md — share/export (Google Maps + Apple Maps deep links, clipboard shareable URL with base64 encoding, /trip restoration route, ShareBar, ItineraryPanel stub)
+Last session: 2026-03-01
+Stopped at: Completed 02-01-PLAN.md — finder state slice (finderConfig radiusKm=200/preset=sightseeing/timeOfDay=full/sortBy=score), fetchTownsInRadius Overpass around query, fetchHourlyWeatherBatch hourly Open-Meteo service
 Resume file: None

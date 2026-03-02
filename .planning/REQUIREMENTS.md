@@ -18,12 +18,12 @@
 
 *Use case: "Where is the weather best on Saturday for a hike?" or "Where should I spend next week, max 500km from here?"*
 
-- [ ] **FIND-01**: User can search for the best weather in a defined area for a specific date or date range (up to 14-day forecast horizon)
-- [ ] **FIND-02**: User can set a maximum distance constraint (e.g. max 500km from starting point) to filter results
+- [x] **FIND-01**: User can search for the best weather in a defined area for a specific date or date range (up to 14-day forecast horizon)
+- [x] **FIND-02**: User can set a maximum distance constraint (e.g. max 500km from starting point) to filter results
 - [ ] **FIND-03**: Results are displayed as a ranked list of top locations with weather scores
 - [ ] **FIND-04**: Results are simultaneously displayed on a map as color-coded markers (green = best weather)
-- [ ] **FIND-05**: User can toggle between morning and afternoon scoring for day-trip planning (e.g. "I'll arrive Saturday morning")
-- [ ] **FIND-06**: User can select a weather preset profile (Beach, Hiking, Sightseeing) to adjust scoring weights — free tier
+- [x] **FIND-05**: User can toggle between morning and afternoon scoring for day-trip planning (e.g. "I'll arrive Saturday morning")
+- [x] **FIND-06**: User can select a weather preset profile (Beach, Hiking, Sightseeing) to adjust scoring weights — free tier
 
 ---
 
@@ -177,12 +177,12 @@
 | SHARE-01 | Phase 1 | Complete |
 | SHARE-02 | Phase 1 | Complete |
 | INFRA-05 | Phase 1 | Complete |
-| FIND-01 | Phase 2 | Pending |
-| FIND-02 | Phase 2 | Pending |
+| FIND-01 | Phase 2 | Complete |
+| FIND-02 | Phase 2 | Complete |
 | FIND-03 | Phase 2 | Pending |
 | FIND-04 | Phase 2 | Pending |
-| FIND-05 | Phase 2 | Pending |
-| FIND-06 | Phase 2 | Pending |
+| FIND-05 | Phase 2 | Complete |
+| FIND-06 | Phase 2 | Complete |
 | AUTH-01 | Phase 3 | Pending |
 | AUTH-02 | Phase 3 | Pending |
 | AUTH-03 | Phase 3 | Pending |

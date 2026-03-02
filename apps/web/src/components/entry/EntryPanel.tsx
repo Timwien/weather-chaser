@@ -5,6 +5,7 @@ import { DateRangePicker } from './DateRangePicker.tsx';
 import { LocationInput } from './LocationInput.tsx';
 import { CriteriaSelector } from './CriteriaSelector.tsx';
 import { RouteConfigStep } from './RouteConfigStep.tsx';
+import { WeatherFinderStep } from './WeatherFinderStep.tsx';
 import './EntryPanel.css';
 
 export function EntryPanel() {
@@ -74,12 +75,8 @@ export function EntryPanel() {
         </div>
       )}
 
-      {/* Weather finder placeholder — Phase 2 */}
-      {isWeatherFinder && (
-        <div className="entry-panel-coming-soon">
-          {t('route_config.coming_soon')}
-        </div>
-      )}
+      {/* Weather finder — Phase 2 */}
+      {isWeatherFinder && <WeatherFinderStep />}
 
       {/* Error banner — shown after a failed route calculation */}
       {mode === 'idle' && error && (

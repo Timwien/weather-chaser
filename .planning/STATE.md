@@ -10,10 +10,10 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 2 of 5 — **IN PROGRESS**
-Current plan: 02-05 complete; next: 02-06
-Last activity: 2026-03-02 — Phase 2 Plan 05 complete (FinderMarkers.tsx, MapContainer.tsx extended with FitFinderBounds)
+Current plan: 02-06 complete; Phase 2 complete
+Last activity: 2026-03-02 — Phase 2 Plan 06 complete (routes/index.tsx wired with WeatherFinderPanel + two-way selection; finder unified with Wo? origin + radius)
 
-Progress: [█████░░░░░] 35% (Phase 1 complete; Phase 2 in progress — 5/6 plans done)
+Progress: [██████░░░░] 40% (Phase 1 complete; Phase 2 complete — 6/6 plans done)
 
 ## Performance Metrics
 
@@ -43,6 +43,7 @@ Progress: [█████░░░░░] 35% (Phase 1 complete; Phase 2 in pro
 | Phase 02-weather-finder-mode P03 | 12 | 2 tasks | 8 files |
 | Phase 02-weather-finder-mode P04 | 8 | 2 tasks | 3 files |
 | Phase 02-weather-finder-mode P05 | 2 | 2 tasks | 2 files |
+| Phase 02-weather-finder-mode P06 | 30 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,9 @@ Recent decisions affecting current work:
 - [02-05]: FinderMarkers receives pre-scored results as prop — no re-scoring inside the component
 - [02-05]: FitFinderBounds prevLengthRef guard fires fitBounds only once when results first load, not on sort/filter changes
 - [02-05]: mode read from useAppStore() inside MapContainer — no prop drilling; StopMarkers+RouteLayer suppressed in weather-finder mode
+- [02-06]: Finder origin unified with Wo? location: searchAreas[0].lat/lng is single source — WeatherFinderStep is now a confirmation step, not an input step
+- [02-06]: Finder radius unified with Wo? radius slider: searchRadiusKm drives both use cases — FinderFilterBar no longer has its own distance slider
+- [02-06]: WeatherFinderPanel.tsx useMemo deps include searchAreas and searchRadiusKm so results refilter instantly when radius slider changes
 
 ### Pending Todos
 
@@ -112,5 +116,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 02-05-PLAN.md — FinderMarkers.tsx (3-band color markers, rank/score label, popup), MapContainer.tsx extended (FitFinderBounds, conditional FinderMarkers vs StopMarkers)
+Stopped at: Completed 02-06-PLAN.md — routes/index.tsx wired (WeatherFinderPanel, two-way finder selection); finder unified with Wo? origin (searchAreas[0]) and radius (searchRadiusKm); Phase 2 complete
 Resume file: None

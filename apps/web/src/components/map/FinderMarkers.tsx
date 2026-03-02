@@ -9,10 +9,10 @@ interface FinderMarkersProps {
   onMarkerClick: (index: number) => void;
 }
 
-function finderMarkerColor(score: number): string {
-  if (score >= 70) return 'var(--score-good)';
-  if (score >= 40) return 'var(--score-fair)';
-  return 'var(--score-poor)';
+/** Continuous hsl gradient: 0 (red) → 120 (green), matching StopMarkers */
+function scoreColor(score: number): string {
+  const hue = Math.round((Math.min(Math.max(score, 0), 100) / 100) * 120);
+  return `hsl(${hue}, 65%, 45%)`;
 }
 
 export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderMarkersProps) {
@@ -22,7 +22,7 @@ export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderM
   return (
     <>
       {results.map((result, idx) => {
-        const color = finderMarkerColor(result.score.composite);
+        const color = scoreColor(result.score.composite);
         const isSelected = selectedIndex === idx;
 
         return (
@@ -50,16 +50,16 @@ export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderM
                 justifyContent: 'center',
                 color: 'white',
                 fontWeight: 700,
-                fontSize: '12px',
                 cursor: 'pointer',
                 transition: 'width 0.15s, height 0.15s',
                 userSelect: 'none',
+                padding: '2px',
               }}
             >
-              <span style={{ fontSize: '9px', fontWeight: 400, opacity: 0.85 }}>
+              <span style={{ fontSize: '9px', fontWeight: 400, opacity: 0.85, lineHeight: 1 }}>
                 {t('finder.rank_label', '#{{rank}}', { rank: result.rank })}
               </span>
-              <span style={{ fontSize: '11px', lineHeight: 1 }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, lineHeight: 1 }}>
                 {Math.round(result.score.composite)}
               </span>
             </div>

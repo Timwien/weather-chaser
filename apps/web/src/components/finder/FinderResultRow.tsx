@@ -11,6 +11,7 @@ export interface FinderResultData {
   sunshineHoursPerDay: number;
   tempC: number;
   precipMm: number;
+  windAvgKmh: number;
   distanceKm: number;
 }
 
@@ -20,21 +21,15 @@ interface FinderResultRowProps {
   onClick: () => void;
 }
 
-function finderMarkerColor(score: number): string {
-  if (score >= 70) return 'var(--score-good)';
-  if (score >= 40) return 'var(--score-fair)';
-  return 'var(--score-poor)';
-}
-
-function scoreColor(value: number): string {
-  const hue = Math.round((Math.min(Math.max(value, 0), 100) / 100) * 120);
+/** Continuous hsl gradient: 0 (red) → 120 (green), matching StopMarkers and FinderMarkers */
+function scoreColor(score: number): string {
+  const hue = Math.round((Math.min(Math.max(score, 0), 100) / 100) * 120);
   return `hsl(${hue}, 65%, 45%)`;
 }
 
 export function FinderResultRow({ data, isSelected, onClick }: FinderResultRowProps) {
   const { t } = useTranslation('common');
-  const { rank, townName, score, sunshineHoursPerDay, tempC, precipMm, distanceKm } = data;
-  const bandColor = finderMarkerColor(score.composite);
+  const { rank, townName, score, sunshineHoursPerDay, tempC, precipMm, windAvgKmh, distanceKm } = data;
 
   return (
     <div
@@ -51,13 +46,13 @@ export function FinderResultRow({ data, isSelected, onClick }: FinderResultRowPr
         transition: 'border-color 0.15s',
       }}
     >
-      {/* Rank bubble */}
+      {/* Rank bubble — continuous gradient */}
       <div style={{
         flexShrink: 0,
         width: '36px',
         height: '36px',
         borderRadius: 'var(--radius-full)',
-        background: bandColor,
+        background: scoreColor(score.composite),
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -85,26 +80,48 @@ export function FinderResultRow({ data, isSelected, onClick }: FinderResultRowPr
         </div>
       </div>
 
-      {/* Score + metrics */}
+      {/* Score + KPI chips */}
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
         <div style={{
           fontSize: 'var(--font-size-2xl)',
           fontWeight: 700,
           color: scoreColor(score.composite),
           lineHeight: 1,
-          marginBottom: '2px',
+          marginBottom: '4px',
         }}>
           {Math.round(score.composite)}
         </div>
-        <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+        {/* 4 KPI chips: sun, temp, precip, wind */}
+        <div style={{
+          display: 'flex',
+          gap: '3px',
+          justifyContent: 'flex-end',
+          flexWrap: 'wrap',
+          maxWidth: '120px',
+        }}>
+          <span
+            style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}
+            aria-label={t('finder.kpi.sun', 'Sonne')}
+          >
             ☀ {sunshineHoursPerDay.toFixed(1)}h
           </span>
-          <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-            {Math.round(tempC)}°C
+          <span
+            style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}
+            aria-label={t('finder.kpi.temp', 'Temperatur')}
+          >
+            🌡 {Math.round(tempC)}°C
           </span>
-          <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-            {precipMm.toFixed(1)}mm
+          <span
+            style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}
+            aria-label={t('finder.kpi.precip', 'Niederschlag')}
+          >
+            💧 {precipMm.toFixed(1)}mm
+          </span>
+          <span
+            style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}
+            aria-label={t('finder.kpi.wind', 'Wind')}
+          >
+            💨 {Math.round(windAvgKmh)}km/h
           </span>
         </div>
       </div>

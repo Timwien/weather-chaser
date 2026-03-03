@@ -62,7 +62,7 @@ export function RouteLayer({ route }: RouteLayerProps) {
   return (
     <canvas
       ref={canvasRef}
-      style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 2 }}
+      style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}
     />
   );
 }

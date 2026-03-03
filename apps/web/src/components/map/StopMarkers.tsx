@@ -56,6 +56,8 @@ export function StopMarkers({ route, selectedStopIndex, onStopClick }: StopMarke
                 cursor: 'pointer',
                 transition: 'width 0.15s, height 0.15s',
                 userSelect: 'none',
+                position: 'relative',
+                zIndex: 2,
               }}
             >
               {stopDay}

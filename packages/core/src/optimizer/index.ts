@@ -1,10 +1,12 @@
 import type { OptimizerInput, Route } from '../types/index.js';
 import { nearestNeighborTour } from './nearestNeighbor.js';
 import { twoOptImprove } from './twoOpt.js';
+import { orOptImprove } from './orOpt.js';
 import { assignStops } from './assignStops.js';
 
 export { nearestNeighborTour } from './nearestNeighbor.js';
 export { twoOptImprove } from './twoOpt.js';
+export { orOptImprove } from './orOpt.js';
 export { assignStops } from './assignStops.js';
 
 /**
@@ -13,10 +15,13 @@ export { assignStops } from './assignStops.js';
  * Single public entry point for the route optimization algorithm.
  *
  * Pipeline:
- *  1. nearestNeighborTour  — builds a greedy initial tour visiting all towns
- *  2. twoOptImprove        — applies 2-opt local search (never worsens tour)
- *  3. must-visit anchoring — ensures mustVisitIndices appear before truncation point
- *  4. assignStops          — assigns nights, dates, scores, distances → Route
+ *  1. nearestNeighborTour  — greedy initial tour through all candidate towns
+ *  2. twoOptImprove        — global 2-opt on the full candidate pool
+ *  3. must-visit anchoring — ensures must-visits appear before the truncation point
+ *  4. post-truncation 2-opt + or-opt — re-optimizes only the final N active stops.
+ *     Eliminates zig-zags introduced by must-visit swaps and truncation.
+ *     (Fast: N is typically 5–14, so O(N²) is <1 ms)
+ *  5. assignStops          — assigns nights, dates, scores, distances → Route
  */
 export function optimizeRoute(input: OptimizerInput): Route {
   const { towns, distanceMatrix, config } = input;
@@ -27,19 +32,25 @@ export function optimizeRoute(input: OptimizerInput): Route {
     return { stops: [], totalDistanceKm: 0, totalDays: 0, avgScore: 0 };
   }
 
-  // Step 1: Build nearest-neighbor tour (all towns, must-visit preference)
+  // Step 1: Nearest-neighbor tour through all candidate towns
   let tour = nearestNeighborTour(startIndex, distanceMatrix, mustVisitIndices);
 
-  // Step 2: 2-opt improvement
+  // Step 2: 2-opt on the full candidate pool (removes edge crossings globally)
   tour = twoOptImprove(tour, distanceMatrix);
 
-  // Step 3: Must-visit anchoring
-  // Determine how many stops will actually be visited given totalDays and maxStay.
-  // Any must-visit town that falls beyond the truncation point is moved earlier.
+  // Step 3: Anchor must-visits within the active window before truncation
   const truncationPoint = computeTruncationPoint(tour, totalDays, maxStay);
   tour = anchorMustVisits(tour, mustVisitIndices, truncationPoint);
 
-  // Step 4: Assign stops (dates, nights, scores, distances)
+  // Step 4: Re-optimize only the stops that will actually be in the route.
+  // anchorMustVisits uses raw swaps that can break the 2-opt ordering.
+  // Running 2-opt + or-opt on the small final slice fixes zig-zags cheaply.
+  const activeSlice = tour.slice(0, truncationPoint);
+  const optimizedSlice = orOptImprove(twoOptImprove(activeSlice, distanceMatrix), distanceMatrix);
+  // Reconstruct: optimized active stops + unvisited tail (assignStops ignores the tail)
+  tour = [...optimizedSlice, ...tour.slice(truncationPoint)];
+
+  // Step 5: Assign stops (dates, nights, scores, distances)
   return assignStops(tour, input);
 }
 

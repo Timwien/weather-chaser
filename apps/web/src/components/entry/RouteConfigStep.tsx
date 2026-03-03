@@ -4,6 +4,7 @@ import { useAppStore } from '../../stores/appStore.ts';
 import { useLocationSearch } from '../../hooks/useLocationSearch.ts';
 import type { NominatimResult } from '../../services/nominatim.ts';
 import type { WeatherPreset } from '@weatherchaser/core';
+import { BeachIcon, HikingIcon, SightseeingIcon } from '../finder/FinderIcons.tsx';
 
 // Inline remove icon — no emoji per design decision
 function RemoveIcon() {
@@ -17,34 +18,11 @@ function RemoveIcon() {
 
 const PRESETS: WeatherPreset[] = ['beach', 'hiking', 'sightseeing'];
 
-// Preset icons (inline SVG, no emoji)
-function PresetIcon({ preset }: { preset: WeatherPreset }) {
-  if (preset === 'beach') {
-    return (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        {/* Simple beach umbrella shape */}
-        <circle cx="10" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" fill="none" />
-        <line x1="10" y1="7" x2="10" y2="17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  if (preset === 'hiking') {
-    return (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        {/* Mountain silhouette */}
-        <polyline points="2,17 8,6 12,12 15,8 18,17" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" fill="none" />
-      </svg>
-    );
-  }
-  // sightseeing — camera shape
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <rect x="2" y="6" width="16" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="10" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M7 6 L7 4 Q7 3 8 3 L12 3 Q13 3 13 4 L13 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
+const PRESET_ICONS: Record<WeatherPreset, React.ComponentType<{ size?: number }>> = {
+  beach: BeachIcon,
+  hiking: HikingIcon,
+  sightseeing: SightseeingIcon,
+};
 
 /** Simplified location search for start location — writes to tripConfig, not searchArea */
 function StartLocationSearch() {
@@ -132,7 +110,7 @@ function StartLocationSearch() {
   );
 }
 
-export function RouteConfigStep({ onGenerate }: { onGenerate: () => void }) {
+export function RouteConfigStep({ onGenerate, onBack }: { onGenerate: () => void; onBack: () => void }) {
   const { t } = useTranslation('common');
   const { tripConfig, setTripConfig, searchAreas } = useAppStore();
   const [mustVisitInput, setMustVisitInput] = useState('');
@@ -175,6 +153,11 @@ export function RouteConfigStep({ onGenerate }: { onGenerate: () => void }) {
   return (
     <div className="route-config-step">
       <div className="route-config-divider" />
+
+      {/* Back button */}
+      <button type="button" className="route-config-back-btn" onClick={onBack}>
+        ← {t('itinerary.back', 'Zurück')}
+      </button>
 
       {/* Start location */}
       <div className="route-config-field">
@@ -236,17 +219,20 @@ export function RouteConfigStep({ onGenerate }: { onGenerate: () => void }) {
       <div className="route-config-field">
         <label className="input-label">{t('preset.label')}</label>
         <div className="preset-buttons">
-          {PRESETS.map((preset) => (
-            <button
-              key={preset}
-              type="button"
-              className={`preset-btn${tripConfig.preset === preset ? ' preset-btn--active' : ''}`}
-              onClick={() => setTripConfig({ preset })}
-            >
-              <PresetIcon preset={preset} />
-              <span>{t(`preset.${preset}`)}</span>
-            </button>
-          ))}
+          {PRESETS.map((preset) => {
+            const Icon = PRESET_ICONS[preset];
+            return (
+              <button
+                key={preset}
+                type="button"
+                className={`preset-btn${tripConfig.preset === preset ? ' preset-btn--active' : ''}`}
+                onClick={() => setTripConfig({ preset })}
+              >
+                <Icon size={20} />
+                <span>{t(`preset.${preset}`)}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

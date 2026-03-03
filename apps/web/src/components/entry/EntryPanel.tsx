@@ -56,7 +56,7 @@ export function EntryPanel() {
       )}
 
       {/* Route config second step — expands inline when mode is route-config */}
-      {isRouteConfig && <RouteConfigStep onGenerate={optimizer.run} />}
+      {isRouteConfig && <RouteConfigStep onGenerate={optimizer.run} onBack={() => setMode('idle')} />}
 
       {/* Loading state */}
       {mode === 'loading' && (

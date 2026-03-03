@@ -79,6 +79,82 @@ export function ScoreIcon({ size = 13 }: IconProps) {
   );
 }
 
+/* ── Activity preset icons ──────────────────────────────── */
+
+export function BeachIcon({ size = 20 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" aria-hidden="true" style={base}>
+      {/* umbrella arc */}
+      <path d="M3 8 Q10 2 17 8" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      {/* pole */}
+      <line x1="10" y1="8" x2="13" y2="17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      {/* ground */}
+      <line x1="8" y1="17" x2="16" y2="17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function HikingIcon({ size = 20 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" aria-hidden="true" style={base}>
+      <polyline points="2,17 7,7 11,12 14,8 18,17" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function SightseeingIcon({ size = 20 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" aria-hidden="true" style={base}>
+      <rect x="2" y="6" width="16" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="10" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M7 6 L7 4 Q7 3 8 3 L12 3 Q13 3 13 4 L13 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/* ── Time-of-day icons ──────────────────────────────────── */
+
+export function FullDayIcon({ size = 14 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true" style={base}>
+      <circle cx="8" cy="8" r="3" fill="currentColor" />
+      <line x1="8" y1="1" x2="8" y2="2.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <line x1="8" y1="13.2" x2="8" y2="15" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <line x1="1" y1="8" x2="2.8" y2="8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <line x1="13.2" y1="8" x2="15" y2="8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <line x1="3" y1="3" x2="4.2" y2="4.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <line x1="11.8" y1="11.8" x2="13" y2="13" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <line x1="13" y1="3" x2="11.8" y2="4.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <line x1="4.2" y1="11.8" x2="3" y2="13" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function MorningIcon({ size = 14 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true" style={base}>
+      {/* horizon */}
+      <line x1="1.5" y1="12" x2="14.5" y2="12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      {/* half-sun arc */}
+      <path d="M4 12 A4 4 0 0 1 12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+      {/* rays */}
+      <line x1="8" y1="2" x2="8" y2="3.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <line x1="3.5" y1="4.5" x2="4.7" y2="5.7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <line x1="12.5" y1="4.5" x2="11.3" y2="5.7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function EveningIcon({ size = 14 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true" style={base}>
+      {/* crescent moon */}
+      <path d="M12.5 10 A5.5 5.5 0 1 1 6 3.5 A4.5 4.5 0 0 0 12.5 10Z"
+        stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  );
+}
+
 export function TrophyIcon({ size = 14 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true" style={base}>

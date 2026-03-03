@@ -1,17 +1,21 @@
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
+import {
+  FullDayIcon, MorningIcon, EveningIcon,
+  BeachIcon, HikingIcon, SightseeingIcon,
+} from './FinderIcons.tsx';
 import './FinderFilterBar.css';
 
 const TIME_OPTIONS = [
-  { value: 'full',    labelKey: 'finder.time.full',    default: 'Ganzer Tag' },
-  { value: 'morning', labelKey: 'finder.time.morning', default: 'Morgen' },
-  { value: 'evening', labelKey: 'finder.time.evening', default: 'Abend' },
+  { value: 'full',    labelKey: 'finder.time.full',    default: 'Ganzer Tag', Icon: FullDayIcon },
+  { value: 'morning', labelKey: 'finder.time.morning', default: 'Morgen',     Icon: MorningIcon },
+  { value: 'evening', labelKey: 'finder.time.evening', default: 'Abend',      Icon: EveningIcon },
 ] as const;
 
 const PRESET_OPTIONS = [
-  { value: 'beach',       labelKey: 'preset.beach',       default: 'Strand' },
-  { value: 'hiking',      labelKey: 'preset.hiking',      default: 'Wandern' },
-  { value: 'sightseeing', labelKey: 'preset.sightseeing', default: 'Sightseeing' },
+  { value: 'beach',       labelKey: 'preset.beach',       default: 'Strand',      Icon: BeachIcon },
+  { value: 'hiking',      labelKey: 'preset.hiking',      default: 'Wandern',     Icon: HikingIcon },
+  { value: 'sightseeing', labelKey: 'preset.sightseeing', default: 'Sightseeing', Icon: SightseeingIcon },
 ] as const;
 
 /** Generate an array of ISO date strings between startDate and endDate (inclusive) */
@@ -72,35 +76,37 @@ export function FinderFilterBar() {
         </div>
       )}
 
-      {/* Time-of-day toggle */}
+      {/* Time-of-day toggle — pill chips with icon */}
       <div className="finder-filter-group">
         <span className="finder-filter-label">{t('finder.time_label', 'Tageszeit')}</span>
         <div className="finder-filter-toggle">
-          {TIME_OPTIONS.map(({ value, labelKey, default: def }) => (
+          {TIME_OPTIONS.map(({ value, labelKey, default: def, Icon }) => (
             <button
               key={value}
               type="button"
               className={`finder-filter-toggle-btn${finderConfig.timeOfDay === value ? ' finder-filter-toggle-btn--active' : ''}`}
               onClick={() => setFinderConfig({ timeOfDay: value })}
             >
+              <Icon size={13} />
               {t(labelKey, def)}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Preset selector */}
+      {/* Preset selector — card tiles with icon above label */}
       <div className="finder-filter-group">
-        <span className="finder-filter-label">{t('preset.label', 'Profil')}</span>
-        <div className="finder-filter-toggle">
-          {PRESET_OPTIONS.map(({ value, labelKey, default: def }) => (
+        <span className="finder-filter-label">{t('preset.label', 'Wetterprofil')}</span>
+        <div className="finder-preset-grid">
+          {PRESET_OPTIONS.map(({ value, labelKey, default: def, Icon }) => (
             <button
               key={value}
               type="button"
-              className={`finder-filter-toggle-btn${finderConfig.preset === value ? ' finder-filter-toggle-btn--active' : ''}`}
+              className={`finder-preset-card${finderConfig.preset === value ? ' finder-preset-card--active' : ''}`}
               onClick={() => setFinderConfig({ preset: value })}
             >
-              {t(labelKey, def)}
+              <Icon size={22} />
+              <span>{t(labelKey, def)}</span>
             </button>
           ))}
         </div>

@@ -695,6 +695,24 @@
    Route config step
    ========================================================= */
 
+.route-config-back-btn {
+  align-self: flex-start;
+  padding: var(--space-1) 0;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease;
+}
+
+.route-config-back-btn:hover {
+  color: var(--color-text-secondary);
+}
+
 .route-config-step {
   display: flex;
   flex-direction: column;

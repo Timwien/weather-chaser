@@ -680,13 +680,15 @@
 }
 
 .cta-btn--secondary {
-  background: transparent;
-  color: var(--color-accent);
-  border: 1.5px solid var(--color-accent);
+  background: var(--color-secondary);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 16px rgba(245, 146, 30, 0.28);
 }
 
 .cta-btn--secondary:hover {
-  background: var(--color-accent-light);
+  background: var(--color-secondary-hover);
+  box-shadow: 0 6px 20px rgba(245, 146, 30, 0.38);
 }
 
 /* =========================================================

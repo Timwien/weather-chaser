@@ -1,6 +1,13 @@
 // Nominatim geocoding — debounce at call site (500ms minimum)
 // Policy: 1 req/s max, no automated bulk queries
-// Phase 1 dev only — Phase 3 adds a proxy
+// In production: routes through /api/proxy/nominatim (Vercel serverless)
+// In dev: calls Nominatim directly (no Vercel CLI required for local dev)
+
+// In production: route through /api/proxy/nominatim (Vercel serverless)
+// In dev: call Nominatim directly (no Vercel CLI required for local dev)
+const NOMINATIM_BASE = import.meta.env.PROD
+  ? '/api/proxy/nominatim'
+  : 'https://nominatim.openstreetmap.org/search';
 
 export interface NominatimResult {
   display_name: string;
@@ -18,19 +25,19 @@ export interface BoundingBox {
 }
 
 export async function searchPlace(query: string): Promise<NominatimResult[]> {
-  const url = new URL('https://nominatim.openstreetmap.org/search');
+  const url = new URL(NOMINATIM_BASE, window.location.origin);
   url.searchParams.set('q', query);
   url.searchParams.set('format', 'json');
   url.searchParams.set('limit', '5');
   url.searchParams.set('addressdetails', '0');
 
-  const res = await fetch(url.toString(), {
-    headers: {
-      'Accept-Language': 'en',
-      // Nominatim policy requires a valid User-Agent / Referer
-      'Referer': window.location.origin,
-    },
-  });
+  const headers: Record<string, string> = { 'Accept-Language': 'en' };
+  if (import.meta.env.DEV) {
+    // Nominatim policy requires a valid User-Agent / Referer — set only in dev (direct call)
+    headers['Referer'] = window.location.origin;
+  }
+
+  const res = await fetch(url.toString(), { headers });
 
   if (!res.ok) throw new Error(`Nominatim error: ${res.status}`);
   return res.json();

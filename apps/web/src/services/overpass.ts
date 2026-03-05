@@ -1,15 +1,19 @@
 // Overpass API — tries primary endpoint first, falls back to mirror on 429/5xx
-// Production (Phase 3): must proxy through own server
+// In production (Phase 3): proxied through /api/proxy/overpass (Vercel serverless)
+// In dev: uses public Overpass endpoints directly with fallback
 // Only fetches city/town/village nodes with name tags — excludes hamlets, isolated_dwelling, farm
 
 import type { Town } from '@weatherchaser/core';
 import type { BoundingBox } from './nominatim.ts';
 
-/** Endpoints tried in order; the first one to succeed wins */
+/** Endpoints tried in order in dev; the first one to succeed wins */
 const OVERPASS_ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
 ];
+
+/** Production proxy endpoint (Vercel serverless) */
+const OVERPASS_PROXY = '/api/proxy/overpass';
 
 function buildBboxQuery(bbox: BoundingBox): string {
   const { south, west, north, east } = bbox;
@@ -80,6 +84,13 @@ async function tryEndpoint(url: string, query: string): Promise<Town[] | null> {
 }
 
 async function runOverpassQuery(query: string): Promise<Town[]> {
+  if (import.meta.env.PROD) {
+    // Production: use proxy endpoint (single endpoint, Vercel CDN caches responses)
+    const result = await tryEndpoint(OVERPASS_PROXY, query);
+    if (result !== null) return result;
+    throw new Error('Overpass proxy error: request failed');
+  }
+  // Dev: try multiple public endpoints with fallback
   for (const url of OVERPASS_ENDPOINTS) {
     const result = await tryEndpoint(url, query);
     if (result !== null) return result;

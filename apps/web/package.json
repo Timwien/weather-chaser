@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.98.0",
     "@tanstack/react-router": "^1.0.0",
     "@turf/turf": "^7.0.0",
     "@vis.gl/react-maplibre": "^8.1.0",

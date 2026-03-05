@@ -680,15 +680,15 @@
 }
 
 .cta-btn--secondary {
-  background: var(--color-secondary);
+  background: var(--color-accent);
   color: #ffffff;
   border: none;
-  box-shadow: 0 4px 16px rgba(245, 146, 30, 0.28);
+  box-shadow: 0 4px 16px rgba(14, 116, 144, 0.28);
 }
 
 .cta-btn--secondary:hover {
-  background: var(--color-secondary-hover);
-  box-shadow: 0 6px 20px rgba(245, 146, 30, 0.38);
+  background: var(--color-accent-hover);
+  box-shadow: 0 6px 20px rgba(14, 116, 144, 0.38);
 }
 
 /* =========================================================
@@ -1025,6 +1025,50 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   padding: var(--space-4) 0;
+}
+
+/* =========================================================
+   Panel footer — account icon row
+   ========================================================= */
+
+.entry-panel-footer {
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+}
+
+.entry-panel-account-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.12s, background 0.12s;
+}
+
+.entry-panel-account-btn:hover {
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+}
+
+/* Avatar circle for logged-in users */
+.entry-panel-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* =========================================================

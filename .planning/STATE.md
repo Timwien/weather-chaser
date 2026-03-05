@@ -10,10 +10,10 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 3 of 5 — **IN PROGRESS**
-Current plan: 03-01 complete; 1/7 plans done
-Last activity: 2026-03-05 — Phase 3 Plan 01 complete (Vercel proxy functions: weather, Overpass, Nominatim, keepalive; vercel.json with fra1 region, SPA rewrite, cron)
+Current plan: 03-02 complete; 2/7 plans done
+Last activity: 2026-03-05 — Phase 3 Plan 02 complete (Supabase client singleton, TypeScript database types, Zustand auth store with pending-action queue, main.tsx auth initialization)
 
-Progress: [███████░░░] 46% (Phase 1 complete; Phase 2 complete; Phase 3 in progress — 1/7 plans done)
+Progress: [████████░░] 49% (Phase 1 complete; Phase 2 complete; Phase 3 in progress — 2/7 plans done)
 
 ## Performance Metrics
 
@@ -45,6 +45,7 @@ Progress: [███████░░░] 46% (Phase 1 complete; Phase 2 comple
 | Phase 02-weather-finder-mode P05 | 2 | 2 tasks | 2 files |
 | Phase 02-weather-finder-mode P06 | 30 | 2 tasks | 7 files |
 | Phase 03 P01 | 6 min | 2 tasks | 7 files |
+| Phase 03 P02 | 8 min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,9 @@ Recent decisions affecting current work:
 - [03-01]: @supabase/supabase-js added to apps/web production dependencies for keepalive.ts serverless function
 - [03-01]: Overpass proxy forwards raw POST body verbatim — client sends data=<encoded query> as form-urlencoded, proxy passes through unchanged
 - [03-01]: OPEN_METEO_API_KEY optional in weather proxy — appended as apikey param only if set, allowing free-tier use without config
+- [03-02]: Auth store initialize() returns unsubscribe fn — called in Root wrapper useEffect for StrictMode-safe cleanup; not module-level init
+- [03-02]: pendingAction consumed by UI layer (not auth store) — store logs SIGNED_IN+pending event but does not execute; UI clears after executing
+- [03-02]: VITE_ prefix only on SUPABASE_URL and SUPABASE_ANON_KEY — anon key is designed public/safe in bundles; service_role key must never get VITE_ prefix
 
 ### Pending Todos
 
@@ -127,5 +131,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-05
-Stopped at: Completed 03-01-PLAN.md — Vercel proxy functions (weather, Overpass, Nominatim, keepalive) + vercel.json configured
+Stopped at: Completed 03-02-PLAN.md — Supabase client singleton, TypeScript database types, Zustand auth store with pending-action queue, main.tsx auth initialization
 Resume file: None

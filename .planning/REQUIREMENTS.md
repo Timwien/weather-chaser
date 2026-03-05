@@ -67,7 +67,7 @@
 ### Weather Data
 
 - [x] **WTHR-01**: App fetches hourly weather data via Open-Meteo API (14-day horizon)
-- [ ] **WTHR-02**: Weather fetching is routed through a backend proxy with caching (~6h TTL) — no direct client-to-Open-Meteo calls in production
+- [x] **WTHR-02**: Weather fetching is routed through a backend proxy with caching (~6h TTL) — no direct client-to-Open-Meteo calls in production
 
 ### Export & Sharing
 
@@ -95,10 +95,10 @@
 
 ### Infrastructure & Platform
 
-- [ ] **INFRA-01**: Backend API handles auth, user data persistence, weather proxy + cache, Overpass proxy + cache
-- [ ] **INFRA-02**: Web app is publicly hosted (Vercel or equivalent)
-- [ ] **INFRA-03**: All production API usage complies with provider ToS — no use of Nominatim/OSRM/Overpass public demo endpoints for production traffic
-- [ ] **INFRA-04**: Backend hosted in EU region (GDPR compliance for EU user data)
+- [x] **INFRA-01**: Backend API handles auth, user data persistence, weather proxy + cache, Overpass proxy + cache
+- [x] **INFRA-02**: Web app is publicly hosted (Vercel or equivalent)
+- [x] **INFRA-03**: All production API usage complies with provider ToS — no use of Nominatim/OSRM/Overpass public demo endpoints for production traffic
+- [x] **INFRA-04**: Backend hosted in EU region (GDPR compliance for EU user data)
 - [x] **INFRA-05**: Codebase is a Turborepo monorepo with shared TypeScript core library (scoring + optimization) used by web and mobile apps
 - [ ] **PLAT-01**: Web app is released as v1
 - [ ] **PLAT-02**: Native iOS app is released as v1 (Expo / React Native)
@@ -190,11 +190,11 @@
 | AUTH-05 | Phase 3 | Pending |
 | AUTH-06 | Phase 3 | Pending |
 | AUTH-07 | Phase 3 | Pending |
-| WTHR-02 | Phase 3 | Pending |
-| INFRA-01 | Phase 3 | Pending |
-| INFRA-02 | Phase 3 | Pending |
-| INFRA-03 | Phase 3 | Pending |
-| INFRA-04 | Phase 3 | Pending |
+| WTHR-02 | Phase 3 | Complete |
+| INFRA-01 | Phase 3 | Complete |
+| INFRA-02 | Phase 3 | Complete |
+| INFRA-03 | Phase 3 | Complete |
+| INFRA-04 | Phase 3 | Complete |
 | PLAT-01 | Phase 3 | Pending |
 | AUTH-08 | Phase 4 | Pending |
 | AUTH-09 | Phase 4 | Pending |

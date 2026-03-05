@@ -5,15 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Show travelers where the best weather is — and for campervan trips, the optimal multi-day route to chase it — through real towns, not dots on a grid
-**Current focus:** Phase 2 — Weather Finder Mode
+**Current focus:** Phase 3 — Backend + Auth + Production Hosting
 
 ## Current Position
 
-Phase: 2 of 5 — **IN PROGRESS**
-Current plan: 02-06 complete; Phase 2 complete
-Last activity: 2026-03-02 — Phase 2 Plan 06 complete (routes/index.tsx wired with WeatherFinderPanel + two-way selection; finder unified with Wo? origin + radius)
+Phase: 3 of 5 — **IN PROGRESS**
+Current plan: 03-01 complete; 1/7 plans done
+Last activity: 2026-03-05 — Phase 3 Plan 01 complete (Vercel proxy functions: weather, Overpass, Nominatim, keepalive; vercel.json with fra1 region, SPA rewrite, cron)
 
-Progress: [██████░░░░] 40% (Phase 1 complete; Phase 2 complete — 6/6 plans done)
+Progress: [███████░░░] 46% (Phase 1 complete; Phase 2 complete; Phase 3 in progress — 1/7 plans done)
 
 ## Performance Metrics
 
@@ -44,6 +44,7 @@ Progress: [██████░░░░] 40% (Phase 1 complete; Phase 2 comple
 | Phase 02-weather-finder-mode P04 | 8 | 2 tasks | 3 files |
 | Phase 02-weather-finder-mode P05 | 2 | 2 tasks | 2 files |
 | Phase 02-weather-finder-mode P06 | 30 | 2 tasks | 7 files |
+| Phase 03 P01 | 6 min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,11 @@ Recent decisions affecting current work:
 - [02-06-fixes]: FinderTimeOfDay: 'afternoon' replaced with 'evening' (17:00–21:59); order: full | morning | evening
 - [02-06-fixes]: selectedDay field in FinderConfig drives per-day slicing in panel without re-fetch; day picker UI in FinderFilterBar
 - [02-06-fixes]: windAvgKmh in FinderResultData; sunshine formula: sum(seconds)/3600/dayCount for true per-day hours
+- [03-01]: Vercel Web fetch handler format (export default { async fetch(request: Request): Promise<Response> }) used — modern preferred format for Edge/Node runtimes
+- [03-01]: apps/web tsconfig.json include extended to add 'api' so serverless function files are type-checked by pnpm type-check
+- [03-01]: @supabase/supabase-js added to apps/web production dependencies for keepalive.ts serverless function
+- [03-01]: Overpass proxy forwards raw POST body verbatim — client sends data=<encoded query> as form-urlencoded, proxy passes through unchanged
+- [03-01]: OPEN_METEO_API_KEY optional in weather proxy — appended as apikey param only if set, allowing free-tier use without config
 
 ### Pending Todos
 
@@ -120,6 +126,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-02
-Stopped at: 02-06 post-verification fix pass — location modes (around/polygon/multi-place), continuous gradient, marker centering, day picker, wind KPI, time options, sunshine formula; Phase 2 complete
+Last session: 2026-03-05
+Stopped at: Completed 03-01-PLAN.md — Vercel proxy functions (weather, Overpass, Nominatim, keepalive) + vercel.json configured
 Resume file: None

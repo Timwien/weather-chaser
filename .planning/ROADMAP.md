@@ -74,7 +74,16 @@ Plans:
   3. Logged-in user can save a named route, view it again later, and favorite a location — and these persist after closing the app
   4. The web app is publicly accessible at a stable URL, all weather and location API calls are routed through the backend proxy, and no client-to-Nominatim/OSRM-demo/Overpass-public calls occur in production
   5. User data (accounts, saved routes, favorites) is stored in an EU-region database and the app satisfies GDPR requirements for the German market
-**Plans**: TBD
+**Plans**: 7 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Vercel proxy functions (weather, Overpass, Nominatim, keepalive) + vercel.json (fra1, SPA rewrite, cron)
+- [ ] 03-02-PLAN.md — Supabase client singleton + Zustand auth store + DB schema SQL (saved_routes, favorites, finder searches)
+- [ ] 03-03-PLAN.md — Migrate client services (nominatim.ts, overpass.ts, weather.ts, osrm.ts) to proxy URLs in production
+- [ ] 03-04-PLAN.md — AccountModal (3 tabs) + InlineSignInPrompt + EntryPanel account icon footer
+- [ ] 03-05-PLAN.md — User data persistence (save routes, favorites, saved finder searches) + SavedTab + LocationInput suggestions
+- [ ] 03-06-PLAN.md — GDPR: account deletion endpoint (server-side) + one-time guest route hint
+- [ ] 03-07-PLAN.md — Production deployment to Vercel + end-to-end verification (all 5 success criteria)
 
 ### Phase 4: Freemium + Monetization
 **Goal**: The freemium tier split is enforced server-side with a working Stripe subscription flow, premium features are gated behind a paywall, and users can upgrade from within the app
@@ -106,6 +115,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Core Algorithm + Route Planner Web | 10/10 | Complete | 2026-03-01 |
 | 2. Weather Finder Mode | 6/6 | Complete | 2026-03-02 |
-| 3. Backend + Auth + Production Hosting | 0/TBD | Not started | - |
+| 3. Backend + Auth + Production Hosting | 0/7 | Not started | - |
 | 4. Freemium + Monetization | 0/TBD | Not started | - |
 | 5. Native Mobile Apps | 0/TBD | Not started | - |

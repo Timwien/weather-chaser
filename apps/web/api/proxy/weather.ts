@@ -1,5 +1,7 @@
 // Vercel serverless proxy for Open-Meteo — avoids CORS issues and caches at CDN edge
 // Cache: 6h (s-maxage=21600) with 1h stale-while-revalidate
+// Forwards all Open-Meteo query params: latitude, longitude, daily, hourly, start_date,
+// end_date, forecast_days, timezone — supports both date-range batch and forecast_days modes.
 
 export default {
   async fetch(request: Request): Promise<Response> {
@@ -21,18 +23,26 @@ export default {
       });
     }
 
-    const forecastDays = url.searchParams.get('forecast_days') ?? '16';
-    const hourly =
-      url.searchParams.get('hourly') ??
-      'temperature_2m,precipitation,sunshine_duration,wind_speed_10m';
-    const timezone = url.searchParams.get('timezone') ?? 'Europe/Berlin';
-
     const upstream = new URL('https://api.open-meteo.com/v1/forecast');
     upstream.searchParams.set('latitude', latitude);
     upstream.searchParams.set('longitude', longitude);
-    upstream.searchParams.set('forecast_days', forecastDays);
-    upstream.searchParams.set('hourly', hourly);
-    upstream.searchParams.set('timezone', timezone);
+
+    // Forward optional Open-Meteo parameters
+    const forwardParams = [
+      'daily',
+      'hourly',
+      'start_date',
+      'end_date',
+      'forecast_days',
+      'timezone',
+    ] as const;
+
+    for (const param of forwardParams) {
+      const value = url.searchParams.get(param);
+      if (value !== null) {
+        upstream.searchParams.set(param, value);
+      }
+    }
 
     const apiKey = process.env.OPEN_METEO_API_KEY;
     if (apiKey) {

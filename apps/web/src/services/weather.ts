@@ -14,6 +14,11 @@ const EMPTY_DAILY: DailyWeather = {
   wind_speed_10m_max: [],
 };
 
+// In production: route through /api/proxy/weather (Vercel serverless)
+// In dev: call Open-Meteo directly (no Vercel CLI required for local dev)
+const WEATHER_PROXY = '/api/proxy/weather';
+const WEATHER_DIRECT = 'https://api.open-meteo.com/v1/forecast';
+
 /**
  * Fetch daily weather aggregates for a list of towns from Open-Meteo.
  * Batches requests in groups of 50 (API practical limit).
@@ -42,7 +47,8 @@ async function fetchBatch(
   startDate: string,
   endDate: string,
 ): Promise<WeatherData[]> {
-  const url = new URL('https://api.open-meteo.com/v1/forecast');
+  const base = import.meta.env.PROD ? WEATHER_PROXY : WEATHER_DIRECT;
+  const url = new URL(base, window.location.origin);
   url.searchParams.set('latitude', towns.map((t) => t.lat.toFixed(4)).join(','));
   url.searchParams.set('longitude', towns.map((t) => t.lng.toFixed(4)).join(','));
   url.searchParams.set(

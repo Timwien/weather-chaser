@@ -77,8 +77,8 @@
 ### User Accounts — Three Tiers
 
 - [x] **AUTH-01**: App is fully functional without login — guest users can plan routes, view results, and share links
-- [ ] **AUTH-02**: User can create a free account with email/password
-- [ ] **AUTH-03**: User can sign in with OAuth (Google) — Apple Sign-In required for iOS App Store
+- [x] **AUTH-02**: User can create a free account with email/password
+- [x] **AUTH-03**: User can sign in with OAuth (Google) — Apple Sign-In required for iOS App Store
 - [x] **AUTH-04**: User session persists across app restarts (free account)
 - [ ] **AUTH-05**: Free account user can save and name planned routes
 - [ ] **AUTH-06**: Free account user can favorite/bookmark specific locations
@@ -184,8 +184,8 @@
 | FIND-05 | Phase 2 | Complete |
 | FIND-06 | Phase 2 | Complete |
 | AUTH-01 | Phase 3 | Complete |
-| AUTH-02 | Phase 3 | Pending |
-| AUTH-03 | Phase 3 | Pending |
+| AUTH-02 | Phase 3 | Complete |
+| AUTH-03 | Phase 3 | Complete |
 | AUTH-04 | Phase 3 | Complete |
 | AUTH-05 | Phase 3 | Pending |
 | AUTH-06 | Phase 3 | Pending |

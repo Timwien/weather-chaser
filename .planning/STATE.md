@@ -47,6 +47,7 @@ Progress: [████████░░] 51% (Phase 1 complete; Phase 2 comple
 | Phase 03 P01 | 6 min | 2 tasks | 7 files |
 | Phase 03 P02 | 8 min | 2 tasks | 5 files |
 | Phase 03 P03 | 3 min | 2 tasks | 6 files |
+| Phase 03-backend-auth-production-hosting P04 | 4 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,8 @@ Recent decisions affecting current work:
 - [03-03]: weather.ts (daily) and weatherHourly.ts (hourly) kept as separate services — different return types (DailyWeather vs HourlyWeather), different callers (optimizer.worker vs finder.worker)
 - [03-03]: Weather proxy extended to forward start_date, end_date, daily params — batch services use date-range mode; original proxy only supported forecast_days+hourly
 - [03-03]: !import.meta.env.PROD guard for OSRM public demo server — production goes configured OSRM URL → Haversine fallback, never touching demo server
+- [Phase 03-04]: useRef for prevUser tracking in AccountModal/InlineSignInPrompt — plain object literal resets on every render; useRef persists across re-renders for null→truthy user transition detection
+- [Phase 03-04]: SettingsTab delete account calls DELETE /api/user/delete (not direct Supabase client) — server-side endpoint needed for GDPR-compliant deletion across all tables; service_role key must never be in client bundle
 
 ### Pending Todos
 

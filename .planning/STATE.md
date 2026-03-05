@@ -10,10 +10,10 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 3 of 5 — **IN PROGRESS**
-Current plan: 03-02 complete; 2/7 plans done
-Last activity: 2026-03-05 — Phase 3 Plan 02 complete (Supabase client singleton, TypeScript database types, Zustand auth store with pending-action queue, main.tsx auth initialization)
+Current plan: 03-03 complete; 3/7 plans done
+Last activity: 2026-03-05 — Phase 3 Plan 03 complete (all API services proxied in production: Nominatim→/api/proxy/nominatim, Overpass→/api/proxy/overpass, Open-Meteo→/api/proxy/weather; OSRM demo server guarded behind !PROD)
 
-Progress: [████████░░] 49% (Phase 1 complete; Phase 2 complete; Phase 3 in progress — 2/7 plans done)
+Progress: [████████░░] 51% (Phase 1 complete; Phase 2 complete; Phase 3 in progress — 3/7 plans done)
 
 ## Performance Metrics
 
@@ -46,6 +46,7 @@ Progress: [████████░░] 49% (Phase 1 complete; Phase 2 comple
 | Phase 02-weather-finder-mode P06 | 30 | 2 tasks | 7 files |
 | Phase 03 P01 | 6 min | 2 tasks | 7 files |
 | Phase 03 P02 | 8 min | 2 tasks | 5 files |
+| Phase 03 P03 | 3 min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,10 @@ Recent decisions affecting current work:
 - [03-02]: Auth store initialize() returns unsubscribe fn — called in Root wrapper useEffect for StrictMode-safe cleanup; not module-level init
 - [03-02]: pendingAction consumed by UI layer (not auth store) — store logs SIGNED_IN+pending event but does not execute; UI clears after executing
 - [03-02]: VITE_ prefix only on SUPABASE_URL and SUPABASE_ANON_KEY — anon key is designed public/safe in bundles; service_role key must never get VITE_ prefix
+- [03-03]: import.meta.env.PROD ternary pattern for service base URLs — PROXY = '/api/proxy/X', DIRECT = 'https://...', base = PROD ? PROXY : DIRECT; URL built with new URL(base, window.location.origin)
+- [03-03]: weather.ts (daily) and weatherHourly.ts (hourly) kept as separate services — different return types (DailyWeather vs HourlyWeather), different callers (optimizer.worker vs finder.worker)
+- [03-03]: Weather proxy extended to forward start_date, end_date, daily params — batch services use date-range mode; original proxy only supported forecast_days+hourly
+- [03-03]: !import.meta.env.PROD guard for OSRM public demo server — production goes configured OSRM URL → Haversine fallback, never touching demo server
 
 ### Pending Todos
 
@@ -131,5 +136,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-05
-Stopped at: Completed 03-02-PLAN.md — Supabase client singleton, TypeScript database types, Zustand auth store with pending-action queue, main.tsx auth initialization
+Stopped at: Completed 03-03-PLAN.md — all API services proxied in production (Nominatim, Overpass, Open-Meteo), OSRM demo server guarded behind !PROD, weather proxy extended for batch-mode params
 Resume file: None

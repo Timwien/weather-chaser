@@ -10,10 +10,10 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 3 of 5 — **IN PROGRESS**
-Current plan: 03-03 complete; 3/7 plans done
-Last activity: 2026-03-05 — Phase 3 Plan 03 complete (all API services proxied in production: Nominatim→/api/proxy/nominatim, Overpass→/api/proxy/overpass, Open-Meteo→/api/proxy/weather; OSRM demo server guarded behind !PROD)
+Current plan: 03-04 complete; 4/7 plans done
+Last activity: 2026-03-06 — Phase 3 Plan 04 complete (AccountModal 3 tabs, InlineSignInPrompt, EntryPanel account icon, i18n account.* keys, lazy Supabase init; human-verify approved)
 
-Progress: [████████░░] 51% (Phase 1 complete; Phase 2 complete; Phase 3 in progress — 3/7 plans done)
+Progress: [████████░░] 54% (Phase 1 complete; Phase 2 complete; Phase 3 in progress — 4/7 plans done)
 
 ## Performance Metrics
 
@@ -47,7 +47,7 @@ Progress: [████████░░] 51% (Phase 1 complete; Phase 2 comple
 | Phase 03 P01 | 6 min | 2 tasks | 7 files |
 | Phase 03 P02 | 8 min | 2 tasks | 5 files |
 | Phase 03 P03 | 3 min | 2 tasks | 6 files |
-| Phase 03-backend-auth-production-hosting P04 | 4 | 2 tasks | 9 files |
+| Phase 03-backend-auth-production-hosting P04 | ~90 min | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -124,6 +124,9 @@ Recent decisions affecting current work:
 - [03-03]: !import.meta.env.PROD guard for OSRM public demo server — production goes configured OSRM URL → Haversine fallback, never touching demo server
 - [Phase 03-04]: useRef for prevUser tracking in AccountModal/InlineSignInPrompt — plain object literal resets on every render; useRef persists across re-renders for null→truthy user transition detection
 - [Phase 03-04]: SettingsTab delete account calls DELETE /api/user/delete (not direct Supabase client) — server-side endpoint needed for GDPR-compliant deletion across all tables; service_role key must never be in client bundle
+- [Phase 03-04]: Lazy Supabase init via getSupabase() — returns null when env vars absent; authStore.initialize() guards on null; app loads in guest mode without .env.local
+- [Phase 03-04]: Tab bar uses CSS grid repeat(3,1fr) — guarantees equal tab widths for both Deutsch and English text lengths
+- [Phase 03-04]: Language switcher in SettingsTab available to all users (not login-gated) — guest users need language access to read sign-in UI in their preferred language
 
 ### Pending Todos
 
@@ -138,6 +141,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-05
-Stopped at: Completed 03-03-PLAN.md — all API services proxied in production (Nominatim, Overpass, Open-Meteo), OSRM demo server guarded behind !PROD, weather proxy extended for batch-mode params
+Last session: 2026-03-06
+Stopped at: Completed 03-04-PLAN.md — AccountModal (3 tabs), InlineSignInPrompt, EntryPanel account icon, i18n account.* keys in de/en, lazy Supabase init; human-verify checkpoint approved
 Resume file: None

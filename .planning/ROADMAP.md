@@ -78,9 +78,9 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — Vercel proxy functions (weather, Overpass, Nominatim, keepalive) + vercel.json (fra1, SPA rewrite, cron)
-- [ ] 03-02-PLAN.md — Supabase client singleton + Zustand auth store + DB schema SQL (saved_routes, favorites, finder searches)
-- [ ] 03-03-PLAN.md — Migrate client services (nominatim.ts, overpass.ts, weather.ts, osrm.ts) to proxy URLs in production
-- [ ] 03-04-PLAN.md — AccountModal (3 tabs) + InlineSignInPrompt + EntryPanel account icon footer
+- [x] 03-02-PLAN.md — Supabase client singleton + Zustand auth store + DB schema SQL (saved_routes, favorites, finder searches)
+- [x] 03-03-PLAN.md — Migrate client services (nominatim.ts, overpass.ts, weather.ts, osrm.ts) to proxy URLs in production
+- [x] 03-04-PLAN.md — AccountModal (3 tabs) + InlineSignInPrompt + EntryPanel account icon footer
 - [ ] 03-05-PLAN.md — User data persistence (save routes, favorites, saved finder searches) + SavedTab + LocationInput suggestions
 - [ ] 03-06-PLAN.md — GDPR: account deletion endpoint (server-side) + one-time guest route hint
 - [ ] 03-07-PLAN.md — Production deployment to Vercel + end-to-end verification (all 5 success criteria)
@@ -115,6 +115,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Core Algorithm + Route Planner Web | 10/10 | Complete | 2026-03-01 |
 | 2. Weather Finder Mode | 6/6 | Complete | 2026-03-02 |
-| 3. Backend + Auth + Production Hosting | 1/7 | In progress | - |
+| 3. Backend + Auth + Production Hosting | 4/7 | In progress | - |
 | 4. Freemium + Monetization | 0/TBD | Not started | - |
 | 5. Native Mobile Apps | 0/TBD | Not started | - |

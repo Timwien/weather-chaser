@@ -10,10 +10,10 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 3 of 5 — **IN PROGRESS**
-Current plan: 03-04 complete; 4/7 plans done
-Last activity: 2026-03-06 — Phase 3 Plan 04 complete (AccountModal 3 tabs, InlineSignInPrompt, EntryPanel account icon, i18n account.* keys, lazy Supabase init; human-verify approved)
+Current plan: 03-05 at checkpoint; 4/7 plans done (Tasks 1+2 complete, awaiting human-verify)
+Last activity: 2026-03-06 — Phase 3 Plan 05 paused at human-verify checkpoint (userdata service, save buttons, heart favorites, location suggestions all committed)
 
-Progress: [████████░░] 54% (Phase 1 complete; Phase 2 complete; Phase 3 in progress — 4/7 plans done)
+Progress: [████████░░] 54% (Phase 1 complete; Phase 2 complete; Phase 3 in progress — 4/7 plans done, 03-05 at checkpoint)
 
 ## Performance Metrics
 
@@ -127,6 +127,10 @@ Recent decisions affecting current work:
 - [Phase 03-04]: Lazy Supabase init via getSupabase() — returns null when env vars absent; authStore.initialize() guards on null; app loads in guest mode without .env.local
 - [Phase 03-04]: Tab bar uses CSS grid repeat(3,1fr) — guarantees equal tab widths for both Deutsch and English text lengths
 - [Phase 03-04]: Language switcher in SettingsTab available to all users (not login-gated) — guest users need language access to read sign-in UI in their preferred language
+- [Phase 03-05]: userdata.ts uses getSupabase() per call — consistent lazy init, throws if not configured, callers guard with supabaseConfigured
+- [Phase 03-05]: as any casts on supabase v2.98 .insert() — insert types resolve to never without full auto-generated Database schema; runtime correct, guarded by explicit return type annotations
+- [Phase 03-05]: buildRouteName uses s.town.name (not s.name) — Stop interface has town.name, not a direct name property
+- [Phase 03-05]: Guest save button: opacity 0.5, cursor pointer — visible and clickable but visually dimmed; clicking opens InlineSignInPrompt inline below button
 
 ### Pending Todos
 

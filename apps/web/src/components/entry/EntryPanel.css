@@ -1040,6 +1040,63 @@
 }
 
 /* =========================================================
+   One-time guest route save hint banner
+   ========================================================= */
+
+.entry-route-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 12px;
+  background: #E0F2FE;
+  border-left: 3px solid #0E7490;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--color-text);
+  flex-shrink: 0;
+}
+
+.entry-route-hint span {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.entry-route-hint-cta {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #0E7490;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+  white-space: nowrap;
+  transition: opacity 0.1s;
+}
+
+.entry-route-hint-cta:hover {
+  opacity: 0.75;
+}
+
+.entry-route-hint-dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 0 0 var(--space-1);
+  flex-shrink: 0;
+  transition: color 0.1s;
+}
+
+.entry-route-hint-dismiss:hover {
+  color: var(--color-text);
+}
+
+/* =========================================================
    Panel footer — account icon row
    ========================================================= */
 

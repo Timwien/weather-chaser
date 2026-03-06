@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useAuthStore } from '../../stores/authStore.ts';
@@ -11,14 +11,28 @@ import { WeatherFinderStep } from './WeatherFinderStep.tsx';
 import { AccountModal } from '../account/AccountModal.tsx';
 import './EntryPanel.css';
 
+// One-time guest hint — fires after first route generation, never again
+const HINT_KEY = 'wc_first_route_hint_shown';
+const hasShownHint = () => localStorage.getItem(HINT_KEY) === '1';
+const markHintShown = () => localStorage.setItem(HINT_KEY, '1');
+
 export function EntryPanel() {
   const { t } = useTranslation('common');
-  const { mode, setMode, loadingStep, tripConfig, searchAreas, error, setError } = useAppStore();
+  const { mode, setMode, loadingStep, tripConfig, searchAreas, error, setError, route } = useAppStore();
   const user = useAuthStore((s) => s.user);
   // Hoisted here so the worker ref survives when RouteConfigStep unmounts during loading
   const optimizer = useOptimizer();
 
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [showRouteHint, setShowRouteHint] = useState(false);
+
+  // Fire once when: route just appeared + user is guest + hint never shown
+  useEffect(() => {
+    if (route && !user && !hasShownHint()) {
+      setShowRouteHint(true);
+      markHintShown();
+    }
+  }, [route, user]);
 
   // Show CTAs only in idle mode — once user picks a mode the step expands instead
   const showCTAs = Boolean(tripConfig.startDate && searchAreas.length > 0 && mode === 'idle');
@@ -105,6 +119,31 @@ export function EntryPanel() {
             onClick={() => setError(null)}
           >
             ✕
+          </button>
+        </div>
+      )}
+
+      {/* One-time save hint — shown once for guests after first route generation */}
+      {showRouteHint && (
+        <div className="entry-route-hint">
+          <span>Route speichern —</span>
+          <button
+            type="button"
+            className="entry-route-hint-cta"
+            onClick={() => {
+              setShowRouteHint(false);
+              setIsAccountModalOpen(true);
+            }}
+          >
+            Jetzt anmelden
+          </button>
+          <button
+            type="button"
+            className="entry-route-hint-dismiss"
+            onClick={() => setShowRouteHint(false)}
+            aria-label="Schließen"
+          >
+            ×
           </button>
         </div>
       )}

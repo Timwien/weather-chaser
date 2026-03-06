@@ -161,6 +161,7 @@
     "fallback_user": "User",
     "saved_empty_heading": "Nothing saved yet",
     "saved_empty_text": "Save routes and favorites to see them here.",
+    "saved_not_logged_in": "Please sign in to see your saved items.",
     "settings_privacy_title": "Privacy",
     "settings_privacy_link": "Privacy Policy",
     "settings_tos_link": "Terms of Service",

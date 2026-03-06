@@ -161,6 +161,7 @@
     "fallback_user": "Benutzer",
     "saved_empty_heading": "Noch nichts gespeichert",
     "saved_empty_text": "Speichere Routen und Favoriten, um sie hier zu sehen.",
+    "saved_not_logged_in": "Bitte anmelden, um gespeicherte Elemente zu sehen.",
     "settings_privacy_title": "Datenschutz",
     "settings_privacy_link": "Datenschutzerklärung",
     "settings_tos_link": "Nutzungsbedingungen",

@@ -82,7 +82,7 @@
 - [x] **AUTH-04**: User session persists across app restarts (free account)
 - [ ] **AUTH-05**: Free account user can save and name planned routes
 - [ ] **AUTH-06**: Free account user can favorite/bookmark specific locations
-- [ ] **AUTH-07**: Free account user can save weather preferences and home region
+- [x] **AUTH-07**: Free account user can save weather preferences and home region
 - [ ] **AUTH-08**: Premium account user can use custom weather score weight sliders (override preset profiles)
 - [ ] **AUTH-09**: Premium account user can access future premium features as they are added
 
@@ -189,7 +189,7 @@
 | AUTH-04 | Phase 3 | Complete |
 | AUTH-05 | Phase 3 | Pending |
 | AUTH-06 | Phase 3 | Pending |
-| AUTH-07 | Phase 3 | Pending |
+| AUTH-07 | Phase 3 | Complete |
 | WTHR-02 | Phase 3 | Complete |
 | INFRA-01 | Phase 3 | Complete |
 | INFRA-02 | Phase 3 | Complete |

@@ -10,10 +10,10 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 3 of 5 — **IN PROGRESS**
-Current plan: 03-05 at checkpoint; 4/7 plans done (Tasks 1+2 complete, awaiting human-verify)
-Last activity: 2026-03-06 — Phase 3 Plan 05 paused at human-verify checkpoint (userdata service, save buttons, heart favorites, location suggestions all committed)
+Current plan: 03-06 complete; 6/7 plans done
+Last activity: 2026-03-06 — Phase 3 Plan 06 complete (GDPR deletion endpoint, one-time guest save hint)
 
-Progress: [████████░░] 54% (Phase 1 complete; Phase 2 complete; Phase 3 in progress — 4/7 plans done, 03-05 at checkpoint)
+Progress: [█████████░] 80% (Phase 1 complete; Phase 2 complete; Phase 3 in progress — 6/7 plans done)
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Progress: [████████░░] 54% (Phase 1 complete; Phase 2 comple
 | Phase 03 P02 | 8 min | 2 tasks | 5 files |
 | Phase 03 P03 | 3 min | 2 tasks | 6 files |
 | Phase 03-backend-auth-production-hosting P04 | ~90 min | 3 tasks | 13 files |
+| Phase 03-backend-auth-production-hosting P06 | 4 min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -131,6 +132,9 @@ Recent decisions affecting current work:
 - [Phase 03-05]: as any casts on supabase v2.98 .insert() — insert types resolve to never without full auto-generated Database schema; runtime correct, guarded by explicit return type annotations
 - [Phase 03-05]: buildRouteName uses s.town.name (not s.name) — Stop interface has town.name, not a direct name property
 - [Phase 03-05]: Guest save button: opacity 0.5, cursor pointer — visible and clickable but visually dimmed; clicking opens InlineSignInPrompt inline below button
+- [Phase 03-06]: Two-step deletion: anon client validates token (getUser), admin client deletes user (auth.admin.deleteUser) — prevents arbitrary user deletion attacks
+- [Phase 03-06]: SUPABASE_SERVICE_ROLE_KEY without VITE_ prefix — process.env in serverless api/ functions only; verified never in apps/web/src/
+- [Phase 03-06]: localStorage key wc_first_route_hint_shown persists one-time guest hint permanently; useEffect deps [route, user] fire exactly once when guest first generates a route
 
 ### Pending Todos
 
@@ -146,5 +150,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 03-04-PLAN.md — AccountModal (3 tabs), InlineSignInPrompt, EntryPanel account icon, i18n account.* keys in de/en, lazy Supabase init; human-verify checkpoint approved
+Stopped at: Completed 03-06-PLAN.md — GDPR deletion endpoint (api/user/delete.ts, service_role server-side), one-time guest save hint in EntryPanel (localStorage persisted)
 Resume file: None

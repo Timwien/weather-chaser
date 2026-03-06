@@ -18,12 +18,12 @@ export async function saveRoute(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
-  const { data, error } = await supabase
-    .from('saved_routes')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.from('saved_routes') as any)
     .insert({
       user_id: user.id,
       name: buildRouteName(route),
-      stops_json: route.stops as unknown,
+      stops_json: route.stops,
       date_from: dateFrom,
       date_to: dateTo,
     })
@@ -31,7 +31,7 @@ export async function saveRoute(
     .single();
 
   if (error) throw error;
-  return data;
+  return data as SavedRoute;
 }
 
 export async function getSavedRoutes(): Promise<SavedRoute[]> {
@@ -41,7 +41,7 @@ export async function getSavedRoutes(): Promise<SavedRoute[]> {
     .select('*')
     .order('created_at', { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as SavedRoute[];
 }
 
 export async function deleteSavedRoute(id: string): Promise<void> {
@@ -71,10 +71,13 @@ export async function toggleFavorite(
     .maybeSingle();
 
   if (existing) {
-    await supabase.from('favorites').delete().eq('id', existing.id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await supabase.from('favorites').delete().eq('id', (existing as any).id);
     return { added: false };
   } else {
-    await supabase.from('favorites').insert({ user_id: user.id, place_name: placeName, lat, lng });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase.from('favorites') as any)
+      .insert({ user_id: user.id, place_name: placeName, lat, lng });
     return { added: true };
   }
 }
@@ -86,7 +89,7 @@ export async function getFavorites(): Promise<Favorite[]> {
     .select('*')
     .order('created_at', { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as Favorite[];
 }
 
 // ── Saved Finder Searches ─────────────────────────────────────────────────────
@@ -99,14 +102,14 @@ export async function saveFinderSearch(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
-  const { data, error } = await supabase
-    .from('saved_finder_searches')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.from('saved_finder_searches') as any)
     .insert({ user_id: user.id, name, config_json: config })
     .select()
     .single();
 
   if (error) throw error;
-  return data;
+  return data as SavedFinderSearch;
 }
 
 export async function getSavedFinderSearches(): Promise<SavedFinderSearch[]> {
@@ -116,5 +119,5 @@ export async function getSavedFinderSearches(): Promise<SavedFinderSearch[]> {
     .select('*')
     .order('created_at', { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as SavedFinderSearch[];
 }

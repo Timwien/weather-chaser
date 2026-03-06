@@ -28,9 +28,28 @@ export interface Favorite {
 export interface Database {
   public: {
     Tables: {
-      saved_routes: { Row: SavedRoute; Insert: Omit<SavedRoute, 'id' | 'created_at'>; Update: Partial<Omit<SavedRoute, 'id' | 'user_id'>>; };
-      saved_finder_searches: { Row: SavedFinderSearch; Insert: Omit<SavedFinderSearch, 'id' | 'created_at'>; Update: Partial<Omit<SavedFinderSearch, 'id' | 'user_id'>>; };
-      favorites: { Row: Favorite; Insert: Omit<Favorite, 'id' | 'created_at'>; Update: Partial<Omit<Favorite, 'id' | 'user_id'>>; };
+      saved_routes: {
+        Row: SavedRoute;
+        Insert: Omit<SavedRoute, 'id' | 'created_at'>;
+        Update: Partial<Omit<SavedRoute, 'id' | 'user_id'>>;
+        Relationships: [];
+      };
+      saved_finder_searches: {
+        Row: SavedFinderSearch;
+        Insert: Omit<SavedFinderSearch, 'id' | 'created_at'>;
+        Update: Partial<Omit<SavedFinderSearch, 'id' | 'user_id'>>;
+        Relationships: [];
+      };
+      favorites: {
+        Row: Favorite;
+        Insert: Omit<Favorite, 'id' | 'created_at'>;
+        Update: Partial<Omit<Favorite, 'id' | 'user_id'>>;
+        Relationships: [];
+      };
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }

@@ -89,14 +89,13 @@
    ========================================================= */
 
 .account-modal-tabs {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   border-bottom: 1px solid var(--color-border);
   padding: 0 var(--space-4);
-  gap: 0;
 }
 
 .account-modal-tab {
-  flex: 1;
   padding: var(--space-3) var(--space-2);
   border: none;
   background: none;
@@ -107,7 +106,10 @@
   cursor: pointer;
   position: relative;
   transition: color 0.15s;
+  text-align: center;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .account-modal-tab:hover {
@@ -545,4 +547,36 @@
   color: var(--color-text-muted);
   font-style: italic;
   margin: 0;
+}
+
+/* Language switcher */
+.settings-tab-lang-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.settings-tab-lang-btn {
+  flex: 1;
+  padding: 8px var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+}
+
+.settings-tab-lang-btn:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.settings-tab-lang-btn--active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: rgba(14, 116, 144, 0.06);
+  font-weight: 600;
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.ts';
 import './InlineSignInPrompt.css';
 
@@ -7,6 +8,7 @@ interface InlineSignInPromptProps {
 }
 
 export function InlineSignInPrompt({ onClose }: InlineSignInPromptProps) {
+  const { t } = useTranslation();
   const { user, signInWithGoogle, signInWithApple, signInWithEmail, signUpWithEmail } = useAuthStore();
   const prevUserRef = useRef<typeof user>(null);
 
@@ -32,7 +34,7 @@ export function InlineSignInPrompt({ onClose }: InlineSignInPromptProps) {
     try {
       await signInWithGoogle();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Google-Anmeldung fehlgeschlagen.');
+      setError(err instanceof Error ? err.message : t('account.google_error'));
       setLoading(false);
     }
   };
@@ -43,7 +45,7 @@ export function InlineSignInPrompt({ onClose }: InlineSignInPromptProps) {
     try {
       await signInWithApple();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Apple-Anmeldung fehlgeschlagen.');
+      setError(err instanceof Error ? err.message : t('account.apple_error'));
       setLoading(false);
     }
   };
@@ -58,10 +60,10 @@ export function InlineSignInPrompt({ onClose }: InlineSignInPromptProps) {
         await signInWithEmail(email, password);
       } else {
         await signUpWithEmail(email, password);
-        setSuccessMsg('Bestätigungs-E-Mail gesendet. Bitte prüfe deinen Posteingang.');
+        setSuccessMsg(t('account.confirm_email_sent'));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Anmeldung fehlgeschlagen.');
+      setError(err instanceof Error ? err.message : t('account.login_error_fallback'));
     } finally {
       setLoading(false);
     }
@@ -72,13 +74,13 @@ export function InlineSignInPrompt({ onClose }: InlineSignInPromptProps) {
       {/* Header */}
       <div className="inline-sign-in-header">
         <span className="inline-sign-in-title">
-          Anmelden zum Speichern — kostenlos
+          {t('account.inline_title')}
         </span>
         <button
           type="button"
           className="inline-sign-in-close"
           onClick={onClose}
-          aria-label="Schließen"
+          aria-label={t('account.close')}
         >
           ×
         </button>
@@ -91,7 +93,7 @@ export function InlineSignInPrompt({ onClose }: InlineSignInPromptProps) {
           className="inline-sign-in-btn inline-sign-in-btn--google"
           onClick={handleGoogle}
           disabled={loading}
-          title="Mit Google anmelden"
+          title={t('account.google_btn')}
         >
           <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
             <path d="M17.64 9.2a10.34 10.34 0 0 0-.164-1.84H9v3.48h4.844a4.14 4.14 0 0 1-1.796 2.716v2.258h2.908C16.658 14.252 17.64 11.945 17.64 9.2z" fill="#4285F4"/>
@@ -107,7 +109,7 @@ export function InlineSignInPrompt({ onClose }: InlineSignInPromptProps) {
           className="inline-sign-in-btn inline-sign-in-btn--apple"
           onClick={handleApple}
           disabled={loading}
-          title="Mit Apple anmelden"
+          title={t('account.apple_btn')}
         >
           <svg width="13" height="16" viewBox="0 0 16 18" fill="currentColor" aria-hidden="true">
             <path d="M13.047 9.617c-.02-2.042 1.66-3.026 1.736-3.075-0.943-1.38-2.413-1.569-2.934-1.59-1.253-.127-2.45.74-3.083.74-.638 0-1.618-.724-2.663-.703-1.367.02-2.63.797-3.334 2.018-1.422 2.467-.364 6.126 1.02 8.13.677.979 1.483 2.076 2.541 2.036 1.019-.042 1.4-.658 2.63-.658 1.233 0 1.573.658 2.651.636 1.097-.018 1.787-.994 2.456-1.978.779-1.133 1.098-2.234 1.115-2.29-.024-.01-2.134-.82-2.155-3.266zM10.98 3.32C11.538 2.636 11.919 1.68 11.806.703c-.825.043-1.83.553-2.41 1.22-.528.605-.99 1.587-.866 2.52.916.072 1.855-.468 2.45-1.123z"/>
@@ -120,13 +122,13 @@ export function InlineSignInPrompt({ onClose }: InlineSignInPromptProps) {
           className={`inline-sign-in-btn inline-sign-in-btn--email${showEmailForm ? ' inline-sign-in-btn--active' : ''}`}
           onClick={() => setShowEmailForm(!showEmailForm)}
           disabled={loading}
-          title="Mit E-Mail anmelden"
+          title={t('account.inline_email_btn')}
         >
           <svg width="15" height="12" viewBox="0 0 15 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <rect x="1" y="1" width="13" height="10" rx="1.5"/>
             <path d="m1 1 6.5 5.5L14 1"/>
           </svg>
-          E-Mail
+          {t('account.inline_email_btn')}
         </button>
       </div>
 
@@ -136,7 +138,7 @@ export function InlineSignInPrompt({ onClose }: InlineSignInPromptProps) {
           <input
             className="inline-sign-in-input"
             type="email"
-            placeholder="E-Mail-Adresse"
+            placeholder={t('account.email_placeholder')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -146,7 +148,7 @@ export function InlineSignInPrompt({ onClose }: InlineSignInPromptProps) {
           <input
             className="inline-sign-in-input"
             type="password"
-            placeholder="Passwort"
+            placeholder={t('account.password_placeholder')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -162,9 +164,9 @@ export function InlineSignInPrompt({ onClose }: InlineSignInPromptProps) {
               {loading ? (
                 <span className="inline-sign-in-spinner" />
               ) : emailMode === 'signin' ? (
-                'Anmelden'
+                t('account.signin')
               ) : (
-                'Registrieren'
+                t('account.signup')
               )}
             </button>
             <button
@@ -176,7 +178,7 @@ export function InlineSignInPrompt({ onClose }: InlineSignInPromptProps) {
                 setSuccessMsg(null);
               }}
             >
-              {emailMode === 'signin' ? 'Registrieren' : 'Anmelden'}
+              {emailMode === 'signin' ? t('account.signup') : t('account.signin')}
             </button>
           </div>
         </form>

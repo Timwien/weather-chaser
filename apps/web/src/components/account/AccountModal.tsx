@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.ts';
 import { AccountTab } from './AccountTab.tsx';
 import { SavedTab } from './SavedTab.tsx';
@@ -13,16 +14,17 @@ interface AccountModalProps {
   initialTab?: TabId;
 }
 
-const TABS: { id: TabId; label: string }[] = [
-  { id: 'account', label: 'Konto' },
-  { id: 'saved', label: 'Gespeichert' },
-  { id: 'settings', label: 'Einstellungen' },
-];
-
 export function AccountModal({ isOpen, onClose, initialTab = 'account' }: AccountModalProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const user = useAuthStore((s) => s.user);
   const prevUserRef = useRef<typeof user>(null);
+
+  const TABS: { id: TabId; label: string }[] = [
+    { id: 'account', label: t('account.tab_account') },
+    { id: 'saved', label: t('account.tab_saved') },
+    { id: 'settings', label: t('account.tab_settings') },
+  ];
 
   // Close modal after successful sign-in (user goes from null to truthy)
   useEffect(() => {
@@ -48,14 +50,14 @@ export function AccountModal({ isOpen, onClose, initialTab = 'account' }: Accoun
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="account-modal-panel" role="dialog" aria-modal="true" aria-label="Konto">
+      <div className="account-modal-panel" role="dialog" aria-modal="true" aria-label={t('account.tab_account')}>
         {/* Header row */}
         <div className="account-modal-header">
           <button
             type="button"
             className="account-modal-close"
             onClick={onClose}
-            aria-label="Schließen"
+            aria-label={t('account.close')}
           >
             ×
           </button>

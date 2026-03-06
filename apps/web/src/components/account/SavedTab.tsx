@@ -1,4 +1,8 @@
+import { useTranslation } from 'react-i18next';
+
 export function SavedTab() {
+  const { t } = useTranslation();
+
   return (
     <div className="saved-tab">
       <div className="saved-tab-empty">
@@ -16,10 +20,8 @@ export function SavedTab() {
         >
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
         </svg>
-        <h3 className="saved-tab-empty-heading">Noch nichts gespeichert</h3>
-        <p className="saved-tab-empty-text">
-          Speichere Routen und Favoriten, um sie hier zu sehen.
-        </p>
+        <h3 className="saved-tab-empty-heading">{t('account.saved_empty_heading')}</h3>
+        <p className="saved-tab-empty-text">{t('account.saved_empty_text')}</p>
       </div>
     </div>
   );

@@ -118,9 +118,8 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPan
 
       <SummaryBar route={route} />
 
-      {/* Save button */}
-      {supabaseConfigured && (
-        <div className="itinerary-save-area">
+      {/* Save button — always visible; guest sees it dimmed */}
+      <div className="itinerary-save-area">
           <button
             type="button"
             className={`itinerary-save-btn${!user ? ' itinerary-save-btn--guest' : ''}${saveState === 'saved' ? ' itinerary-save-btn--saved' : ''}`}
@@ -138,7 +137,6 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPan
             <InlineSignInPrompt onClose={() => { setShowInlineSignIn(false); setPendingAction(null); }} />
           )}
         </div>
-      )}
 
       <div className="itinerary-list">
         {route.stops.map((stop, idx) => {

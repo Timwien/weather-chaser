@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useAuthStore } from '../../stores/authStore.ts';
 import { supabaseConfigured } from '../../lib/supabase.ts';
-import { getFavorites } from '../../services/userdata.ts';
+import { getFavorites, toggleFavorite } from '../../services/userdata.ts';
 import { useLocationSearch } from '../../hooks/useLocationSearch.ts';
 import { parseBbox } from '../../services/nominatim.ts';
 import type { NominatimResult } from '../../services/nominatim.ts';
@@ -20,21 +20,25 @@ function RemoveIcon() {
   );
 }
 
+/* ── Heart icon ─────────────────────────────────────────── */
+function HeartIcon({ filled }: { filled: boolean }) {
+  return filled ? (
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="#0E7490" aria-hidden="true">
+      <path d="M8 13.7s-6-3.9-6-8a4 4 0 0 1 6-3.46A4 4 0 0 1 14 5.7c0 4.1-6 8-6 8z" />
+    </svg>
+  ) : (
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M8 13.7s-6-3.9-6-8a4 4 0 0 1 6-3.46A4 4 0 0 1 14 5.7c0 4.1-6 8-6 8z" />
+    </svg>
+  );
+}
+
 /* ── Map pin icon (for "Pick on map" button) ────────────── */
 function MapPinIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 14 16" fill="none" aria-hidden="true">
       <path d="M7 1C4.24 1 2 3.24 2 6C2 9.5 7 15 7 15C7 15 12 9.5 12 6C12 3.24 9.76 1 7 1Z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
       <circle cx="7" cy="6" r="1.8" stroke="currentColor" strokeWidth="1.4"/>
-    </svg>
-  );
-}
-
-/* ── Heart icon ─────────────────────────────────────────── */
-function HeartIcon() {
-  return (
-    <svg width="11" height="11" viewBox="0 0 16 16" fill="#0E7490" aria-hidden="true">
-      <path d="M8 13.7s-6-3.9-6-8a4 4 0 0 1 6-3.46A4 4 0 0 1 14 5.7c0 4.1-6 8-6 8z"/>
     </svg>
   );
 }
@@ -93,16 +97,38 @@ export function LocationInput() {
   // Favorites state for logged-in users
   const [favorites, setFavorites] = useState<Favorite[]>([]);
 
+  // favoritedNames: set of place names the user has favorited (for tag heart state)
+  const [favoritedNames, setFavoritedNames] = useState<Set<string>>(new Set());
+
   // Load favorites when user changes
   useEffect(() => {
     if (!user || !supabaseConfigured) {
       setFavorites([]);
+      setFavoritedNames(new Set());
       return;
     }
     getFavorites()
-      .then(setFavorites)
+      .then((favs) => {
+        setFavorites(favs);
+        setFavoritedNames(new Set(favs.map((f) => f.place_name)));
+      })
       .catch(() => { /* non-critical */ });
   }, [user]);
+
+  async function handleTagFavorite(area: SearchAreaItem) {
+    if (area.type !== 'place' || !('lat' in area) || area.lat === undefined) return;
+    const name = 'name' in area ? area.name : '';
+    if (!name) return;
+    if (!user || !supabaseConfigured) return; // requires auth
+    try {
+      const { added } = await toggleFavorite(name, area.lat, area.lng ?? 0);
+      setFavoritedNames((prev) => {
+        const next = new Set(prev);
+        if (added) next.add(name); else next.delete(name);
+        return next;
+      });
+    } catch { /* non-critical */ }
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -187,24 +213,39 @@ export function LocationInput() {
       {/* Tag list of selected places / drawn areas */}
       {searchAreas.length > 0 && (
         <div className="loc-tags">
-          {searchAreas.map((area) => (
-            <span
-              key={area.id}
-              className={`loc-tag${area.type === 'polygon' ? ' loc-tag--polygon' : ''}`}
-            >
-              <span className="loc-tag-name">
-                {area.type === 'polygon' ? t('entry.drawn_area', 'Gezeichnetes Gebiet') : ('name' in area ? area.name : '')}
-              </span>
-              <button
-                type="button"
-                className="loc-tag-remove"
-                onClick={() => removeSearchArea(area.id)}
-                aria-label={`Remove ${area.type === 'polygon' ? 'drawn area' : ('name' in area ? area.name : 'area')}`}
+          {searchAreas.map((area) => {
+            const tagName = area.type === 'polygon'
+              ? t('entry.drawn_area', 'Gezeichnetes Gebiet')
+              : ('name' in area ? area.name : '');
+            const isPlace = area.type === 'place' && 'lat' in area && area.lat !== undefined;
+            const isFavorited = isPlace && 'name' in area && favoritedNames.has(area.name);
+            return (
+              <span
+                key={area.id}
+                className={`loc-tag${area.type === 'polygon' ? ' loc-tag--polygon' : ''}`}
               >
-                <RemoveIcon />
-              </button>
-            </span>
-          ))}
+                <span className="loc-tag-name">{tagName}</span>
+                {isPlace && user && supabaseConfigured && (
+                  <button
+                    type="button"
+                    className={`loc-tag-heart${isFavorited ? ' loc-tag-heart--active' : ''}`}
+                    onClick={() => handleTagFavorite(area)}
+                    aria-label={isFavorited ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
+                  >
+                    <HeartIcon filled={isFavorited} />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="loc-tag-remove"
+                  onClick={() => removeSearchArea(area.id)}
+                  aria-label={`Remove ${area.type === 'polygon' ? 'drawn area' : ('name' in area ? area.name : 'area')}`}
+                >
+                  <RemoveIcon />
+                </button>
+              </span>
+            );
+          })}
         </div>
       )}
 
@@ -245,7 +286,7 @@ export function LocationInput() {
               className="autocomplete-option autocomplete-option--favorite"
               onMouseDown={() => selectFavorite(fav)}
             >
-              <HeartIcon />
+              <HeartIcon filled={true} />
               <span>{fav.place_name}</span>
             </li>
           ))}

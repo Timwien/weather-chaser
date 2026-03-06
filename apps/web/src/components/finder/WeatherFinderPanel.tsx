@@ -1,12 +1,16 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { HourlyWeather } from '@weatherchaser/core';
 import { scoreLocation, PRESETS, sliceHoursByDays } from '@weatherchaser/core';
 import { useAppStore } from '../../stores/appStore.ts';
+import { useAuthStore } from '../../stores/authStore.ts';
+import { supabaseConfigured } from '../../lib/supabase.ts';
+import { getFavorites, toggleFavorite } from '../../services/userdata.ts';
 import { FinderResultRow } from './FinderResultRow.tsx';
 import { FinderFilterBar } from './FinderFilterBar.tsx';
 import { FinderEmptyState } from './FinderEmptyState.tsx';
 import type { FinderResultData } from './FinderResultRow.tsx';
+import type { Favorite } from '../../types/database.ts';
 import { ScoreIcon, SunIcon, TempIcon, RainIcon, WindIcon } from './FinderIcons.tsx';
 import './WeatherFinderPanel.css';
 
@@ -71,7 +75,22 @@ const SORT_ICONS = {
 export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack, onResultsComputed }: WeatherFinderPanelProps) {
   const { t } = useTranslation('common');
   const { finderTowns, finderHourlyCache, finderConfig, finderError, tripConfig, searchAreas, searchRadiusKm, setFinderConfig } = useAppStore();
+  const { user } = useAuthStore();
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
+
+  // Favorites state
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+
+  // Load favorites when user is logged in
+  useEffect(() => {
+    if (!user || !supabaseConfigured) {
+      setFavorites([]);
+      return;
+    }
+    getFavorites()
+      .then(setFavorites)
+      .catch(() => { /* favorites load failure is non-critical */ });
+  }, [user]);
 
   // Scroll to selected row
   if (selectedFinderIndex !== null && rowRefs.current[selectedFinderIndex]) {
@@ -176,6 +195,42 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
     onResultsComputed(finderResults);
   }, [finderResults, onResultsComputed]);
 
+  // Check if a town is favorited
+  function isTownFavorited(townName: string, lat: number, lng: number): boolean {
+    return favorites.some(
+      (f) => f.place_name === townName && Math.abs(f.lat - lat) < 0.001 && Math.abs(f.lng - lng) < 0.001
+    );
+  }
+
+  // Toggle favorite for a town
+  async function handleFavoriteToggle(result: FinderResultData) {
+    if (!user || !supabaseConfigured) return;
+    try {
+      const { added } = await toggleFavorite(result.townName, result.lat, result.lng);
+      if (added) {
+        // Optimistically add to local favorites state
+        const newFav: Favorite = {
+          id: `optimistic-${Date.now()}`,
+          user_id: '',
+          place_name: result.townName,
+          lat: result.lat,
+          lng: result.lng,
+          created_at: new Date().toISOString(),
+        };
+        setFavorites((prev) => [newFav, ...prev]);
+      } else {
+        // Remove from local state
+        setFavorites((prev) =>
+          prev.filter(
+            (f) => !(f.place_name === result.townName && Math.abs(f.lat - result.lat) < 0.001 && Math.abs(f.lng - result.lng) < 0.001)
+          )
+        );
+      }
+    } catch {
+      // Non-critical — ignore toggle failure
+    }
+  }
+
   return (
     <div className="weather-finder-panel">
       {/* Header */}
@@ -220,6 +275,9 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
                 data={result}
                 isSelected={selectedFinderIndex === idx}
                 onClick={() => onResultSelect(idx)}
+                isFavorited={isTownFavorited(result.townName, result.lat, result.lng)}
+                onFavoriteToggle={() => handleFavoriteToggle(result)}
+                isGuest={!user}
               />
             </div>
           ))}

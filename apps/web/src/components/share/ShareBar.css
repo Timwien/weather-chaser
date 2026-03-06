@@ -49,3 +49,36 @@
 .share-btn-secondary:hover {
   background: var(--color-accent-light);
 }
+
+.share-btn-save {
+  background: var(--color-surface);
+  color: var(--color-accent);
+  border: 1.5px solid var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.share-btn-save:hover:not(:disabled) {
+  background: var(--color-accent-light);
+}
+
+.share-btn-save:disabled {
+  cursor: default;
+}
+
+.share-btn-save--guest {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.share-btn-save--guest:hover {
+  opacity: 0.65;
+}
+
+.share-btn-save--saved {
+  color: var(--color-success, #16a34a);
+  border-color: var(--color-success, #16a34a);
+  background: rgba(22, 163, 74, 0.06);
+}

@@ -21,6 +21,9 @@ interface FinderResultRowProps {
   data: FinderResultData;
   isSelected: boolean;
   onClick: () => void;
+  isFavorited?: boolean;
+  onFavoriteToggle?: () => void;
+  isGuest?: boolean;
 }
 
 /** Continuous hsl gradient: 0 (red) → 120 (green), matching StopMarkers and FinderMarkers */
@@ -29,9 +32,34 @@ function scoreColor(score: number): string {
   return `hsl(${hue}, 65%, 45%)`;
 }
 
-export function FinderResultRow({ data, isSelected, onClick }: FinderResultRowProps) {
+function HeartIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill={filled ? '#0E7490' : 'none'}
+      stroke={filled ? '#0E7490' : 'currentColor'}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M8 13.7s-6-3.9-6-8a4 4 0 0 1 6-3.46A4 4 0 0 1 14 5.7c0 4.1-6 8-6 8z"/>
+    </svg>
+  );
+}
+
+export function FinderResultRow({ data, isSelected, onClick, isFavorited = false, onFavoriteToggle, isGuest = false }: FinderResultRowProps) {
   const { t } = useTranslation('common');
   const { rank, townName, score, sunshineHoursPerDay, tempC, precipMm, windAvgKmh, distanceKm } = data;
+
+  function handleHeartClick(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (onFavoriteToggle) {
+      onFavoriteToggle();
+    }
+  }
 
   return (
     <div
@@ -78,6 +106,17 @@ export function FinderResultRow({ data, isSelected, onClick }: FinderResultRowPr
       >
         {Math.round(score.composite)}
       </div>
+
+      {/* Heart / favorite button */}
+      <button
+        type="button"
+        className={`finder-result-heart${isGuest ? ' finder-result-heart--guest' : ''}`}
+        onClick={handleHeartClick}
+        aria-label={isFavorited ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
+        title={isGuest ? 'Anmelden zum Favorisieren' : undefined}
+      >
+        <HeartIcon filled={isFavorited} />
+      </button>
     </div>
   );
 }

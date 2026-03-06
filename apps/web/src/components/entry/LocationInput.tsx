@@ -1,10 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
+import { useAuthStore } from '../../stores/authStore.ts';
+import { supabaseConfigured } from '../../lib/supabase.ts';
+import { getFavorites } from '../../services/userdata.ts';
 import { useLocationSearch } from '../../hooks/useLocationSearch.ts';
 import { parseBbox } from '../../services/nominatim.ts';
 import type { NominatimResult } from '../../services/nominatim.ts';
 import type { SearchAreaItem } from '../../stores/appStore.ts';
+import type { Favorite } from '../../types/database.ts';
 
 /* ── Remove icon ────────────────────────────────────────── */
 function RemoveIcon() {
@@ -22,6 +26,15 @@ function MapPinIcon() {
     <svg width="13" height="13" viewBox="0 0 14 16" fill="none" aria-hidden="true">
       <path d="M7 1C4.24 1 2 3.24 2 6C2 9.5 7 15 7 15C7 15 12 9.5 12 6C12 3.24 9.76 1 7 1Z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
       <circle cx="7" cy="6" r="1.8" stroke="currentColor" strokeWidth="1.4"/>
+    </svg>
+  );
+}
+
+/* ── Heart icon ─────────────────────────────────────────── */
+function HeartIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 16 16" fill="#0E7490" aria-hidden="true">
+      <path d="M8 13.7s-6-3.9-6-8a4 4 0 0 1 6-3.46A4 4 0 0 1 14 5.7c0 4.1-6 8-6 8z"/>
     </svg>
   );
 }
@@ -69,12 +82,27 @@ function RadiusSlider() {
 export function LocationInput() {
   const { t } = useTranslation('common');
   const { searchAreas, addSearchArea, removeSearchArea, searchRadiusKm } = useAppStore();
+  const { user } = useAuthStore();
   const { search, results, loading } = useLocationSearch();
 
   const [inputValue, setInputValue] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Favorites state for logged-in users
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+
+  // Load favorites when user changes
+  useEffect(() => {
+    if (!user || !supabaseConfigured) {
+      setFavorites([]);
+      return;
+    }
+    getFavorites()
+      .then(setFavorites)
+      .catch(() => { /* non-critical */ });
+  }, [user]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -102,6 +130,10 @@ export function LocationInput() {
     }
   }
 
+  function handleFocus() {
+    setDropdownOpen(true);
+  }
+
   function selectResult(result: NominatimResult) {
     const bbox = parseBbox(result);
     const shortName = result.display_name.split(',')[0].trim();
@@ -122,9 +154,31 @@ export function LocationInput() {
     inputRef.current?.focus();
   }
 
+  function selectFavorite(fav: Favorite) {
+    const area: SearchAreaItem = {
+      type: 'place',
+      id: `fav-${fav.id}`,
+      name: fav.place_name,
+      fullName: fav.place_name,
+      lat: fav.lat,
+      lng: fav.lng,
+    };
+    addSearchArea(area);
+    setInputValue('');
+    setDropdownOpen(false);
+    inputRef.current?.focus();
+  }
+
   const hasDrawnPolygon = searchAreas.some((a) => a.type === 'polygon');
-  const showDropdown = dropdownOpen && results.length > 0 && !hasDrawnPolygon;
   const showRadius = searchAreas.filter((a) => a.type === 'place').length === 1 && searchAreas.length === 1;
+
+  // Filter favorites by current input value
+  const matchedFavorites = favorites.filter((f) =>
+    inputValue.trim() === '' || f.place_name.toLowerCase().includes(inputValue.toLowerCase())
+  );
+
+  // Show dropdown if open and (has Nominatim results OR has favorites)
+  const showDropdown = dropdownOpen && !hasDrawnPolygon && (results.length > 0 || matchedFavorites.length > 0);
 
   return (
     <div className="location-input-wrapper" ref={containerRef}>
@@ -164,6 +218,7 @@ export function LocationInput() {
             value={inputValue}
             onChange={hasDrawnPolygon ? undefined : handleChange}
             onKeyDown={hasDrawnPolygon ? undefined : handleKeyDown}
+            onFocus={hasDrawnPolygon ? undefined : handleFocus}
             placeholder={hasDrawnPolygon ? t('entry.polygon_active_placeholder', 'Gebiet gezeichnet') : t('entry.location_placeholder')}
             autoComplete="off"
             disabled={hasDrawnPolygon}
@@ -180,9 +235,20 @@ export function LocationInput() {
         </button>
       </div>
 
-      {/* Autocomplete dropdown */}
+      {/* Autocomplete dropdown — favorites first, then Nominatim results */}
       {showDropdown && (
         <ul className="autocomplete-dropdown" role="listbox">
+          {matchedFavorites.slice(0, 3).map((fav) => (
+            <li
+              key={`fav-${fav.id}`}
+              role="option"
+              className="autocomplete-option autocomplete-option--favorite"
+              onMouseDown={() => selectFavorite(fav)}
+            >
+              <HeartIcon />
+              <span>{fav.place_name}</span>
+            </li>
+          ))}
           {results.slice(0, 5).map((result) => (
             <li
               key={result.place_id}

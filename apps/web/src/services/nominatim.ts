@@ -25,7 +25,7 @@ export interface BoundingBox {
 }
 
 export async function searchPlace(query: string): Promise<NominatimResult[]> {
-  const url = new URL(NOMINATIM_BASE, window.location.origin);
+  const url = new URL(NOMINATIM_BASE, self.location.origin);
   url.searchParams.set('q', query);
   url.searchParams.set('format', 'json');
   url.searchParams.set('limit', '5');
@@ -34,7 +34,7 @@ export async function searchPlace(query: string): Promise<NominatimResult[]> {
   const headers: Record<string, string> = { 'Accept-Language': 'en' };
   if (import.meta.env.DEV) {
     // Nominatim policy requires a valid User-Agent / Referer — set only in dev (direct call)
-    headers['Referer'] = window.location.origin;
+    headers['Referer'] = self.location.origin;
   }
 
   const res = await fetch(url.toString(), { headers });

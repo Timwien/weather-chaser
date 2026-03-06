@@ -26,7 +26,7 @@ async function fetchHourlyBatch(
   endDate: string,
 ): Promise<HourlyWeatherData[]> {
   const base = import.meta.env.PROD ? WEATHER_PROXY : WEATHER_DIRECT;
-  const url = new URL(base, window.location.origin);
+  const url = new URL(base, self.location.origin);
   url.searchParams.set('latitude', towns.map((t) => t.lat.toFixed(4)).join(','));
   url.searchParams.set('longitude', towns.map((t) => t.lng.toFixed(4)).join(','));
   url.searchParams.set(

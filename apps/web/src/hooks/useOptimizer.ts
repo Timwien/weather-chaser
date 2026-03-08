@@ -4,7 +4,7 @@ import type { OptimizerWorkerInput, OptimizerWorkerOutput, SearchAreaSpec } from
 
 export function useOptimizer() {
   const workerRef = useRef<Worker | null>(null);
-  const { searchAreas, searchArea, tripConfig, setMode, setLoadingStep, setRoute, setError } =
+  const { searchAreas, searchArea, searchRadiusKm, tripConfig, setMode, setLoadingStep, setRoute, setError } =
     useAppStore();
 
   useEffect(() => {
@@ -25,10 +25,19 @@ export function useOptimizer() {
     const usesPinnedMode = placeAreas.length > 1 &&
       placeAreas.every((a) => 'lat' in a && a.lat !== undefined);
 
+    const singlePlace = searchAreas.length === 1 && searchAreas[0].type === 'place';
+
     for (const area of searchAreas) {
       if (area.type === 'place' && 'bbox' in area) {
         if (usesPinnedMode && 'lat' in area && area.lat !== undefined) {
           specs.push({ type: 'pinned', lat: area.lat, lng: area.lng, name: area.name });
+        } else if (singlePlace && 'lat' in area && area.lat !== undefined) {
+          // Single place: use radius slider to define the search area, not the raw Nominatim bbox
+          const lat = area.lat;
+          const lng = area.lng ?? 0;
+          const dLat = searchRadiusKm / 111;
+          const dLng = searchRadiusKm / (111 * Math.cos((lat * Math.PI) / 180));
+          specs.push({ type: 'place', bbox: [lng - dLng, lat - dLat, lng + dLng, lat + dLat] });
         } else if (area.bbox) {
           specs.push({ type: 'place', bbox: area.bbox });
         }
@@ -122,7 +131,7 @@ export function useOptimizer() {
     };
 
     workerRef.current.postMessage(input);
-  }, [searchAreas, searchArea, tripConfig, setMode, setLoadingStep, setRoute, setError]);
+  }, [searchAreas, searchArea, searchRadiusKm, tripConfig, setMode, setLoadingStep, setRoute, setError]);
 
   return { run };
 }

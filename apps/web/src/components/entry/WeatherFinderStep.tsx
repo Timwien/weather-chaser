@@ -6,7 +6,7 @@ import './WeatherFinderStep.css';
 
 export function WeatherFinderStep() {
   const { t } = useTranslation('common');
-  const { searchAreas, finderLoading, setMode } = useAppStore();
+  const { searchAreas, finderLoading, finderError, setMode } = useAppStore();
   const { run } = useFinder();
 
   const hasAreas = searchAreas.length > 0;
@@ -34,10 +34,44 @@ export function WeatherFinderStep() {
 
   if (finderLoading) {
     return (
+      <div className="entry-panel-loading">
+        <div className="entry-loading-spinner" />
+        <p className="entry-loading-text">
+          {t('finder.loading', 'Orte werden analysiert\u2026')}
+        </p>
+        <button
+          type="button"
+          className="entry-loading-cancel"
+          onClick={() => setMode('idle')}
+        >
+          {t('entry.cancel_draw', 'Abbrechen')}
+        </button>
+      </div>
+    );
+  }
+
+  if (finderError) {
+    return (
       <div className="finder-step">
-        <div className="finder-step-loading">
-          <div className="entry-loading-spinner" />
+        <div className="finder-step-error">
+          {finderError === 'no_towns'
+            ? t('errors.no_towns', 'Keine Orte gefunden. Bitte ein größeres Gebiet wählen.')
+            : t('finder.error', 'Fehler beim Laden. Bitte erneut versuchen.')}
         </div>
+        <button
+          type="button"
+          className="cta-btn cta-btn--primary"
+          onClick={run}
+        >
+          {t('finder.retry', 'Erneut versuchen')}
+        </button>
+        <button
+          type="button"
+          className="finder-step-back-btn"
+          onClick={() => setMode('idle')}
+        >
+          {t('itinerary.back', 'Zurück')}
+        </button>
       </div>
     );
   }

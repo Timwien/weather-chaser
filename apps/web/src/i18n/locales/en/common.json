@@ -25,7 +25,7 @@
       "wind": "Calm wind"
     },
     "draw_area": "Draw area",
-    "draw_hint": "Click to set points, double-click to finish",
+    "draw_hint": "Click to set points · click first point to finish",
     "cancel_draw": "Cancel",
     "clear_area": "Clear area"
   },
@@ -89,6 +89,9 @@
     "start_placeholder": "Town or city...",
     "use_location": "Use my location",
     "no_location": "Please first add a place in \u2018Where?\u2019",
+    "loading": "Analysing locations\u2026",
+    "error": "Failed to load. Please try again.",
+    "retry": "Try again",
     "search": "Find best weather",
     "searching": "Searching...",
     "radius_label": "Radius",

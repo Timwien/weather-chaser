@@ -25,7 +25,7 @@
       "wind": "Ruhiger Wind"
     },
     "draw_area": "Gebiet zeichnen",
-    "draw_hint": "Klicken um Punkte zu setzen, doppelklicken zum Abschließen",
+    "draw_hint": "Klicken um Punkte zu setzen · ersten Punkt klicken zum Abschließen",
     "cancel_draw": "Abbrechen",
     "clear_area": "Gebiet löschen"
   },
@@ -89,6 +89,9 @@
     "start_placeholder": "Ort oder Stadt...",
     "use_location": "Mein Standort verwenden",
     "no_location": "Bitte zuerst einen Ort in \u201eWo?\u201c eingeben",
+    "loading": "Orte werden analysiert\u2026",
+    "error": "Fehler beim Laden. Bitte erneut versuchen.",
+    "retry": "Erneut versuchen",
     "search": "Bestes Wetter suchen",
     "searching": "Suche l\u00e4uft...",
     "radius_label": "Radius",

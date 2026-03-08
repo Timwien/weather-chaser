@@ -98,8 +98,32 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
     if (!map || !isDrawing) return;
     const m = map.getMap();
 
+    function completePolygon(verts: Verts) {
+      m.off('click', onClick);
+      m.off('dblclick', onDblClick);
+      m.doubleClickZoom.enable();
+      m.getCanvas().style.cursor = '';
+      verticesRef.current = verts;
+      setIsDrawing(false);
+      setHasPolygon(true);
+      onCompleteRef.current([...verts, verts[0]]);
+    }
+
     const onClick = (e: MapMouseEvent) => {
-      verticesRef.current = [...verticesRef.current, [e.lngLat.lng, e.lngLat.lat]];
+      const verts = verticesRef.current;
+
+      // Close polygon when user clicks near the first vertex (≥3 points set)
+      if (verts.length >= 3) {
+        const firstPx = m.project([verts[0][0], verts[0][1]] as [number, number]);
+        const dx = e.point.x - firstPx.x;
+        const dy = e.point.y - firstPx.y;
+        if (Math.sqrt(dx * dx + dy * dy) < 15) {
+          completePolygon(verts);
+          return;
+        }
+      }
+
+      verticesRef.current = [...verts, [e.lngLat.lng, e.lngLat.lat]];
       redraw();
     };
 
@@ -107,16 +131,7 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
       // MapLibre fires click then dblclick — strip the extra vertex from the second click
       const verts = verticesRef.current.slice(0, -1);
       if (verts.length < 3) return;
-
-      m.off('click', onClick);
-      m.off('dblclick', onDblClick);
-      m.doubleClickZoom.enable();
-      m.getCanvas().style.cursor = '';
-
-      verticesRef.current = verts;
-      setIsDrawing(false);
-      setHasPolygon(true);
-      onCompleteRef.current([...verts, verts[0]]);
+      completePolygon(verts);
     };
 
     m.on('click', onClick);

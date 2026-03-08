@@ -1,6 +1,12 @@
 // Vercel serverless proxy for Overpass API — forwards Overpass QL queries
 // Cache: 24h (s-maxage=86400) with 1h stale-while-revalidate
 // Upstream: POST with data=<encoded query> (application/x-www-form-urlencoded)
+// Tries primary endpoint first, falls back to mirror on 429/5xx/timeout
+
+const UPSTREAM_URLS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+];
 
 export default {
   async fetch(request: Request): Promise<Response> {
@@ -13,24 +19,39 @@ export default {
 
     const body = await request.text();
 
-    const upstreamRes = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'WeatherChaser/1.0 (weatherchaser.vercel.app)',
-      },
-      body,
-    });
+    for (const url of UPSTREAM_URLS) {
+      try {
+        const upstreamRes = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'WeatherChaser/1.0 (weatherchaser.vercel.app)',
+          },
+          body,
+          signal: AbortSignal.timeout(30000),
+        });
 
-    const responseBody = await upstreamRes.text();
+        // Retry on rate-limit or server error
+        if (upstreamRes.status === 429 || upstreamRes.status >= 500) continue;
 
-    return new Response(responseBody, {
-      status: upstreamRes.status,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=3600',
-        'Access-Control-Allow-Origin': '*',
-      },
+        const responseBody = await upstreamRes.text();
+        return new Response(responseBody, {
+          status: upstreamRes.status,
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=3600',
+            'Access-Control-Allow-Origin': '*',
+          },
+        });
+      } catch {
+        // Network error or timeout — try next mirror
+        continue;
+      }
+    }
+
+    return new Response(JSON.stringify({ error: 'All Overpass endpoints unavailable' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
     });
   },
 };

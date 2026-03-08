@@ -145,7 +145,7 @@ export function RouteConfigStep({ onGenerate, onBack }: { onGenerate: () => void
   }
 
   function incrementMaxStay() {
-    setTripConfig({ maxStay: Math.min(7, tripConfig.maxStay + 1) });
+    setTripConfig({ maxStay: Math.min(tripConfig.totalDays, tripConfig.maxStay + 1) });
   }
 
   const hasDates = Boolean(tripConfig.startDate && tripConfig.endDate);
@@ -206,7 +206,7 @@ export function RouteConfigStep({ onGenerate, onBack }: { onGenerate: () => void
             type="button"
             className="stepper-btn"
             onClick={incrementMaxStay}
-            disabled={tripConfig.maxStay >= 7}
+            disabled={tripConfig.maxStay >= tripConfig.totalDays}
             aria-label="Increase max stay"
           >
             +

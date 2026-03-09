@@ -48,7 +48,7 @@ function buildBboxQuery(bbox: BoundingBox): string {
   const areaKm2 = (north - south) * 111 * ((east - west) * 111 * Math.cos((centerLat * Math.PI) / 180));
   const filter = placeFilter(areaKm2);
   return `
-    [out:json][timeout:30];
+    [out:json][timeout:8];
     (
       node[${filter}]["name"](${south},${west},${north},${east});
     );
@@ -61,7 +61,7 @@ function buildPolygonQuery(polygon: [number, number][]): string {
   const polyStr = polygon.map(([lng, lat]) => `${lat} ${lng}`).join(' ');
   const filter = placeFilter(polygonAreaKm2(polygon));
   return `
-    [out:json][timeout:30];
+    [out:json][timeout:8];
     (
       node[${filter}]["name"](poly:"${polyStr}");
     );
@@ -94,7 +94,7 @@ async function tryEndpoint(url: string, query: string): Promise<Town[] | null> {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: `data=${encodeURIComponent(query)}`,
-      signal: AbortSignal.timeout(35000),
+      signal: AbortSignal.timeout(12000),
     });
 
     if (!res.ok) {
@@ -133,7 +133,7 @@ function buildAroundQuery(lat: number, lng: number, radiusKm: number): string {
   const areaKm2 = Math.PI * radiusKm * radiusKm;
   const filter = placeFilter(areaKm2);
   return `
-    [out:json][timeout:30];
+    [out:json][timeout:8];
     (
       node[${filter}]["name"](around:${radiusKm * 1000},${lat},${lng});
     );

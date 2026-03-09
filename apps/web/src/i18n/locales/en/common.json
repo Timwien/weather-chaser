@@ -67,7 +67,8 @@
   },
   "nav": {
     "itinerary": "Itinerary",
-    "map": "Map"
+    "map": "Map",
+    "search": "Search"
   },
   "map": {
     "stop_popup": "Score: {{score}}"

@@ -28,7 +28,7 @@ export default {
             'User-Agent': 'WeatherChaser/1.0 (weatherchaser.vercel.app)',
           },
           body,
-          signal: AbortSignal.timeout(30000),
+          signal: AbortSignal.timeout(10000),
         });
 
         // Retry on rate-limit or server error

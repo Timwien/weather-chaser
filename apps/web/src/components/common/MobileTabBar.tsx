@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next';
 interface MobileTabBarProps {
   activeView: 'itinerary' | 'map';
   onSwitch: (view: 'itinerary' | 'map') => void;
+  panelLabel?: string;
 }
 
-export function MobileTabBar({ activeView, onSwitch }: MobileTabBarProps) {
+export function MobileTabBar({ activeView, onSwitch, panelLabel }: MobileTabBarProps) {
   const { t } = useTranslation('common');
   return (
     <nav
@@ -34,7 +35,7 @@ export function MobileTabBar({ activeView, onSwitch }: MobileTabBarProps) {
           borderTop: activeView === 'itinerary' ? '2px solid var(--color-accent)' : '2px solid transparent',
         }}
       >
-        {t('nav.itinerary', 'Itinerary')}
+        {panelLabel ?? t('nav.itinerary', 'Itinerary')}
       </button>
       <button
         onClick={() => onSwitch('map')}

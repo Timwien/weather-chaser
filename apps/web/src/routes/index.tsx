@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createRoute } from '@tanstack/react-router';
 import { Route as rootRoute } from './__root.tsx';
 import { useAppStore } from '../stores/appStore.ts';
@@ -19,6 +20,7 @@ export const Route = createRoute({
 const DRAWN_AREA_ID = 'drawn-polygon';
 
 function IndexPage() {
+  const { t } = useTranslation('common');
   const { addSearchArea, removeSearchArea, mode, finderTowns, reset } = useAppStore();
   const [selectedStopIndex, setSelectedStopIndex] = useState<number | null>(null);
   const [selectedFinderIndex, setSelectedFinderIndex] = useState<number | null>(null);
@@ -107,10 +109,12 @@ function IndexPage() {
 
       <LoadingOverlay />
 
-      {/* Mobile tab bar: only visible on mobile (CSS hides on desktop) and only when results are shown */}
-      {showResults && (
-        <MobileTabBar activeView={mobileView} onSwitch={setMobileView} />
-      )}
+      {/* Mobile tab bar: always visible on mobile (CSS class hides on desktop) */}
+      <MobileTabBar
+        activeView={mobileView}
+        onSwitch={setMobileView}
+        panelLabel={showResults ? undefined : t('nav.search', 'Search')}
+      />
     </div>
   );
 }

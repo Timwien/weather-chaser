@@ -1,0 +1,7 @@
+node_modules/
+.turbo/
+dist/
+.DS_Store
+.env.local
+.vercel/
+weather-chaser/

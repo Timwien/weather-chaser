@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.ts';
+import { useAppStore } from '../../stores/appStore.ts';
 import { supabaseConfigured } from '../../lib/supabase.ts';
 import {
   getSavedRoutes,
@@ -9,6 +10,7 @@ import {
   deleteSavedRoute,
 } from '../../services/userdata.ts';
 import type { SavedRoute, SavedFinderSearch, Favorite } from '../../types/database.ts';
+import type { Route } from '@weatherchaser/core';
 
 function TrashIcon() {
   return (
@@ -49,9 +51,15 @@ function formatDateRange(from: string | null, to: string | null): string {
   return '';
 }
 
-export function SavedTab() {
+interface SavedTabProps {
+  onClose: () => void;
+}
+
+export function SavedTab({ onClose }: SavedTabProps) {
   const { t } = useTranslation();
   const { user } = useAuthStore();
+  const setRoute = useAppStore((s) => s.setRoute);
+  const setMode = useAppStore((s) => s.setMode);
 
   const [routes, setRoutes] = useState<SavedRoute[]>([]);
   const [searches, setSearches] = useState<SavedFinderSearch[]>([]);
@@ -128,6 +136,26 @@ export function SavedTab() {
     );
   }
 
+  function handleLoadRoute(saved: SavedRoute) {
+    const raw = saved.stops_json as unknown;
+    let route: Route;
+    if (Array.isArray(raw)) {
+      // Legacy format: only stops array stored
+      const stops = raw as Route['stops'];
+      route = {
+        stops,
+        totalDistanceKm: stops.reduce((sum, s) => sum + (s.distanceToNextKm ?? 0), 0),
+        totalDays: stops.reduce((sum, s) => sum + s.nights, 0),
+        avgScore: stops.length > 0 ? stops.reduce((sum, s) => sum + s.score.composite, 0) / stops.length : 0,
+      };
+    } else {
+      route = raw as Route;
+    }
+    setRoute(route);
+    setMode('results');
+    onClose();
+  }
+
   async function handleDeleteRoute(id: string) {
     setDeletingId(id);
     try {
@@ -177,7 +205,12 @@ export function SavedTab() {
         ) : (
           <ul className="saved-list">
             {routes.map((route) => (
-              <li key={route.id} className="saved-card">
+              <li
+                key={route.id}
+                className="saved-card saved-card--clickable"
+                onClick={() => handleLoadRoute(route)}
+                title="Route auf der Karte anzeigen"
+              >
                 <div className="saved-card-icon">
                   <BookmarkIcon />
                 </div>
@@ -192,7 +225,7 @@ export function SavedTab() {
                 <button
                   type="button"
                   className="saved-card-delete"
-                  onClick={() => handleDeleteRoute(route.id)}
+                  onClick={(e) => { e.stopPropagation(); handleDeleteRoute(route.id); }}
                   disabled={deletingId === route.id}
                   aria-label="Route löschen"
                 >

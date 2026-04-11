@@ -82,7 +82,7 @@ export function AccountModal({ isOpen, onClose, initialTab = 'account' }: Accoun
         {/* Tab content */}
         <div className="account-modal-content">
           {activeTab === 'account' && <AccountTab />}
-          {activeTab === 'saved' && <SavedTab />}
+          {activeTab === 'saved' && <SavedTab onClose={onClose} />}
           {activeTab === 'settings' && <SettingsTab onClose={onClose} />}
         </div>
       </div>

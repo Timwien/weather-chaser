@@ -23,7 +23,7 @@ export async function saveRoute(
     .insert({
       user_id: user.id,
       name: buildRouteName(route),
-      stops_json: route.stops,
+      stops_json: route,
       date_from: dateFrom,
       date_to: dateTo,
     })

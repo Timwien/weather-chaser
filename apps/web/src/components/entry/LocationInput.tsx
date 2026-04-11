@@ -198,9 +198,15 @@ export function LocationInput() {
   const hasDrawnPolygon = searchAreas.some((a) => a.type === 'polygon');
   const showRadius = searchAreas.filter((a) => a.type === 'place').length === 1 && searchAreas.length === 1;
 
-  // Filter favorites by current input value
+  // Names of places already added — exclude from favorites dropdown
+  const selectedNames = new Set(
+    searchAreas.filter((a) => a.type === 'place').map((a) => ('name' in a ? a.name : ''))
+  );
+
+  // Filter favorites by current input and exclude already-selected places
   const matchedFavorites = favorites.filter((f) =>
-    inputValue.trim() === '' || f.place_name.toLowerCase().includes(inputValue.toLowerCase())
+    !selectedNames.has(f.place_name) &&
+    (inputValue.trim() === '' || f.place_name.toLowerCase().includes(inputValue.toLowerCase()))
   );
 
   // Show dropdown if open and (has Nominatim results OR has favorites)
@@ -279,7 +285,7 @@ export function LocationInput() {
       {/* Autocomplete dropdown — favorites first, then Nominatim results */}
       {showDropdown && (
         <ul className="autocomplete-dropdown" role="listbox">
-          {matchedFavorites.slice(0, 3).map((fav) => (
+          {matchedFavorites.slice(0, 5).map((fav) => (
             <li
               key={`fav-${fav.id}`}
               role="option"

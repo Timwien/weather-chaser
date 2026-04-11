@@ -60,6 +60,7 @@ export function SavedTab({ onClose }: SavedTabProps) {
   const { user } = useAuthStore();
   const setRoute = useAppStore((s) => s.setRoute);
   const setMode = useAppStore((s) => s.setMode);
+  const addSearchArea = useAppStore((s) => s.addSearchArea);
 
   const [routes, setRoutes] = useState<SavedRoute[]>([]);
   const [searches, setSearches] = useState<SavedFinderSearch[]>([]);
@@ -136,12 +137,19 @@ export function SavedTab({ onClose }: SavedTabProps) {
     );
   }
 
+  function reviveDates(stops: Route['stops']): Route['stops'] {
+    return stops.map((s) => ({
+      ...s,
+      arrivalDate: s.arrivalDate instanceof Date ? s.arrivalDate : new Date(s.arrivalDate as unknown as string),
+    }));
+  }
+
   function handleLoadRoute(saved: SavedRoute) {
     const raw = saved.stops_json as unknown;
     let route: Route;
     if (Array.isArray(raw)) {
       // Legacy format: only stops array stored
-      const stops = raw as Route['stops'];
+      const stops = reviveDates(raw as Route['stops']);
       route = {
         stops,
         totalDistanceKm: stops.reduce((sum, s) => sum + (s.distanceToNextKm ?? 0), 0),
@@ -149,10 +157,23 @@ export function SavedTab({ onClose }: SavedTabProps) {
         avgScore: stops.length > 0 ? stops.reduce((sum, s) => sum + s.score.composite, 0) / stops.length : 0,
       };
     } else {
-      route = raw as Route;
+      const r = raw as Route;
+      route = { ...r, stops: reviveDates(r.stops) };
     }
     setRoute(route);
     setMode('results');
+    onClose();
+  }
+
+  function handleLoadFavorite(fav: Favorite) {
+    addSearchArea({
+      type: 'place',
+      id: `fav-${fav.id}`,
+      name: fav.place_name,
+      fullName: fav.place_name,
+      lat: fav.lat,
+      lng: fav.lng,
+    });
     onClose();
   }
 
@@ -269,7 +290,12 @@ export function SavedTab({ onClose }: SavedTabProps) {
         ) : (
           <ul className="saved-list">
             {favorites.map((fav) => (
-              <li key={fav.id} className="saved-card">
+              <li
+                key={fav.id}
+                className="saved-card saved-card--clickable"
+                onClick={() => handleLoadFavorite(fav)}
+                title="Als Startort hinzufügen"
+              >
                 <div className="saved-card-icon saved-card-icon--heart">
                   <HeartFilledIcon />
                 </div>

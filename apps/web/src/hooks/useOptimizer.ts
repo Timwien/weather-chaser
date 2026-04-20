@@ -15,7 +15,18 @@ export function useOptimizer() {
   }, []);
 
   const run = useCallback(() => {
-    if (!tripConfig.startDate || !tripConfig.endDate) return;
+    if (!tripConfig.startDate) return;
+
+    // Derive endDate if user only picked a start date
+    let endDate = tripConfig.endDate;
+    if (!endDate) {
+      const start = new Date(tripConfig.startDate + 'T00:00:00');
+      start.setDate(start.getDate() + tripConfig.totalDays - 1);
+      const y = start.getFullYear();
+      const m = String(start.getMonth() + 1).padStart(2, '0');
+      const d = String(start.getDate()).padStart(2, '0');
+      endDate = `${y}-${m}-${d}`;
+    }
 
     // Build search area specs from the multi-area store
     const specs: SearchAreaSpec[] = [];
@@ -28,7 +39,7 @@ export function useOptimizer() {
     const singlePlace = searchAreas.length === 1 && searchAreas[0].type === 'place';
 
     for (const area of searchAreas) {
-      if (area.type === 'place' && 'bbox' in area) {
+      if (area.type === 'place') {
         if (usesPinnedMode && 'lat' in area && area.lat !== undefined) {
           specs.push({ type: 'pinned', lat: area.lat, lng: area.lng, name: area.name });
         } else if (singlePlace && 'lat' in area && area.lat !== undefined) {
@@ -120,7 +131,7 @@ export function useOptimizer() {
       searchAreas: specs,
       config: {
         startDate: tripConfig.startDate,
-        endDate: tripConfig.endDate,
+        endDate,
         totalDays: tripConfig.totalDays,
         maxStay: tripConfig.maxStay,
         preset: tripConfig.preset,

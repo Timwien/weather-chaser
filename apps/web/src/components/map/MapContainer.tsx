@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Map, useMap } from '@vis.gl/react-maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import type { Map as MaplibreMap } from 'maplibre-gl';
+import type { Map as MaplibreMap, MapMouseEvent } from 'maplibre-gl';
 import { useAppStore } from '../../stores/appStore.ts';
+import { reverseGeocode } from '../../services/nominatim.ts';
 import { DrawingControls } from './DrawingControls.tsx';
 import { RouteLayer } from './RouteLayer.tsx';
 import { StopMarkers } from './StopMarkers.tsx';
@@ -103,6 +104,44 @@ function FlyToCity({ target }: { target?: { lat: number; lng: number; token: num
   return null;
 }
 
+/** Handles click-to-pick-location mode. */
+function PickLocationOnClick() {
+  const { current: map } = useMap();
+  const { pickingLocation, setPickingLocation, addSearchArea } = useAppStore();
+
+  useEffect(() => {
+    if (!map || !pickingLocation) return;
+    const nativeMap = map.getMap();
+    nativeMap.getCanvas().style.cursor = 'crosshair';
+
+    async function handleClick(e: MapMouseEvent) {
+      const { lat, lng } = e.lngLat;
+      setPickingLocation(false);
+      nativeMap.getCanvas().style.cursor = '';
+      const result = await reverseGeocode(lat, lng);
+      const name = result
+        ? result.display_name.split(',')[0].trim()
+        : `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+      addSearchArea({
+        type: 'place',
+        id: `picked-${Date.now()}`,
+        name,
+        fullName: result?.display_name ?? name,
+        lat,
+        lng,
+      });
+    }
+
+    nativeMap.once('click', handleClick);
+    return () => {
+      nativeMap.off('click', handleClick);
+      nativeMap.getCanvas().style.cursor = '';
+    };
+  }, [map, pickingLocation, setPickingLocation, addSearchArea]);
+
+  return null;
+}
+
 export function MapContainer({
   selectedStopIndex,
   onStopClick,
@@ -135,6 +174,7 @@ export function MapContainer({
         <FitRouteOnSelection selectedStopIndex={selectedStopIndex} />
         <FlyToFinderRank1 finderResults={finderResults} />
         <FlyToCity target={flyToCity} />
+        <PickLocationOnClick />
         {/* DrawingControls must live inside <Map> so useMap() has a provider */}
         {onDrawComplete && onDrawClear && (
           <DrawingControls

@@ -15,8 +15,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Core Algorithm + Route Planner Web** - Working web app with real town data, temporal weather scoring, anti-backtracking optimizer, day-by-day itinerary, and shareable trip link — no backend required
 - [x] **Phase 2: Weather Finder Mode** - Second product mode: ranked best-weather locations for a given date range with map visualization and time-of-day scoring
 - [ ] **Phase 3: Backend + Auth + Production Hosting** - API server with weather/Overpass/OSRM proxies and caching, user accounts (email + OAuth), saved routes, favorites, preferences, and public web hosting
-- [ ] **Phase 4: Freemium + Monetization** - Stripe subscription, premium feature enforcement server-side, custom weight sliders, and clear free vs. premium UX
-- [ ] **Phase 5: Native Mobile Apps** - iOS and Android apps at feature parity with web, distributed via Expo EAS through App Store and Play Store
+- [ ] **Phase 4: Mobile Web UX** - Map-first mobile layout with Airbnb-style compact search bar and bottom sheet panels
+- [ ] **Phase 5: Freemium + Monetization** - Stripe subscription, premium feature enforcement server-side, custom weight sliders, and clear free vs. premium UX
+- [ ] **Phase 6: Native Mobile Apps** - iOS and Android apps at feature parity with web, distributed via Expo EAS through App Store and Play Store
 
 ## Phase Details
 
@@ -85,9 +86,15 @@ Plans:
 - [ ] 03-06-PLAN.md — GDPR: account deletion endpoint (server-side) + one-time guest route hint
 - [ ] 03-07-PLAN.md — Production deployment to Vercel + end-to-end verification (all 5 success criteria)
 
-### Phase 4: Freemium + Monetization
+### Phase 4: Mobile Web UX — map-first layout with compact search bar and bottom sheet panels
+
+**Goal:** [To be planned]
+**Depends on:** Phase 3
+**Plans:** TBD
+
+### Phase 5: Freemium + Monetization
 **Goal**: The freemium tier split is enforced server-side with a working Stripe subscription flow, premium features are gated behind a paywall, and users can upgrade from within the app
-**Depends on**: Phase 3
+**Depends on**: Phase 4
 **Requirements**: AUTH-08, AUTH-09, PREM-01, PREM-02, PREM-03, PREM-04
 **Success Criteria** (what must be TRUE):
   1. A guest or free-tier user can plan routes and use all core features with no trip-length limit — the app does not prompt for login or payment to generate a route
@@ -96,9 +103,9 @@ Plans:
   4. Save and favorite actions for a guest user trigger a signup prompt, not a paywall — the account is free, only the action requires registration
 **Plans**: TBD
 
-### Phase 5: Native Mobile Apps
+### Phase 6: Native Mobile Apps
 **Goal**: Users can install WeatherChaser on iOS and Android and use all core route planning and weather finding features natively, with maps and location services working as expected on each platform
-**Depends on**: Phase 3
+**Depends on**: Phase 4
 **Requirements**: PLAT-02, PLAT-03
 **Success Criteria** (what must be TRUE):
   1. User can install the iOS app from the App Store and the Android app from the Play Store, and both apps launch, connect to the production backend, and support login with Apple (iOS) and Google (both)
@@ -109,12 +116,16 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Core Algorithm + Route Planner Web | 10/10 | Complete | 2026-03-01 |
 | 2. Weather Finder Mode | 6/6 | Complete | 2026-03-02 |
-| 3. Backend + Auth + Production Hosting | 4/7 | In progress | - |
-| 4. Freemium + Monetization | 0/TBD | Not started | - |
-| 5. Native Mobile Apps | 0/TBD | Not started | - |
+| 3. Backend + Auth + Production Hosting | 6/7 | In progress | - |
+| 4. Mobile Web UX | 0/TBD | Not started | - |
+| 5. Freemium + Monetization | 0/TBD | Not started | - |
+| 6. Native Mobile Apps | 0/TBD | Not started | - |
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 6 to break down)

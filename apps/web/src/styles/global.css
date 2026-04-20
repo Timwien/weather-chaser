@@ -27,6 +27,11 @@ html, body, #root {
   height: 100%;
 }
 
+/* Ensure stop markers render above the route canvas overlay (z-index: 0) */
+.maplibregl-marker {
+  z-index: 1;
+}
+
 /* Mobile two-screen layout: hide inactive screen */
 @media (max-width: 768px) {
   /* When map is the active mobile screen, hide the panel overlay */

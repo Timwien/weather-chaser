@@ -85,7 +85,7 @@ function RadiusSlider() {
 
 export function LocationInput() {
   const { t } = useTranslation('common');
-  const { searchAreas, addSearchArea, removeSearchArea, searchRadiusKm } = useAppStore();
+  const { searchAreas, addSearchArea, removeSearchArea, searchRadiusKm, pickingLocation, setPickingLocation } = useAppStore();
   const { user } = useAuthStore();
   const { search, results, loading } = useLocationSearch();
 
@@ -140,6 +140,16 @@ export function LocationInput() {
     document.addEventListener('mousedown', handleMouseDown);
     return () => document.removeEventListener('mousedown', handleMouseDown);
   }, []);
+
+  // Cancel picking mode on Escape
+  useEffect(() => {
+    if (!pickingLocation) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setPickingLocation(false);
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [pickingLocation, setPickingLocation]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
@@ -274,9 +284,10 @@ export function LocationInput() {
         </div>
         <button
           type="button"
-          className="loc-pick-map-btn"
+          className={`loc-pick-map-btn${pickingLocation ? ' loc-pick-map-btn--active' : ''}`}
           title={t('entry.location_pick_map')}
           aria-label={t('entry.location_pick_map')}
+          onClick={() => setPickingLocation(!pickingLocation)}
         >
           <MapPinIcon />
         </button>

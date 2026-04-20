@@ -96,6 +96,8 @@ interface AppState {
   tripConfig: TripConfig;
   route: Route | null;
   error: string | null;
+  /** True while user is in "click to pick location" mode */
+  pickingLocation: boolean;
 
   // Finder state slice
   finderConfig: FinderConfig;
@@ -109,6 +111,8 @@ interface AppState {
   setFinderError: (e: string | null) => void;
   setFinderData: (towns: Town[], hourly: Record<string, HourlyWeather>) => void;
   clearFinderData: () => void;
+
+  setPickingLocation: (v: boolean) => void;
 
   // Actions
   setMode: (mode: AppMode) => void;
@@ -166,12 +170,14 @@ export const useAppStore = create<AppState>((set) => ({
   tripConfig: defaultTripConfig,
   route: null,
   error: null,
+  pickingLocation: false,
   finderConfig: defaultFinderConfig,
   finderLoading: false,
   finderError: null,
   finderTowns: null,
   finderHourlyCache: {},
 
+  setPickingLocation: (v) => set({ pickingLocation: v }),
   setMode: (mode) => set({ mode }),
   setLoadingStep: (step) => set({ loadingStep: step }),
   setSearchArea: (area) => set({ searchArea: area ?? null }),

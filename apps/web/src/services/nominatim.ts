@@ -9,6 +9,10 @@ const NOMINATIM_BASE = import.meta.env.PROD
   ? '/api/proxy/nominatim'
   : 'https://nominatim.openstreetmap.org/search';
 
+const NOMINATIM_REVERSE_BASE = import.meta.env.PROD
+  ? '/api/proxy/nominatim-reverse'
+  : 'https://nominatim.openstreetmap.org/reverse';
+
 export interface NominatimResult {
   display_name: string;
   lat: string;
@@ -53,4 +57,16 @@ export async function geocodeAddress(query: string): Promise<{ lat: number; lng:
   if (results.length === 0) return null;
   const first = results[0];
   return { lat: Number(first.lat), lng: Number(first.lon), name: first.display_name };
+}
+
+export async function reverseGeocode(lat: number, lng: number): Promise<NominatimResult | null> {
+  const url = new URL(NOMINATIM_REVERSE_BASE, self.location.origin);
+  url.searchParams.set('lat', String(lat));
+  url.searchParams.set('lon', String(lng));
+  url.searchParams.set('format', 'json');
+  const headers: Record<string, string> = { 'Accept-Language': 'en' };
+  if (import.meta.env.DEV) headers['Referer'] = self.location.origin;
+  const res = await fetch(url.toString(), { headers });
+  if (!res.ok) return null;
+  return res.json();
 }

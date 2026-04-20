@@ -163,8 +163,11 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
       const wd = weatherData.find((d) => d.townId === stop.town.id);
       if (!wd || wd.daily.time.length === 0) return stop;
       const { daily } = wd;
+      // Re-score at actual arrival date + nights (initial scores were all at startDate/1-night)
+      const score = scoreDailyLocation(daily, stop.arrivalDate, stop.nights, weights);
       return {
         ...stop,
+        score,
         weatherAvg: {
           sunshineHoursPerDay: avg(daily.sunshine_duration) / 3600,
           precipitationMmPerDay: avg(daily.precipitation_sum),

@@ -52,6 +52,10 @@ Progress: [█████████░] 80% (Phase 1 complete; Phase 2 comple
 
 ## Accumulated Context
 
+### Roadmap Evolution
+
+- Phase 4 added: Mobile Web UX — map-first layout with compact search bar and bottom sheet panels (former Phase 4 Freemium → 5, former Phase 5 Native Apps → 6)
+
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.
@@ -138,7 +142,8 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+- [pre-launch] Finder-Suchen: add save button in the finder UI so users can save searches (currently the SavedTab section is always empty — no UI to create entries)
+- [pre-launch] Email delivery: configure Resend custom SMTP (already in memory file)
 
 ### Blockers/Concerns
 

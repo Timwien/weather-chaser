@@ -15,9 +15,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Core Algorithm + Route Planner Web** - Working web app with real town data, temporal weather scoring, anti-backtracking optimizer, day-by-day itinerary, and shareable trip link — no backend required
 - [x] **Phase 2: Weather Finder Mode** - Second product mode: ranked best-weather locations for a given date range with map visualization and time-of-day scoring
 - [ ] **Phase 3: Backend + Auth + Production Hosting** - API server with weather/Overpass/OSRM proxies and caching, user accounts (email + OAuth), saved routes, favorites, preferences, and public web hosting
-- [ ] **Phase 4: Mobile Web UX** - Map-first mobile layout with Airbnb-style compact search bar and bottom sheet panels
-- [ ] **Phase 5: Freemium + Monetization** - Stripe subscription, premium feature enforcement server-side, custom weight sliders, and clear free vs. premium UX
-- [ ] **Phase 6: Native Mobile Apps** - iOS and Android apps at feature parity with web, distributed via Expo EAS through App Store and Play Store
+- [ ] **Phase 3.1: Mobile Web UX (INSERTED)** - Map-first mobile layout with Airbnb-style compact search bar and bottom sheet panels
+- [ ] **Phase 3.2: Premium UI Overhaul (INSERTED)** - Modernize the UI aesthetic using clean typography, glassmorphism, micro-animations, dark mode, and full i18n support
+- [ ] **Phase 4: Freemium + Monetization** - Stripe subscription, premium feature enforcement server-side, custom weight sliders, and clear free vs. premium UX
+- [ ] **Phase 5: Native Mobile Apps** - iOS and Android apps at feature parity with web, distributed via Expo EAS through App Store and Play Store
 
 ## Phase Details
 
@@ -86,15 +87,25 @@ Plans:
 - [ ] 03-06-PLAN.md — GDPR: account deletion endpoint (server-side) + one-time guest route hint
 - [ ] 03-07-PLAN.md — Production deployment to Vercel + end-to-end verification (all 5 success criteria)
 
-### Phase 4: Mobile Web UX — map-first layout with compact search bar and bottom sheet panels
+### Phase 3.1: Mobile Web UX (INSERTED)
+**Goal**: Map-first mobile layout with Airbnb-style compact search bar and bottom sheet panels — feels native on phone-sized viewports while keeping the desktop layout untouched
+**Depends on**: Phase 3 (or runs in parallel)
+**Plans**: TBD
 
-**Goal:** [To be planned]
-**Depends on:** Phase 3
-**Plans:** TBD
+### Phase 3.2: Premium UI Overhaul (INSERTED)
+**Goal**: Elevate the web application's user interface to a premium state-of-the-art design, featuring modern typography, glassmorphism, dynamic micro-animations, and an intelligent Dark Mode. All new UI text will use translation keys to strictly support i18n (English and German).
+**Depends on**: Phase 3.1 (sequenced after Mobile UX so glass/animation work lands on the final layout, not the old one)
+**Requirements**: UI-01, UI-02, UI-03, i18n-01
+**Success Criteria** (what must be TRUE):
+  1. No text strings are hardcoded in the new UI components; everything correctly leverages `react-i18next` with English and German keys.
+  2. The application uses a premium, modern font (e.g., Inter or Outfit) and implements glassmorphism and subtle gradient styling across panels and interactive elements.
+  3. Interactive elements (buttons, inputs, tabs) respond fluidly with micro-animations on hover and focus.
+  4. The user can toggle a Dark Mode that beautifully recalculates variables to deep, neon-accented colors.
+**Plans**: TBD
 
-### Phase 5: Freemium + Monetization
+### Phase 4: Freemium + Monetization
 **Goal**: The freemium tier split is enforced server-side with a working Stripe subscription flow, premium features are gated behind a paywall, and users can upgrade from within the app
-**Depends on**: Phase 4
+**Depends on**: Phase 3
 **Requirements**: AUTH-08, AUTH-09, PREM-01, PREM-02, PREM-03, PREM-04
 **Success Criteria** (what must be TRUE):
   1. A guest or free-tier user can plan routes and use all core features with no trip-length limit — the app does not prompt for login or payment to generate a route
@@ -103,9 +114,9 @@ Plans:
   4. Save and favorite actions for a guest user trigger a signup prompt, not a paywall — the account is free, only the action requires registration
 **Plans**: TBD
 
-### Phase 6: Native Mobile Apps
+### Phase 5: Native Mobile Apps
 **Goal**: Users can install WeatherChaser on iOS and Android and use all core route planning and weather finding features natively, with maps and location services working as expected on each platform
-**Depends on**: Phase 4
+**Depends on**: Phase 3
 **Requirements**: PLAT-02, PLAT-03
 **Success Criteria** (what must be TRUE):
   1. User can install the iOS app from the App Store and the Android app from the Play Store, and both apps launch, connect to the production backend, and support login with Apple (iOS) and Google (both)
@@ -116,16 +127,14 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
+Phases execute in numeric order: 1 → 2 → 3 → 3.1 → 3.2 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Core Algorithm + Route Planner Web | 10/10 | Complete | 2026-03-01 |
 | 2. Weather Finder Mode | 6/6 | Complete | 2026-03-02 |
 | 3. Backend + Auth + Production Hosting | 6/7 | In progress | - |
-| 4. Mobile Web UX | 0/TBD | Not started | - |
-| 5. Freemium + Monetization | 0/TBD | Not started | - |
-| 6. Native Mobile Apps | 0/TBD | Not started | - |
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 6 to break down)
+| 3.1. Mobile Web UX (INSERTED) | 0/TBD | Not started | - |
+| 3.2. Premium UI Overhaul (INSERTED) | 0/TBD | Not started | - |
+| 4. Freemium + Monetization | 0/TBD | Not started | - |
+| 5. Native Mobile Apps | 0/TBD | Not started | - |

@@ -123,7 +123,7 @@ export function SavedTab({ onClose }: SavedTabProps) {
     return (
       <div className="saved-tab">
         <div className="saved-tab-loading">
-          <div className="saved-tab-spinner" aria-label="Laden..." />
+          <div className="saved-tab-spinner" aria-label={t('a11y.loading')} />
         </div>
       </div>
     );

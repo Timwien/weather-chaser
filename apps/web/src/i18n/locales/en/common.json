@@ -142,7 +142,8 @@
     "no_towns": "No towns found in this area",
     "no_towns_hint": "Try expanding your search area or drawing a larger polygon",
     "poor_weather": "Weather looks unfavorable in this region for these dates",
-    "weather_unavailable": "Weather data unavailable for some stops"
+    "weather_unavailable": "Weather data unavailable for some stops",
+    "overpass": "Weather data couldn't be loaded (Overpass API). Please try again."
   },
   "account": {
     "tab_account": "Account",
@@ -205,6 +206,9 @@
     "show_route_on_map": "Show route on map",
     "delete_route": "Delete route",
     "add_as_start": "Add as start location",
-    "close": "Close"
+    "close": "Close",
+    "loading": "Loading…",
+    "remove_named": "Remove {{name}}",
+    "max_days_ahead": "Max. {{days}} days ahead"
   }
 }

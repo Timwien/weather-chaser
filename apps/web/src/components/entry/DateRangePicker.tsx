@@ -103,6 +103,7 @@ function CalendarMonth({
   maxDate,
   locale,
 }: CalendarMonthProps) {
+  const { t } = useTranslation();
   const year = month.getFullYear();
   const monthIdx = month.getMonth();
   const totalDays = daysInMonth(year, monthIdx);
@@ -161,7 +162,7 @@ function CalendarMonth({
               disabled={disabled}
               onClick={() => !disabled && onDayClick(date)}
               onMouseEnter={() => !disabled && onDayHover(date)}
-              title={isBefore(maxDate, date) ? `Max. ${OPENMETEO_FORECAST_DAYS} days ahead` : undefined}
+              title={isBefore(maxDate, date) ? t('a11y.max_days_ahead', { days: OPENMETEO_FORECAST_DAYS }) : undefined}
               onMouseLeave={() => onDayHover(null)}
               aria-label={date.toLocaleDateString(locale, { dateStyle: 'medium' })}
             >

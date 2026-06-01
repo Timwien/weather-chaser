@@ -142,7 +142,8 @@
     "no_towns": "Keine Orte in diesem Gebiet gefunden",
     "no_towns_hint": "Versuche, das Suchgebiet zu vergrößern",
     "poor_weather": "Das Wetter in dieser Region ist für die gewählten Daten ungünstig",
-    "weather_unavailable": "Wetterdaten für einige Stopps nicht verfügbar"
+    "weather_unavailable": "Wetterdaten für einige Stopps nicht verfügbar",
+    "overpass": "Wetterdaten konnten nicht geladen werden (Overpass API). Bitte erneut versuchen."
   },
   "account": {
     "tab_account": "Konto",
@@ -205,6 +206,9 @@
     "show_route_on_map": "Route auf der Karte anzeigen",
     "delete_route": "Route l\u00f6schen",
     "add_as_start": "Als Startort hinzuf\u00fcgen",
-    "close": "Schlie\u00dfen"
+    "close": "Schlie\u00dfen",
+    "loading": "L\u00e4dt\u2026",
+    "remove_named": "{{name}} entfernen",
+    "max_days_ahead": "Max. {{days}} Tage im Voraus"
   }
 }

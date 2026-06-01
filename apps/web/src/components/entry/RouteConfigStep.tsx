@@ -280,7 +280,7 @@ export function RouteConfigStep({ onGenerate, onBack }: { onGenerate: () => void
                   type="button"
                   className="must-visit-remove"
                   onClick={() => removeMustVisit(name)}
-                  aria-label={`Remove ${name}`}
+                  aria-label={t('a11y.remove_named', { name })}
                 >
                   <RemoveIcon />
                 </button>

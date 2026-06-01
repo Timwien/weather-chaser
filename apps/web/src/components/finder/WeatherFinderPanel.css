@@ -100,25 +100,4 @@
   flex: 1;
 }
 
-/* ── Mobile ─────────────────────────────────────────────────── */
-
-@media (max-width: 768px) {
-  .weather-finder-panel {
-    position: fixed;
-    inset: 0;
-    bottom: 48px;
-    width: 100%;
-    left: 0;
-    top: 0;
-    border-radius: 0;
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background: var(--color-bg);
-    padding: var(--space-4);
-  }
-
-  .mobile-screen-map-active .weather-finder-panel {
-    display: none;
-  }
-}
+/* Mobile overrides for .weather-finder-panel inside .mobile-sheet-content are in global.css */

@@ -144,25 +144,4 @@
   text-align: center;
 }
 
-/* Mobile: full-screen itinerary view (shown by default; map hidden behind it) */
-@media (max-width: 768px) {
-  .itinerary-panel {
-    position: fixed;
-    inset: 0;
-    bottom: 48px; /* leave room for the mobile tab bar */
-    width: 100%;
-    left: 0;
-    top: 0;
-    border-radius: 0;
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background: var(--color-bg);
-    padding: var(--space-4);
-  }
-
-  /* Hide/show controlled by parent via data-mobile-view attribute */
-  .mobile-screen-map-active .itinerary-panel {
-    display: none;
-  }
-}
+/* Mobile overrides for .itinerary-panel inside .mobile-sheet-content are in global.css */

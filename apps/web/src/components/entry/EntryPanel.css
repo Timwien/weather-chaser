@@ -1169,18 +1169,4 @@
   justify-content: center;
 }
 
-/* =========================================================
-   Mobile — full-screen panel above map; tab bar at bottom
-   ========================================================= */
-
-@media (max-width: 768px) {
-  .entry-panel {
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 48px; /* tab bar height */
-    width: 100%;
-    border-radius: 0;
-    padding: var(--space-4);
-  }
-}
+/* Mobile overrides for .entry-panel inside .mobile-sheet-content are in global.css */

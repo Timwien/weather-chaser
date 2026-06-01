@@ -33,18 +33,24 @@ html, body, #root {
   z-index: 1;
 }
 
-/* Mobile two-screen layout: hide inactive screen */
+/* Mobile sheet content: reset panel desktop chrome so panels render correctly
+   inside the MobileBottomSheet (RESEARCH Pattern 4 + Pitfall 3).
+   ONLY scoped to .mobile-sheet-content — base desktop panel rules are untouched. */
 @media (max-width: 768px) {
-  /* When map is the active mobile screen, hide the panel overlay */
-  [data-mobile-view="map"] .screen-panel {
-    display: none;
-  }
-
-  /* When itinerary is the active mobile screen, hide the map visually
-     but keep it mounted (display:none would unmount MapLibre).
-     Use visibility:hidden + pointer-events:none to keep the map alive but invisible. */
-  [data-mobile-view="itinerary"] .screen-map {
-    visibility: hidden;
-    pointer-events: none;
+  .mobile-sheet-content .entry-panel,
+  .mobile-sheet-content .itinerary-panel,
+  .mobile-sheet-content .weather-finder-panel {
+    position: static;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    max-height: none;
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: transparent; /* sheet provides the glass surface */
+    padding: var(--space-4);
+    z-index: auto;
   }
 }

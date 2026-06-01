@@ -1,0 +1,155 @@
+/* =========================================================
+   MobileSearchBar — token-driven, mobile-only
+   Scoped to .mobile-search-* classes — desktop UNTOUCHED.
+   All layout, colors, borders use design tokens only.
+   ========================================================= */
+
+/* ── Container (fixed at top, z-index 50 above sheet at 40) ─── */
+.mobile-search-bar {
+  position: fixed;
+  top: var(--space-3);
+  left: var(--space-3);
+  right: var(--space-3);
+  z-index: 50;
+  transition: transform 200ms ease-out, opacity 200ms ease-out;
+  /* overflow: visible so DateRangePicker popover (z-index 100) is not clipped */
+  overflow: visible;
+}
+
+/* Hide-on-full: Plan 03 sets hidden prop when sheet is at full height */
+.mobile-search-bar--hidden {
+  transform: translateY(-120%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Collapsed pill ────────────────────────────────────────── */
+.mobile-search-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 48px;
+  padding: 0 var(--space-4);
+  gap: var(--space-2);
+
+  background: var(--color-surface);
+  border: var(--glass-border);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-glass);
+  color: var(--color-text);
+  cursor: pointer;
+
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.mobile-search-pill:hover {
+  background: var(--color-surface-raised);
+}
+
+.mobile-search-pill__label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text);
+}
+
+.mobile-search-pill__icon {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+}
+
+/* ── Expanded drop-down container ──────────────────────────── */
+.mobile-search-expanded {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-glass);
+  padding: var(--space-4);
+  /* overflow: visible so DateRangePicker popover (absolute, z-index 100) is not clipped */
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ── Expanded header ────────────────────────────────────────── */
+.mobile-search-expanded__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-search-expanded__title {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.mobile-search-expanded__close {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.mobile-search-expanded__close:hover {
+  background: var(--color-primary-light);
+}
+
+/* ── Mode toggle (two-segment control) ─────────────────────── */
+.mobile-search-mode-toggle {
+  display: flex;
+  background: var(--surface-frost);
+  border-radius: var(--radius-full);
+  padding: 2px;
+  gap: 2px;
+  border: 1px solid var(--color-border);
+}
+
+.mobile-search-mode-btn {
+  flex: 1;
+  height: 36px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background 150ms ease-out, color 150ms ease-out;
+}
+
+.mobile-search-mode-btn--active {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.mobile-search-mode-btn:not(.mobile-search-mode-btn--active):hover {
+  color: var(--color-text);
+  background: var(--surface-frost-soft);
+}
+
+/* ── Inputs container ────────────────────────────────────────── */
+.mobile-search-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}

@@ -90,7 +90,12 @@ Plans:
 ### Phase 3.1: Mobile Web UX (INSERTED)
 **Goal**: Map-first mobile layout with Airbnb-style compact search bar and bottom sheet panels — feels native on phone-sized viewports while keeping the desktop layout untouched
 **Depends on**: Phase 3 (or runs in parallel)
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 03.1-01-PLAN.md — Foundation: useIsMobile hook + custom 3-snap draggable MobileBottomSheet (Wave 1)
+- [ ] 03.1-02-PLAN.md — Airbnb-style MobileSearchBar (collapsed pill + inline-expanded unified form) + mobile.* i18n keys (Wave 1)
+- [ ] 03.1-03-PLAN.md — Compose map-first layout in index.tsx + sheet-aware map fitting + CSS cleanup + delete MobileTabBar + device-verification checkpoint (Wave 2)
 
 ### Phase 3.2: Premium UI Overhaul (INSERTED)
 **Goal**: Elevate the web application's user interface to a premium state-of-the-art design, featuring modern typography, glassmorphism, dynamic micro-animations, and an intelligent Dark Mode. All new UI text will use translation keys to strictly support i18n (English and German).
@@ -139,7 +144,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 3.1 → 3.2 → 4 → 5
 | 1. Core Algorithm + Route Planner Web | 10/10 | Complete | 2026-03-01 |
 | 2. Weather Finder Mode | 6/6 | Complete | 2026-03-02 |
 | 3. Backend + Auth + Production Hosting | 6/7 | In progress | - |
-| 3.1. Mobile Web UX (INSERTED) | 0/TBD | Not started | - |
+| 3.1. Mobile Web UX (INSERTED) | 0/3 | Planned | - |
 | 3.2. Premium UI Overhaul (INSERTED) | 1/1 | Complete | 2026-06-01 |
 | 4. Freemium + Monetization | 0/TBD | Not started | - |
 | 5. Native Mobile Apps | 0/TBD | Not started | - |

@@ -274,7 +274,7 @@ export function DateRangePicker() {
       </button>
 
       {open && (
-        <div ref={panelRef} className="drp-popover" role="dialog" aria-modal="true" aria-label="Date range picker">
+        <div ref={panelRef} className="drp-popover" role="dialog" aria-modal="true" aria-label={t('a11y.date_range_picker')}>
           {showHint && (
             <div className="drp-hint">{t('entry.dates_select_end')}</div>
           )}
@@ -284,7 +284,7 @@ export function DateRangePicker() {
                 type="button"
                 className="drp-nav-btn"
                 onClick={() => setViewMonth(addMonths(viewMonth, -1))}
-                aria-label="Previous month"
+                aria-label={t('a11y.prev_month')}
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <polyline points="9,2 4,7 9,12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
@@ -294,7 +294,7 @@ export function DateRangePicker() {
                 type="button"
                 className="drp-nav-btn"
                 onClick={() => setViewMonth(addMonths(viewMonth, 1))}
-                aria-label="Next month"
+                aria-label={t('a11y.next_month')}
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <polyline points="5,2 10,7 5,12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
@@ -334,7 +334,7 @@ export function DateRangePicker() {
                   setSelectingEnd(false);
                 }}
               >
-                Clear
+                {t('entry.clear_dates')}
               </button>
               <span className="drp-footer-range">
                 {formatRange(startDate, endDate, locale)} &middot; {tripConfig.totalDays} {t('route_config.days_suffix')}

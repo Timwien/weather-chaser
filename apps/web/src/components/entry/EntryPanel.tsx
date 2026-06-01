@@ -46,7 +46,7 @@ export function EntryPanel() {
     : null;
 
   return (
-    <aside className="entry-panel" aria-label="Trip configuration">
+    <aside className="entry-panel" aria-label={t('a11y.trip_config')}>
       {/* Header */}
       <div className="entry-panel-header">
         <h1 className="entry-panel-title">{t('app.title')}</h1>
@@ -126,7 +126,7 @@ export function EntryPanel() {
       {/* One-time save hint — shown once for guests after first route generation */}
       {showRouteHint && (
         <div className="entry-route-hint">
-          <span>Route speichern —</span>
+          <span>{t('entry.route_hint_text')}</span>
           <button
             type="button"
             className="entry-route-hint-cta"
@@ -135,13 +135,13 @@ export function EntryPanel() {
               setIsAccountModalOpen(true);
             }}
           >
-            Jetzt anmelden
+            {t('entry.route_hint_signin')}
           </button>
           <button
             type="button"
             className="entry-route-hint-dismiss"
             onClick={() => setShowRouteHint(false)}
-            aria-label="Schließen"
+            aria-label={t('a11y.close')}
           >
             ×
           </button>
@@ -154,8 +154,8 @@ export function EntryPanel() {
           type="button"
           className="entry-panel-account-btn"
           onClick={() => setIsAccountModalOpen(true)}
-          aria-label="Konto"
-          title="Konto"
+          aria-label={t('a11y.account')}
+          title={t('a11y.account')}
         >
           {avatarInitial ? (
             <span className="entry-panel-avatar">{avatarInitial}</span>

@@ -197,7 +197,7 @@ export function RouteConfigStep({ onGenerate, onBack }: { onGenerate: () => void
             className="stepper-btn"
             onClick={decrementMaxStay}
             disabled={tripConfig.maxStay <= 1}
-            aria-label="Decrease max stay"
+            aria-label={t('a11y.decrease_max_stay')}
           >
             –
           </button>
@@ -207,7 +207,7 @@ export function RouteConfigStep({ onGenerate, onBack }: { onGenerate: () => void
             className="stepper-btn"
             onClick={incrementMaxStay}
             disabled={tripConfig.maxStay >= tripConfig.totalDays}
-            aria-label="Increase max stay"
+            aria-label={t('a11y.increase_max_stay')}
           >
             +
           </button>

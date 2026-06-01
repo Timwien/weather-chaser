@@ -220,9 +220,9 @@ export function SavedTab({ onClose }: SavedTabProps) {
     <div className="saved-tab saved-tab--loaded">
       {/* Saved Routes */}
       <section className="saved-section">
-        <h3 className="saved-section-title">Routen</h3>
+        <h3 className="saved-section-title">{t('account.saved_routes_title')}</h3>
         {routes.length === 0 ? (
-          <p className="saved-section-empty">Noch keine Routen gespeichert</p>
+          <p className="saved-section-empty">{t('account.saved_routes_empty')}</p>
         ) : (
           <ul className="saved-list">
             {routes.map((route) => (
@@ -230,7 +230,7 @@ export function SavedTab({ onClose }: SavedTabProps) {
                 key={route.id}
                 className="saved-card saved-card--clickable"
                 onClick={() => handleLoadRoute(route)}
-                title="Route auf der Karte anzeigen"
+                title={t('a11y.show_route_on_map')}
               >
                 <div className="saved-card-icon">
                   <BookmarkIcon />
@@ -248,7 +248,7 @@ export function SavedTab({ onClose }: SavedTabProps) {
                   className="saved-card-delete"
                   onClick={(e) => { e.stopPropagation(); handleDeleteRoute(route.id); }}
                   disabled={deletingId === route.id}
-                  aria-label="Route löschen"
+                  aria-label={t('a11y.delete_route')}
                 >
                   <TrashIcon />
                 </button>
@@ -260,9 +260,9 @@ export function SavedTab({ onClose }: SavedTabProps) {
 
       {/* Saved Finder Searches */}
       <section className="saved-section">
-        <h3 className="saved-section-title">Finder-Suchen</h3>
+        <h3 className="saved-section-title">{t('account.saved_searches_title')}</h3>
         {searches.length === 0 ? (
-          <p className="saved-section-empty">Noch keine Suchen gespeichert</p>
+          <p className="saved-section-empty">{t('account.saved_searches_empty')}</p>
         ) : (
           <ul className="saved-list">
             {searches.map((search) => (
@@ -284,9 +284,9 @@ export function SavedTab({ onClose }: SavedTabProps) {
 
       {/* Favorites */}
       <section className="saved-section">
-        <h3 className="saved-section-title">Favoriten</h3>
+        <h3 className="saved-section-title">{t('account.saved_favorites_title')}</h3>
         {favorites.length === 0 ? (
-          <p className="saved-section-empty">Noch keine Favoriten gespeichert</p>
+          <p className="saved-section-empty">{t('account.saved_favorites_empty')}</p>
         ) : (
           <ul className="saved-list">
             {favorites.map((fav) => (
@@ -294,7 +294,7 @@ export function SavedTab({ onClose }: SavedTabProps) {
                 key={fav.id}
                 className="saved-card saved-card--clickable"
                 onClick={() => handleLoadFavorite(fav)}
-                title="Als Startort hinzufügen"
+                title={t('a11y.add_as_start')}
               >
                 <div className="saved-card-icon saved-card-icon--heart">
                   <HeartFilledIcon />

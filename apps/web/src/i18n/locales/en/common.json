@@ -195,6 +195,16 @@
     "inline_title": "Sign in to save \u2014 free",
     "inline_email_btn": "Email"
   },
+  "mobile": {
+    "search_placeholder": "Where, when...",
+    "mode_route": "Plan route",
+    "mode_finder": "Find weather",
+    "search_bar_close": "Close",
+    "search_bar_open": "Edit search",
+    "sheet_summary_route": "Route: {{stops}} stops · {{km}} km",
+    "sheet_summary_finder": "{{count}} places found",
+    "sheet_summary_empty": "Tap to search"
+  },
   "a11y": {
     "trip_config": "Trip configuration",
     "account": "Account",

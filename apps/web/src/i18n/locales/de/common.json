@@ -195,6 +195,16 @@
     "inline_title": "Anmelden zum Speichern \u2014 kostenlos",
     "inline_email_btn": "E-Mail"
   },
+  "mobile": {
+    "search_placeholder": "Wohin, wann...",
+    "mode_route": "Route planen",
+    "mode_finder": "Wetter finden",
+    "search_bar_close": "Schließen",
+    "search_bar_open": "Suche bearbeiten",
+    "sheet_summary_route": "Route: {{stops}} Stopps · {{km}} km",
+    "sheet_summary_finder": "{{count}} Orte gefunden",
+    "sheet_summary_empty": "Tippen um zu suchen"
+  },
   "a11y": {
     "trip_config": "Reisekonfiguration",
     "account": "Konto",

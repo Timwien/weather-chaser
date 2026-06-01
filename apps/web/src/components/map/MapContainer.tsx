@@ -27,6 +27,13 @@ interface MapContainerProps {
   onFinderClick?: (index: number) => void;
   /** When set, the map flies to this city. Increment token to re-fly to same coords. */
   flyToCity?: { lat: number; lng: number; token: number } | null;
+  /**
+   * Pixels of viewport currently covered by the bottom sheet (0 on desktop).
+   * Passed to FitRouteOnSelection and FlyToFinderRank1 so map content sits
+   * above the sheet instead of behind it. Imported from getSheetHeights() in
+   * the parent — do NOT recompute here.
+   */
+  sheetBottomPadding?: number;
 }
 
 /** Switch all symbol layers to prefer German names (name:de → name fallback) */
@@ -46,7 +53,13 @@ function switchLabelsToGerman(map: MaplibreMap) {
 }
 
 /** Fits the map to the full route bounding box when a stop is selected. */
-function FitRouteOnSelection({ selectedStopIndex }: { selectedStopIndex: number | null }) {
+function FitRouteOnSelection({
+  selectedStopIndex,
+  sheetBottomPadding,
+}: {
+  selectedStopIndex: number | null;
+  sheetBottomPadding?: number;
+}) {
   const { current: map } = useMap();
   const { route } = useAppStore();
   const prevIndexRef = useRef<number | null>(null);
@@ -59,11 +72,15 @@ function FitRouteOnSelection({ selectedStopIndex }: { selectedStopIndex: number 
     if (route.stops.length === 0) return;
     const lngs = route.stops.map((s) => s.town.lng);
     const lats = route.stops.map((s) => s.town.lat);
+    const bp = sheetBottomPadding ?? 0;
+    // Reset any accumulated padding before fitting (MapLibre issue #4095 —
+    // accumulated padding offsets add up across repeated fitBounds calls)
+    map.getMap().setPadding({ top: 0, right: 0, bottom: 0, left: 0 });
     map.getMap().fitBounds(
       [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
-      { padding: 60, maxZoom: 9, duration: 600 },
+      { padding: { top: 60, right: 60, left: 60, bottom: bp + 60 }, maxZoom: 9, duration: 600 },
     );
-  }, [map, route, selectedStopIndex]);
+  }, [map, route, selectedStopIndex, sheetBottomPadding]);
 
   return null;
 }
@@ -71,8 +88,22 @@ function FitRouteOnSelection({ selectedStopIndex }: { selectedStopIndex: number 
 /**
  * Flies the map to rank #1 whenever the top-ranked city changes.
  * Fires on first results load (null → city) and on filter changes that change rank #1.
+ * sheetBottomPadding is applied so rank-1 is centered in the VISIBLE area above the
+ * sheet, not hidden behind it. On desktop (bp = 0) this is identical to a plain flyTo.
+ *
+ * Marker-tap decoupling: StopMarkers/FinderMarkers own their internal popupIndex and
+ * show the mini card on click without touching the sheet snap. The parent (index.tsx)
+ * is responsible for wiring onStopClick/onFinderClick (map marker callbacks) WITHOUT
+ * calling setSheetSnap — sheet-snap changes are only triggered by the panel list-item
+ * handlers, keeping marker tap and sheet snap fully decoupled.
  */
-function FlyToFinderRank1({ finderResults }: { finderResults: FinderResultData[] | undefined }) {
+function FlyToFinderRank1({
+  finderResults,
+  sheetBottomPadding,
+}: {
+  finderResults: FinderResultData[] | undefined;
+  sheetBottomPadding?: number;
+}) {
   const { current: map } = useMap();
   const prevRank1IdRef = useRef<string | null>(null);
 
@@ -82,8 +113,14 @@ function FlyToFinderRank1({ finderResults }: { finderResults: FinderResultData[]
     if (rank1.townId === prevRank1IdRef.current) return;
     prevRank1IdRef.current = rank1.townId;
 
-    map.getMap().flyTo({ center: [rank1.lng, rank1.lat], zoom: 7, duration: 800 });
-  }, [map, finderResults]);
+    const bp = sheetBottomPadding ?? 0;
+    map.getMap().flyTo({
+      center: [rank1.lng, rank1.lat],
+      zoom: 7,
+      duration: 800,
+      padding: { top: 0, right: 0, left: 0, bottom: bp },
+    });
+  }, [map, finderResults, sheetBottomPadding]);
 
   return null;
 }
@@ -151,6 +188,7 @@ export function MapContainer({
   selectedFinderIndex,
   onFinderClick,
   flyToCity,
+  sheetBottomPadding,
 }: MapContainerProps) {
   const { route, mode } = useAppStore();
 
@@ -171,8 +209,8 @@ export function MapContainer({
         onLoad={handleLoad}
       >
         {/* Always-present: map-positioning helpers */}
-        <FitRouteOnSelection selectedStopIndex={selectedStopIndex} />
-        <FlyToFinderRank1 finderResults={finderResults} />
+        <FitRouteOnSelection selectedStopIndex={selectedStopIndex} sheetBottomPadding={sheetBottomPadding} />
+        <FlyToFinderRank1 finderResults={finderResults} sheetBottomPadding={sheetBottomPadding} />
         <FlyToCity target={flyToCity} />
         <PickLocationOnClick />
         {/* DrawingControls must live inside <Map> so useMap() has a provider */}

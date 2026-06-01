@@ -50,6 +50,7 @@ Progress: [█████████░] 88% (Phases 1, 2, 3.2 complete; Phase
 | Phase 03-backend-auth-production-hosting P04 | ~90 min | 3 tasks | 13 files |
 | Phase 03-backend-auth-production-hosting P06 | 4 min | 2 tasks | 3 files |
 | Phase 03.1-mobile-web-ux P01 | 3 | 2 tasks | 3 files |
+| Phase 03.1-mobile-web-ux P02 | 3 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -149,6 +150,8 @@ Recent decisions affecting current work:
 - [Phase 03.1-mobile-web-ux]: getSheetHeights() exported from MobileBottomSheet.tsx is the canonical [peekPx, halfPx, fullPx] tuple — Plan 03 must import it, never recompute
 - [Phase 03.1-mobile-web-ux]: Sheet wrapper has overflow:visible so DateRangePicker absolute popover is not clipped; border-radius on body element only
 - [Phase 03.1-mobile-web-ux]: JSX.Element return type annotation removed from MobileBottomSheet — project tsconfig has no JSX namespace; implicit return type inferred by tsc
+- [Phase 03.1-mobile-web-ux]: criterionIcons.tsx uses .tsx extension — file contains JSX, consistent with repo convention; CriteriaSelector updated to import shared CRITERION_ICONS map
+- [Phase 03.1-mobile-web-ux]: MobileSearchBar ownership boundary enforced: pill = compact selection (mode toggle + DateRangePicker + LocationInput + CriteriaSelector only); EntryPanel in sheet = launch step; no RouteConfigStep/WeatherFinderStep/useOptimizer in MobileSearchBar
 
 ### Pending Todos
 

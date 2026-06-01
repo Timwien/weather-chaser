@@ -51,6 +51,11 @@
   --glass-border: 1px solid rgba(255, 255, 255, 0.55);
   --glass-blur:   blur(20px) saturate(1.5) brightness(1.01);
 
+  /* ── Translucent control/surface fills (frosted inputs, chips, bars) ─── */
+  --surface-frost:        rgba(255, 255, 255, 0.7);
+  --surface-frost-soft:   rgba(255, 255, 255, 0.4);
+  --surface-frost-strong: rgba(255, 255, 255, 0.95);
+
   /* ── Weather score gradient (data vis — stays vivid) ──── */
   --score-poor:   hsl(0,   80%, 50%);   /* Red   */
   --score-fair:   hsl(45,  90%, 55%);   /* Amber */
@@ -134,6 +139,11 @@
   --glass-bg:     rgba(20, 32, 31, 0.72);
   --glass-border: 1px solid rgba(34, 195, 214, 0.18);
   --glass-blur:   blur(20px) saturate(1.4) brightness(0.9);
+
+  /* Frosted fills for dark: subtle light frost / near-opaque dark surface */
+  --surface-frost:        rgba(255, 255, 255, 0.06);
+  --surface-frost-soft:   rgba(255, 255, 255, 0.04);
+  --surface-frost-strong: rgba(28, 42, 41, 0.92);
 
   /* Shadows: darker, no teal tint on black bg */
   --shadow-sm:    0 1px 3px rgba(0,0,0,0.40);

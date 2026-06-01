@@ -85,7 +85,7 @@
 }
 
 .inline-sign-in-btn--google {
-  background: #ffffff;
+  background: var(--color-surface);
   color: var(--color-text);
 }
 
@@ -140,7 +140,7 @@
   font-size: var(--font-size-sm);
   font-family: var(--font-sans);
   color: var(--color-text);
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--surface-frost);
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -152,7 +152,7 @@
 }
 
 .inline-sign-in-input:disabled {
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--surface-frost-soft);
   cursor: not-allowed;
 }
 

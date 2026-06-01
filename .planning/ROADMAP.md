@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Weather Finder Mode** - Second product mode: ranked best-weather locations for a given date range with map visualization and time-of-day scoring
 - [ ] **Phase 3: Backend + Auth + Production Hosting** - API server with weather/Overpass/OSRM proxies and caching, user accounts (email + OAuth), saved routes, favorites, preferences, and public web hosting
 - [ ] **Phase 3.1: Mobile Web UX (INSERTED)** - Map-first mobile layout with Airbnb-style compact search bar and bottom sheet panels
-- [ ] **Phase 3.2: Premium UI Overhaul (INSERTED)** - Modernize the UI aesthetic using clean typography, glassmorphism, micro-animations, dark mode, and full i18n support
+- [x] **Phase 3.2: Premium UI Overhaul (INSERTED)** - Modernize the UI aesthetic using clean typography, glassmorphism, micro-animations, dark mode, and full i18n support (completed 2026-06-01)
 - [ ] **Phase 4: Freemium + Monetization** - Stripe subscription, premium feature enforcement server-side, custom weight sliders, and clear free vs. premium UX
 - [ ] **Phase 5: Native Mobile Apps** - iOS and Android apps at feature parity with web, distributed via Expo EAS through App Store and Play Store
 
@@ -101,7 +101,12 @@ Plans:
   2. The application uses a premium, modern font (e.g., Inter or Outfit) and implements glassmorphism and subtle gradient styling across panels and interactive elements.
   3. Interactive elements (buttons, inputs, tabs) respond fluidly with micro-animations on hover and focus.
   4. The user can toggle a Dark Mode that beautifully recalculates variables to deep, neon-accented colors.
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [x] 03.2-01-PLAN.md — Auto dark mode (theme store, dark tokens, no-flash, settings toggle) + i18n enforcement of remaining hardcoded strings
+
+_Note: typography, glassmorphism, and micro-animations (criteria 2 & 3) were delivered ad-hoc in earlier UI commits before this phase was formally planned; plan 03.2-01 built only the two genuinely-missing parts (dark mode + i18n)._
 
 ### Phase 4: Freemium + Monetization
 **Goal**: The freemium tier split is enforced server-side with a working Stripe subscription flow, premium features are gated behind a paywall, and users can upgrade from within the app
@@ -135,6 +140,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 3.1 → 3.2 → 4 → 5
 | 2. Weather Finder Mode | 6/6 | Complete | 2026-03-02 |
 | 3. Backend + Auth + Production Hosting | 6/7 | In progress | - |
 | 3.1. Mobile Web UX (INSERTED) | 0/TBD | Not started | - |
-| 3.2. Premium UI Overhaul (INSERTED) | 0/TBD | Not started | - |
+| 3.2. Premium UI Overhaul (INSERTED) | 1/1 | Complete | 2026-06-01 |
 | 4. Freemium + Monetization | 0/TBD | Not started | - |
 | 5. Native Mobile Apps | 0/TBD | Not started | - |

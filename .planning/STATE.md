@@ -9,11 +9,11 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 
 ## Current Position
 
-Phase: 3 of 5 — **IN PROGRESS**
-Current plan: 03-06 complete; 6/7 plans done
-Last activity: 2026-03-06 — Phase 3 Plan 06 complete (GDPR deletion endpoint, one-time guest save hint)
+Phase: 3.2 complete (executed out of sequence) — Phase 3 and 3.1 still open
+Current plan: 03.2-01 complete (dark mode + i18n). Phase 3 still has 03-07 (production deploy, needs user setup); Phase 3.1 (mobile web UX) not started.
+Last activity: 2026-06-01 — Phase 3.2 Plan 01 complete (auto dark mode + i18n enforcement)
 
-Progress: [█████████░] 80% (Phase 1 complete; Phase 2 complete; Phase 3 in progress — 6/7 plans done)
+Progress: [█████████░] 88% (Phases 1, 2, 3.2 complete; Phase 3 at 6/7; Phase 3.1 not started)
 
 ## Performance Metrics
 
@@ -139,6 +139,12 @@ Recent decisions affecting current work:
 - [Phase 03-06]: Two-step deletion: anon client validates token (getUser), admin client deletes user (auth.admin.deleteUser) — prevents arbitrary user deletion attacks
 - [Phase 03-06]: SUPABASE_SERVICE_ROLE_KEY without VITE_ prefix — process.env in serverless api/ functions only; verified never in apps/web/src/
 - [Phase 03-06]: localStorage key wc_first_route_hint_shown persists one-time guest hint permanently; useEffect deps [route, user] fire exactly once when guest first generates a route
+- [Phase 03.2]: Plan re-scoped before execution — typography/glassmorphism/micro-animations already existed ad-hoc; plan built only the two missing parts (auto dark mode + i18n enforcement)
+- [Phase 03.2]: Dark mode = [data-theme] attr on <html> + single [data-theme=dark] token override block in tokens.css; all token-driven components adapt automatically (no per-component dark styles)
+- [Phase 03.2]: Theme source of truth = localStorage key wc-theme (plain zustand store, not persist middleware); pre-paint inline script in index.html reads it before first paint to prevent flash; initTheme() matchMedia listener re-applies only while mode==='system'
+- [Phase 03.2]: Theme DB-sync deferred — no user-preferences table exists; localStorage-only persistence
+- [Phase 03.2]: i18n gap was larger than the attribute-only audit suggested — SavedTab had 6 hardcoded German strings + DateRangePicker 'Clear'; all moved to keys. Brand names (Google/Apple) and language self-names (Deutsch/English) intentionally left untranslated. EN/DE parity: 170/170 keys
+- [Phase 03.2]: First executor run crashed (API ConnectionRefused) after Task 1 code but before commit; recovered by verifying Task 1, completing Task 2, committing both atomically
 
 ### Pending Todos
 

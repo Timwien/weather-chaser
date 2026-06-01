@@ -1,0 +1,117 @@
+/* =========================================================
+   MobileBottomSheet — mobile-only draggable bottom sheet
+   All colours via design tokens. Only safe exception: scrim rgba(0,0,0,x).
+   ========================================================= */
+
+/* ── Scrim (sibling, below sheet body) ─────────────────── */
+.mbs-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  background: rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease-out;
+}
+
+.mbs-scrim--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Sheet outer wrapper (fixed, full screen height) ──── */
+.mbs-wrapper {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* 100dvh so the sheet body fills the visual viewport on mobile */
+  height: 100dvh;
+  /* Fallback for browsers without dvh support (iOS Safari < 15.4) */
+  height: calc(100vh - env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  /* overflow: visible so DateRangePicker's absolute-positioned popover is not clipped */
+  overflow: visible;
+  /* transition toggled via data-dragging attribute below */
+  transition: transform 200ms ease-out;
+  pointer-events: none; /* pass clicks through the transparent top area */
+}
+
+/* Remove transition during active drag for 60fps feel */
+.mbs-wrapper[data-dragging="true"] {
+  transition: none;
+}
+
+/* ── Sheet body (glass card) ───────────────────────────── */
+.mbs-body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Height fills the sheet wrapper — translateY is applied to wrapper */
+  height: 100%;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-top: var(--glass-border);
+  box-shadow: var(--shadow-glass);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto; /* re-enable within the body */
+  overflow: visible; /* see wrapper comment above */
+}
+
+/* ── Handle area (drag zone, top of body) ─────────────── */
+.mbs-handle-area {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+  cursor: grab;
+  touch-action: none; /* disable browser pan during drag */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mbs-handle-area:active {
+  cursor: grabbing;
+}
+
+/* The grab pill */
+.mbs-handle-pill {
+  width: 36px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-2);
+  pointer-events: none; /* events handled by the parent area */
+}
+
+/* ── Peek summary strip ────────────────────────────────── */
+.mbs-summary {
+  flex-shrink: 0;
+  width: 100%;
+  padding: 0 var(--space-4) var(--space-2);
+}
+
+/* ── Scrollable content area ───────────────────────────── */
+.mbs-content {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Reserve bottom safe area so content is not hidden behind home indicator */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── Landscape guard ───────────────────────────────────── */
+/* On very short landscape viewports the half-detent (~50dvh) would be tiny;
+   cap the wrapper height to 70% so the peek/handle remain accessible. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .mbs-wrapper {
+    height: 70dvh;
+    height: 70vh; /* dvh fallback-safe; order matters — dvh wins if supported */
+  }
+}

@@ -27,7 +27,10 @@
     "draw_area": "Draw area",
     "draw_hint": "Click to set points · click first point to finish",
     "cancel_draw": "Cancel",
-    "clear_area": "Clear area"
+    "clear_area": "Clear area",
+    "route_hint_text": "Save this route —",
+    "route_hint_signin": "Sign in now",
+    "clear_dates": "Clear"
   },
   "route_config": {
     "start_location": "Start location",
@@ -166,6 +169,12 @@
     "saved_empty_heading": "Nothing saved yet",
     "saved_empty_text": "Save routes and favorites to see them here.",
     "saved_not_logged_in": "Please sign in to see your saved items.",
+    "saved_routes_title": "Routes",
+    "saved_routes_empty": "No routes saved yet",
+    "saved_searches_title": "Finder searches",
+    "saved_searches_empty": "No searches saved yet",
+    "saved_favorites_title": "Favorites",
+    "saved_favorites_empty": "No favorites saved yet",
     "settings_privacy_title": "Privacy",
     "settings_privacy_link": "Privacy Policy",
     "settings_tos_link": "Terms of Service",
@@ -178,7 +187,24 @@
     "settings_delete_error": "Error {{status}}: Account could not be deleted.",
     "settings_guest_note": "Sign in to manage settings.",
     "settings_language_title": "Language",
+    "settings_theme_title": "Appearance",
+    "settings_theme_system": "System",
+    "settings_theme_light": "Light",
+    "settings_theme_dark": "Dark",
     "inline_title": "Sign in to save \u2014 free",
     "inline_email_btn": "Email"
+  },
+  "a11y": {
+    "trip_config": "Trip configuration",
+    "account": "Account",
+    "date_range_picker": "Date range picker",
+    "prev_month": "Previous month",
+    "next_month": "Next month",
+    "decrease_max_stay": "Decrease max stay",
+    "increase_max_stay": "Increase max stay",
+    "show_route_on_map": "Show route on map",
+    "delete_route": "Delete route",
+    "add_as_start": "Add as start location",
+    "close": "Close"
   }
 }

@@ -4,11 +4,13 @@ import './i18n/index.ts';
 import './styles/global.css';
 import { App } from './app.tsx';
 import { useAuthStore } from './stores/authStore.ts';
+import { initTheme } from './stores/themeStore.ts';
 
 function Root() {
   useEffect(() => {
-    const unsubscribe = useAuthStore.getState().initialize();
-    return unsubscribe;
+    const unsubAuth = useAuthStore.getState().initialize();
+    const cleanupTheme = initTheme();
+    return () => { unsubAuth(); cleanupTheme(); };
   }, []);
 
   return <App />;

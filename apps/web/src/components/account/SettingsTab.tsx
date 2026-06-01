@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.ts';
+import { useThemeStore } from '../../stores/themeStore.ts';
 
 interface SettingsTabProps {
   onClose: () => void;
@@ -9,6 +10,7 @@ interface SettingsTabProps {
 export function SettingsTab({ onClose }: SettingsTabProps) {
   const { t, i18n } = useTranslation();
   const { user, session, signOut } = useAuthStore();
+  const { mode, setMode: setThemeMode } = useThemeStore();
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -67,6 +69,25 @@ export function SettingsTab({ onClose }: SettingsTabProps) {
           >
             English
           </button>
+        </div>
+      </section>
+
+      <div className="settings-tab-divider" />
+
+      {/* Theme switcher */}
+      <section className="settings-tab-section">
+        <h3 className="settings-tab-section-title">{t('account.settings_theme_title')}</h3>
+        <div className="settings-tab-lang-row">
+          {(['system', 'light', 'dark'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              className={`settings-tab-lang-btn${mode === m ? ' settings-tab-lang-btn--active' : ''}`}
+              onClick={() => setThemeMode(m)}
+            >
+              {t(`account.settings_theme_${m}`)}
+            </button>
+          ))}
         </div>
       </section>
 

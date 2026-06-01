@@ -1,19 +1,32 @@
 import { create } from 'zustand';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
+
+// NOTE: keep STORAGE_KEY, the 'system' default, and the resolve rule in sync with
+// the pre-paint anti-FOUC script in apps/web/index.html (intentional duplication —
+// that script must run before this module loads, so it can't import from here).
 const STORAGE_KEY = 'wc-theme';
 
-function readStoredMode(): ThemeMode {
-  const v = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-  return v === 'light' || v === 'dark' || v === 'system' ? v : 'system';
+function prefersDark(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
 }
 
-function systemPrefersDark(): boolean {
-  return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+function readStoredMode(): ThemeMode {
+  try {
+    const v = localStorage.getItem(STORAGE_KEY);
+    if (v === 'light' || v === 'dark' || v === 'system') return v;
+  } catch {
+    /* localStorage unavailable (private mode, disabled) — fall through */
+  }
+  return 'system';
 }
 
 function resolve(mode: ThemeMode): 'light' | 'dark' {
-  return mode === 'system' ? (systemPrefersDark() ? 'dark' : 'light') : mode;
+  return mode === 'system' ? (prefersDark() ? 'dark' : 'light') : mode;
 }
 
 function applyTheme(mode: ThemeMode): void {
@@ -22,30 +35,48 @@ function applyTheme(mode: ThemeMode): void {
 
 interface ThemeState {
   mode: ThemeMode;
-  resolved: 'light' | 'dark';
   setMode: (mode: ThemeMode) => void;
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({
   mode: readStoredMode(),
-  resolved: resolve(readStoredMode()),
   setMode: (mode) => {
-    localStorage.setItem(STORAGE_KEY, mode);
+    try {
+      localStorage.setItem(STORAGE_KEY, mode);
+    } catch {
+      /* persistence best-effort — still apply for this session */
+    }
     applyTheme(mode);
-    set({ mode, resolved: resolve(mode) });
+    set({ mode });
   },
 }));
 
-/** Apply current theme and keep it in sync with the OS while in 'system' mode. Returns cleanup. */
+/**
+ * Apply the current theme and keep it in sync with the OS (while in 'system')
+ * and across tabs (via the storage event). Returns a cleanup function.
+ */
 export function initTheme(): () => void {
   applyTheme(useThemeStore.getState().mode);
-  const mq = window.matchMedia('(prefers-color-scheme: dark)');
-  const onChange = () => {
-    if (useThemeStore.getState().mode === 'system') {
-      applyTheme('system');
-      useThemeStore.setState({ resolved: resolve('system') });
-    }
+
+  const mq =
+    typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      ? window.matchMedia('(prefers-color-scheme: dark)')
+      : null;
+  const onOSChange = () => {
+    if (useThemeStore.getState().mode === 'system') applyTheme('system');
   };
-  mq.addEventListener('change', onChange);
-  return () => mq.removeEventListener('change', onChange);
+  mq?.addEventListener('change', onOSChange);
+
+  const onStorage = (e: StorageEvent) => {
+    if (e.key && e.key !== STORAGE_KEY) return;
+    const next = readStoredMode();
+    useThemeStore.setState({ mode: next });
+    applyTheme(next);
+  };
+  if (typeof window !== 'undefined') window.addEventListener('storage', onStorage);
+
+  return () => {
+    mq?.removeEventListener('change', onOSChange);
+    if (typeof window !== 'undefined') window.removeEventListener('storage', onStorage);
+  };
 }

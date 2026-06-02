@@ -51,8 +51,11 @@ function IndexPage() {
     }
   }, [showResults, showFinderPanel, isMobile]);
 
-  // Snap heights from Plan 01's canonical helper — single source of truth
-  const sheetPx = getSheetHeights()[sheetSnap];
+  // Snap heights from Plan 01's canonical helper — single source of truth.
+  // The sheet now renders ONLY when there are results; in entry mode it is unmounted,
+  // so the map must not be padded for a non-existent sheet → 0 padding in entry mode.
+  const sheetExists = showResults || showFinderPanel;
+  const sheetPx = sheetExists ? getSheetHeights()[sheetSnap] : 0;
 
   // ── Panel callbacks (list-item tap → FULL snap on mobile) ──────────────────
 
@@ -122,30 +125,40 @@ function IndexPage() {
           isExpanded={searchExpanded}
           onExpandedChange={setSearchExpanded}
           hidden={sheetSnap === 2}
-        />
-        <MobileBottomSheet
-          snapIndex={sheetSnap}
-          onSnapChange={setSheetSnap}
-          summary={<PeekSummary />}
         >
-          <div className="mobile-sheet-content">
-            {showEntryPanel && <EntryPanel />}
-            {showResults && (
-              <ItineraryPanel
-                selectedStopIndex={selectedStopIndex}
-                onStopSelect={handleStopSelectFromPanel}
-              />
-            )}
-            {showFinderPanel && (
-              <WeatherFinderPanel
-                selectedFinderIndex={selectedFinderIndex}
-                onResultSelect={handleFinderSelectFromPanel}
-                onBack={() => reset()}
-                onResultsComputed={setComputedFinderResults}
-              />
-            )}
-          </div>
-        </MobileBottomSheet>
+          {/* The expanded search pill is now the SINGLE, complete search surface:
+              EntryPanel owns the mode CTAs, RouteConfigStep/WeatherFinderStep and the
+              hoisted useOptimizer launch. There is exactly ONE EntryPanel on mobile (here),
+              and ZERO EntryPanel in the bottom sheet. */}
+          {showEntryPanel && <EntryPanel />}
+        </MobileSearchBar>
+        {/* Bottom sheet appears ONLY when there are RESULTS (route or finder).
+            In entry/idle/route-config/weather-finder-input states the sheet is not rendered;
+            the user interacts with the map + the search pill only. */}
+        {(showResults || showFinderPanel) && (
+          <MobileBottomSheet
+            snapIndex={sheetSnap}
+            onSnapChange={setSheetSnap}
+            summary={<PeekSummary />}
+          >
+            <div className="mobile-sheet-content">
+              {showResults && (
+                <ItineraryPanel
+                  selectedStopIndex={selectedStopIndex}
+                  onStopSelect={handleStopSelectFromPanel}
+                />
+              )}
+              {showFinderPanel && (
+                <WeatherFinderPanel
+                  selectedFinderIndex={selectedFinderIndex}
+                  onResultSelect={handleFinderSelectFromPanel}
+                  onBack={() => reset()}
+                  onResultsComputed={setComputedFinderResults}
+                />
+              )}
+            </div>
+          </MobileBottomSheet>
+        )}
         <LoadingOverlay />
       </div>
     );

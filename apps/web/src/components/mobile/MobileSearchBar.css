@@ -112,44 +112,43 @@
   background: var(--color-primary-light);
 }
 
-/* ── Mode toggle (two-segment control) ─────────────────────── */
-.mobile-search-mode-toggle {
-  display: flex;
-  background: var(--surface-frost);
-  border-radius: var(--radius-full);
-  padding: 2px;
-  gap: 2px;
-  border: 1px solid var(--color-border);
+/* ── Expanded body: hosts the full EntryPanel ──────────────────
+   The expanded pill is now the single search surface; it renders the real
+   <EntryPanel/>. This inner element scrolls (long forms / calendar), while the
+   outer .mobile-search-expanded keeps overflow: visible so the DateRangePicker
+   popover (absolute, z-index 100) is never clipped. */
+.mobile-search-body {
+  /* Cap height so long forms scroll internally instead of pushing the bar
+     past the viewport; leave room for the header + top inset + a margin. */
+  max-height: calc(100dvh - var(--space-3) * 2 - 96px);
+  max-height: calc(100vh - var(--space-3) * 2 - 96px); /* dvh fallback */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* overflow-x visible so the popover can extend horizontally if needed */
+  overflow-x: visible;
 }
 
-.mobile-search-mode-btn {
-  flex: 1;
-  height: 36px;
-  border: none;
-  border-radius: var(--radius-full);
-  background: transparent;
-  color: var(--color-text-muted);
-  font-family: var(--font-sans);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: background 150ms ease-out, color 150ms ease-out;
-}
-
-.mobile-search-mode-btn--active {
-  background: var(--color-primary);
-  color: #fff;
-  box-shadow: var(--shadow-sm);
-}
-
-.mobile-search-mode-btn:not(.mobile-search-mode-btn--active):hover {
-  color: var(--color-text);
-  background: var(--surface-frost-soft);
-}
-
-/* ── Inputs container ────────────────────────────────────────── */
-.mobile-search-inputs {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+/* ── EntryPanel override inside the expanded search bar ────────
+   The desktop .entry-panel is position: fixed, full-height, with its own glass
+   chrome. Inside the expanded pill it must be a static, full-width block (the pill
+   provides the glass surface), with no fixed positioning and no duplicate frame.
+   This mirrors the .mobile-sheet-content .entry-panel reset in global.css, scoped
+   here because the EntryPanel now lives in the search bar, not the sheet. */
+.mobile-search-body .entry-panel {
+  position: static;
+  inset: auto;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: transparent; /* expanded pill provides the glass surface */
+  padding: 0;
+  /* overflow visible so nested popovers are not clipped; scrolling is on the
+     .mobile-search-body wrapper above. */
+  overflow: visible;
+  z-index: auto;
+  gap: var(--space-4);
 }

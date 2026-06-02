@@ -1,27 +1,34 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
 import { CRITERION_ICONS } from '../entry/criterionIcons.tsx';
-import { DateRangePicker } from '../entry/DateRangePicker.tsx';
-import { LocationInput } from '../entry/LocationInput.tsx';
-import { CriteriaSelector } from '../entry/CriteriaSelector.tsx';
 import './MobileSearchBar.css';
 
 interface MobileSearchBarProps {
   isExpanded: boolean;
   onExpandedChange: (expanded: boolean) => void;
   hidden?: boolean; // Plan 03 sets true when sheet is at full → bar animates out
+  /**
+   * Expanded-state content. index.tsx passes the real <EntryPanel/>, which owns the
+   * full entry+launch flow (mode CTAs, RouteConfigStep/WeatherFinderStep, and the hoisted
+   * useOptimizer launch). This makes the search launchable from the top and is the SINGLE
+   * search surface on mobile — there is no duplicate EntryPanel in the bottom sheet.
+   */
+  children?: ReactNode;
 }
 
 /**
- * Collapsed pill (compact selection) + inline-expanded selection form.
+ * Collapsed pill (compact selection summary) + inline-expanded search surface.
  *
- * OWNERSHIP BOUNDARY: This component owns ONLY the mode toggle + the three shared inputs
- * (DateRangePicker, LocationInput, CriteriaSelector). It does NOT render RouteConfigStep,
- * WeatherFinderStep, or call useOptimizer. The launch step stays in EntryPanel.
+ * OWNERSHIP BOUNDARY: This component owns ONLY the collapsed pill summary
+ * (location + dates + criterion icon) and the expanded container chrome
+ * (header + close). The actual search inputs and launch flow live in the
+ * EntryPanel passed as `children` — the pill no longer renders its own
+ * mode-toggle / inputs form, which removes the duplicate-menu problem.
  */
-export function MobileSearchBar({ isExpanded, onExpandedChange, hidden = false }: MobileSearchBarProps) {
+export function MobileSearchBar({ isExpanded, onExpandedChange, hidden = false, children }: MobileSearchBarProps) {
   const { t, i18n } = useTranslation('common');
-  const { searchAreas, tripConfig, mode, setMode } = useAppStore();
+  const { searchAreas, tripConfig } = useAppStore();
 
   // ── Derive collapsed pill label from store state ─────────────────────────────
   const locationName = searchAreas[0]?.type === 'place'
@@ -57,14 +64,6 @@ export function MobileSearchBar({ isExpanded, onExpandedChange, hidden = false }
 
   const pillLabel = buildPillLabel();
 
-  // ── Determine mode segment: route or finder ───────────────────────────────────
-  const activeSegment: 'route' | 'finder' =
-    mode === 'weather-finder' ? 'finder' : 'route';
-
-  function handleSegmentClick(segment: 'route' | 'finder') {
-    setMode(segment === 'finder' ? 'weather-finder' : 'route-config');
-  }
-
   return (
     <div
       className={[
@@ -92,7 +91,7 @@ export function MobileSearchBar({ isExpanded, onExpandedChange, hidden = false }
         </button>
       )}
 
-      {/* ── Expanded selection form ───────────────────────────────────────────── */}
+      {/* ── Expanded search surface ───────────────────────────────────────────── */}
       {isExpanded && (
         <div className="mobile-search-expanded">
           {/* Header row: title + close */}
@@ -110,40 +109,9 @@ export function MobileSearchBar({ isExpanded, onExpandedChange, hidden = false }
             </button>
           </div>
 
-          {/* Mode toggle: two-segment control */}
-          <div className="mobile-search-mode-toggle" role="group">
-            <button
-              type="button"
-              className={[
-                'mobile-search-mode-btn',
-                activeSegment === 'route' ? 'mobile-search-mode-btn--active' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              onClick={() => handleSegmentClick('route')}
-            >
-              {t('mobile.mode_route')}
-            </button>
-            <button
-              type="button"
-              className={[
-                'mobile-search-mode-btn',
-                activeSegment === 'finder' ? 'mobile-search-mode-btn--active' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              onClick={() => handleSegmentClick('finder')}
-            >
-              {t('mobile.mode_finder')}
-            </button>
-          </div>
-
-          {/* Three shared store-driven inputs — unchanged, no launch step */}
-          <div className="mobile-search-inputs">
-            <DateRangePicker />
-            <LocationInput />
-            <CriteriaSelector />
-          </div>
+          {/* Full entry + launch flow (EntryPanel), scrolls internally.
+              This is the SINGLE search surface on mobile. */}
+          <div className="mobile-search-body">{children}</div>
         </div>
       )}
     </div>

@@ -83,10 +83,10 @@ export function ShareBar() {
   }
 
   const saveLabel = saveState === 'saved'
-    ? 'Gespeichert ✓'
+    ? t('save.saved')
     : saveState === 'saving'
-    ? 'Speichern...'
-    : 'Speichern';
+    ? t('save.saving')
+    : t('save.short');
 
   return (
     <div className="share-bar">
@@ -120,7 +120,7 @@ export function ShareBar() {
             onClick={handleSaveClick}
             disabled={saveState === 'saving' || saveState === 'saved'}
             className={`share-btn share-btn-save${!user ? ' share-btn-save--guest' : ''}${saveState === 'saved' ? ' share-btn-save--saved' : ''}`}
-            title={!user ? 'Anmelden zum Speichern' : undefined}
+            title={!user ? t('save.sign_in') : undefined}
           >
             <SaveCloudIcon />
             {saveLabel}

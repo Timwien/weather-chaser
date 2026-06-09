@@ -83,6 +83,14 @@
     "link_copied": "Link kopiert",
     "google_limit": "Google Maps unterstützt bis zu 9 Stopps"
   },
+  "save": {
+    "route": "Route speichern",
+    "short": "Speichern",
+    "saving": "Speichern…",
+    "saved": "Gespeichert ✓",
+    "sign_in": "Anmelden zum Speichern",
+    "error_generic": "Fehler beim Speichern"
+  },
   "loading": {
     "finding_towns": "Orte werden gesucht...",
     "fetching_weather": "Wetterdaten werden geladen...",

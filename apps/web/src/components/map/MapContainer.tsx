@@ -52,7 +52,7 @@ function switchLabelsToGerman(map: MaplibreMap) {
   }
 }
 
-/** Fits the map to the full route bounding box when a stop is selected. */
+/** Fits the map to the full route bounding box when a new route loads or a stop is selected. */
 function FitRouteOnSelection({
   selectedStopIndex,
   sheetBottomPadding,
@@ -63,16 +63,23 @@ function FitRouteOnSelection({
   const { current: map } = useMap();
   const { route } = useAppStore();
   const prevIndexRef = useRef<number | null>(null);
+  const prevRouteRef = useRef<typeof route>(null);
+  const prevBpRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!map || !route || selectedStopIndex === null) return;
-    if (prevIndexRef.current === selectedStopIndex) return;
+    if (!map || !route || route.stops.length === 0) return;
+    const bp = sheetBottomPadding ?? 0;
+    const isNewRoute = prevRouteRef.current !== route;
+    const isNewSelection = selectedStopIndex !== null && prevIndexRef.current !== selectedStopIndex;
+    // Sheet snap changed (peek↔half↔full) — refit so the route stays in the visible area
+    const isNewPadding = prevBpRef.current !== null && prevBpRef.current !== bp;
+    if (!isNewRoute && !isNewSelection && !isNewPadding) return;
+    prevRouteRef.current = route;
     prevIndexRef.current = selectedStopIndex;
+    prevBpRef.current = bp;
 
-    if (route.stops.length === 0) return;
     const lngs = route.stops.map((s) => s.town.lng);
     const lats = route.stops.map((s) => s.town.lat);
-    const bp = sheetBottomPadding ?? 0;
     // Reset any accumulated padding before fitting (MapLibre issue #4095 —
     // accumulated padding offsets add up across repeated fitBounds calls)
     map.getMap().setPadding({ top: 0, right: 0, bottom: 0, left: 0 });

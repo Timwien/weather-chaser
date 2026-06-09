@@ -83,6 +83,14 @@
     "link_copied": "Link copied",
     "google_limit": "Google Maps supports up to 9 stops"
   },
+  "save": {
+    "route": "Save route",
+    "short": "Save",
+    "saving": "Saving…",
+    "saved": "Saved ✓",
+    "sign_in": "Sign in to save",
+    "error_generic": "Saving failed"
+  },
   "loading": {
     "finding_towns": "Finding towns...",
     "fetching_weather": "Fetching weather...",

@@ -44,10 +44,12 @@ function IndexPage() {
   const showEntryPanel  = !showResults && !showFinderPanel;
 
   // Pinned auto-snap: when search results arrive → auto-rise to HALF (1)
+  // and collapse the expanded search surface so results are not hidden behind it
   useEffect(() => {
     if (!isMobile) return;
     if (showResults || showFinderPanel) {
       setSheetSnap(1);
+      setSearchExpanded(false);
     }
   }, [showResults, showFinderPanel, isMobile]);
 
@@ -121,10 +123,13 @@ function IndexPage() {
           flyToCity={flyToCity}
           sheetBottomPadding={sheetPx}
         />
+        {/* Pill hidden while results are showing — the sheet's Back button returns to search.
+            Without this, tapping the pill in results mode expands an empty surface
+            (EntryPanel only renders when showEntryPanel). */}
         <MobileSearchBar
           isExpanded={searchExpanded}
           onExpandedChange={setSearchExpanded}
-          hidden={sheetSnap === 2}
+          hidden={sheetSnap === 2 || sheetExists}
         >
           {/* The expanded search pill is now the SINGLE, complete search surface:
               EntryPanel owns the mode CTAs, RouteConfigStep/WeatherFinderStep and the

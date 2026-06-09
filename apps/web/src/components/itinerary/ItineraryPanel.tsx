@@ -68,7 +68,7 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPan
       setTimeout(() => setSaveState('idle'), 2000);
     } catch (err) {
       setSaveState('error');
-      setSaveError(err instanceof Error ? err.message : 'Fehler beim Speichern');
+      setSaveError(err instanceof Error ? err.message : t('save.error_generic'));
       setTimeout(() => setSaveState('idle'), 3000);
     }
   }
@@ -101,10 +101,10 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPan
   let cumulativeDay = 1;
 
   const saveLabel = saveState === 'saved'
-    ? 'Gespeichert ✓'
+    ? t('save.saved')
     : saveState === 'saving'
-    ? 'Speichern...'
-    : 'Route speichern';
+    ? t('save.saving')
+    : t('save.route');
 
   return (
     <div className="itinerary-panel">
@@ -125,7 +125,7 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPan
             className={`itinerary-save-btn${!user ? ' itinerary-save-btn--guest' : ''}${saveState === 'saved' ? ' itinerary-save-btn--saved' : ''}`}
             onClick={handleSaveClick}
             disabled={saveState === 'saving' || saveState === 'saved'}
-            title={!user ? 'Anmelden zum Speichern' : undefined}
+            title={!user ? t('save.sign_in') : undefined}
           >
             <SaveIcon />
             {saveLabel}

@@ -9,11 +9,11 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 
 ## Current Position
 
-Phase: 3.2 complete (executed out of sequence) — Phase 3 and 3.1 still open
-Current plan: 03.2-01 complete (dark mode + i18n). Phase 3 still has 03-07 (production deploy, needs user setup); Phase 3.1 (mobile web UX) not started.
-Last activity: 2026-06-01 — Phase 3.2 Plan 01 complete (auto dark mode + i18n enforcement)
+Phase: 3.1 complete (2026-06-09) — Phase 3 open only at 03-07 (production deploy, needs user accounts)
+Current plan: 03.1-03 complete (map-first mobile composition, verified headlessly). Phase 3 still has 03-07 (Vercel deploy — blocked on user's Vercel/Supabase/OAuth setup).
+Last activity: 2026-06-09 — Phase 3.1 Plan 03 complete + post-checkpoint fixes (search auto-collapse, fit-on-route-load, save.* i18n keys, favicon)
 
-Progress: [█████████░] 88% (Phases 1, 2, 3.2 complete; Phase 3 at 6/7; Phase 3.1 not started)
+Progress: [█████████░] 92% (Phases 1, 2, 3.1, 3.2 complete; Phase 3 at 6/7)
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [█████████░] 88% (Phases 1, 2, 3.2 complete; Phase
 | Phase 03-backend-auth-production-hosting P06 | 4 min | 2 tasks | 3 files |
 | Phase 03.1-mobile-web-ux P01 | 3 | 2 tasks | 3 files |
 | Phase 03.1-mobile-web-ux P02 | 3 | 3 tasks | 6 files |
+| Phase 03.1-mobile-web-ux P03 | ~60 | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -152,6 +153,9 @@ Recent decisions affecting current work:
 - [Phase 03.1-mobile-web-ux]: JSX.Element return type annotation removed from MobileBottomSheet — project tsconfig has no JSX namespace; implicit return type inferred by tsc
 - [Phase 03.1-mobile-web-ux]: criterionIcons.tsx uses .tsx extension — file contains JSX, consistent with repo convention; CriteriaSelector updated to import shared CRITERION_ICONS map
 - [Phase 03.1-mobile-web-ux]: MobileSearchBar ownership boundary enforced: pill = compact selection (mode toggle + DateRangePicker + LocationInput + CriteriaSelector only); EntryPanel in sheet = launch step; no RouteConfigStep/WeatherFinderStep/useOptimizer in MobileSearchBar
+- [03.1-03 DEVIATION]: EntryPanel moved INTO the expanded search pill (single search surface); bottom sheet is results-only — supersedes the "EntryPanel in sheet" boundary above (commits 37e1b99, d15ea59)
+- [03.1-03]: Search surface auto-collapses + pill hides when results arrive; map fits route on load AND on sheet snap changes (prevRouteRef/prevBpRef guards in FitRouteOnSelection)
+- [03.1-03]: save.* i18n namespace replaces last hardcoded German strings (ItineraryPanel/ShareBar save buttons)
 
 ### Pending Todos
 

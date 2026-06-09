@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Core Algorithm + Route Planner Web** - Working web app with real town data, temporal weather scoring, anti-backtracking optimizer, day-by-day itinerary, and shareable trip link — no backend required
 - [x] **Phase 2: Weather Finder Mode** - Second product mode: ranked best-weather locations for a given date range with map visualization and time-of-day scoring
 - [ ] **Phase 3: Backend + Auth + Production Hosting** - API server with weather/Overpass/OSRM proxies and caching, user accounts (email + OAuth), saved routes, favorites, preferences, and public web hosting
-- [ ] **Phase 3.1: Mobile Web UX (INSERTED)** - Map-first mobile layout with Airbnb-style compact search bar and bottom sheet panels
+- [x] **Phase 3.1: Mobile Web UX (INSERTED)** - Map-first mobile layout with Airbnb-style compact search bar and bottom sheet panels (completed 2026-06-09)
 - [x] **Phase 3.2: Premium UI Overhaul (INSERTED)** - Modernize the UI aesthetic using clean typography, glassmorphism, micro-animations, dark mode, and full i18n support (completed 2026-06-01)
 - [ ] **Phase 4: Freemium + Monetization** - Stripe subscription, premium feature enforcement server-side, custom weight sliders, and clear free vs. premium UX
 - [ ] **Phase 5: Native Mobile Apps** - iOS and Android apps at feature parity with web, distributed via Expo EAS through App Store and Play Store
@@ -93,9 +93,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03.1-01-PLAN.md — Foundation: useIsMobile hook + custom 3-snap draggable MobileBottomSheet (Wave 1)
-- [ ] 03.1-02-PLAN.md — Airbnb-style MobileSearchBar (collapsed pill + inline-expanded unified form) + mobile.* i18n keys (Wave 1)
-- [ ] 03.1-03-PLAN.md — Compose map-first layout in index.tsx + sheet-aware map fitting + CSS cleanup + delete MobileTabBar + device-verification checkpoint (Wave 2)
+- [x] 03.1-01-PLAN.md — Foundation: useIsMobile hook + custom 3-snap draggable MobileBottomSheet (Wave 1)
+- [x] 03.1-02-PLAN.md — Airbnb-style MobileSearchBar (collapsed pill + inline-expanded unified form) + mobile.* i18n keys (Wave 1)
+- [x] 03.1-03-PLAN.md — Compose map-first layout in index.tsx + sheet-aware map fitting + CSS cleanup + delete MobileTabBar + device-verification checkpoint (Wave 2; verified headlessly, EntryPanel lives in the search pill — see 03.1-03-SUMMARY.md deviation note)
 
 ### Phase 3.2: Premium UI Overhaul (INSERTED)
 **Goal**: Elevate the web application's user interface to a premium state-of-the-art design, featuring modern typography, glassmorphism, dynamic micro-animations, and an intelligent Dark Mode. All new UI text will use translation keys to strictly support i18n (English and German).
@@ -144,7 +144,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 3.1 → 3.2 → 4 → 5
 | 1. Core Algorithm + Route Planner Web | 10/10 | Complete | 2026-03-01 |
 | 2. Weather Finder Mode | 6/6 | Complete | 2026-03-02 |
 | 3. Backend + Auth + Production Hosting | 6/7 | In progress | - |
-| 3.1. Mobile Web UX (INSERTED) | 0/3 | Planned | - |
+| 3.1. Mobile Web UX (INSERTED) | 3/3 | Complete | 2026-06-09 |
 | 3.2. Premium UI Overhaul (INSERTED) | 1/1 | Complete | 2026-06-01 |
 | 4. Freemium + Monetization | 0/TBD | Not started | - |
 | 5. Native Mobile Apps | 0/TBD | Not started | - |

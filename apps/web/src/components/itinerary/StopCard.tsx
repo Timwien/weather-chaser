@@ -1,12 +1,15 @@
 import { useTranslation } from 'react-i18next';
 import type { Stop } from '@weatherchaser/core';
 import { ScoreBar } from './ScoreBar.tsx';
+import './StopCard.css';
 
 interface StopCardProps {
   stop: Stop;
   stopNumber: number;
   isSelected: boolean;
   onClick: () => void;
+  /** Position in the list — drives the entrance animation stagger */
+  index?: number;
 }
 
 function scoreColor(value: number): string {
@@ -14,69 +17,68 @@ function scoreColor(value: number): string {
   return `hsl(${hue}, 65%, 45%)`;
 }
 
-export function StopCard({ stop, stopNumber, isSelected, onClick }: StopCardProps) {
-  const { t } = useTranslation('common');
+/** Circular progress ring: composite 0–100 mapped to stroke sweep. */
+function ScoreRing({ value }: { value: number }) {
+  const r = 20;
+  const circumference = 2 * Math.PI * r;
+  const clamped = Math.min(Math.max(value, 0), 100);
+  const color = scoreColor(clamped);
+  return (
+    <div className="stop-card-score-ring">
+      <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+        <circle className="stop-card-score-track" cx="24" cy="24" r={r} fill="none" strokeWidth="4" />
+        <circle
+          cx="24"
+          cy="24"
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeDasharray={`${(clamped / 100) * circumference} ${circumference}`}
+        />
+      </svg>
+      <span className="stop-card-score-value" style={{ color }}>
+        {Math.round(clamped)}
+      </span>
+    </div>
+  );
+}
+
+export function StopCard({ stop, stopNumber, isSelected, onClick, index = 0 }: StopCardProps) {
+  const { t, i18n } = useTranslation('common');
   const { town, arrivalDate, nights, score, weatherAvg } = stop;
 
-  // Format arrival date as "Mon 10 Jul"
-  const dateStr = arrivalDate.toLocaleDateString('en-GB', {
+  // Locale-aware arrival date, e.g. "Mon 10 Jul" / "Mo., 10. Juli"
+  const locale = i18n.language.startsWith('de') ? 'de-DE' : 'en-GB';
+  const dateStr = arrivalDate.toLocaleDateString(locale, {
     weekday: 'short', day: 'numeric', month: 'short',
   });
 
   return (
     <div
       onClick={onClick}
-      style={{
-        display: 'flex',
-        gap: 'var(--space-4)',
-        padding: 'var(--space-4)',
-        borderRadius: 'var(--radius-md)',
-        border: isSelected ? `2px solid var(--color-accent)` : '2px solid transparent',
-        background: isSelected ? 'var(--color-accent-light)' : 'var(--color-bg)',
-        cursor: 'pointer',
-        transition: 'border-color 0.15s',
-      }}
+      className={`stop-card wc-fade-up${isSelected ? ' stop-card--selected' : ''}`}
+      style={{ animationDelay: `${Math.min(index, 8) * 55}ms` }}
     >
-      {/* Day bubble */}
-      <div style={{
-        flexShrink: 0,
-        width: '40px',
-        height: '40px',
-        borderRadius: 'var(--radius-full)',
-        background: scoreColor(score.composite),
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'white',
-        lineHeight: 1,
-        gap: '1px',
-      }}>
-        <span style={{ fontSize: '8px', fontWeight: 400, opacity: 0.9, letterSpacing: '0.02em' }}>
+      <div className="stop-card-day">
+        <span className="stop-card-day-label">
           {t('itinerary.day_label', { count: stopNumber })}
         </span>
-        <span style={{ fontSize: '15px', fontWeight: 700 }}>{stopNumber}</span>
+        <span className="stop-card-day-number">{stopNumber}</span>
       </div>
 
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{
-          fontSize: 'var(--font-size-lg)',
-          fontWeight: 600,
-          color: 'var(--color-text)',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}>
-          {town.name}
-        </div>
-        <div style={{
-          fontSize: 'var(--font-size-xs)',
-          color: 'var(--color-text-muted)',
-          marginBottom: 'var(--space-2)',
-        }}>
+      <div className="stop-card-body">
+        <div className="stop-card-town">{town.name}</div>
+        <div className="stop-card-date">
           {dateStr} &middot; {nights} {t('itinerary.nights')}
         </div>
-        <ScoreBar score={score} weatherAvg={weatherAvg} />
+        <ScoreBar score={score} weatherAvg={weatherAvg} showComposite={false} />
+      </div>
+
+      <div className="stop-card-score">
+        <ScoreRing value={score.composite} />
+        <span className="stop-card-score-label">{t('itinerary.score')}</span>
       </div>
     </div>
   );

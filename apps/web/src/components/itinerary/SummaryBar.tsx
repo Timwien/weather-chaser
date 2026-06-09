@@ -21,7 +21,13 @@ export function SummaryBar({ route }: SummaryBarProps) {
         { label: t('itinerary.avg_score'), value: String(Math.round(route.avgScore)) },
       ].map(({ label, value }) => (
         <div key={label} style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 'var(--font-size-xl)', fontWeight: 700, color: 'var(--color-text)' }}>
+          <div style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'var(--font-size-xl)',
+            fontWeight: 700,
+            letterSpacing: 'var(--tracking-tight)',
+            color: 'var(--color-text)',
+          }}>
             {value}
           </div>
           <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>

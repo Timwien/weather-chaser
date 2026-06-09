@@ -7,13 +7,14 @@
   padding: 10px var(--space-3);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background 0.12s, box-shadow 0.12s;
+  transition: background 0.12s, box-shadow 0.12s, transform 0.18s var(--ease-spring);
   /* inset left accent via box-shadow avoids layout shift */
   box-shadow: inset 3px 0 0 transparent;
 }
 
 .finder-result-row:hover {
-  background: rgba(13, 143, 159, 0.05);
+  background: var(--color-primary-light);
+  transform: translateX(2px);
 }
 
 .finder-result-row--selected {
@@ -32,9 +33,16 @@
   align-items: center;
   justify-content: center;
   color: white;
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: 15px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+/* Top-3 podium: golden halo ring around the rank bubble */
+.finder-result-rank--podium {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
 }
 
 /* ── Body (name + meta) ─────────────────────────── */
@@ -45,6 +53,7 @@
 }
 
 .finder-result-name {
+  font-family: var(--font-display);
   font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-text);
@@ -93,6 +102,7 @@
 
 .finder-result-score {
   flex-shrink: 0;
+  font-family: var(--font-display);
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -1px;
@@ -118,8 +128,8 @@
 }
 
 .finder-result-heart:hover {
-  color: #0E7490;
-  background: rgba(14, 116, 144, 0.08);
+  color: var(--color-primary);
+  background: var(--color-primary-mid);
 }
 
 .finder-result-heart--guest {

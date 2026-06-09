@@ -19,6 +19,20 @@ html, body, #root {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* ── Shared motion: card entrance (used by itinerary stops + finder rows) ── */
+@keyframes wc-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.wc-fade-up {
+  animation: wc-fade-up 0.4s var(--ease-spring) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-fade-up { animation: none; }
+}
+
 /* maplibre-gl container reset */
 .maplibregl-map {
   position: absolute;

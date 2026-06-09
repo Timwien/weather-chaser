@@ -38,8 +38,8 @@ function HeartIcon({ filled }: { filled: boolean }) {
       width="16"
       height="16"
       viewBox="0 0 16 16"
-      fill={filled ? '#0E7490' : 'none'}
-      stroke={filled ? '#0E7490' : 'currentColor'}
+      fill={filled ? 'var(--color-primary)' : 'none'}
+      stroke={filled ? 'var(--color-primary)' : 'currentColor'}
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -64,11 +64,12 @@ export function FinderResultRow({ data, isSelected, onClick, isFavorited = false
   return (
     <div
       onClick={onClick}
-      className={`finder-result-row${isSelected ? ' finder-result-row--selected' : ''}`}
+      className={`finder-result-row wc-fade-up${isSelected ? ' finder-result-row--selected' : ''}`}
+      style={{ animationDelay: `${Math.min(rank - 1, 10) * 40}ms` }}
     >
-      {/* Rank bubble — continuous gradient background */}
+      {/* Rank bubble — continuous gradient background; top-3 get a podium halo */}
       <div
-        className="finder-result-rank"
+        className={`finder-result-rank${rank <= 3 ? ' finder-result-rank--podium' : ''}`}
         style={{ background: scoreColor(score.composite) }}
       >
         {rank}
@@ -112,8 +113,8 @@ export function FinderResultRow({ data, isSelected, onClick, isFavorited = false
         type="button"
         className={`finder-result-heart${isGuest ? ' finder-result-heart--guest' : ''}`}
         onClick={handleHeartClick}
-        aria-label={isFavorited ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
-        title={isGuest ? 'Anmelden zum Favorisieren' : undefined}
+        aria-label={isFavorited ? t('favorites.remove') : t('favorites.add')}
+        title={isGuest ? t('favorites.sign_in') : undefined}
       >
         <HeartIcon filled={isFavorited} />
       </button>

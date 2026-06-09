@@ -4,6 +4,8 @@ import type { WeatherScore, StopWeatherAvg } from '@weatherchaser/core';
 interface ScoreBarProps {
   score: WeatherScore;
   weatherAvg?: StopWeatherAvg;
+  /** Hide the big composite number (e.g. when the parent shows a score ring) */
+  showComposite?: boolean;
 }
 
 function scoreColor(value: number): string {
@@ -93,21 +95,23 @@ function Metric({ icon, label, dimScore }: MetricProps) {
 
 // ── ScoreBar ────────────────────────────────────────────────────────────────
 
-export function ScoreBar({ score, weatherAvg }: ScoreBarProps) {
+export function ScoreBar({ score, weatherAvg, showComposite = true }: ScoreBarProps) {
   const { t } = useTranslation('common');
   const { composite, breakdown } = score;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
       {/* Composite score — big, colored, no gradient bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--space-2)' }}>
-        <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-          {t('itinerary.score')}
-        </span>
-        <span style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700, lineHeight: 1, color: scoreColor(composite) }}>
-          {Math.round(composite)}
-        </span>
-      </div>
+      {showComposite && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--space-2)' }}>
+          <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+            {t('itinerary.score')}
+          </span>
+          <span style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700, lineHeight: 1, color: scoreColor(composite) }}>
+            {Math.round(composite)}
+          </span>
+        </div>
+      )}
 
       {/* Weather dimension metrics — each colored by its score */}
       <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>

@@ -83,6 +83,11 @@
     "link_copied": "Link kopiert",
     "google_limit": "Google Maps unterstützt bis zu 9 Stopps"
   },
+  "favorites": {
+    "add": "Zu Favoriten hinzufügen",
+    "remove": "Aus Favoriten entfernen",
+    "sign_in": "Anmelden zum Favorisieren"
+  },
   "save": {
     "route": "Route speichern",
     "short": "Speichern",

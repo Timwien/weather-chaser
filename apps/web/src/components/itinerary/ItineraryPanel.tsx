@@ -149,10 +149,13 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPan
                 stopNumber={stopDay}
                 isSelected={selectedStopIndex === idx}
                 onClick={() => onStopSelect(idx)}
+                index={idx}
               />
               {idx < route.stops.length - 1 && stop.distanceToNextKm !== undefined && (
                 <div className="itinerary-distance-connector">
-                  {Math.round(stop.distanceToNextKm)} km
+                  <span className="itinerary-distance-pill">
+                    {Math.round(stop.distanceToNextKm)} km
+                  </span>
                 </div>
               )}
             </div>

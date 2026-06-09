@@ -8,7 +8,7 @@
    Neutrals  — teal-tinted for cohesion
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Sora:wght@400..800&display=swap');
 
 :root {
   color-scheme: light;
@@ -61,6 +61,12 @@
   --score-fair:   hsl(45,  90%, 55%);   /* Amber */
   --score-good:   hsl(152, 60%, 40%);   /* Green */
 
+  /* ── Signature gradients (road-trip sky language) ─────── */
+  --gradient-brand:   linear-gradient(135deg, #0d8f9f 0%, #0d619f 100%);   /* teal → ocean */
+  --gradient-sunset:  linear-gradient(135deg, #f5921e 0%, #ef5e63 100%);   /* sun → dusk   */
+  --gradient-horizon: linear-gradient(180deg, rgba(13,143,159,0.10) 0%, rgba(13,143,159,0) 100%);
+  --gradient-text:    linear-gradient(110deg, #0d8f9f 10%, #0d619f 90%);
+
   /* ── Spacing ──────────────────────────────────────────── */
   --space-1: 4px;
   --space-2: 8px;
@@ -73,6 +79,7 @@
 
   /* ── Typography ───────────────────────────────────────── */
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Sora', 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-size-xs:   11px;
   --font-size-sm:   13px;
   --font-size-base: 15px;
@@ -102,6 +109,10 @@
   --shadow-lg:    0 12px 40px rgba(13,143,159,0.14), 0 4px 12px rgba(0,0,0,0.07);
   --shadow-glass: 0 8px 32px rgba(13,143,159,0.12), 0 2px 8px rgba(0,0,0,0.06),
                   inset 0 1px 0 rgba(255,255,255,0.65);
+
+  /* ── Motion ───────────────────────────────────────────── */
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.4, 1);
+  --shadow-pop:  0 16px 40px rgba(13,143,159,0.18), 0 6px 16px rgba(0,0,0,0.08);
 
   /* ── Layout ───────────────────────────────────────────── */
   --panel-width: 390px;
@@ -150,4 +161,11 @@
   --shadow-md:    0 4px 16px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.30);
   --shadow-lg:    0 12px 40px rgba(0,0,0,0.55), 0 4px 12px rgba(0,0,0,0.35);
   --shadow-glass: 0 8px 32px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.06);
+  --shadow-pop:   0 16px 40px rgba(0,0,0,0.55), 0 6px 16px rgba(34,195,214,0.10);
+
+  /* Gradients: brighter neon ends for dark surfaces */
+  --gradient-brand:   linear-gradient(135deg, #22c3d6 0%, #3b82d6 100%);
+  --gradient-sunset:  linear-gradient(135deg, #f7a541 0%, #f4716f 100%);
+  --gradient-horizon: linear-gradient(180deg, rgba(34,195,214,0.12) 0%, rgba(34,195,214,0) 100%);
+  --gradient-text:    linear-gradient(110deg, #2fd4e6 10%, #5b9bf0 90%);
 }

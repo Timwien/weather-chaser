@@ -38,10 +38,16 @@
 }
 
 .itinerary-title {
+  font-family: var(--font-display);
   font-size: var(--font-size-xl);
   font-weight: 700;
-  color: var(--color-text);
+  letter-spacing: var(--tracking-tight);
   margin: 0;
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--color-primary); /* fallback when background-clip unsupported */
 }
 
 .itinerary-back-btn {
@@ -70,22 +76,35 @@
   gap: 0;
 }
 
+/* Distance connector — dashed "road" segment between day cards with a km pill */
 .itinerary-distance-connector {
-  text-align: center;
+  display: flex;
+  align-items: center;
   font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
-  padding: var(--space-2) 0;
+  padding: var(--space-2) 0 var(--space-2) 38px;
   position: relative;
+  min-height: 30px;
 }
 
 .itinerary-distance-connector::before {
   content: '';
   position: absolute;
-  left: 28px;
+  left: 38px;
   top: 0;
   bottom: 0;
-  width: 1px;
-  background: var(--color-border);
+  width: 0;
+  border-left: 2px dashed var(--color-border-strong);
+}
+
+.itinerary-distance-pill {
+  position: relative;
+  margin-left: var(--space-3);
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
 }
 
 /* ── Save button area ─────────────────────────────────── */
@@ -103,20 +122,21 @@
   gap: var(--space-2);
   width: 100%;
   padding: 10px var(--space-4);
-  border-radius: var(--radius-md);
-  border: 1.5px solid var(--color-accent);
-  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--gradient-brand);
   color: #ffffff;
   font-family: var(--font-sans);
   font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.14s, opacity 0.14s;
+  box-shadow: 0 4px 14px var(--color-primary-glow);
+  transition: transform 0.18s var(--ease-spring), box-shadow 0.18s ease, opacity 0.14s;
 }
 
 .itinerary-save-btn:hover:not(:disabled) {
-  background: var(--color-accent-hover);
-  border-color: var(--color-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-pop);
 }
 
 .itinerary-save-btn:disabled {

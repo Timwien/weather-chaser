@@ -115,6 +115,20 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
       return scoreDailyLocation(data.daily, new Date(config.startDate), 1, weights);
     });
 
+    // Per-town per-day score matrix — lets the optimizer time arrivals to each
+    // town's best weather days instead of scoring everything at startDate
+    const startDateObj = new Date(config.startDate);
+    const dayScores: number[][] = towns.map((town) => {
+      const data = weatherData.find((d) => d.townId === town.id);
+      const row = new Array<number>(config.totalDays).fill(0);
+      if (!data) return row;
+      for (let d = 0; d < config.totalDays; d++) {
+        const day = new Date(startDateObj.getTime() + d * 86_400_000);
+        row[d] = scoreDailyLocation(data.daily, day, 1, weights).composite;
+      }
+      return row;
+    });
+
     // ── Step 3: Distance matrix + optimize ─────────────────────────────────
     self.postMessage({ type: 'progress', step: 'optimizing_route' } satisfies OptimizerWorkerOutput);
 
@@ -142,6 +156,7 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
       distanceMatrix: distanceKm,
       durationMatrix: matrix.durations,
       weatherScores,
+      dayScores,
       config: {
         startIndex,
         totalDays: config.totalDays,
@@ -177,9 +192,16 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
       };
     });
 
+    // Recompute avgScore from the re-scored stops (day-weighted) — the core
+    // aggregate would otherwise reflect the pre-rescore composites
+    const totalNights = stopsWithWeather.reduce((s, st) => s + st.nights, 0);
+    const avgScore = totalNights > 0
+      ? stopsWithWeather.reduce((s, st) => s + st.score.composite * st.nights, 0) / totalNights
+      : 0;
+
     self.postMessage({
       type: 'complete',
-      result: { ...result, stops: stopsWithWeather },
+      result: { ...result, stops: stopsWithWeather, avgScore },
     } satisfies OptimizerWorkerOutput);
   } catch (err) {
     self.postMessage({

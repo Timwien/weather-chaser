@@ -80,4 +80,13 @@ export interface OptimizerInput {
   durationMatrix: number[][];    // seconds NxN
   weatherScores: WeatherScore[];
   config: OptimizerConfig;
+  /**
+   * Per-town per-day composite scores: dayScores[townIdx][dayOffset] is the
+   * 0–100 weather score of that town on startDate + dayOffset. When provided,
+   * the planner optimizes temporally (which days you are where). When absent,
+   * the static weatherScores composite is replicated across all days.
+   */
+  dayScores?: number[][];
+  /** Optional overrides for the planner objective (see optimizer/params.ts). */
+  params?: Partial<import('../optimizer/params.js').PlannerParams>;
 }

@@ -71,7 +71,7 @@ export function StopCard({ stop, stopNumber, isSelected, onClick, index = 0 }: S
       <div className="stop-card-body">
         <div className="stop-card-town">{town.name}</div>
         <div className="stop-card-date">
-          {dateStr} &middot; {nights} {t('itinerary.nights')}
+          {dateStr} &middot; {t('itinerary.nights_count', { count: nights })}
         </div>
         <ScoreBar score={score} weatherAvg={weatherAvg} showComposite={false} />
       </div>

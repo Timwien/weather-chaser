@@ -146,5 +146,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 3.1 → 3.2 → 4 → 5
 | 3. Backend + Auth + Production Hosting | 6/7 | In progress | - |
 | 3.1. Mobile Web UX (INSERTED) | 3/3 | Complete | 2026-06-09 |
 | 3.2. Premium UI Overhaul (INSERTED) | 1/1 | Complete | 2026-06-01 |
-| 4. Freemium + Monetization | 0/TBD | Not started | - |
-| 5. Native Mobile Apps | 0/TBD | Not started | - |
+| 4. Freemium + Monetization | 0/TBD | Scaffolded (code-complete server gate + checkout/webhook/portal + premium UI; blocked on Stripe account) | - |
+| 5. Native Mobile Apps | 0/TBD | Scaffolded (Expo app runs shared core; blocked on Apple/Play/EAS accounts) | - |

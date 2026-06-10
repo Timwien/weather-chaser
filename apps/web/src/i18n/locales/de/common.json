@@ -57,6 +57,8 @@
     "day_label_other": "Tage",
     "day": "Tag",
     "nights": "Nächte",
+    "nights_count_one": "{{count}} Nacht",
+    "nights_count_other": "{{count}} Nächte",
     "score": "Score",
     "total_distance": "Gesamtstrecke",
     "stops": "Stopps",

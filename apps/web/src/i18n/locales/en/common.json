@@ -57,6 +57,8 @@
     "day_label_other": "Day",
     "day": "Day",
     "nights": "nights",
+    "nights_count_one": "{{count}} night",
+    "nights_count_other": "{{count}} nights",
     "score": "Score",
     "total_distance": "Total distance",
     "stops": "stops",

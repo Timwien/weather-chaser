@@ -9,11 +9,11 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 
 ## Current Position
 
-Phase: 3.1 complete (2026-06-09) — Phase 3 open only at 03-07 (production deploy, needs user accounts)
-Current plan: 03.1-03 complete (map-first mobile composition, verified headlessly). Phase 3 still has 03-07 (Vercel deploy — blocked on user's Vercel/Supabase/OAuth setup).
-Last activity: 2026-06-09 — Phase 3.1 Plan 03 complete + post-checkpoint fixes (search auto-collapse, fit-on-route-load, save.* i18n keys, favicon)
+Phase: 3.1 complete (2026-06-09); Phases 4 + 5 scaffolded ahead of schedule (2026-06-10) — Phase 3 open only at 03-07 (production deploy, needs user accounts)
+Current plan: Phase 3 has 03-07 left (Vercel deploy — blocked on user's Vercel/Supabase/OAuth setup). Phase 4 code-complete server+client scaffold (blocked on Stripe account for live keys/webhook). Phase 5 Expo scaffold runs shared core (blocked on Apple/Play/EAS accounts for distribution).
+Last activity: 2026-06-10 — New utility-driven route planner (planRoute) in packages/core; full UI redesign (Sora display font, gradients, score rings, motion); Phase 4 Stripe/freemium scaffolding; Phase 5 Expo scaffold; verification matrix (mobile/desktop × EN/DE × light/dark) green
 
-Progress: [█████████░] 92% (Phases 1, 2, 3.1, 3.2 complete; Phase 3 at 6/7)
+Progress: [█████████░] 94% (Phases 1, 2, 3.1, 3.2 complete; Phase 3 at 6/7; Phases 4/5 scaffolded)
 
 ## Performance Metrics
 
@@ -156,6 +156,11 @@ Recent decisions affecting current work:
 - [03.1-03 DEVIATION]: EntryPanel moved INTO the expanded search pill (single search surface); bottom sheet is results-only — supersedes the "EntryPanel in sheet" boundary above (commits 37e1b99, d15ea59)
 - [03.1-03]: Search surface auto-collapses + pill hides when results arrive; map fits route on load AND on sheet snap changes (prevRouteRef/prevBpRef guards in FitRouteOnSelection)
 - [03.1-03]: save.* i18n namespace replaces last hardcoded German strings (ItineraryPanel/ShareBar save buttons)
+- [2026-06-10 optimizer]: optimizeRoute now delegates to planRoute — joint objective J = Σ dayScore[townAtDay][day] − legCost(driveHours); legCost = 12·h + 18·max(0, h−3). dayScores[town][dayOffset] matrix from worker enables temporal arrival timing; allocateNights DP optimizes nights; swap-out + position-move local search; deterministic; old NN/2-opt building blocks still exported; PlannerParams tunable via OptimizerInput.params
+- [2026-06-10 optimizer]: worker recomputes avgScore day-weighted after per-stop re-score (core aggregate was stale); core dayScores are per-single-day while display re-score uses window-total precip — known mild inconsistency, display is authoritative
+- [2026-06-10 ui]: Sora = --font-display for titles/stats/scores; gradient tokens --gradient-brand/-sunset/-text with dark variants; route CTA = brand gradient, finder CTA = sunset gradient (mode color-coding)
+- [2026-06-10 phase4]: Stripe via REST fetch (no SDK) in api/stripe/*; webhook verifies signature with Web Crypto HMAC; subscriptions table written ONLY by webhook (service_role); /api/premium/validate is the server-side 403 gate; client tier in subscriptionStore refreshed on auth changes; tripConfig.customWeights (normalized sum 1) overrides preset in worker
+- [2026-06-10 phase5]: apps/mobile = Expo SDK 54 scaffold; metro watchFolders for pnpm monorepo; App.tsx proves shared planRoute on RN; locales TODO: extract packages/locales for web+mobile parity
 
 ### Pending Todos
 

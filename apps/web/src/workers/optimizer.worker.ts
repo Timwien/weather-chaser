@@ -31,6 +31,8 @@ export interface OptimizerWorkerInput {
     startLat: number | null;
     startLng: number | null;
     mustVisitCoords: Array<{ lat: number; lng: number; name: string }>;
+    /** Premium: overrides the preset weights when set (validated server-side) */
+    customWeights?: ScoringWeights | null;
   };
 }
 
@@ -103,9 +105,9 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
     self.postMessage({ type: 'progress', step: 'fetching_weather' } satisfies OptimizerWorkerOutput);
     const weatherData = await fetchWeatherBatch(towns, config.startDate, config.endDate);
 
-    const weights: ScoringWeights = {
-      ...(PRESETS[config.preset as keyof typeof PRESETS] ?? PRESETS['sightseeing']),
-    };
+    const weights: ScoringWeights = config.customWeights
+      ? { ...config.customWeights }
+      : { ...(PRESETS[config.preset as keyof typeof PRESETS] ?? PRESETS['sightseeing']) };
 
     const weatherScores: WeatherScore[] = towns.map((town) => {
       const data = weatherData.find((d) => d.townId === town.id);

@@ -83,6 +83,26 @@
     "link_copied": "Link kopiert",
     "google_limit": "Google Maps unterstützt bis zu 9 Stopps"
   },
+  "premium": {
+    "badge": "Premium",
+    "weights_title": "Eigene Gewichtung",
+    "weights_locked": "Feinjustiere, wie Sonne, Regen, Wärme und Wind gewichtet werden — ein Premium-Feature.",
+    "weights_customize": "Anpassen",
+    "weights_use_preset": "Preset verwenden",
+    "upgrade_cta": "Auf Premium upgraden",
+    "modal_title": "WeatherChaser Premium",
+    "modal_text": "Schalte die volle Power des Routen-Optimierers frei.",
+    "benefit_weights": "Eigene Gewichtung für jede Reise",
+    "benefit_priority": "Bevorzugter Zugang zu neuen Features",
+    "benefit_support": "Unterstütze die unabhängige Entwicklung",
+    "redirecting": "Weiterleitung…",
+    "sign_in_first": "Erstelle zuerst ein kostenloses Konto — Upgrade jederzeit möglich.",
+    "not_available": "Zahlungen sind noch nicht verfügbar. Bald!",
+    "checkout_error": "Checkout konnte nicht gestartet werden. Bitte erneut versuchen.",
+    "manage_title": "Abo",
+    "manage_btn": "Abo verwalten",
+    "manage_active": "Premium aktiv"
+  },
   "favorites": {
     "add": "Zu Favoriten hinzufügen",
     "remove": "Aus Favoriten entfernen",

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Session, User } from '@supabase/supabase-js';
 import { getSupabase, supabaseConfigured } from '../lib/supabase.ts';
+import { useSubscriptionStore } from './subscriptionStore.ts';
 
 export interface PendingAction {
   type: 'save_route' | 'favorite_place' | 'save_finder_search';
@@ -46,6 +47,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           loading: false,
           initialized: true,
         });
+
+        // Keep the subscription tier in sync with the signed-in user (Phase 4)
+        void useSubscriptionStore.getState().refresh(session?.user?.id ?? null);
 
         if (event === 'SIGNED_IN' && !prevUser && pending) {
           console.info('[auth] SIGNED_IN with pending action:', pending.type);

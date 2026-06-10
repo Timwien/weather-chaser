@@ -138,6 +138,7 @@ export function useOptimizer() {
         startLat,
         startLng,
         mustVisitCoords: tripConfig.mustVisitCoords,
+        customWeights: tripConfig.customWeights,
       },
     };
 

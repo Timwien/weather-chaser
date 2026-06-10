@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.ts';
 import { useThemeStore } from '../../stores/themeStore.ts';
+import { useSubscriptionStore } from '../../stores/subscriptionStore.ts';
 
 interface SettingsTabProps {
   onClose: () => void;
@@ -11,8 +12,28 @@ export function SettingsTab({ onClose }: SettingsTabProps) {
   const { t, i18n } = useTranslation();
   const { user, session, signOut } = useAuthStore();
   const { mode, setMode: setThemeMode } = useThemeStore();
+  const tier = useSubscriptionStore((s) => s.tier);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  const handleManageSubscription = async () => {
+    const token = session?.access_token;
+    if (!token) return;
+    setPortalLoading(true);
+    try {
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const { url } = (await res.json()) as { url?: string };
+        if (url) window.location.href = url;
+      }
+    } finally {
+      setPortalLoading(false);
+    }
+  };
 
   const handleDeleteAccount = async () => {
     const confirmed = window.confirm(t('account.settings_delete_confirm'));
@@ -92,6 +113,23 @@ export function SettingsTab({ onClose }: SettingsTabProps) {
       </section>
 
       <div className="settings-tab-divider" />
+
+      {/* Subscription — only shown to premium users (Phase 4) */}
+      {user && tier === 'premium' && (
+        <section className="settings-tab-section">
+          <h3 className="settings-tab-section-title">{t('premium.manage_title')}</h3>
+          <p className="settings-tab-guest-note">{t('premium.manage_active')}</p>
+          <button
+            type="button"
+            className="settings-tab-link"
+            onClick={handleManageSubscription}
+            disabled={portalLoading}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
+          >
+            {t('premium.manage_btn')}
+          </button>
+        </section>
+      )}
 
       {/* Privacy & legal links */}
       <section className="settings-tab-section">

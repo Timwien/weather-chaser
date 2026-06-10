@@ -5,6 +5,7 @@ import { useLocationSearch } from '../../hooks/useLocationSearch.ts';
 import type { NominatimResult } from '../../services/nominatim.ts';
 import type { WeatherPreset } from '@weatherchaser/core';
 import { BeachIcon, HikingIcon, SightseeingIcon } from '../finder/FinderIcons.tsx';
+import { CustomWeights } from '../premium/CustomWeights.tsx';
 
 // Inline remove icon — no emoji per design decision
 function RemoveIcon() {
@@ -234,6 +235,11 @@ export function RouteConfigStep({ onGenerate, onBack }: { onGenerate: () => void
             );
           })}
         </div>
+      </div>
+
+      {/* Premium: custom scoring weights (free tier sees locked sliders + upgrade) */}
+      <div className="route-config-field">
+        <CustomWeights />
       </div>
 
       {/* Must-visit stops */}

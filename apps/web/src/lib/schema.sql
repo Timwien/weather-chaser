@@ -45,3 +45,20 @@ create policy "Users can CRUD own favorites"
   on favorites for all to authenticated
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
+
+-- subscriptions (Phase 4 — written ONLY by the Stripe webhook via service_role;
+-- users can read their own row, never write it)
+create table if not exists subscriptions (
+  user_id                uuid primary key references auth.users(id) on delete cascade,
+  stripe_customer_id     text,
+  stripe_subscription_id text,
+  status                 text not null default 'inactive', -- active | trialing | past_due | canceled | inactive
+  price_id               text,
+  current_period_end     timestamptz,
+  updated_at             timestamptz default now()
+);
+alter table subscriptions enable row level security;
+create policy "Users can read own subscription"
+  on subscriptions for select to authenticated
+  using ((select auth.uid()) = user_id);
+-- No insert/update/delete policies: only the service_role key (webhook) writes.

@@ -57,6 +57,8 @@ interface TripConfig {
   maxStay: number;
   mustVisitNames: string[];   // Display names
   mustVisitCoords: Array<{ lat: number; lng: number; name: string }>;
+  /** Premium: custom scoring weights override the preset when set (must sum to 1) */
+  customWeights: ScoringWeights | null;
 }
 
 interface FinderConfig {
@@ -145,6 +147,7 @@ const defaultTripConfig: TripConfig = {
   maxStay: 2,
   mustVisitNames: [],
   mustVisitCoords: [],
+  customWeights: null,
 };
 
 // ── DEV DEFAULTS — remove before shipping ─────────────────────────────────

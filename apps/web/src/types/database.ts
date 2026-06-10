@@ -25,9 +25,25 @@ export interface Favorite {
   created_at: string;
 }
 
+export interface Subscription {
+  user_id: string;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  status: string; // active | trialing | past_due | canceled | inactive
+  price_id: string | null;
+  current_period_end: string | null;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
+      subscriptions: {
+        Row: Subscription;
+        Insert: Subscription;
+        Update: Partial<Subscription>;
+        Relationships: [];
+      };
       saved_routes: {
         Row: SavedRoute;
         Insert: Omit<SavedRoute, 'id' | 'created_at'>;

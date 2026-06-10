@@ -1,0 +1,129 @@
+/* =========================================================
+   DrawingControls — draw-area UX (token-driven)
+   Desktop: hint pill centered at top, buttons top-right.
+   Mobile (≤768px): everything drops BELOW the search pill
+   (pill is fixed at top: var(--space-3), height 48px).
+   ========================================================= */
+
+.draw-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ── Idle launch button ─────────────────────────────────── */
+.draw-controls {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.draw-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.18s var(--ease-spring), box-shadow 0.18s ease;
+}
+
+.draw-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-pop);
+}
+
+.draw-btn--danger {
+  color: var(--color-error);
+}
+
+.draw-btn--finish {
+  background: var(--gradient-brand);
+  border: none;
+  color: #ffffff;
+  box-shadow: 0 4px 14px var(--color-primary-glow);
+}
+
+/* ── Hint pill (top center, away from the buttons) ──────── */
+.draw-hint {
+  position: absolute;
+  top: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--surface-frost-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+  max-width: calc(100% - 32px);
+}
+
+/* Small animated dot inside the hint — signals "live" drawing mode */
+.draw-hint::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--gradient-brand);
+  animation: draw-hint-pulse 1.6s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes draw-hint-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(0.75); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draw-hint::before { animation: none; }
+}
+
+/* ── Mobile: drop below the fixed search pill ───────────── */
+@media (max-width: 768px) {
+  /* pill: top var(--space-3) + 48px height */
+  .draw-controls {
+    top: calc(var(--space-3) + 48px + var(--space-2));
+    right: var(--space-3);
+  }
+
+  .draw-hint {
+    top: calc(var(--space-3) + 48px + var(--space-2));
+    left: var(--space-3);
+    transform: none;
+    max-width: calc(100% - 140px); /* leave room for the buttons on the right */
+    white-space: normal;
+    font-size: var(--font-size-xs);
+  }
+
+  /* While drawing, the hint takes the top row — push buttons further down */
+  .draw-controls--drawing {
+    top: calc(var(--space-3) + 48px + var(--space-2) + 56px);
+  }
+}

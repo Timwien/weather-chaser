@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useMap } from '@vis.gl/react-maplibre';
 import { useTranslation } from 'react-i18next';
 import type { MapMouseEvent } from 'maplibre-gl';
+import './DrawingControls.css';
 
 interface DrawingControlsProps {
   onPolygonComplete: (polygon: [number, number][]) => void;
@@ -10,14 +11,33 @@ interface DrawingControlsProps {
 
 type Verts = [number, number][];
 
+const CLOSE_RADIUS_PX = 18; // tap/click tolerance around the first vertex
+const MIN_VERTICES = 3;
+
+/** Resolves a CSS custom property to its computed value (canvas can't use var()). */
+function cssVar(name: string, fallback: string): string {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+}
+
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+  const n = parseInt(full, 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+
 export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsProps) {
   const { t } = useTranslation('common');
   const { current: map } = useMap();
   const [hasPolygon, setHasPolygon] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
+  // Drives the progressive hint + the "Done" button — mirrors verticesRef.length
+  const [vertexCount, setVertexCount] = useState(0);
 
   const verticesRef = useRef<Verts>([]);
   const isDrawingRef = useRef(false);  // stays in sync — set below before hooks read it
+  const cursorPxRef = useRef<{ x: number; y: number } | null>(null); // rubber band target
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const onCompleteRef = useRef(onPolygonComplete);
 
@@ -28,7 +48,9 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
 
   // ── Canvas drawing ──────────────────────────────────────────────────────────
   // Renders the polygon directly on a 2D canvas overlaid on the map.
-  // Avoids MapLibre's GeoJSON worker entirely (no __publicField issues).
+  // A 2D canvas (unlike MapLibre fill layers) supports real linear gradients,
+  // so the area uses the brand gradient — colors resolved from tokens at draw
+  // time so dark mode automatically gets the neon variants.
   const redraw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas || !map) return;
@@ -42,38 +64,91 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
     canvas.height = container.clientHeight;
 
     const verts = verticesRef.current;
-    if (verts.length < 2) return;
+    if (verts.length === 0) return;
+
+    const gradStart = cssVar('--color-primary', '#0d8f9f');
+    const gradEnd = cssVar('--color-tertiary', '#0d619f');
 
     const pts = verts.map(([lng, lat]) => {
       const p = m.project([lng, lat] as [number, number]);
       return { x: p.x, y: p.y };
     });
 
-    const closed = !isDrawingRef.current && verts.length >= 3;
+    const drawing = isDrawingRef.current;
+    const closed = !drawing && verts.length >= MIN_VERTICES;
 
-    // Fill
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pts[0].y);
-    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-    if (closed) ctx.closePath();
-    ctx.fillStyle = 'rgba(63, 151, 224, 0.25)';
-    ctx.fill();
+    // Brand gradient across the polygon's bounding box
+    const xs = pts.map((p) => p.x);
+    const ys = pts.map((p) => p.y);
+    const grad = ctx.createLinearGradient(
+      Math.min(...xs), Math.min(...ys),
+      Math.max(...xs) || 1, Math.max(...ys) || 1,
+    );
+    grad.addColorStop(0, hexToRgba(gradStart, closed ? 0.28 : 0.18));
+    grad.addColorStop(1, hexToRgba(gradEnd, closed ? 0.28 : 0.18));
 
-    // Outline
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pts[0].y);
-    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-    if (closed) ctx.closePath();
-    ctx.strokeStyle = '#3f97e0';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    const strokeGrad = ctx.createLinearGradient(
+      Math.min(...xs), Math.min(...ys),
+      Math.max(...xs) || 1, Math.max(...ys) || 1,
+    );
+    strokeGrad.addColorStop(0, gradStart);
+    strokeGrad.addColorStop(1, gradEnd);
 
-    // Vertex dots
-    for (const pt of pts) {
+    // Fill + outline
+    if (pts.length >= 2) {
       ctx.beginPath();
-      ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#3f97e0';
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+      if (closed) ctx.closePath();
+      if (pts.length >= MIN_VERTICES) {
+        ctx.fillStyle = grad;
+        ctx.fill();
+      }
+      ctx.strokeStyle = strokeGrad;
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+
+    // Rubber band: dashed preview from the last vertex to the cursor (desktop)
+    const cursor = cursorPxRef.current;
+    if (drawing && cursor && pts.length >= 1) {
+      const last = pts[pts.length - 1];
+      ctx.save();
+      ctx.setLineDash([6, 6]);
+      ctx.strokeStyle = hexToRgba(gradEnd, 0.7);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(last.x, last.y);
+      ctx.lineTo(cursor.x, cursor.y);
+      // Faint closing edge back to the first point once the shape can close
+      if (pts.length >= MIN_VERTICES - 1) {
+        ctx.lineTo(pts[0].x, pts[0].y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Vertex dots — white ring + brand fill
+    for (let i = 0; i < pts.length; i++) {
+      const pt = pts[i];
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, i === 0 ? 6 : 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = i === 0 ? gradStart : gradEnd;
       ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+    }
+
+    // Closable affordance: halo around the first vertex ("tap here to finish")
+    if (drawing && pts.length >= MIN_VERTICES) {
+      ctx.beginPath();
+      ctx.arc(pts[0].x, pts[0].y, 12, 0, Math.PI * 2);
+      ctx.strokeStyle = hexToRgba(gradStart, 0.5);
+      ctx.lineWidth = 3;
+      ctx.stroke();
     }
   }, [map]);
 
@@ -93,56 +168,7 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
     };
   }, [map, redraw]);
 
-  // ── Click handlers while drawing ───────────────────────────────────────────
-  useEffect(() => {
-    if (!map || !isDrawing) return;
-    const m = map.getMap();
-
-    function completePolygon(verts: Verts) {
-      m.off('click', onClick);
-      m.off('dblclick', onDblClick);
-      m.doubleClickZoom.enable();
-      m.getCanvas().style.cursor = '';
-      verticesRef.current = verts;
-      setIsDrawing(false);
-      setHasPolygon(true);
-      onCompleteRef.current([...verts, verts[0]]);
-    }
-
-    const onClick = (e: MapMouseEvent) => {
-      const verts = verticesRef.current;
-
-      // Close polygon when user clicks near the first vertex (≥3 points set)
-      if (verts.length >= 3) {
-        const firstPx = m.project([verts[0][0], verts[0][1]] as [number, number]);
-        const dx = e.point.x - firstPx.x;
-        const dy = e.point.y - firstPx.y;
-        if (Math.sqrt(dx * dx + dy * dy) < 15) {
-          completePolygon(verts);
-          return;
-        }
-      }
-
-      verticesRef.current = [...verts, [e.lngLat.lng, e.lngLat.lat]];
-      redraw();
-    };
-
-    const onDblClick = () => {
-      // MapLibre fires click then dblclick — strip the extra vertex from the second click
-      const verts = verticesRef.current.slice(0, -1);
-      if (verts.length < 3) return;
-      completePolygon(verts);
-    };
-
-    m.on('click', onClick);
-    m.on('dblclick', onDblClick);
-    return () => {
-      m.off('click', onClick);
-      m.off('dblclick', onDblClick);
-    };
-  }, [map, isDrawing, redraw]);
-
-  // ── Handlers ───────────────────────────────────────────────────────────────
+  // ── Cancel (declared before the drawing effect — Esc handler closes over the ref) ──
   const clearCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -150,27 +176,120 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
     ctx?.clearRect(0, 0, canvas.width, canvas.height);
   }, []);
 
-  const handleStartDrawing = useCallback(() => {
-    if (!map) return;
-    verticesRef.current = [];
-    clearCanvas();
-    map.getMap().doubleClickZoom.disable();
-    map.getMap().getCanvas().style.cursor = 'crosshair';
-    setIsDrawing(true);
-  }, [map, clearCanvas]);
-
   const handleCancelDrawing = useCallback(() => {
     if (!map) return;
     verticesRef.current = [];
+    setVertexCount(0);
+    cursorPxRef.current = null;
     clearCanvas();
     map.getMap().doubleClickZoom.enable();
     map.getMap().getCanvas().style.cursor = '';
     setIsDrawing(false);
   }, [map, clearCanvas]);
 
+  const handleCancelDrawingRef = useRef(handleCancelDrawing);
+  useEffect(() => { handleCancelDrawingRef.current = handleCancelDrawing; }, [handleCancelDrawing]);
+
+  // ── Click / move handlers while drawing ──────────────────────────────────────
+  useEffect(() => {
+    if (!map || !isDrawing) return;
+    const m = map.getMap();
+
+    function completePolygon(verts: Verts) {
+      m.doubleClickZoom.enable();
+      m.getCanvas().style.cursor = '';
+      cursorPxRef.current = null;
+      verticesRef.current = verts;
+      setIsDrawing(false);
+      setHasPolygon(true);
+      setVertexCount(verts.length);
+      onCompleteRef.current([...verts, verts[0]]);
+    }
+
+    const distToFirstPx = (x: number, y: number): number => {
+      const verts = verticesRef.current;
+      if (verts.length === 0) return Infinity;
+      const firstPx = m.project([verts[0][0], verts[0][1]] as [number, number]);
+      return Math.hypot(x - firstPx.x, y - firstPx.y);
+    };
+
+    const onClick = (e: MapMouseEvent) => {
+      const verts = verticesRef.current;
+
+      // Close polygon when user clicks near the first vertex (≥3 points set)
+      if (verts.length >= MIN_VERTICES && distToFirstPx(e.point.x, e.point.y) < CLOSE_RADIUS_PX) {
+        completePolygon(verts);
+        return;
+      }
+
+      verticesRef.current = [...verts, [e.lngLat.lng, e.lngLat.lat]];
+      setVertexCount(verticesRef.current.length);
+      redraw();
+    };
+
+    const onDblClick = () => {
+      // MapLibre fires click then dblclick — strip the extra vertex from the second click
+      const verts = verticesRef.current.slice(0, -1);
+      if (verts.length < MIN_VERTICES) return;
+      setVertexCount(verts.length);
+      completePolygon(verts);
+    };
+
+    // Rubber-band preview + pointer cursor near the closable first vertex
+    const onMouseMove = (e: MapMouseEvent) => {
+      cursorPxRef.current = { x: e.point.x, y: e.point.y };
+      const closable =
+        verticesRef.current.length >= MIN_VERTICES &&
+        distToFirstPx(e.point.x, e.point.y) < CLOSE_RADIUS_PX;
+      m.getCanvas().style.cursor = closable ? 'pointer' : 'crosshair';
+      redraw();
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleCancelDrawingRef.current();
+    };
+
+    m.on('click', onClick);
+    m.on('dblclick', onDblClick);
+    m.on('mousemove', onMouseMove);
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      m.off('click', onClick);
+      m.off('dblclick', onDblClick);
+      m.off('mousemove', onMouseMove);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [map, isDrawing, redraw]);
+
+  // ── Handlers ───────────────────────────────────────────────────────────────
+  const handleStartDrawing = useCallback(() => {
+    if (!map) return;
+    verticesRef.current = [];
+    setVertexCount(0);
+    clearCanvas();
+    map.getMap().doubleClickZoom.disable();
+    map.getMap().getCanvas().style.cursor = 'crosshair';
+    setIsDrawing(true);
+  }, [map, clearCanvas]);
+
+  /** Explicit finish — the touch-friendly alternative to tapping the first point. */
+  const handleFinishDrawing = useCallback(() => {
+    if (!map) return;
+    const verts = verticesRef.current;
+    if (verts.length < MIN_VERTICES) return;
+    const m = map.getMap();
+    m.doubleClickZoom.enable();
+    m.getCanvas().style.cursor = '';
+    cursorPxRef.current = null;
+    setIsDrawing(false);
+    setHasPolygon(true);
+    onCompleteRef.current([...verts, verts[0]]);
+  }, [map]);
+
   const handleClear = useCallback(() => {
     if (!map) return;
     verticesRef.current = [];
+    setVertexCount(0);
     clearCanvas();
     map.getMap().doubleClickZoom.enable();
     map.getMap().getCanvas().style.cursor = '';
@@ -179,101 +298,51 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
     onClear();
   }, [map, clearCanvas, onClear]);
 
+  // Progressive hint: what to do next, not a manual
+  const hint =
+    vertexCount === 0
+      ? t('entry.draw_hint_start')
+      : vertexCount < MIN_VERTICES
+        ? t('entry.draw_hint_more', { count: MIN_VERTICES - vertexCount })
+        : t('entry.draw_hint_close');
+
   // ── UI ─────────────────────────────────────────────────────────────────────
   return (
     <>
       {/* Canvas overlay — pointer-events: none so map pan/zoom still works */}
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          pointerEvents: 'none',
-          zIndex: 5,
-        }}
-      />
+      <canvas ref={canvasRef} className="draw-canvas" />
+
+      {/* Hint pill — centered at top (desktop), below the search pill (mobile) */}
+      {isDrawing && <div className="draw-hint" role="status">{hint}</div>}
 
       {/* Control buttons */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 'var(--space-4)',
-          right: 'var(--space-4)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--space-2)',
-          zIndex: 10,
-          pointerEvents: 'auto',
-        }}
-      >
+      <div className={`draw-controls${isDrawing ? ' draw-controls--drawing' : ''}`}>
         {!isDrawing && !hasPolygon && (
-          <button
-            onClick={handleStartDrawing}
-            style={{
-              background: 'var(--glass-bg)',
-              backdropFilter: 'var(--glass-blur)',
-              border: 'var(--glass-border)',
-              borderRadius: 'var(--radius-md)',
-              padding: 'var(--space-2) var(--space-4)',
-              fontSize: 'var(--font-size-sm)',
-              fontWeight: 'var(--font-weight-medium)',
-              color: 'var(--color-primary)',
-              cursor: 'pointer',
-              boxShadow: 'var(--shadow-md)',
-            }}
-          >
-            {t('entry.draw_area', 'Gebiet zeichnen')}
+          <button type="button" className="draw-btn" onClick={handleStartDrawing}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor"
+              strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M2 9.5 L5 3 L9.5 5.5 L12 2" strokeDasharray="2.5 2" />
+              <circle cx="2" cy="9.5" r="1.4" fill="currentColor" stroke="none" />
+              <circle cx="12" cy="2" r="1.4" fill="currentColor" stroke="none" />
+            </svg>
+            {t('entry.draw_area')}
           </button>
         )}
         {isDrawing && (
           <>
-            <div style={{
-              background: 'var(--color-primary)',
-              borderRadius: 'var(--radius-md)',
-              padding: 'var(--space-2) var(--space-4)',
-              fontSize: 'var(--font-size-sm)',
-              fontWeight: 'var(--font-weight-medium)',
-              color: '#fff',
-              boxShadow: 'var(--shadow-md)',
-              textAlign: 'center',
-            }}>
-              {t('entry.draw_hint', 'Klicken um Punkte zu setzen, doppelklicken zum Abschließen')}
-            </div>
-            <button
-              onClick={handleCancelDrawing}
-              style={{
-                background: 'var(--glass-bg)',
-                backdropFilter: 'var(--glass-blur)',
-                border: 'var(--glass-border)',
-                borderRadius: 'var(--radius-md)',
-                padding: 'var(--space-2) var(--space-4)',
-                fontSize: 'var(--font-size-sm)',
-                color: 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                boxShadow: 'var(--shadow-sm)',
-              }}
-            >
-              {t('entry.cancel_draw', 'Abbrechen')}
+            {vertexCount >= MIN_VERTICES && (
+              <button type="button" className="draw-btn draw-btn--finish" onClick={handleFinishDrawing}>
+                {t('entry.draw_finish')}
+              </button>
+            )}
+            <button type="button" className="draw-btn" onClick={handleCancelDrawing}>
+              {t('entry.cancel_draw')}
             </button>
           </>
         )}
         {hasPolygon && (
-          <button
-            onClick={handleClear}
-            style={{
-              background: 'var(--glass-bg)',
-              backdropFilter: 'var(--glass-blur)',
-              border: 'var(--glass-border)',
-              borderRadius: 'var(--radius-md)',
-              padding: 'var(--space-2) var(--space-4)',
-              fontSize: 'var(--font-size-sm)',
-              fontWeight: 'var(--font-weight-medium)',
-              color: 'var(--color-error)',
-              cursor: 'pointer',
-              boxShadow: 'var(--shadow-sm)',
-            }}
-          >
-            {t('entry.clear_area', 'Gebiet löschen')}
+          <button type="button" className="draw-btn draw-btn--danger" onClick={handleClear}>
+            {t('entry.clear_area')}
           </button>
         )}
       </div>

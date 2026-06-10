@@ -137,6 +137,10 @@
   --color-secondary-hover: #f9b45e;
   --color-secondary-light: rgba(247, 165, 65, 0.16);
 
+  /* Tertiary: brighter ocean blue (matches dark --gradient-brand end) */
+  --color-tertiary:       #3b82d6;
+  --color-tertiary-light: rgba(59, 130, 214, 0.16);
+
   /* Primary: brighter teal for contrast on dark surfaces */
   --color-primary:        #22c3d6;
   --color-primary-hover:  #3ccfe0;

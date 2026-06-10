@@ -83,16 +83,17 @@
   white-space: nowrap;
 }
 
+/* Finder mode color = sunset/orange, matching FinderFilterBar */
 .finder-sort-btn:hover:not(.finder-sort-btn--active) {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
+  background: var(--color-secondary-light);
+  color: var(--color-secondary);
 }
 
 .finder-sort-btn--active {
-  background: var(--color-primary);
+  background: var(--gradient-sunset);
   color: white;
   font-weight: var(--font-weight-semibold);
-  box-shadow: 0 2px 8px rgba(13, 143, 159, 0.30);
+  box-shadow: 0 2px 8px rgba(245, 146, 30, 0.30);
 }
 
 /* ── Results list ───────────────────────────────────────────── */

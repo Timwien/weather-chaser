@@ -67,16 +67,17 @@
   flex-shrink: 0;
 }
 
+/* Finder mode color = sunset/orange (route mode = teal) — see tokens.css */
 .finder-filter-toggle-btn:hover:not(.finder-filter-toggle-btn--active) {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
+  background: var(--color-secondary-light);
+  color: var(--color-secondary);
 }
 
 .finder-filter-toggle-btn--active {
-  background: var(--color-primary);
+  background: var(--gradient-sunset);
   color: white;
   font-weight: var(--font-weight-semibold);
-  box-shadow: 0 2px 8px rgba(13, 143, 159, 0.30);
+  box-shadow: 0 2px 8px rgba(245, 146, 30, 0.30);
 }
 
 /* ── Preset card tiles (Wetterprofil) ───────────────────── */
@@ -105,15 +106,15 @@
 }
 
 .finder-preset-card:hover:not(.finder-preset-card--active) {
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
-  color: var(--color-primary);
+  border-color: var(--color-secondary);
+  background: var(--color-secondary-light);
+  color: var(--color-secondary);
 }
 
 .finder-preset-card--active {
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
-  color: var(--color-primary);
+  border-color: transparent;
+  background: var(--gradient-sunset);
+  color: #ffffff;
   font-weight: var(--font-weight-semibold);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  box-shadow: 0 2px 8px rgba(245, 146, 30, 0.30);
 }

@@ -61,11 +61,16 @@
   --score-fair:   hsl(45,  90%, 55%);   /* Amber */
   --score-good:   hsl(152, 60%, 40%);   /* Green */
 
-  /* ── Signature gradients (road-trip sky language) ─────── */
+  /* ── Signature gradients (road-trip sky language) ───────
+     Color roles: brand/teal = route mode, sunset/orange = weather-finder
+     mode, premium/violet = premium features. Keep these distinct. */
   --gradient-brand:   linear-gradient(135deg, #0d8f9f 0%, #0d619f 100%);   /* teal → ocean */
   --gradient-sunset:  linear-gradient(135deg, #f5921e 0%, #ef5e63 100%);   /* sun → dusk   */
+  --gradient-premium: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);   /* violet → indigo */
   --gradient-horizon: linear-gradient(180deg, rgba(13,143,159,0.10) 0%, rgba(13,143,159,0) 100%);
   --gradient-text:    linear-gradient(110deg, #0d8f9f 10%, #0d619f 90%);
+  --color-premium:        #7c3aed;
+  --color-premium-glow:   rgba(124, 58, 237, 0.30);
 
   /* ── Spacing ──────────────────────────────────────────── */
   --space-1: 4px;
@@ -127,6 +132,11 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
+  /* Secondary: brighter amber + translucent tint for dark surfaces */
+  --color-secondary:       #f7a541;
+  --color-secondary-hover: #f9b45e;
+  --color-secondary-light: rgba(247, 165, 65, 0.16);
+
   /* Primary: brighter teal for contrast on dark surfaces */
   --color-primary:        #22c3d6;
   --color-primary-hover:  #3ccfe0;
@@ -166,6 +176,9 @@
   /* Gradients: brighter neon ends for dark surfaces */
   --gradient-brand:   linear-gradient(135deg, #22c3d6 0%, #3b82d6 100%);
   --gradient-sunset:  linear-gradient(135deg, #f7a541 0%, #f4716f 100%);
+  --gradient-premium: linear-gradient(135deg, #a78bfa 0%, #818cf8 100%);
   --gradient-horizon: linear-gradient(180deg, rgba(34,195,214,0.12) 0%, rgba(34,195,214,0) 100%);
   --gradient-text:    linear-gradient(110deg, #2fd4e6 10%, #5b9bf0 90%);
+  --color-premium:        #a78bfa;
+  --color-premium-glow:   rgba(167, 139, 250, 0.35);
 }

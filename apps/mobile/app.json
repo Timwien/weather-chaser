@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "WeatherChaser",
+    "slug": "weatherchaser",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "scheme": "weatherchaser",
+    "ios": {
+      "bundleIdentifier": "com.weatherchaser.app",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.weatherchaser.app",
+      "edgeToEdgeEnabled": true
+    },
+    "platforms": ["ios", "android"]
+  }
+}

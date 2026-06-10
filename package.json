@@ -9,7 +9,7 @@
     "type-check": "turbo type-check"
   },
   "devDependencies": {
-    "turbo": "latest",
+    "turbo": "^2.9.6",
     "typescript": "^5.0.0"
   }
 }

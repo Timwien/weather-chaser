@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Route, WeatherPreset, ScoringWeights, Town, HourlyWeather } from '@weatherchaser/core';
+import type { SearchGranularity } from '../services/overpass.ts';
 
 type AppMode = 'idle' | 'route-config' | 'weather-finder' | 'loading' | 'results';
 type LoadingStep = 'finding_towns' | 'fetching_weather' | 'optimizing_route' | null;
@@ -93,6 +94,8 @@ interface AppState {
   searchAreas: SearchAreaItem[];
   /** Radius in km for single-place searches */
   searchRadiusKm: number;
+  /** Place granularity for area searches: auto (size-adaptive) | cities | all */
+  searchGranularity: SearchGranularity;
   /** Legacy single search area — kept for route index compatibility */
   searchArea: SearchArea | null;
   tripConfig: TripConfig;
@@ -129,6 +132,7 @@ interface AppState {
   clearSearchAreas: () => void;
   /** Set radius (applies when exactly one place is in searchAreas) */
   setSearchRadiusKm: (km: number) => void;
+  setSearchGranularity: (g: SearchGranularity) => void;
   setTripConfig: (config: Partial<TripConfig>) => void;
   setRoute: (route: Route | null) => void;
   setError: (error: string | null) => void;
@@ -169,6 +173,7 @@ export const useAppStore = create<AppState>((set) => ({
   loadingStep: null,
   searchAreas: DEV_SEARCH_AREAS,
   searchRadiusKm: 50,
+  searchGranularity: 'auto',
   searchArea: null,
   tripConfig: defaultTripConfig,
   route: null,
@@ -192,6 +197,7 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({ searchAreas: state.searchAreas.filter((a) => a.id !== id) })),
   clearSearchAreas: () => set({ searchAreas: [] }),
   setSearchRadiusKm: (km) => set({ searchRadiusKm: km }),
+  setSearchGranularity: (g) => set({ searchGranularity: g }),
   setTripConfig: (config) =>
     set((state) => ({ tripConfig: { ...state.tripConfig, ...config } })),
   setRoute: (route) => set({ route }),

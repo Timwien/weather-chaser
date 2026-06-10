@@ -2,7 +2,9 @@
 import type { Town } from '@weatherchaser/core';
 import { fetchHourlyWeatherBatch } from '../services/weatherHourly.ts';
 import { fetchTownsInRadius, fetchTownsInPolygon } from '../services/overpass.ts';
+import type { SearchGranularity } from '../services/overpass.ts';
 import type { HourlyWeatherData } from '../services/weatherHourly.ts';
+import { dedupeByWeatherCell } from '../utils/spatialDedupe.ts';
 
 const MAX_TOWNS = 120;
 
@@ -20,6 +22,8 @@ export interface FinderWorkerInput {
     towns?: Town[];
     startDate: string;   // ISO YYYY-MM-DD
     endDate: string;     // ISO YYYY-MM-DD
+    /** Place granularity for Overpass queries (default 'auto') */
+    granularity?: SearchGranularity;
   };
 }
 
@@ -46,7 +50,7 @@ self.onmessage = async (event: MessageEvent<FinderWorkerInput>) => {
         self.postMessage({ type: 'error', message: 'missing_polygon' } satisfies FinderWorkerOutput);
         return;
       }
-      const allTowns = await fetchTownsInPolygon(config.polygon);
+      const allTowns = await fetchTownsInPolygon(config.polygon, config.granularity ?? 'auto');
       towns = deduplicateAndCap(allTowns);
     } else {
       // 'around' mode
@@ -54,7 +58,9 @@ self.onmessage = async (event: MessageEvent<FinderWorkerInput>) => {
         self.postMessage({ type: 'error', message: 'missing_coords' } satisfies FinderWorkerOutput);
         return;
       }
-      const allTowns = await fetchTownsInRadius(config.startLat, config.startLng, config.radiusKm);
+      const allTowns = await fetchTownsInRadius(
+        config.startLat, config.startLng, config.radiusKm, config.granularity ?? 'auto',
+      );
       towns = deduplicateAndCap(allTowns);
     }
 
@@ -96,6 +102,9 @@ function deduplicateAndCap(allTowns: Town[]): Town[] {
       unique.push(town);
     }
   }
-  unique.sort((a, b) => (b.population ?? 0) - (a.population ?? 0));
-  return unique.slice(0, MAX_TOWNS);
+  // One place per ~12 km weather-model cell (Open-Meteo grid ~11 km) —
+  // adjacent villages have identical forecasts, so keep the biggest only
+  const thinned = dedupeByWeatherCell(unique);
+  thinned.sort((a, b) => (b.population ?? 0) - (a.population ?? 0));
+  return thinned.slice(0, MAX_TOWNS);
 }

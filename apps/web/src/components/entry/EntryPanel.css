@@ -581,6 +581,48 @@
   gap: var(--space-2);
 }
 
+/* ── Granularity toggle (Auto / cities / all places) ────── */
+
+.loc-granularity-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.loc-granularity-chips {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.loc-granularity-chip {
+  flex: 1;
+  padding: 6px var(--space-2);
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  background: var(--surface-frost);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s, border-color 0.12s, box-shadow 0.12s;
+}
+
+.loc-granularity-chip:hover:not(.loc-granularity-chip--active) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.loc-granularity-chip--active {
+  background: var(--gradient-brand);
+  border-color: transparent;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px var(--color-primary-glow);
+}
+
 .loc-radius-header {
   display: flex;
   align-items: center;
@@ -742,6 +784,24 @@
 
 .cta-btn--secondary:hover {
   box-shadow: 0 10px 28px rgba(245, 146, 30, 0.38);
+}
+
+/* Disabled (inputs missing): dimmed, flat, no lift — still clickable so
+   the click can surface WHAT is missing via .entry-cta-hint */
+.cta-btn--disabled,
+.cta-btn--disabled:hover {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.entry-cta-hint {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-secondary);
+  text-align: center;
+  animation: wc-fade-up 0.3s var(--ease-spring) both;
 }
 
 /* =========================================================

@@ -9,6 +9,7 @@ export function useFinder() {
   const {
     searchAreas,
     searchRadiusKm,
+    searchGranularity,
     tripConfig,
     setFinderLoading,
     setFinderError,
@@ -112,6 +113,7 @@ export function useFinder() {
             polygon,
             startDate,
             endDate,
+            granularity: searchGranularity,
           },
         };
       } else if (area.type === 'place' || area.type === 'radius') {
@@ -140,6 +142,7 @@ export function useFinder() {
             radiusKm: searchRadiusKm,
             startDate,
             endDate,
+            granularity: searchGranularity,
           },
         };
       } else {
@@ -152,7 +155,7 @@ export function useFinder() {
     }
 
     worker.postMessage(input);
-  }, [searchAreas, searchRadiusKm, tripConfig, setFinderLoading, setFinderError, setFinderData, clearFinderData]);
+  }, [searchAreas, searchRadiusKm, searchGranularity, tripConfig, setFinderLoading, setFinderError, setFinderData, clearFinderData]);
 
   return { run };
 }

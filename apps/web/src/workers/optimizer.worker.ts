@@ -4,7 +4,9 @@ import type { Town, OptimizerInput, WeatherScore, ScoringWeights } from '@weathe
 import { fetchWeatherBatch } from '../services/weather.ts';
 import { fetchDistanceMatrix } from '../services/osrm.ts';
 import { fetchTownsInArea, fetchTownsInPolygon } from '../services/overpass.ts';
+import type { SearchGranularity } from '../services/overpass.ts';
 import type { BoundingBox } from '../services/nominatim.ts';
+import { dedupeByWeatherCell } from '../utils/spatialDedupe.ts';
 
 /** Maximum towns passed to the optimizer — keeps weather + matrix calls fast */
 const MAX_TOWNS = 120;
@@ -33,6 +35,8 @@ export interface OptimizerWorkerInput {
     mustVisitCoords: Array<{ lat: number; lng: number; name: string }>;
     /** Premium: overrides the preset weights when set (validated server-side) */
     customWeights?: ScoringWeights | null;
+    /** Place granularity for Overpass queries (default 'auto') */
+    granularity?: SearchGranularity;
   };
 }
 
@@ -49,6 +53,7 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
     // ── Step 1: Fetch towns from each area in parallel ──────────────────────
     self.postMessage({ type: 'progress', step: 'finding_towns' } satisfies OptimizerWorkerOutput);
 
+    const granularity = config.granularity ?? 'auto';
     const townArrays = await Promise.all(
       searchAreas.map(async (area) => {
         if (area.type === 'pinned' && area.lat !== undefined && area.lng !== undefined && area.name) {
@@ -56,36 +61,42 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
           return [{ id: `pinned-${area.name}`, name: area.name, lat: area.lat, lng: area.lng }] as Town[];
         }
         if (area.type === 'polygon' && area.polygon) {
-          return fetchTownsInPolygon(area.polygon);
+          return fetchTownsInPolygon(area.polygon, granularity);
         }
         if (area.bbox) {
           const [west, south, east, north] = area.bbox;
-          return fetchTownsInArea({ south, north, west, east } as BoundingBox);
+          return fetchTownsInArea({ south, north, west, east } as BoundingBox, granularity);
         }
         return [] as Town[];
       }),
     );
 
-    // Merge, deduplicate, sort by population, cap at MAX_TOWNS
+    // Merge + deduplicate by id; keep user-pinned cities separate — they must
+    // never be dropped by the spatial dedup below
     const seen = new Set<string>();
-    const merged: Town[] = [];
+    const pinned: Town[] = [];
+    const fetched: Town[] = [];
     for (const arr of townArrays) {
       for (const town of arr) {
-        if (!seen.has(town.id)) {
-          seen.add(town.id);
-          merged.push(town);
-        }
+        if (seen.has(town.id)) continue;
+        seen.add(town.id);
+        (town.id.startsWith('pinned-') ? pinned : fetched).push(town);
       }
     }
 
-    if (merged.length === 0) {
+    if (pinned.length === 0 && fetched.length === 0) {
       self.postMessage({ type: 'error', message: 'no_towns' } satisfies OptimizerWorkerOutput);
       return;
     }
 
-    // Prioritise by population, then cap
-    merged.sort((a, b) => (b.population ?? 0) - (a.population ?? 0));
-    let towns = merged.slice(0, MAX_TOWNS);
+    // Spatial dedup: Open-Meteo's model grid is ~11 km — keep only the most
+    // populous place per ~12 km cell. Cuts weather calls + matrix size sharply
+    // for drawn areas without losing any weather information.
+    const thinned = dedupeByWeatherCell(fetched);
+
+    // Prioritise by population, cap, then re-attach pinned cities
+    thinned.sort((a, b) => (b.population ?? 0) - (a.population ?? 0));
+    let towns = [...pinned, ...thinned.slice(0, Math.max(0, MAX_TOWNS - pinned.length))];
 
     // Inject must-visit towns (add any not already in the list by name)
     const mustVisitTowns: Town[] = config.mustVisitCoords.map((c, i) => ({

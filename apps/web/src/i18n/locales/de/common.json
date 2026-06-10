@@ -34,7 +34,16 @@
     "clear_area": "Gebiet löschen",
     "route_hint_text": "Route speichern —",
     "route_hint_signin": "Jetzt anmelden",
-    "clear_dates": "Löschen"
+    "clear_dates": "Löschen",
+    "granularity_label": "Orte suchen",
+    "granularity": {
+      "auto": "Auto",
+      "cities": "Nur Städte",
+      "all": "Alle Orte"
+    },
+    "cta_missing_dates": "Wähle zuerst deine Reisedaten",
+    "cta_missing_location": "Füge zuerst einen Ort hinzu oder zeichne ein Gebiet",
+    "cta_missing_both": "Wähle Reisedaten und füge einen Ort hinzu, um zu starten"
   },
   "route_config": {
     "start_location": "Startort",
@@ -182,7 +191,7 @@
     "no_towns_hint": "Versuche, das Suchgebiet zu vergrößern",
     "poor_weather": "Das Wetter in dieser Region ist für die gewählten Daten ungünstig",
     "weather_unavailable": "Wetterdaten für einige Stopps nicht verfügbar",
-    "overpass": "Wetterdaten konnten nicht geladen werden (Overpass API). Bitte erneut versuchen."
+    "overpass": "Orte konnten gerade nicht geladen werden. Versuche ein kleineres Gebiet, „Nur Städte“ oder probiere es erneut."
   },
   "account": {
     "tab_account": "Konto",

@@ -5,6 +5,7 @@
 
 const UPSTREAM_URLS = [
   'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
 ];
 
@@ -31,8 +32,9 @@ export default {
           signal: AbortSignal.timeout(10000),
         });
 
-        // Retry on rate-limit or server error
-        if (upstreamRes.status === 429 || upstreamRes.status >= 500) continue;
+        // Treat ALL non-OK as transient — the public Apache front-ends return
+        // flaky 406/504 even for valid queries; the next mirror often succeeds
+        if (!upstreamRes.ok) continue;
 
         const responseBody = await upstreamRes.text();
         return new Response(responseBody, {

@@ -81,6 +81,35 @@ function RadiusSlider() {
   );
 }
 
+/* ── Granularity toggle (Auto / cities / all places) ────── */
+
+const GRANULARITIES = ['auto', 'cities', 'all'] as const;
+
+function GranularityToggle() {
+  const { t } = useTranslation('common');
+  const { searchGranularity, setSearchGranularity } = useAppStore();
+
+  return (
+    <div className="loc-granularity-wrapper">
+      <span className="loc-radius-label">{t('entry.granularity_label')}</span>
+      <div className="loc-granularity-chips" role="radiogroup" aria-label={t('entry.granularity_label')}>
+        {GRANULARITIES.map((g) => (
+          <button
+            key={g}
+            type="button"
+            role="radio"
+            aria-checked={searchGranularity === g}
+            className={`loc-granularity-chip${searchGranularity === g ? ' loc-granularity-chip--active' : ''}`}
+            onClick={() => setSearchGranularity(g)}
+          >
+            {t(`entry.granularity.${g}`)}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ── Main LocationInput component ───────────────────────── */
 
 export function LocationInput() {
@@ -246,7 +275,7 @@ export function LocationInput() {
                     type="button"
                     className={`loc-tag-heart${isFavorited ? ' loc-tag-heart--active' : ''}`}
                     onClick={() => handleTagFavorite(area)}
-                    aria-label={isFavorited ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
+                    aria-label={isFavorited ? t('favorites.remove') : t('favorites.add')}
                   >
                     <HeartIcon filled={isFavorited} />
                   </button>
@@ -255,7 +284,7 @@ export function LocationInput() {
                   type="button"
                   className="loc-tag-remove"
                   onClick={() => removeSearchArea(area.id)}
-                  aria-label={`Remove ${area.type === 'polygon' ? 'drawn area' : ('name' in area ? area.name : 'area')}`}
+                  aria-label={t('a11y.remove_named', { name: tagName })}
                 >
                   <RemoveIcon />
                 </button>
@@ -322,6 +351,9 @@ export function LocationInput() {
 
       {/* Radius selector — only when exactly one place */}
       {showRadius && <RadiusSlider />}
+
+      {/* Place granularity — relevant when Overpass is queried (radius or drawn area) */}
+      {(showRadius || hasDrawnPolygon) && <GranularityToggle />}
     </div>
   );
 }

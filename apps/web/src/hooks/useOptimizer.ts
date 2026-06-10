@@ -4,7 +4,7 @@ import type { OptimizerWorkerInput, OptimizerWorkerOutput, SearchAreaSpec } from
 
 export function useOptimizer() {
   const workerRef = useRef<Worker | null>(null);
-  const { searchAreas, searchArea, searchRadiusKm, tripConfig, setMode, setLoadingStep, setRoute, setError } =
+  const { searchAreas, searchArea, searchRadiusKm, searchGranularity, tripConfig, setMode, setLoadingStep, setRoute, setError } =
     useAppStore();
 
   useEffect(() => {
@@ -139,11 +139,12 @@ export function useOptimizer() {
         startLng,
         mustVisitCoords: tripConfig.mustVisitCoords,
         customWeights: tripConfig.customWeights,
+        granularity: searchGranularity,
       },
     };
 
     workerRef.current.postMessage(input);
-  }, [searchAreas, searchArea, searchRadiusKm, tripConfig, setMode, setLoadingStep, setRoute, setError]);
+  }, [searchAreas, searchArea, searchRadiusKm, searchGranularity, tripConfig, setMode, setLoadingStep, setRoute, setError]);
 
   return { run };
 }

@@ -34,8 +34,33 @@ export function EntryPanel() {
     }
   }, [route, user]);
 
-  // Show CTAs only in idle mode — once user picks a mode the step expands instead
-  const showCTAs = Boolean(tripConfig.startDate && searchAreas.length > 0 && mode === 'idle');
+  // CTAs are always visible in idle mode — disabled (with feedback on click)
+  // until dates + at least one location are set. Hiding them entirely was
+  // confusing: users didn't know a search existed or what was missing.
+  const hasDates = Boolean(tripConfig.startDate);
+  const hasLocation = searchAreas.length > 0;
+  const ctasReady = hasDates && hasLocation;
+  const showCTAs = mode === 'idle';
+  const [showMissingHint, setShowMissingHint] = useState(false);
+
+  // Clear the hint as soon as the missing inputs are filled
+  useEffect(() => {
+    if (ctasReady) setShowMissingHint(false);
+  }, [ctasReady]);
+
+  const missingHintKey = !hasDates && !hasLocation
+    ? 'entry.cta_missing_both'
+    : !hasDates
+      ? 'entry.cta_missing_dates'
+      : 'entry.cta_missing_location';
+
+  function handleCtaClick(nextMode: 'route-config' | 'weather-finder') {
+    if (!ctasReady) {
+      setShowMissingHint(true);
+      return;
+    }
+    setMode(nextMode);
+  }
 
   const isRouteConfig = mode === 'route-config';
   const isWeatherFinder = mode === 'weather-finder';
@@ -60,23 +85,28 @@ export function EntryPanel() {
         <CriteriaSelector />
       </div>
 
-      {/* CTAs — shown when dates + at least one location filled */}
+      {/* CTAs — always visible in idle; disabled with feedback until inputs are set */}
       {showCTAs && (
         <div className="entry-panel-ctas">
           <button
             type="button"
-            className="cta-btn cta-btn--primary"
-            onClick={() => setMode('route-config')}
+            className={`cta-btn cta-btn--primary${!ctasReady ? ' cta-btn--disabled' : ''}`}
+            aria-disabled={!ctasReady}
+            onClick={() => handleCtaClick('route-config')}
           >
             {t('entry.cta.findRoute')}
           </button>
           <button
             type="button"
-            className="cta-btn cta-btn--secondary"
-            onClick={() => setMode('weather-finder')}
+            className={`cta-btn cta-btn--secondary${!ctasReady ? ' cta-btn--disabled' : ''}`}
+            aria-disabled={!ctasReady}
+            onClick={() => handleCtaClick('weather-finder')}
           >
             {t('entry.cta.findWeather')}
           </button>
+          {showMissingHint && !ctasReady && (
+            <p className="entry-cta-hint" role="status">{t(missingHintKey)}</p>
+          )}
         </div>
       )}
 

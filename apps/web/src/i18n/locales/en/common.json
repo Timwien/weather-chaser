@@ -34,7 +34,16 @@
     "clear_area": "Clear area",
     "route_hint_text": "Save this route —",
     "route_hint_signin": "Sign in now",
-    "clear_dates": "Clear"
+    "clear_dates": "Clear",
+    "granularity_label": "Search places",
+    "granularity": {
+      "auto": "Auto",
+      "cities": "Cities only",
+      "all": "All places"
+    },
+    "cta_missing_dates": "Choose your travel dates first",
+    "cta_missing_location": "Add a place or draw an area first",
+    "cta_missing_both": "Choose travel dates and add a place to start"
   },
   "route_config": {
     "start_location": "Start location",
@@ -182,7 +191,7 @@
     "no_towns_hint": "Try expanding your search area or drawing a larger polygon",
     "poor_weather": "Weather looks unfavorable in this region for these dates",
     "weather_unavailable": "Weather data unavailable for some stops",
-    "overpass": "Weather data couldn't be loaded (Overpass API). Please try again."
+    "overpass": "Places couldn't be loaded right now. Try a smaller area, “Cities only”, or try again."
   },
   "account": {
     "tab_account": "Account",

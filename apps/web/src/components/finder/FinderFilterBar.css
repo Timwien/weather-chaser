@@ -114,6 +114,7 @@
 .finder-preset-card--active {
   border-color: transparent;
   background: var(--gradient-sunset);
+  background-origin: border-box;
   color: #ffffff;
   font-weight: var(--font-weight-semibold);
   box-shadow: 0 2px 8px rgba(245, 146, 30, 0.30);

@@ -628,6 +628,7 @@
 
 .loc-granularity-chip--active {
   background: var(--gradient-brand);
+  background-origin: border-box;
   border-color: transparent;
   color: #ffffff;
   font-weight: 600;
@@ -732,6 +733,9 @@
 
 .criteria-chip--selected {
   background: var(--gradient-brand);
+  /* span the gradient across the (transparent) border too — otherwise it
+     tiles under the border edge and the opposite end-color peeks through */
+  background-origin: border-box;
   border-color: transparent;
   color: #ffffff;
   box-shadow: 0 2px 8px var(--color-primary-glow);
@@ -938,6 +942,7 @@
 .preset-btn--active {
   border-color: transparent;
   background: var(--gradient-brand);
+  background-origin: border-box;
   color: #ffffff;
   font-weight: 600;
   box-shadow: 0 2px 8px var(--color-primary-glow);

@@ -140,6 +140,7 @@
   width: 100%;
   height: auto;
   max-height: none;
+  border: none; /* no duplicate frame inside the pill's glass surface */
   border-radius: 0;
   box-shadow: none;
   backdrop-filter: none;

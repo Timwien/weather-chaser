@@ -149,26 +149,33 @@
   --color-primary-mid:    rgba(34, 195, 214, 0.22);
   --color-primary-glow:   rgba(34, 195, 214, 0.30);
 
-  /* Neutrals: deep charcoal-teal */
+  /* Neutrals: deep charcoal-teal.
+     Text colors deliberately brighter than a solid-surface palette would
+     need: panels are translucent glass, so the effective background is
+     lighter/muddier than --color-surface — tuned for readability on glass. */
   --color-bg:             #0c1416;
   --color-surface:        #14201f;
   --color-surface-raised: #1b2a29;
-  --color-border:         #2a3b3c;
-  --color-border-strong:  #3a5052;
-  --color-text:           #e8f1f1;
-  --color-text-secondary: #a8c4c6;
-  --color-text-muted:     #7a9a9d;
-  --color-text-light:     #5c787b;
+  --color-border:         #35494b;
+  --color-border-strong:  #4a6366;
+  --color-text:           #eef6f6;
+  --color-text-secondary: #bcd5d7;
+  --color-text-muted:     #94b4b7;
+  --color-text-light:     #6f9094;
 
-  /* Glass: deep charcoal glass with subtle neon teal edge */
-  --glass-bg:     rgba(20, 32, 31, 0.72);
-  --glass-border: 1px solid rgba(34, 195, 214, 0.18);
+  /* Semantic: brighter on dark surfaces */
+  --color-error:          #f87171;
+
+  /* Glass: near-opaque charcoal — at lower opacity the backdrop blur over a
+     bright map turned panels muddy gray and killed text contrast (mobile) */
+  --glass-bg:     rgba(16, 26, 28, 0.92);
+  --glass-border: 1px solid rgba(34, 195, 214, 0.22);
   --glass-blur:   blur(20px) saturate(1.4) brightness(0.9);
 
   /* Frosted fills for dark: subtle light frost / near-opaque dark surface */
-  --surface-frost:        rgba(255, 255, 255, 0.06);
-  --surface-frost-soft:   rgba(255, 255, 255, 0.04);
-  --surface-frost-strong: rgba(28, 42, 41, 0.92);
+  --surface-frost:        rgba(255, 255, 255, 0.09);
+  --surface-frost-soft:   rgba(255, 255, 255, 0.06);
+  --surface-frost-strong: rgba(24, 38, 38, 0.95);
 
   /* Shadows: darker, no teal tint on black bg */
   --shadow-sm:    0 1px 3px rgba(0,0,0,0.40);

@@ -432,6 +432,17 @@
   color: rgb(79, 70, 229);
 }
 
+/* Dark: the indigo above is unreadable on dark glass — use light indigo */
+[data-theme="dark"] .loc-tag--polygon {
+  background: rgba(165, 180, 252, 0.14);
+  border-color: rgba(165, 180, 252, 0.40);
+  color: #c0c9fc;
+}
+
+[data-theme="dark"] .loc-tag--polygon .loc-tag-remove {
+  color: #c0c9fc;
+}
+
 /* Input row */
 .loc-input-row {
   display: flex;

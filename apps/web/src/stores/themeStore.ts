@@ -35,11 +35,15 @@ function applyTheme(mode: ThemeMode): void {
 
 interface ThemeState {
   mode: ThemeMode;
+  /** The effective theme after resolving 'system' — consumers (e.g. the map
+   *  style switch) subscribe to this instead of re-deriving matchMedia. */
+  resolved: 'light' | 'dark';
   setMode: (mode: ThemeMode) => void;
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({
   mode: readStoredMode(),
+  resolved: resolve(readStoredMode()),
   setMode: (mode) => {
     try {
       localStorage.setItem(STORAGE_KEY, mode);
@@ -47,7 +51,7 @@ export const useThemeStore = create<ThemeState>((set) => ({
       /* persistence best-effort — still apply for this session */
     }
     applyTheme(mode);
-    set({ mode });
+    set({ mode, resolved: resolve(mode) });
   },
 }));
 
@@ -63,14 +67,17 @@ export function initTheme(): () => void {
       ? window.matchMedia('(prefers-color-scheme: dark)')
       : null;
   const onOSChange = () => {
-    if (useThemeStore.getState().mode === 'system') applyTheme('system');
+    if (useThemeStore.getState().mode === 'system') {
+      applyTheme('system');
+      useThemeStore.setState({ resolved: resolve('system') });
+    }
   };
   mq?.addEventListener('change', onOSChange);
 
   const onStorage = (e: StorageEvent) => {
     if (e.key && e.key !== STORAGE_KEY) return;
     const next = readStoredMode();
-    useThemeStore.setState({ mode: next });
+    useThemeStore.setState({ mode: next, resolved: resolve(next) });
     applyTheme(next);
   };
   if (typeof window !== 'undefined') window.addEventListener('storage', onStorage);

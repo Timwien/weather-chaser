@@ -12,6 +12,11 @@
 
 import type { Town } from '@weatherchaser/core';
 import type { BoundingBox } from './nominatim.ts';
+import {
+  fallbackPlacesInBbox,
+  fallbackPlacesInRadius,
+  fallbackPlacesInPolygon,
+} from './fallbackPlaces.ts';
 
 /** User-facing search granularity (appStore.searchGranularity). */
 export type SearchGranularity = 'auto' | 'cities' | 'all';
@@ -174,25 +179,60 @@ function buildAroundQuery(lat: number, lng: number, radiusKm: number, granularit
   `.trim();
 }
 
+/**
+ * Last line of defense: when every Overpass endpoint failed, serve places
+ * from the bundled GeoNames dataset (European places ≥15k population —
+ * effectively the "cities" tier). Only if THAT also yields nothing does the
+ * original error propagate to the UI.
+ */
+async function withFallback(
+  overpass: () => Promise<Town[]>,
+  fallback: () => Promise<Town[]>,
+): Promise<Town[]> {
+  try {
+    return await overpass();
+  } catch (err) {
+    try {
+      const places = await fallback();
+      if (places.length > 0) {
+        console.warn('[overpass] all endpoints down — using bundled GeoNames fallback');
+        return places;
+      }
+    } catch {
+      // fallback dataset unavailable — fall through to the original error
+    }
+    throw err;
+  }
+}
+
 export async function fetchTownsInRadius(
   lat: number,
   lng: number,
   radiusKm: number,
   granularity: SearchGranularity = 'auto',
 ): Promise<Town[]> {
-  return runOverpassQuery(buildAroundQuery(lat, lng, radiusKm, granularity));
+  return withFallback(
+    () => runOverpassQuery(buildAroundQuery(lat, lng, radiusKm, granularity)),
+    () => fallbackPlacesInRadius(lat, lng, radiusKm),
+  );
 }
 
 export async function fetchTownsInArea(
   bbox: BoundingBox,
   granularity: SearchGranularity = 'auto',
 ): Promise<Town[]> {
-  return runOverpassQuery(buildBboxQuery(bbox, granularity));
+  return withFallback(
+    () => runOverpassQuery(buildBboxQuery(bbox, granularity)),
+    () => fallbackPlacesInBbox(bbox),
+  );
 }
 
 export async function fetchTownsInPolygon(
   polygon: [number, number][],
   granularity: SearchGranularity = 'auto',
 ): Promise<Town[]> {
-  return runOverpassQuery(buildPolygonQuery(polygon, granularity));
+  return withFallback(
+    () => runOverpassQuery(buildPolygonQuery(polygon, granularity)),
+    () => fallbackPlacesInPolygon(polygon),
+  );
 }

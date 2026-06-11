@@ -3,6 +3,7 @@ import { Map, useMap } from '@vis.gl/react-maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Map as MaplibreMap, MapMouseEvent } from 'maplibre-gl';
 import { useAppStore } from '../../stores/appStore.ts';
+import { useThemeStore } from '../../stores/themeStore.ts';
 import { reverseGeocode } from '../../services/nominatim.ts';
 import { DrawingControls } from './DrawingControls.tsx';
 import { RouteLayer } from './RouteLayer.tsx';
@@ -11,9 +12,12 @@ import { FinderMarkers } from './FinderMarkers.tsx';
 import type { FinderResultData } from '../finder/FinderResultRow.tsx';
 import './MapContainer.css';
 
-// CartoDB Positron GL — clean Google Maps-like style, free, no API key required
-// Light grey roads, white background, subtle labels — professional look
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+// CartoDB GL styles — free, no API key required.
+// Positron (light) / Dark Matter (dark) — the map follows the app theme so
+// dark-mode glass panels never float over a glaring light map (mobile
+// readability issue: blur over light map turns dark glass into muddy gray).
+const MAP_STYLE_LIGHT = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+const MAP_STYLE_DARK = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
 interface MapContainerProps {
   selectedStopIndex: number | null;
@@ -38,17 +42,23 @@ interface MapContainerProps {
 
 /** Switch all symbol layers to prefer German names (name:de → name fallback) */
 function switchLabelsToGerman(map: MaplibreMap) {
-  const style = map.getStyle();
-  if (!style) return;
-  for (const layer of style.layers) {
-    if (layer.type !== 'symbol') continue;
-    const field = map.getLayoutProperty(layer.id, 'text-field');
-    if (!field) continue;
-    map.setLayoutProperty(layer.id, 'text-field', [
-      'coalesce',
-      ['get', 'name:de'],
-      ['get', 'name'],
-    ]);
+  // Runs again after every style swap (light↔dark); guarded because styledata
+  // can fire while the new style is still loading
+  try {
+    const style = map.getStyle();
+    if (!style?.layers) return;
+    for (const layer of style.layers) {
+      if (layer.type !== 'symbol') continue;
+      const field = map.getLayoutProperty(layer.id, 'text-field');
+      if (!field) continue;
+      map.setLayoutProperty(layer.id, 'text-field', [
+        'coalesce',
+        ['get', 'name:de'],
+        ['get', 'name'],
+      ]);
+    }
+  } catch {
+    /* style mid-load — the next styledata event retries */
   }
 }
 
@@ -198,8 +208,15 @@ export function MapContainer({
   sheetBottomPadding,
 }: MapContainerProps) {
   const { route, mode } = useAppStore();
+  const resolvedTheme = useThemeStore((s) => s.resolved);
 
   const handleLoad = useCallback((event: { target: MaplibreMap }) => {
+    switchLabelsToGerman(event.target);
+  }, []);
+
+  // styledata fires after setStyle (theme switch) — re-apply German labels,
+  // which reset with the new style. Idempotent, so repeated events are fine.
+  const handleStyleData = useCallback((event: { target: MaplibreMap }) => {
     switchLabelsToGerman(event.target);
   }, []);
 
@@ -211,9 +228,10 @@ export function MapContainer({
           latitude: 51.1657,
           zoom: 5.5,
         }}
-        mapStyle={MAP_STYLE}
+        mapStyle={resolvedTheme === 'dark' ? MAP_STYLE_DARK : MAP_STYLE_LIGHT}
         style={{ width: '100%', height: '100%' }}
         onLoad={handleLoad}
+        onStyleData={handleStyleData}
       >
         {/* Always-present: map-positioning helpers */}
         <FitRouteOnSelection selectedStopIndex={selectedStopIndex} sheetBottomPadding={sheetBottomPadding} />

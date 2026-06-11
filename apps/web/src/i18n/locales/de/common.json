@@ -192,7 +192,8 @@
     "no_towns_hint": "Versuche, das Suchgebiet zu vergrößern",
     "poor_weather": "Das Wetter in dieser Region ist für die gewählten Daten ungünstig",
     "weather_unavailable": "Wetterdaten für einige Stopps nicht verfügbar",
-    "overpass": "Orte konnten gerade nicht geladen werden. Versuche ein kleineres Gebiet, „Nur Städte“ oder probiere es erneut."
+    "overpass": "Orte konnten gerade nicht geladen werden. Versuche ein kleineres Gebiet, „Nur Städte“ oder probiere es erneut.",
+    "weather_failed": "Der Wetterdienst ist gerade nicht erreichbar. Bitte in ein paar Minuten erneut versuchen."
   },
   "account": {
     "tab_account": "Konto",

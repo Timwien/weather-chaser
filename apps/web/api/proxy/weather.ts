@@ -49,14 +49,39 @@ export default {
       upstream.searchParams.set('apikey', apiKey);
     }
 
-    const upstreamRes = await fetch(upstream.toString());
-    const body = await upstreamRes.text();
+    // Open-Meteo fails transiently under load (measured: 502 → 504 → 500 in a
+    // row, then recovery). Retry with backoff and a per-attempt timeout — the
+    // function previously had NO timeout and hung 60 s until Vercel killed it.
+    let lastStatus = 502;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) await new Promise((r) => setTimeout(r, 600 * attempt));
+      try {
+        const upstreamRes = await fetch(upstream.toString(), {
+          signal: AbortSignal.timeout(12000),
+        });
+        lastStatus = upstreamRes.status;
+        if (!upstreamRes.ok) continue;
 
-    return new Response(body, {
-      status: upstreamRes.status,
+        const body = await upstreamRes.text();
+        return new Response(body, {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            // Cache ONLY successes — error bodies must never sit in the CDN
+            'Cache-Control': 'public, s-maxage=21600, stale-while-revalidate=3600',
+            'Access-Control-Allow-Origin': '*',
+          },
+        });
+      } catch {
+        lastStatus = 504; // timeout / network — try again
+      }
+    }
+
+    return new Response(JSON.stringify({ error: 'open_meteo_unavailable' }), {
+      status: lastStatus >= 400 ? lastStatus : 502,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=21600, stale-while-revalidate=3600',
+        'Cache-Control': 'no-store',
         'Access-Control-Allow-Origin': '*',
       },
     });

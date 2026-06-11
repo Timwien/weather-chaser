@@ -1,4 +1,5 @@
 import type { Town, DailyWeather } from '@weatherchaser/core';
+import { fetchJsonWithRetry } from './fetchRetry.ts';
 
 export interface WeatherData {
   townId: string;
@@ -21,7 +22,10 @@ const WEATHER_DIRECT = 'https://api.open-meteo.com/v1/forecast';
 
 /**
  * Fetch daily weather aggregates for a list of towns from Open-Meteo.
- * Batches requests in groups of 50 (API practical limit).
+ * Batches requests in groups of 50 (API practical limit). Each batch is
+ * retried on transient failures and recursively split in half when a whole
+ * batch keeps failing — large multi-location requests are the first to die
+ * when Open-Meteo is degraded.
  */
 export async function fetchWeatherBatch(
   towns: Town[],
@@ -35,11 +39,30 @@ export async function fetchWeatherBatch(
 
   for (let i = 0; i < towns.length; i += BATCH_SIZE) {
     const batch = towns.slice(i, i + BATCH_SIZE);
-    const batchResults = await fetchBatch(batch, startDate, endDate);
+    const batchResults = await fetchBatchResilient(batch, startDate, endDate);
     results.push(...batchResults);
   }
 
   return results;
+}
+
+async function fetchBatchResilient(
+  towns: Town[],
+  startDate: string,
+  endDate: string,
+): Promise<WeatherData[]> {
+  try {
+    return await fetchBatch(towns, startDate, endDate);
+  } catch (err) {
+    // Split-on-failure: halve the batch until single-digit sizes, then give up
+    if (towns.length <= 8) throw err;
+    const mid = Math.ceil(towns.length / 2);
+    const [a, b] = await Promise.all([
+      fetchBatchResilient(towns.slice(0, mid), startDate, endDate),
+      fetchBatchResilient(towns.slice(mid), startDate, endDate),
+    ]);
+    return [...a, ...b];
+  }
 }
 
 async function fetchBatch(
@@ -59,11 +82,8 @@ async function fetchBatch(
   url.searchParams.set('end_date', endDate);
   url.searchParams.set('timezone', 'auto');
 
-  const res = await fetch(url.toString());
-  if (!res.ok) throw new Error(`Open-Meteo error: ${res.status}`);
-
   // Single location → object; multiple → array
-  const raw: unknown = await res.json();
+  const raw = await fetchJsonWithRetry(url.toString());
   const dataArray: Array<{ daily?: DailyWeather }> = Array.isArray(raw) ? raw : [raw];
 
   return towns.map((town, idx) => ({

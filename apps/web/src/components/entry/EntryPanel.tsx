@@ -141,7 +141,9 @@ export function EntryPanel() {
               ? t('errors.no_towns', 'Keine Orte gefunden. Bitte ein größeres Gebiet zeichnen.')
               : error.startsWith('Overpass')
                 ? t('errors.overpass', 'Wetterdaten konnten nicht geladen werden (Overpass API). Bitte erneut versuchen.')
-                : error}
+                : /^HTTP \d|Open-Meteo|TimeoutError|Failed to fetch/i.test(error)
+                  ? t('errors.weather_failed')
+                  : error}
           </span>
           <button
             type="button"

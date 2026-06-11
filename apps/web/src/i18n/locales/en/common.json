@@ -192,7 +192,8 @@
     "no_towns_hint": "Try expanding your search area or drawing a larger polygon",
     "poor_weather": "Weather looks unfavorable in this region for these dates",
     "weather_unavailable": "Weather data unavailable for some stops",
-    "overpass": "Places couldn't be loaded right now. Try a smaller area, “Cities only”, or try again."
+    "overpass": "Places couldn't be loaded right now. Try a smaller area, “Cities only”, or try again.",
+    "weather_failed": "The weather service is unavailable right now. Please try again in a few minutes."
   },
   "account": {
     "tab_account": "Account",

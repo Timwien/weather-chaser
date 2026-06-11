@@ -1,4 +1,5 @@
 import type { Town, HourlyWeather } from '@weatherchaser/core';
+import { fetchJsonWithRetry } from './fetchRetry.ts';
 
 export type { HourlyWeather };
 
@@ -37,16 +38,32 @@ async function fetchHourlyBatch(
   url.searchParams.set('end_date', endDate);
   url.searchParams.set('timezone', 'auto');
 
-  const res = await fetch(url.toString());
-  if (!res.ok) throw new Error(`Open-Meteo error: ${res.status}`);
-
-  const raw: unknown = await res.json();
+  const raw = await fetchJsonWithRetry(url.toString());
   const dataArray: Array<{ hourly?: HourlyWeather }> = Array.isArray(raw) ? raw : [raw];
 
   return towns.map((town, idx) => ({
     townId: town.id,
     hourly: dataArray[idx]?.hourly ?? EMPTY_HOURLY,
   }));
+}
+
+/** Split-on-failure wrapper — see weather.ts fetchBatchResilient for rationale. */
+async function fetchHourlyBatchResilient(
+  towns: Town[],
+  startDate: string,
+  endDate: string,
+): Promise<HourlyWeatherData[]> {
+  try {
+    return await fetchHourlyBatch(towns, startDate, endDate);
+  } catch (err) {
+    if (towns.length <= 8) throw err;
+    const mid = Math.ceil(towns.length / 2);
+    const [a, b] = await Promise.all([
+      fetchHourlyBatchResilient(towns.slice(0, mid), startDate, endDate),
+      fetchHourlyBatchResilient(towns.slice(mid), startDate, endDate),
+    ]);
+    return [...a, ...b];
+  }
 }
 
 /** Fetch hourly weather for up to 120 towns, batching at 50 per request (Open-Meteo limit). */
@@ -59,7 +76,7 @@ export async function fetchHourlyWeatherBatch(
   const BATCH_SIZE = 50;
   const results: HourlyWeatherData[] = [];
   for (let i = 0; i < towns.length; i += BATCH_SIZE) {
-    results.push(...await fetchHourlyBatch(towns.slice(i, i + BATCH_SIZE), startDate, endDate));
+    results.push(...await fetchHourlyBatchResilient(towns.slice(i, i + BATCH_SIZE), startDate, endDate));
   }
   return results;
 }

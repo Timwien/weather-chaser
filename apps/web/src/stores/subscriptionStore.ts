@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { getSupabase, supabaseConfigured } from '../lib/supabase.ts';
+import { PREMIUM_FREE_BETA } from '../lib/premiumBeta.ts';
 
 /**
  * Subscription tier state (Phase 4 freemium).
@@ -21,10 +22,15 @@ interface SubscriptionState {
 }
 
 export const useSubscriptionStore = create<SubscriptionState>((set) => ({
-  tier: 'free',
+  // Pre-GA beta: premium is free for everyone (see lib/premiumBeta.ts)
+  tier: PREMIUM_FREE_BETA ? 'premium' : 'free',
   loading: false,
 
   refresh: async (userId) => {
+    if (PREMIUM_FREE_BETA) {
+      set({ tier: 'premium', loading: false });
+      return;
+    }
     if (!userId || !supabaseConfigured) {
       set({ tier: 'free', loading: false });
       return;

@@ -100,6 +100,7 @@
   },
   "premium": {
     "badge": "Premium",
+    "beta_badge": "Free in beta",
     "weights_title": "Custom weights",
     "weights_locked": "Fine-tune how sunshine, rain, warmth and wind are weighted — a Premium feature.",
     "weights_customize": "Customize",

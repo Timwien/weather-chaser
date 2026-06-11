@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.ts';
 import { useThemeStore } from '../../stores/themeStore.ts';
 import { useSubscriptionStore } from '../../stores/subscriptionStore.ts';
+import { PREMIUM_FREE_BETA } from '../../lib/premiumBeta.ts';
 
 interface SettingsTabProps {
   onClose: () => void;
@@ -114,8 +115,9 @@ export function SettingsTab({ onClose }: SettingsTabProps) {
 
       <div className="settings-tab-divider" />
 
-      {/* Subscription — only shown to premium users (Phase 4) */}
-      {user && tier === 'premium' && (
+      {/* Subscription — only for real (paid) premium; hidden during the free
+          beta where there is no Stripe customer to manage */}
+      {user && tier === 'premium' && !PREMIUM_FREE_BETA && (
         <section className="settings-tab-section">
           <h3 className="settings-tab-section-title">{t('premium.manage_title')}</h3>
           <p className="settings-tab-guest-note">{t('premium.manage_active')}</p>

@@ -16,6 +16,13 @@ export default {
     const user = await authenticateRequest(request);
     if (!user) return new Response('Unauthorized', { status: 401 });
 
+    // Pre-GA beta: premium is free for every authenticated user.
+    // End the beta by setting PREMIUM_FREE_BETA=false in Vercel (see
+    // src/lib/premiumBeta.ts for the matching client flag).
+    if (process.env.PREMIUM_FREE_BETA !== 'false') {
+      return json({ premium: true, status: 'beta' });
+    }
+
     const { data } = await adminClient()
       .from('subscriptions')
       .select('status, current_period_end')

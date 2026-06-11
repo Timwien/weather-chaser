@@ -4,6 +4,7 @@ import type { ScoringWeights } from '@weatherchaser/core';
 import { PRESETS } from '@weatherchaser/core';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useSubscriptionStore } from '../../stores/subscriptionStore.ts';
+import { PREMIUM_FREE_BETA } from '../../lib/premiumBeta.ts';
 import { UpgradeModal } from './UpgradeModal.tsx';
 import './CustomWeights.css';
 
@@ -57,7 +58,9 @@ export function CustomWeights() {
       <div className="custom-weights-header">
         <span className="custom-weights-title">
           {t('premium.weights_title')}
-          <span className="custom-weights-badge">{t('premium.badge')}</span>
+          <span className="custom-weights-badge">
+            {PREMIUM_FREE_BETA ? t('premium.beta_badge') : t('premium.badge')}
+          </span>
         </span>
         {isPremium && (
           <button type="button" className="custom-weights-toggle" onClick={handleToggle}>

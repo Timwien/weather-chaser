@@ -100,6 +100,7 @@
   },
   "premium": {
     "badge": "Premium",
+    "beta_badge": "In der Beta kostenlos",
     "weights_title": "Eigene Gewichtung",
     "weights_locked": "Feinjustiere, wie Sonne, Regen, Wärme und Wind gewichtet werden — ein Premium-Feature.",
     "weights_customize": "Anpassen",

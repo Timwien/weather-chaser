@@ -164,8 +164,12 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
+Operative Kurzliste (inkl. Launch-Checkliste + Beta-Einschränkungen): **docs/OPEN-ITEMS.md** (Stand 2026-06-11)
+
 - [pre-launch] Finder-Suchen: add save button in the finder UI so users can save searches (currently the SavedTab section is always empty — no UI to create entries)
 - [pre-launch] Email delivery: configure Resend custom SMTP (already in memory file)
+- [pre-launch] Legal pages: /privacy and /tos are linked from Settings but 404 — Impressum + Datenschutz required for DE market
+- [verify] User checklist on prod (email signup, Google login, save route, sheet drag feel) → then document Phase 3 Plan 03-07 as complete
 
 ### Blockers/Concerns
 

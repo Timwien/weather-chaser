@@ -39,6 +39,7 @@ Repo: `github.com/Timwien/weather-chaser` · Stand: 2026-06-11
 
 ## Teil 2 — Google OAuth (Sign in with Google)
 
+<!--
 1. https://console.cloud.google.com → mit Google-Konto anmelden.
 2. Projekt-Dropdown (oben) → **New Project** → Name `WeatherChaser` → Create →
    Projekt auswählen.
@@ -62,6 +63,7 @@ Repo: `github.com/Timwien/weather-chaser` · Stand: 2026-06-11
 
 *(Apple Sign-in: übersprungen — braucht Apple-Developer-Account, kommt mit
 den nativen Apps in Phase 5.)*
+-->
 
 ---
 

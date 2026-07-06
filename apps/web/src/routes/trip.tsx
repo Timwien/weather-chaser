@@ -14,7 +14,7 @@ export const Route = createRoute({
 
 function TripPage() {
   const [selectedStopIndex, setSelectedStopIndex] = useState<number | null>(null);
-  const { setRoute, setTripConfig, setMode } = useAppStore();
+  const { setRoute, setTripConfig, setWeatherPrefs, setMode } = useAppStore();
 
   useEffect(() => {
     const parsed = parseShareUrl(window.location.search);
@@ -24,12 +24,13 @@ function TripPage() {
         endDate: parsed.config.endDate,
         totalDays: parsed.config.totalDays,
         maxStay: parsed.config.maxStay,
-        preset: parsed.config.preset as 'beach' | 'hiking' | 'sightseeing',
       });
+      // U2: preset lives in the shared weatherPrefs slice now.
+      setWeatherPrefs({ preset: parsed.config.preset as 'beach' | 'hiking' | 'sightseeing' });
       setRoute(parsed.route);
       setMode('results');
     }
-  }, [setRoute, setTripConfig, setMode]);
+  }, [setRoute, setTripConfig, setWeatherPrefs, setMode]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>

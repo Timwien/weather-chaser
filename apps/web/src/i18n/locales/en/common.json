@@ -1,4 +1,7 @@
 {
+  "common": {
+    "reload": "Reload"
+  },
   "app": {
     "title": "WeatherChaser",
     "tagline": "Chase perfect weather"
@@ -8,6 +11,7 @@
     "dates_placeholder": "Select dates",
     "dates_select_end": "Select end date",
     "location": "Where",
+    "weather_prefs": "Weather preference",
     "location_placeholder": "Add a place...",
     "location_add": "Add",
     "location_pick_map": "Pick on map",
@@ -24,6 +28,8 @@
       "temperature": "Warmth",
       "wind": "Calm wind"
     },
+    "drawn_area": "Drawn area",
+    "polygon_active_placeholder": "Area drawn",
     "draw_area": "Draw area",
     "draw_hint": "Click to set points · click first point to finish",
     "draw_hint_start": "Tap the map to set points",
@@ -41,6 +47,7 @@
       "cities": "Cities only",
       "all": "All places"
     },
+    "nearby_label": "Nearby",
     "cta_missing_dates": "Choose your travel dates first",
     "cta_missing_location": "Add a place or draw an area first",
     "cta_missing_both": "Choose travel dates and add a place to start"
@@ -61,7 +68,10 @@
     "label": "Weather profile",
     "beach": "Beach",
     "hiking": "Hiking",
-    "sightseeing": "Sightseeing"
+    "sightseeing": "Sightseeing",
+    "beach_desc": "Lots of sun, warm, little wind",
+    "hiking_desc": "Dry, mild, little wind",
+    "sightseeing_desc": "Mainly dry"
   },
   "itinerary": {
     "title": "Your Route",
@@ -89,7 +99,10 @@
     "search": "Search"
   },
   "map": {
-    "stop_popup": "Score: {{score}}"
+    "stop_popup": "Score: {{score}}",
+    "tap_add_title": "Add place?",
+    "tap_add_confirm": "Add",
+    "tap_hint": "Tap the map to pick a place"
   },
   "share": {
     "export_google": "Open in Google Maps",
@@ -135,7 +148,8 @@
   "loading": {
     "finding_towns": "Finding towns...",
     "fetching_weather": "Fetching weather...",
-    "optimizing_route": "Optimizing route..."
+    "optimizing_route": "Optimizing route...",
+    "taking_long": "Taking unusually long — reload?"
   },
   "finder": {
     "start_label": "Starting point",
@@ -189,11 +203,20 @@
   },
   "errors": {
     "no_towns": "No towns found in this area",
+    "no_towns_small_area": "No larger places found in this area. Enlarge the area or choose “All places”.",
     "no_towns_hint": "Try expanding your search area or drawing a larger polygon",
     "poor_weather": "Weather looks unfavorable in this region for these dates",
     "weather_unavailable": "Weather data unavailable for some stops",
     "overpass": "Places couldn't be loaded right now. Try a smaller area, “Cities only”, or try again.",
-    "weather_failed": "The weather service is unavailable right now. Please try again in a few minutes."
+    "overpass_unavailable": "Places couldn't be loaded right now. Try a smaller area, “Cities only”, or try again.",
+    "weather_failed": "The weather service is unavailable right now. Please try again in a few minutes.",
+    "missing_config": "Please choose your travel dates (start and end).",
+    "missing_polygon": "Please draw an area first.",
+    "missing_coords": "This place is missing coordinates. Please pick it again.",
+    "no_location": "Please add a place or draw an area first.",
+    "unknown": "Something went wrong. Please try again.",
+    "boundary_title": "Something went wrong",
+    "boundary_text": "The app hit an unexpected error. Reload to continue."
   },
   "account": {
     "tab_account": "Account",
@@ -238,6 +261,8 @@
     "settings_delete_error": "Error {{status}}: Account could not be deleted.",
     "settings_guest_note": "Sign in to manage settings.",
     "settings_language_title": "Language",
+    "settings_reload_title": "App",
+    "settings_reload_hint": "Reloads the app if it stops responding.",
     "settings_theme_title": "Appearance",
     "settings_theme_system": "System",
     "settings_theme_light": "Light",
@@ -269,6 +294,8 @@
     "close": "Close",
     "loading": "Loading…",
     "remove_named": "Remove {{name}}",
-    "max_days_ahead": "Max. {{days}} days ahead"
+    "max_days_ahead": "Max. {{days}} days ahead",
+    "reload": "Reload app",
+    "add_nearby": "Add {{name}}"
   }
 }

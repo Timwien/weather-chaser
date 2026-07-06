@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
+import { formatWeekday } from '../../utils/dateFormat.ts';
 import {
   FullDayIcon, MorningIcon, EveningIcon,
   BeachIcon, HikingIcon, SightseeingIcon,
@@ -31,17 +32,9 @@ function dateRange(startDate: string, endDate: string): string[] {
   return dates;
 }
 
-/** Format a date string as short weekday + day number in German, e.g. "Mo 3" */
-function formatDayLabel(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00Z');
-  const weekday = new Intl.DateTimeFormat('de', { weekday: 'short', timeZone: 'UTC' }).format(d);
-  const day = d.getUTCDate();
-  return `${weekday} ${day}`;
-}
-
 export function FinderFilterBar() {
-  const { t } = useTranslation('common');
-  const { finderConfig, setFinderConfig, tripConfig } = useAppStore();
+  const { t, i18n } = useTranslation('common');
+  const { finderConfig, setFinderConfig, weatherPrefs, setWeatherPrefs, tripConfig } = useAppStore();
 
   const days =
     tripConfig.startDate && tripConfig.endDate
@@ -69,7 +62,7 @@ export function FinderFilterBar() {
                 className={`finder-filter-toggle-btn${finderConfig.selectedDay === dateStr ? ' finder-filter-toggle-btn--active' : ''}`}
                 onClick={() => setFinderConfig({ selectedDay: dateStr })}
               >
-                {formatDayLabel(dateStr)}
+                {formatWeekday(dateStr, i18n.language)}
               </button>
             ))}
           </div>
@@ -102,8 +95,8 @@ export function FinderFilterBar() {
             <button
               key={value}
               type="button"
-              className={`finder-preset-card${finderConfig.preset === value ? ' finder-preset-card--active' : ''}`}
-              onClick={() => setFinderConfig({ preset: value })}
+              className={`finder-preset-card${weatherPrefs.customWeights === null && weatherPrefs.preset === value ? ' finder-preset-card--active' : ''}`}
+              onClick={() => setWeatherPrefs({ preset: value, customWeights: null })}
             >
               <Icon size={22} />
               <span>{t(labelKey, def)}</span>

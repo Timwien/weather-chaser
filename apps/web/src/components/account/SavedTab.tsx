@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatRange } from '../../utils/dateFormat.ts';
 import { useAuthStore } from '../../stores/authStore.ts';
 import { useAppStore } from '../../stores/appStore.ts';
 import { supabaseConfigured } from '../../lib/supabase.ts';
@@ -40,23 +41,12 @@ function BookmarkIcon() {
   );
 }
 
-function formatDateRange(from: string | null, to: string | null): string {
-  if (!from && !to) return '';
-  if (from && to) {
-    const f = new Date(from).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-    const t = new Date(to).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    return `${f} – ${t}`;
-  }
-  if (from) return new Date(from).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  return '';
-}
-
 interface SavedTabProps {
   onClose: () => void;
 }
 
 export function SavedTab({ onClose }: SavedTabProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuthStore();
   const setRoute = useAppStore((s) => s.setRoute);
   const setMode = useAppStore((s) => s.setMode);
@@ -239,7 +229,7 @@ export function SavedTab({ onClose }: SavedTabProps) {
                   <div className="saved-card-name">{route.name}</div>
                   {(route.date_from || route.date_to) && (
                     <div className="saved-card-meta">
-                      {formatDateRange(route.date_from, route.date_to)}
+                      {formatRange(route.date_from, route.date_to, i18n.language)}
                     </div>
                   )}
                 </div>

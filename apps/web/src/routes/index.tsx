@@ -59,6 +59,13 @@ function IndexPage() {
   const sheetExists = showResults || showFinderPanel;
   const sheetPx = sheetExists ? getSheetHeights()[sheetSnap] : 0;
 
+  // B1: reset stale snap state when the sheet unmounts (e.g. "Back" → reset()).
+  // Without this, a snap of 2 (set on list-item tap) would keep the search pill
+  // hidden forever, because `hidden` used to also test `sheetSnap === 2`.
+  useEffect(() => {
+    if (!sheetExists) setSheetSnap(0);
+  }, [sheetExists]);
+
   // ── Panel callbacks (list-item tap → FULL snap on mobile) ──────────────────
 
   function handleStopSelectFromPanel(idx: number) {
@@ -115,8 +122,8 @@ function IndexPage() {
         <MapContainer
           selectedStopIndex={selectedStopIndex}
           onStopClick={handleStopClickFromMap}
-          onDrawComplete={!showResults ? (polygon) => addSearchArea({ type: 'polygon', id: DRAWN_AREA_ID, polygon }) : undefined}
-          onDrawClear={!showResults ? () => removeSearchArea(DRAWN_AREA_ID) : undefined}
+          onDrawComplete={(polygon) => addSearchArea({ type: 'polygon', id: DRAWN_AREA_ID, polygon })}
+          onDrawClear={() => removeSearchArea(DRAWN_AREA_ID)}
           finderResults={computedFinderResults.length > 0 ? computedFinderResults : undefined}
           selectedFinderIndex={selectedFinderIndex}
           onFinderClick={handleFinderClickFromMap}
@@ -129,7 +136,7 @@ function IndexPage() {
         <MobileSearchBar
           isExpanded={searchExpanded}
           onExpandedChange={setSearchExpanded}
-          hidden={sheetSnap === 2 || sheetExists}
+          hidden={sheetExists}
         >
           {/* The expanded search pill is now the SINGLE, complete search surface:
               EntryPanel owns the mode CTAs, RouteConfigStep/WeatherFinderStep and the
@@ -189,8 +196,8 @@ function IndexPage() {
         <MapContainer
           selectedStopIndex={selectedStopIndex}
           onStopClick={setSelectedStopIndex}
-          onDrawComplete={!showResults ? (polygon) => addSearchArea({ type: 'polygon', id: DRAWN_AREA_ID, polygon }) : undefined}
-          onDrawClear={!showResults ? () => removeSearchArea(DRAWN_AREA_ID) : undefined}
+          onDrawComplete={(polygon) => addSearchArea({ type: 'polygon', id: DRAWN_AREA_ID, polygon })}
+          onDrawClear={() => removeSearchArea(DRAWN_AREA_ID)}
           finderResults={computedFinderResults.length > 0 ? computedFinderResults : undefined}
           selectedFinderIndex={selectedFinderIndex}
           onFinderClick={(idx) => {

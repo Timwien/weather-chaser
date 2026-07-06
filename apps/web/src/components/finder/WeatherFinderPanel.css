@@ -107,3 +107,11 @@
 }
 
 /* Mobile overrides for .weather-finder-panel inside .mobile-sheet-content are in global.css */
+
+/* U1 — touch-target pass for the sort bar on mobile */
+@media (max-width: 768px) {
+  .finder-sort-btn {
+    min-height: 40px;
+    padding: 8px 14px;
+  }
+}

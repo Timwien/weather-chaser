@@ -7,6 +7,7 @@ import { fetchTownsInArea, fetchTownsInPolygon } from '../services/overpass.ts';
 import type { SearchGranularity } from '../services/overpass.ts';
 import type { BoundingBox } from '../services/nominatim.ts';
 import { dedupeByWeatherCell } from '../utils/spatialDedupe.ts';
+import { classifyError, type AppErrorCode } from '../services/errorCodes.ts';
 
 /** Maximum towns passed to the optimizer — keeps weather + matrix calls fast */
 const MAX_TOWNS = 120;
@@ -43,7 +44,7 @@ export interface OptimizerWorkerInput {
 export type OptimizerWorkerOutput =
   | { type: 'progress'; step: 'finding_towns' | 'fetching_weather' | 'optimizing_route' }
   | { type: 'complete'; result: ReturnType<typeof optimizeRoute> }
-  | { type: 'error'; message: string };
+  | { type: 'error'; code: AppErrorCode };
 
 self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
   if (event.data.type !== 'run') return;
@@ -85,7 +86,7 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
     }
 
     if (pinned.length === 0 && fetched.length === 0) {
-      self.postMessage({ type: 'error', message: 'no_towns' } satisfies OptimizerWorkerOutput);
+      self.postMessage({ type: 'error', code: 'no_towns' } satisfies OptimizerWorkerOutput);
       return;
     }
 
@@ -219,7 +220,7 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
   } catch (err) {
     self.postMessage({
       type: 'error',
-      message: err instanceof Error ? err.message : 'unknown_error',
+      code: classifyError(err),
     } satisfies OptimizerWorkerOutput);
   }
 };

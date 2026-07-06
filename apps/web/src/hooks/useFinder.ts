@@ -60,15 +60,15 @@ export function useFinder() {
         workerRef.current = null;
       }
       if (msg.type === 'error') {
-        setFinderError(msg.message);
+        setFinderError(msg.code);
         setFinderLoading(false);
         worker.terminate();
         workerRef.current = null;
       }
     };
 
-    worker.onerror = (e) => {
-      setFinderError(e.message ?? 'worker_error');
+    worker.onerror = () => {
+      setFinderError('unknown');
       setFinderLoading(false);
       worker.terminate();
       workerRef.current = null;

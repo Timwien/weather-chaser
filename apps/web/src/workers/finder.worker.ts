@@ -5,6 +5,7 @@ import { fetchTownsInRadius, fetchTownsInPolygon } from '../services/overpass.ts
 import type { SearchGranularity } from '../services/overpass.ts';
 import type { HourlyWeatherData } from '../services/weatherHourly.ts';
 import { dedupeByWeatherCell } from '../utils/spatialDedupe.ts';
+import { classifyError, type AppErrorCode } from '../services/errorCodes.ts';
 
 const MAX_TOWNS = 120;
 
@@ -30,7 +31,7 @@ export interface FinderWorkerInput {
 export type FinderWorkerOutput =
   | { type: 'progress'; step: 'finding_towns' | 'fetching_weather' }
   | { type: 'complete'; towns: Town[]; hourlyData: HourlyWeatherData[] }
-  | { type: 'error'; message: string };
+  | { type: 'error'; code: AppErrorCode };
 
 self.onmessage = async (event: MessageEvent<FinderWorkerInput>) => {
   if (event.data.type !== 'run') return;
@@ -47,7 +48,7 @@ self.onmessage = async (event: MessageEvent<FinderWorkerInput>) => {
       towns = config.towns ?? [];
     } else if (config.mode === 'polygon') {
       if (!config.polygon || config.polygon.length === 0) {
-        self.postMessage({ type: 'error', message: 'missing_polygon' } satisfies FinderWorkerOutput);
+        self.postMessage({ type: 'error', code: 'missing_polygon' } satisfies FinderWorkerOutput);
         return;
       }
       const allTowns = await fetchTownsInPolygon(config.polygon, config.granularity ?? 'auto');
@@ -55,7 +56,7 @@ self.onmessage = async (event: MessageEvent<FinderWorkerInput>) => {
     } else {
       // 'around' mode
       if (config.startLat === undefined || config.startLng === undefined || config.radiusKm === undefined) {
-        self.postMessage({ type: 'error', message: 'missing_coords' } satisfies FinderWorkerOutput);
+        self.postMessage({ type: 'error', code: 'missing_coords' } satisfies FinderWorkerOutput);
         return;
       }
       const allTowns = await fetchTownsInRadius(
@@ -65,7 +66,7 @@ self.onmessage = async (event: MessageEvent<FinderWorkerInput>) => {
     }
 
     if (towns.length === 0) {
-      self.postMessage({ type: 'error', message: 'no_towns' } satisfies FinderWorkerOutput);
+      self.postMessage({ type: 'error', code: 'no_towns' } satisfies FinderWorkerOutput);
       return;
     }
 
@@ -88,7 +89,7 @@ self.onmessage = async (event: MessageEvent<FinderWorkerInput>) => {
   } catch (err) {
     self.postMessage({
       type: 'error',
-      message: err instanceof Error ? err.message : 'unknown_error',
+      code: classifyError(err),
     } satisfies FinderWorkerOutput);
   }
 };

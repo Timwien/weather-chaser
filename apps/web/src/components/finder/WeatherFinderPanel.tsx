@@ -12,6 +12,7 @@ import { FinderEmptyState } from './FinderEmptyState.tsx';
 import type { FinderResultData } from './FinderResultRow.tsx';
 import type { Favorite } from '../../types/database.ts';
 import { ScoreIcon, SunIcon, TempIcon, RainIcon, WindIcon } from './FinderIcons.tsx';
+import { haversineKm } from '../../utils/geo.ts';
 import './WeatherFinderPanel.css';
 
 // Parse hour from ISO timestamp without new Date() to avoid timezone bugs.
@@ -39,16 +40,6 @@ function filterHoursByTimeOfDay(
   };
 }
 
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
 interface WeatherFinderPanelProps {
   selectedFinderIndex: number | null;
   onResultSelect: (index: number) => void;
@@ -74,7 +65,7 @@ const SORT_ICONS = {
 
 export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack, onResultsComputed }: WeatherFinderPanelProps) {
   const { t } = useTranslation('common');
-  const { finderTowns, finderHourlyCache, finderConfig, finderError, tripConfig, searchAreas, searchRadiusKm, setFinderConfig } = useAppStore();
+  const { finderTowns, finderHourlyCache, finderConfig, finderError, tripConfig, weatherPrefs, searchAreas, searchRadiusKm, setFinderConfig } = useAppStore();
   const { user } = useAuthStore();
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
 
@@ -142,7 +133,9 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
 
         const sliced   = sliceHoursByDays(hourly, sliceStart, sliceDays);
         const filtered = filterHoursByTimeOfDay(sliced, finderConfig.timeOfDay);
-        const score    = scoreLocation(filtered, sliceStart, sliceDays, PRESETS[finderConfig.preset]);
+        // U2: shared weather preference — custom weights override the preset when set.
+        const weights  = weatherPrefs.customWeights ?? PRESETS[weatherPrefs.preset];
+        const score    = scoreLocation(filtered, sliceStart, sliceDays, weights);
 
         // sunshine_duration is in seconds per hour — sum then divide by 3600 for total hours,
         // then divide by day count for per-day average.
@@ -188,7 +181,7 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
       windAvgKmh: r.windAvgKmh,
       distanceKm: r.distanceKm,
     }));
-  }, [finderTowns, finderHourlyCache, finderConfig, tripConfig.startDate, tripConfig.endDate, searchAreas, searchRadiusKm]);
+  }, [finderTowns, finderHourlyCache, finderConfig, weatherPrefs, tripConfig.startDate, tripConfig.endDate, searchAreas, searchRadiusKm]);
 
   // Share computed results upward so MapContainer can display matching markers
   useEffect(() => {

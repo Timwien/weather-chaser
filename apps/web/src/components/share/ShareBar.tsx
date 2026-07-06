@@ -19,7 +19,7 @@ function SaveCloudIcon() {
 
 export function ShareBar() {
   const { t } = useTranslation('common');
-  const { route, tripConfig, searchArea } = useAppStore();
+  const { route, tripConfig, weatherPrefs, searchAreas } = useAppStore();
   const { user, pendingAction, setPendingAction } = useAuthStore();
   const [copied, setCopied] = useState(false);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -31,14 +31,17 @@ export function ShareBar() {
   const appleUrl = buildAppleMapsUrl(route.stops);
 
   const handleCopyLink = async () => {
+    // Region label for the share URL: derive from the first named search area.
+    const firstNamed = searchAreas.find((a) => a.type === 'place' || (a.type === 'radius' && a.name));
+    const regionName = firstNamed && 'name' in firstNamed ? firstNamed.name : undefined;
     const shareUrl = buildShareUrl(
       {
         startDate: tripConfig.startDate ?? '',
         endDate: tripConfig.endDate ?? '',
         totalDays: tripConfig.totalDays,
         maxStay: tripConfig.maxStay,
-        preset: tripConfig.preset,
-        regionName: searchArea?.name,
+        preset: weatherPrefs.preset,
+        regionName,
       },
       route,
     );

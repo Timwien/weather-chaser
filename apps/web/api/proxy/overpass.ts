@@ -37,6 +37,25 @@ export default {
         if (!upstreamRes.ok) continue;
 
         const responseBody = await upstreamRes.text();
+
+        // B6: harden against soft timeouts — Overpass returns HTTP 200 with a
+        // `remark: ... timed out ...` and empty elements when the query was too
+        // heavy. Previously this was cached and forwarded as a "success" with
+        // zero places. Detect it and try the next mirror instead; only cache
+        // genuinely valid results.
+        let softTimedOut = false;
+        try {
+          const parsed = JSON.parse(responseBody) as { elements?: unknown[]; remark?: string };
+          const empty = (parsed.elements?.length ?? 0) === 0;
+          if (empty && /timed out|runtime error/i.test(parsed.remark ?? '')) {
+            softTimedOut = true;
+          }
+        } catch {
+          // Not JSON (XML/HTML error page from an overloaded front-end) → transient
+          softTimedOut = true;
+        }
+        if (softTimedOut) continue;
+
         return new Response(responseBody, {
           status: upstreamRes.status,
           headers: {

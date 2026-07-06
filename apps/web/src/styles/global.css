@@ -19,6 +19,30 @@ html, body, #root {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* B5: guard against horizontal rubber-banding / side gutter on mobile. */
+html, body {
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+/* B5: iOS Safari auto-zooms any focused input with font-size < 16px, which
+   leaves the page zoomed-in (the reported side gutter). Force 16px on mobile
+   for all text-entry controls. MapLibre pinch-zoom is unaffected (own canvas
+   gesture engine); only DOM input auto-zoom is suppressed. */
+@media (max-width: 768px) {
+  .text-input, .must-visit-input, input[type="text"], input[type="search"],
+  select, textarea {
+    font-size: 16px;
+  }
+}
+
+/* B5: remove the 300ms double-tap delay + double-tap zoom on interactive
+   elements so taps feel instant and don't trigger page zoom. */
+button, [role="button"], a, .loc-tag, .criteria-chip,
+.finder-preset-card, .loc-granularity-chip {
+  touch-action: manipulation;
+}
+
 /* ── Shared motion: card entrance (used by itinerary stops + finder rows) ── */
 @keyframes wc-fade-up {
   from { opacity: 0; transform: translateY(10px); }
@@ -31,6 +55,19 @@ html, body, #root {
 
 @media (prefers-reduced-motion: reduce) {
   .wc-fade-up { animation: none; }
+}
+
+/* Visually hidden but available to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* maplibre-gl container reset */

@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { Map, useMap } from '@vis.gl/react-maplibre';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Map, useMap, Popup } from '@vis.gl/react-maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Map as MaplibreMap, MapMouseEvent } from 'maplibre-gl';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useThemeStore } from '../../stores/themeStore.ts';
 import { reverseGeocode } from '../../services/nominatim.ts';
 import { DrawingControls } from './DrawingControls.tsx';
+import { SearchAreasLayer } from './SearchAreasLayer.tsx';
 import { RouteLayer } from './RouteLayer.tsx';
 import { StopMarkers } from './StopMarkers.tsx';
 import { FinderMarkers } from './FinderMarkers.tsx';
@@ -158,42 +160,110 @@ function FlyToCity({ target }: { target?: { lat: number; lng: number; token: num
   return null;
 }
 
-/** Handles click-to-pick-location mode. */
-function PickLocationOnClick() {
+/**
+ * F3: tap the map to add a place — with a confirmation popup so a pan/mis-tap
+ * never silently adds a location. Always available in entry modes (idle /
+ * route-config / weather-finder), suppressed while drawing a polygon.
+ */
+const TAP_ADD_MODES = new Set(['idle', 'route-config', 'weather-finder']);
+
+function TapToAddLocation() {
+  const { t } = useTranslation('common');
   const { current: map } = useMap();
-  const { pickingLocation, setPickingLocation, addSearchArea } = useAppStore();
+  const mode = useAppStore((s) => s.mode);
+  const isDrawingArea = useAppStore((s) => s.isDrawingArea);
+  const pickingLocation = useAppStore((s) => s.pickingLocation);
+  const setPickingLocation = useAppStore((s) => s.setPickingLocation);
+  const addSearchArea = useAppStore((s) => s.addSearchArea);
+
+  const [pending, setPending] = useState<{ lat: number; lng: number; name: string; fullName: string } | null>(null);
+  const lastMoveEndRef = useRef(0);
+
+  const active = TAP_ADD_MODES.has(mode) && !isDrawingArea;
 
   useEffect(() => {
-    if (!map || !pickingLocation) return;
+    if (!map || !active) return;
     const nativeMap = map.getMap();
-    nativeMap.getCanvas().style.cursor = 'crosshair';
+
+    const onMoveEnd = () => { lastMoveEndRef.current = Date.now(); };
 
     async function handleClick(e: MapMouseEvent) {
+      // Debounce: ignore taps that land right after a pan/zoom settle (mis-taps
+      // while the map is stopping).
+      if (Date.now() - lastMoveEndRef.current < 300) return;
       const { lat, lng } = e.lngLat;
-      setPickingLocation(false);
-      nativeMap.getCanvas().style.cursor = '';
+      // Optimistic placeholder while reverse-geocoding.
+      setPending({ lat, lng, name: `${lat.toFixed(3)}, ${lng.toFixed(3)}`, fullName: '' });
       const result = await reverseGeocode(lat, lng);
-      const name = result
-        ? result.display_name.split(',')[0].trim()
-        : `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
-      addSearchArea({
-        type: 'place',
-        id: `picked-${Date.now()}`,
-        name,
-        fullName: result?.display_name ?? name,
-        lat,
-        lng,
-      });
+      const name = result ? result.display_name.split(',')[0].trim() : `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+      setPending({ lat, lng, name, fullName: result?.display_name ?? name });
     }
 
-    nativeMap.once('click', handleClick);
+    nativeMap.on('click', handleClick);
+    nativeMap.on('moveend', onMoveEnd);
     return () => {
       nativeMap.off('click', handleClick);
-      nativeMap.getCanvas().style.cursor = '';
+      nativeMap.off('moveend', onMoveEnd);
     };
-  }, [map, pickingLocation, setPickingLocation, addSearchArea]);
+  }, [map, active]);
 
-  return null;
+  // Leaving an eligible mode dismisses any open popup + the hint.
+  useEffect(() => {
+    if (!active) { setPending(null); }
+  }, [active]);
+
+  function confirmAdd() {
+    if (!pending) return;
+    addSearchArea({
+      type: 'place',
+      id: `picked-${Date.now()}`,
+      name: pending.name,
+      fullName: pending.fullName || pending.name,
+      lat: pending.lat,
+      lng: pending.lng,
+    });
+    setPending(null);
+    setPickingLocation(false);
+  }
+
+  return (
+    <>
+      {/* Hint nudge when the user explicitly pressed the pin button */}
+      {active && pickingLocation && !pending && (
+        <div className="map-tap-hint" role="status">{t('map.tap_hint')}</div>
+      )}
+
+      {pending && (
+        <Popup
+          longitude={pending.lng}
+          latitude={pending.lat}
+          anchor="bottom"
+          closeButton={false}
+          closeOnClick={false}
+          onClose={() => setPending(null)}
+          offset={12}
+        >
+          <div className="map-tap-popup">
+            <div className="map-tap-popup-title">{t('map.tap_add_title')}</div>
+            <div className="map-tap-popup-name">{pending.name}</div>
+            <div className="map-tap-popup-actions">
+              <button type="button" className="map-tap-popup-add" onClick={confirmAdd}>
+                {t('map.tap_add_confirm')}
+              </button>
+              <button
+                type="button"
+                className="map-tap-popup-close"
+                onClick={() => setPending(null)}
+                aria-label={t('a11y.close')}
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        </Popup>
+      )}
+    </>
+  );
 }
 
 export function MapContainer({
@@ -237,7 +307,9 @@ export function MapContainer({
         <FitRouteOnSelection selectedStopIndex={selectedStopIndex} sheetBottomPadding={sheetBottomPadding} />
         <FlyToFinderRank1 finderResults={finderResults} sheetBottomPadding={sheetBottomPadding} />
         <FlyToCity target={flyToCity} />
-        <PickLocationOnClick />
+        <TapToAddLocation />
+        {/* X1: drawn areas persist here (store-backed), independent of DrawingControls' mount */}
+        <SearchAreasLayer />
         {/* DrawingControls must live inside <Map> so useMap() has a provider */}
         {onDrawComplete && onDrawClear && (
           <DrawingControls

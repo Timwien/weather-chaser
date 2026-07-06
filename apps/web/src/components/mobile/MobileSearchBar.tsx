@@ -1,8 +1,15 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { WeatherPreset } from '@weatherchaser/core';
 import { useAppStore } from '../../stores/appStore.ts';
-import { CRITERION_ICONS } from '../entry/criterionIcons.tsx';
+import { BeachIcon, HikingIcon, SightseeingIcon } from '../finder/FinderIcons.tsx';
 import './MobileSearchBar.css';
+
+const PRESET_ICONS: Record<WeatherPreset, React.ComponentType<{ size?: number }>> = {
+  beach: BeachIcon,
+  hiking: HikingIcon,
+  sightseeing: SightseeingIcon,
+};
 
 interface MobileSearchBarProps {
   isExpanded: boolean;
@@ -28,7 +35,7 @@ interface MobileSearchBarProps {
  */
 export function MobileSearchBar({ isExpanded, onExpandedChange, hidden = false, children }: MobileSearchBarProps) {
   const { t, i18n } = useTranslation('common');
-  const { searchAreas, tripConfig } = useAppStore();
+  const { searchAreas, tripConfig, weatherPrefs } = useAppStore();
 
   // ── Derive collapsed pill label from store state ─────────────────────────────
   const locationName = searchAreas[0]?.type === 'place'
@@ -52,8 +59,8 @@ export function MobileSearchBar({ isExpanded, onExpandedChange, hidden = false, 
   }
 
   const dateFragment = formatDateFragment();
-  const firstCriterion = tripConfig.criteria[0];
-  const criterionIcon = firstCriterion ? CRITERION_ICONS[firstCriterion] : null;
+  const PresetIcon = PRESET_ICONS[weatherPrefs.preset];
+  const criterionIcon = <PresetIcon size={14} />;
 
   function buildPillLabel(): string {
     const parts: string[] = [];

@@ -5,7 +5,7 @@ import { useAuthStore } from '../../stores/authStore.ts';
 import { useOptimizer } from '../../hooks/useOptimizer.ts';
 import { DateRangePicker } from './DateRangePicker.tsx';
 import { LocationInput } from './LocationInput.tsx';
-import { CriteriaSelector } from './CriteriaSelector.tsx';
+import { WeatherPrefsSection } from './WeatherPrefsSection.tsx';
 import { RouteConfigStep } from './RouteConfigStep.tsx';
 import { WeatherFinderStep } from './WeatherFinderStep.tsx';
 import { AccountModal } from '../account/AccountModal.tsx';
@@ -82,7 +82,7 @@ export function EntryPanel() {
       <div className="entry-panel-inputs">
         <DateRangePicker />
         <LocationInput />
-        <CriteriaSelector />
+        <WeatherPrefsSection />
       </div>
 
       {/* CTAs — always visible in idle; disabled with feedback until inputs are set */}
@@ -133,17 +133,12 @@ export function EntryPanel() {
       {/* Weather finder — Phase 2 */}
       {isWeatherFinder && <WeatherFinderStep />}
 
-      {/* Error banner — shown after a failed route calculation */}
+      {/* Error banner — shown after a failed route calculation.
+          R5: `error` is now a typed AppErrorCode from the worker → one mapping. */}
       {mode === 'idle' && error && (
         <div className="entry-error-banner">
           <span className="entry-error-text">
-            {error === 'no_towns'
-              ? t('errors.no_towns', 'Keine Orte gefunden. Bitte ein größeres Gebiet zeichnen.')
-              : error.startsWith('Overpass')
-                ? t('errors.overpass', 'Wetterdaten konnten nicht geladen werden (Overpass API). Bitte erneut versuchen.')
-                : /^HTTP \d|Open-Meteo|TimeoutError|Failed to fetch/i.test(error)
-                  ? t('errors.weather_failed')
-                  : error}
+            {t(`errors.${error}`, { defaultValue: t('errors.unknown') })}
           </span>
           <button
             type="button"
@@ -207,6 +202,31 @@ export function EntryPanel() {
               <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" />
             </svg>
           )}
+        </button>
+
+        {/* F1: always-reachable reload — a lifeline when the installed PWA
+            freezes (no browser reload chrome). Works independently of app state. */}
+        <button
+          type="button"
+          className="entry-panel-account-btn entry-panel-reload-btn"
+          onClick={() => window.location.reload()}
+          aria-label={t('a11y.reload')}
+          title={t('a11y.reload')}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+            <path d="M21 3v6h-6" />
+          </svg>
         </button>
       </div>
 

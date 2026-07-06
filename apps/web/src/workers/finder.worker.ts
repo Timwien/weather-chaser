@@ -25,6 +25,8 @@ export interface FinderWorkerInput {
     endDate: string;     // ISO YYYY-MM-DD
     /** Place granularity for Overpass queries (default 'auto') */
     granularity?: SearchGranularity;
+    /** F4: UI language for localized OSM place names (default 'en') */
+    lang?: string;
   };
 }
 
@@ -51,7 +53,7 @@ self.onmessage = async (event: MessageEvent<FinderWorkerInput>) => {
         self.postMessage({ type: 'error', code: 'missing_polygon' } satisfies FinderWorkerOutput);
         return;
       }
-      const allTowns = await fetchTownsInPolygon(config.polygon, config.granularity ?? 'auto');
+      const allTowns = await fetchTownsInPolygon(config.polygon, config.granularity ?? 'auto', config.lang ?? 'en');
       towns = deduplicateAndCap(allTowns);
     } else {
       // 'around' mode
@@ -60,7 +62,7 @@ self.onmessage = async (event: MessageEvent<FinderWorkerInput>) => {
         return;
       }
       const allTowns = await fetchTownsInRadius(
-        config.startLat, config.startLng, config.radiusKm, config.granularity ?? 'auto',
+        config.startLat, config.startLng, config.radiusKm, config.granularity ?? 'auto', config.lang ?? 'en',
       );
       towns = deduplicateAndCap(allTowns);
     }

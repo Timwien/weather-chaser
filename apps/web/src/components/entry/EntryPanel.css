@@ -1284,6 +1284,34 @@
   margin-left: auto;
 }
 
+/* X2: save-search button under the CTAs */
+.entry-save-search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 40px;
+  margin-top: var(--space-1);
+  padding: 0 var(--space-4);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+}
+
+.entry-save-search-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
 /* Avatar circle for logged-in users */
 .entry-panel-avatar {
   width: 28px;

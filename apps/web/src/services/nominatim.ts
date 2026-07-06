@@ -28,14 +28,22 @@ export interface BoundingBox {
   east: number;
 }
 
-export async function searchPlace(query: string): Promise<NominatimResult[]> {
+/** Normalise an i18n language tag to a 2-letter code Nominatim understands. */
+function normalizeLang(lang: string): string {
+  return (lang || 'en').slice(0, 2).toLowerCase();
+}
+
+export async function searchPlace(query: string, lang = 'en'): Promise<NominatimResult[]> {
   const url = new URL(NOMINATIM_BASE, self.location.origin);
   url.searchParams.set('q', query);
   url.searchParams.set('format', 'json');
   url.searchParams.set('limit', '5');
   url.searchParams.set('addressdetails', '0');
+  // F4: language as a URL param (not a header) so the proxy cache separates per
+  // language — cache key is the full URL. Nominatim honours accept-language here.
+  url.searchParams.set('accept-language', normalizeLang(lang));
 
-  const headers: Record<string, string> = { 'Accept-Language': 'en' };
+  const headers: Record<string, string> = {};
   if (import.meta.env.DEV) {
     // Nominatim policy requires a valid User-Agent / Referer — set only in dev (direct call)
     headers['Referer'] = self.location.origin;
@@ -52,19 +60,20 @@ export function parseBbox(result: NominatimResult): BoundingBox {
   return { south, north, west, east };
 }
 
-export async function geocodeAddress(query: string): Promise<{ lat: number; lng: number; name: string } | null> {
-  const results = await searchPlace(query);
+export async function geocodeAddress(query: string, lang = 'en'): Promise<{ lat: number; lng: number; name: string } | null> {
+  const results = await searchPlace(query, lang);
   if (results.length === 0) return null;
   const first = results[0];
   return { lat: Number(first.lat), lng: Number(first.lon), name: first.display_name };
 }
 
-export async function reverseGeocode(lat: number, lng: number): Promise<NominatimResult | null> {
+export async function reverseGeocode(lat: number, lng: number, lang = 'en'): Promise<NominatimResult | null> {
   const url = new URL(NOMINATIM_REVERSE_BASE, self.location.origin);
   url.searchParams.set('lat', String(lat));
   url.searchParams.set('lon', String(lng));
   url.searchParams.set('format', 'json');
-  const headers: Record<string, string> = { 'Accept-Language': 'en' };
+  url.searchParams.set('accept-language', normalizeLang(lang));
+  const headers: Record<string, string> = {};
   if (import.meta.env.DEV) headers['Referer'] = self.location.origin;
   const res = await fetch(url.toString(), { headers });
   if (!res.ok) return null;

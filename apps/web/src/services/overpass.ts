@@ -108,22 +108,25 @@ interface OverpassNode {
   id: number;
   lat: number;
   lon: number;
-  tags: { name?: string; population?: string; place?: string };
+  tags: Record<string, string | undefined> & { name?: string; population?: string; place?: string };
 }
 
-function parseTowns(nodes: OverpassNode[]): Town[] {
+function parseTowns(nodes: OverpassNode[], lang: string): Town[] {
+  // F4: prefer the localized name tag (e.g. name:de) when present. `out body`
+  // already returns all tags, so this costs no extra query.
+  const localTag = `name:${lang}`;
   return nodes
     .filter((n) => n.tags.name && n.tags.name.trim().length > 0)
     .map((n) => ({
       id: String(n.id),
-      name: n.tags.name!,
+      name: n.tags[localTag] ?? n.tags.name!,
       lat: n.lat,
       lng: n.lon,
       population: n.tags.population ? parseInt(n.tags.population, 10) : undefined,
     }));
 }
 
-async function tryEndpoint(url: string, query: string, timeoutMs: number): Promise<Town[] | null> {
+async function tryEndpoint(url: string, query: string, timeoutMs: number, lang: string): Promise<Town[] | null> {
   try {
     const res = await fetch(url, {
       method: 'POST',
@@ -140,7 +143,7 @@ async function tryEndpoint(url: string, query: string, timeoutMs: number): Promi
     const data: { elements?: OverpassNode[]; remark?: string } = await res.json();
     // Server-side timeout returns 200 with empty elements + a remark — retry
     if (data.remark?.includes('timed out') && (data.elements?.length ?? 0) === 0) return null;
-    return parseTowns(data.elements ?? []);
+    return parseTowns(data.elements ?? [], lang);
   } catch (e) {
     if (e instanceof Error && (e.name === 'TimeoutError' || e.name === 'AbortError')) return null;
     if (e instanceof TypeError) return null; // fetch network failure
@@ -151,7 +154,7 @@ async function tryEndpoint(url: string, query: string, timeoutMs: number): Promi
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function runOverpassQuery(query: string): Promise<Town[]> {
+async function runOverpassQuery(query: string, lang: string): Promise<Town[]> {
   // Production: proxy ONLY (Phase 3 requirement: no client-to-public-Overpass
   // calls in prod; the proxy itself can fall back across mirrors server-side).
   // The retry rounds still apply to the proxy — transient failures are common.
@@ -169,7 +172,7 @@ async function runOverpassQuery(query: string): Promise<Town[]> {
     for (const url of endpoints) {
       const remaining = deadline - Date.now();
       if (remaining <= 0) break;
-      const result = await tryEndpoint(url, query, Math.min(15_000, remaining));
+      const result = await tryEndpoint(url, query, Math.min(15_000, remaining), lang);
       if (result !== null) return result;
     }
   }
@@ -213,9 +216,10 @@ export async function fetchTownsInRadius(
   lng: number,
   radiusKm: number,
   granularity: SearchGranularity = 'auto',
+  lang = 'en',
 ): Promise<Town[]> {
   return withFallback(
-    () => runOverpassQuery(buildAroundQuery(lat, lng, radiusKm, granularity)),
+    () => runOverpassQuery(buildAroundQuery(lat, lng, radiusKm, granularity), lang),
     () => fallbackPlacesInRadius(lat, lng, radiusKm),
   );
 }
@@ -223,9 +227,10 @@ export async function fetchTownsInRadius(
 export async function fetchTownsInArea(
   bbox: BoundingBox,
   granularity: SearchGranularity = 'auto',
+  lang = 'en',
 ): Promise<Town[]> {
   return withFallback(
-    () => runOverpassQuery(buildBboxQuery(bbox, granularity)),
+    () => runOverpassQuery(buildBboxQuery(bbox, granularity), lang),
     () => fallbackPlacesInBbox(bbox),
   );
 }
@@ -242,8 +247,9 @@ function polygonCacheKey(polygon: [number, number][], granularity: SearchGranula
 export async function fetchTownsInPolygon(
   polygon: [number, number][],
   granularity: SearchGranularity = 'auto',
+  lang = 'en',
 ): Promise<Town[]> {
-  const cacheKey = polygonCacheKey(polygon, granularity);
+  const cacheKey = `${lang}:${polygonCacheKey(polygon, granularity)}`;
   const cached = polygonCache.get(cacheKey);
   if (cached) return cached;
 
@@ -253,7 +259,7 @@ export async function fetchTownsInPolygon(
   const towns = await withFallback(
     // Query the bounding box (fast, index-backed) then trim to the exact polygon.
     async () => {
-      const inBbox = await runOverpassQuery(buildPolygonBboxQuery(bbox, realAreaKm2, granularity));
+      const inBbox = await runOverpassQuery(buildPolygonBboxQuery(bbox, realAreaKm2, granularity), lang);
       return inBbox.filter((t) => pointInPolygon(t.lat, t.lng, polygon));
     },
     () => fallbackPlacesInPolygon(polygon),

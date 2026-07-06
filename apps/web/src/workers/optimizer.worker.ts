@@ -38,6 +38,8 @@ export interface OptimizerWorkerInput {
     customWeights?: ScoringWeights | null;
     /** Place granularity for Overpass queries (default 'auto') */
     granularity?: SearchGranularity;
+    /** F4: UI language for localized OSM place names (default 'en') */
+    lang?: string;
   };
 }
 
@@ -55,6 +57,7 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
     self.postMessage({ type: 'progress', step: 'finding_towns' } satisfies OptimizerWorkerOutput);
 
     const granularity = config.granularity ?? 'auto';
+    const lang = config.lang ?? 'en';
     const townArrays = await Promise.all(
       searchAreas.map(async (area) => {
         if (area.type === 'pinned' && area.lat !== undefined && area.lng !== undefined && area.name) {
@@ -62,11 +65,11 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
           return [{ id: `pinned-${area.name}`, name: area.name, lat: area.lat, lng: area.lng }] as Town[];
         }
         if (area.type === 'polygon' && area.polygon) {
-          return fetchTownsInPolygon(area.polygon, granularity);
+          return fetchTownsInPolygon(area.polygon, granularity, lang);
         }
         if (area.bbox) {
           const [west, south, east, north] = area.bbox;
-          return fetchTownsInArea({ south, north, west, east } as BoundingBox, granularity);
+          return fetchTownsInArea({ south, north, west, east } as BoundingBox, granularity, lang);
         }
         return [] as Town[];
       }),

@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppStore, isPlaceArea, isPolygonArea, isRadiusArea, isLocatedPlace } from '../stores/appStore.ts';
+import { recordSearch, buildSearchConfigFromStore } from '../services/savedSearch.ts';
 import type { OptimizerWorkerInput, OptimizerWorkerOutput, SearchAreaSpec } from '../workers/optimizer.worker.ts';
 
 export function useOptimizer() {
+  const { i18n } = useTranslation();
   const workerRef = useRef<Worker | null>(null);
   const { searchAreas, searchRadiusKm, searchGranularity, tripConfig, weatherPrefs, setMode, setLoadingStep, setRoute, setError } =
     useAppStore();
@@ -101,6 +104,8 @@ export function useOptimizer() {
         setRoute(msg.result);
         setMode('results');
         setLoadingStep(null);
+        // X3: record this completed search (fire-and-forget, guest/offline safe).
+        void recordSearch('route', buildSearchConfigFromStore());
       } else if (msg.type === 'error') {
         console.error('[optimizer] worker error:', msg.code);
         setError(msg.code);
@@ -130,11 +135,12 @@ export function useOptimizer() {
         mustVisitCoords: tripConfig.mustVisitCoords,
         customWeights: weatherPrefs.customWeights,
         granularity: searchGranularity,
+        lang: i18n.language,
       },
     };
 
     workerRef.current.postMessage(input);
-  }, [searchAreas, searchRadiusKm, searchGranularity, tripConfig, weatherPrefs, setMode, setLoadingStep, setRoute, setError]);
+  }, [searchAreas, searchRadiusKm, searchGranularity, tripConfig, weatherPrefs, i18n.language, setMode, setLoadingStep, setRoute, setError]);
 
   return { run };
 }

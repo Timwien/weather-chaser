@@ -42,10 +42,11 @@ interface MapContainerProps {
   sheetBottomPadding?: number;
 }
 
-/** Switch all symbol layers to prefer German names (name:de → name fallback) */
-function switchLabelsToGerman(map: MaplibreMap) {
-  // Runs again after every style swap (light↔dark); guarded because styledata
-  // can fire while the new style is still loading
+/** F4: switch all symbol layers to prefer the UI language (name:<lang> → name). */
+function applyMapLanguage(map: MaplibreMap, lang: string) {
+  const code = (lang || 'en').slice(0, 2).toLowerCase();
+  // Runs again after every style swap (light↔dark) and on language change;
+  // guarded because styledata can fire while the new style is still loading.
   try {
     const style = map.getStyle();
     if (!style?.layers) return;
@@ -55,13 +56,24 @@ function switchLabelsToGerman(map: MaplibreMap) {
       if (!field) continue;
       map.setLayoutProperty(layer.id, 'text-field', [
         'coalesce',
-        ['get', 'name:de'],
+        ['get', `name:${code}`],
         ['get', 'name'],
       ]);
     }
   } catch {
     /* style mid-load — the next styledata event retries */
   }
+}
+
+/** Re-applies the label language when the UI language changes. */
+function MapLanguage() {
+  const { current: map } = useMap();
+  const { i18n } = useTranslation();
+  useEffect(() => {
+    if (!map) return;
+    applyMapLanguage(map.getMap(), i18n.language);
+  }, [map, i18n.language]);
+  return null;
 }
 
 /** Fits the map to the full route bounding box when a new route loads or a stop is selected. */
@@ -168,7 +180,7 @@ function FlyToCity({ target }: { target?: { lat: number; lng: number; token: num
 const TAP_ADD_MODES = new Set(['idle', 'route-config', 'weather-finder']);
 
 function TapToAddLocation() {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const { current: map } = useMap();
   const mode = useAppStore((s) => s.mode);
   const isDrawingArea = useAppStore((s) => s.isDrawingArea);
@@ -194,7 +206,7 @@ function TapToAddLocation() {
       const { lat, lng } = e.lngLat;
       // Optimistic placeholder while reverse-geocoding.
       setPending({ lat, lng, name: `${lat.toFixed(3)}, ${lng.toFixed(3)}`, fullName: '' });
-      const result = await reverseGeocode(lat, lng);
+      const result = await reverseGeocode(lat, lng, i18n.language);
       const name = result ? result.display_name.split(',')[0].trim() : `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
       setPending({ lat, lng, name, fullName: result?.display_name ?? name });
     }
@@ -278,16 +290,20 @@ export function MapContainer({
   sheetBottomPadding,
 }: MapContainerProps) {
   const { route, mode } = useAppStore();
+  const { i18n } = useTranslation();
   const resolvedTheme = useThemeStore((s) => s.resolved);
+  // Read the current language inside the (stable) map event handlers.
+  const langRef = useRef(i18n.language);
+  langRef.current = i18n.language;
 
   const handleLoad = useCallback((event: { target: MaplibreMap }) => {
-    switchLabelsToGerman(event.target);
+    applyMapLanguage(event.target, langRef.current);
   }, []);
 
-  // styledata fires after setStyle (theme switch) — re-apply German labels,
-  // which reset with the new style. Idempotent, so repeated events are fine.
+  // styledata fires after setStyle (theme switch) — re-apply labels, which reset
+  // with the new style. Idempotent, so repeated events are fine.
   const handleStyleData = useCallback((event: { target: MaplibreMap }) => {
-    switchLabelsToGerman(event.target);
+    applyMapLanguage(event.target, langRef.current);
   }, []);
 
   return (
@@ -308,6 +324,7 @@ export function MapContainer({
         <FlyToFinderRank1 finderResults={finderResults} sheetBottomPadding={sheetBottomPadding} />
         <FlyToCity target={flyToCity} />
         <TapToAddLocation />
+        <MapLanguage />
         {/* X1: drawn areas persist here (store-backed), independent of DrawingControls' mount */}
         <SearchAreasLayer />
         {/* DrawingControls must live inside <Map> so useMap() has a provider */}

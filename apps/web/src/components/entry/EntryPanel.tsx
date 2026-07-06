@@ -9,6 +9,8 @@ import { WeatherPrefsSection } from './WeatherPrefsSection.tsx';
 import { RouteConfigStep } from './RouteConfigStep.tsx';
 import { WeatherFinderStep } from './WeatherFinderStep.tsx';
 import { AccountModal } from '../account/AccountModal.tsx';
+import { saveSearch, buildSearchConfigFromStore } from '../../services/savedSearch.ts';
+import { supabaseConfigured } from '../../lib/supabase.ts';
 import './EntryPanel.css';
 
 // One-time guest hint — fires after first route generation, never again
@@ -17,7 +19,7 @@ const hasShownHint = () => localStorage.getItem(HINT_KEY) === '1';
 const markHintShown = () => localStorage.setItem(HINT_KEY, '1');
 
 export function EntryPanel() {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const { mode, setMode, loadingStep, tripConfig, searchAreas, error, setError, route } = useAppStore();
   const user = useAuthStore((s) => s.user);
   // Hoisted here so the worker ref survives when RouteConfigStep unmounts during loading
@@ -25,6 +27,21 @@ export function EntryPanel() {
 
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [showRouteHint, setShowRouteHint] = useState(false);
+  const [searchSaved, setSearchSaved] = useState(false);
+
+  // X2: save the current entry state as a search (guest → sign in first).
+  async function handleSaveSearch() {
+    if (!supabaseConfigured) return;
+    if (!user) {
+      setIsAccountModalOpen(true);
+      return;
+    }
+    try {
+      await saveSearch(buildSearchConfigFromStore(), i18n.language);
+      setSearchSaved(true);
+      setTimeout(() => setSearchSaved(false), 2000);
+    } catch { /* non-critical */ }
+  }
 
   // Fire once when: route just appeared + user is guest + hint never shown
   useEffect(() => {
@@ -106,6 +123,19 @@ export function EntryPanel() {
           </button>
           {showMissingHint && !ctasReady && (
             <p className="entry-cta-hint" role="status">{t(missingHintKey)}</p>
+          )}
+          {/* X2: save the current search (bookmark) — visible once inputs are set */}
+          {ctasReady && supabaseConfigured && (
+            <button
+              type="button"
+              className="entry-save-search-btn"
+              onClick={handleSaveSearch}
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 2h10a1 1 0 0 1 1 1v11l-6-3-6 3V3a1 1 0 0 1 1-1z"/>
+              </svg>
+              {searchSaved ? t('save.search_saved') : t('save.search')}
+            </button>
           )}
         </div>
       )}

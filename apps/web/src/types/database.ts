@@ -25,6 +25,15 @@ export interface Favorite {
   created_at: string;
 }
 
+/** X3: recent searches (finder or route), newest first, capped per user. */
+export interface SearchHistory {
+  id: string;
+  user_id: string;
+  kind: 'finder' | 'route';
+  config_json: unknown;  // SavedSearchConfigV1
+  created_at: string;
+}
+
 export interface Subscription {
   user_id: string;
   stripe_customer_id: string | null;
@@ -60,6 +69,12 @@ export interface Database {
         Row: Favorite;
         Insert: Omit<Favorite, 'id' | 'created_at'>;
         Update: Partial<Omit<Favorite, 'id' | 'user_id'>>;
+        Relationships: [];
+      };
+      search_history: {
+        Row: SearchHistory;
+        Insert: Omit<SearchHistory, 'id' | 'created_at'>;
+        Update: Partial<Omit<SearchHistory, 'id' | 'user_id'>>;
         Relationships: [];
       };
     };

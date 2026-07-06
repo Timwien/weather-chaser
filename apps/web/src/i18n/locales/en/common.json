@@ -143,7 +143,9 @@
     "saving": "Saving…",
     "saved": "Saved ✓",
     "sign_in": "Sign in to save",
-    "error_generic": "Saving failed"
+    "error_generic": "Saving failed",
+    "search": "Save search",
+    "search_saved": "Search saved ✓"
   },
   "loading": {
     "finding_towns": "Finding towns...",
@@ -245,8 +247,11 @@
     "saved_not_logged_in": "Please sign in to see your saved items.",
     "saved_routes_title": "Routes",
     "saved_routes_empty": "No routes saved yet",
-    "saved_searches_title": "Finder searches",
+    "saved_searches_title": "Saved searches",
     "saved_searches_empty": "No searches saved yet",
+    "history_title": "Recent searches",
+    "history_empty": "No searches yet",
+    "history_save_as": "Save as search",
     "saved_favorites_title": "Favorites",
     "saved_favorites_empty": "No favorites saved yet",
     "settings_privacy_title": "Privacy",
@@ -291,6 +296,7 @@
     "show_route_on_map": "Show route on map",
     "delete_route": "Delete route",
     "add_as_start": "Add as start location",
+    "load_saved_search": "Load search",
     "close": "Close",
     "loading": "Loading…",
     "remove_named": "Remove {{name}}",

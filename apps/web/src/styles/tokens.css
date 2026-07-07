@@ -122,6 +122,10 @@
   /* ── Layout ───────────────────────────────────────────── */
   --panel-width: 390px;
 
+  /* ── Touch (U1) — min hit-area (Apple HIG) + visible icon size ── */
+  --touch-target: 44px;
+  --icon-size-touch: 20px;
+
   /* ── Legacy aliases (backward compat with existing components) */
   --color-accent:       var(--color-primary);
   --color-accent-hover: var(--color-primary-hover);

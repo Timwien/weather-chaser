@@ -25,17 +25,23 @@ dieses Dokument ist die operative Kurzliste.
   aber kein Fallback bei Totalausfall. Eskalation: `OPEN_METEO_API_KEY`
   in Vercel setzen (~29 €/Monat, dedizierte Server, kein Code nötig)
 - Overpass-Ausfälle: abgefedert durch Retries über 3 Mirrors + GeoNames-Fallback
-  (8,6k EU-Städte ≥15k Einwohner, gebündelt)
+  (8,6k EU-Städte ≥15k Einwohner, gebündelt). Feedback-Runde 2026-07 (B6):
+  Polygon-Suche nutzt jetzt BBox-Query + clientseitigen Point-in-Polygon-Filter,
+  12s-Gesamt-Deadline, Session-Cache; der Proxy verwirft Soft-Timeouts.
 - Supabase-Standard-SMTP: ~4 Mails/Stunde (Registrierungs-Limit für Tester)
 
 ## 3. Kleinere Produkt-Todos
 
-- [ ] Finder-Suchen speichern: Button im Finder fehlt — die SavedTab-Sektion
-      "Finder searches" bleibt immer leer (Backend/Tabelle existiert)
+- [x] Finder-Suchen speichern: erledigt in Feedback-Runde 2026-07 (X2) —
+      Speichern-Button im EntryPanel, klickbare/löschbare Karten in SavedTab,
+      die den Einstiegs-Zustand wiederherstellen. Zusätzlich Suchverlauf (X3).
 - [ ] `packages/locales` extrahieren: EN/DE-JSONs aus apps/web teilen,
       damit die native App (apps/mobile) dieselben Übersetzungen nutzt
-- [ ] Dev-Defaults entfernen vor Launch (6 vorbefüllte Orte, nur DEV-Build —
-      prüfen, dass nichts davon in Prod sichtbar ist)
+- [x] Dev-Defaults: in Feedback-Runde 2026-07 (R2) hinter `VITE_DEV_FIXTURES=true`
+      gelegt — standardmäßig aus, auch im Dev-Build. Für lokales Testen mit den
+      6 vorbefüllten Orten `VITE_DEV_FIXTURES=true` in `.env.local` setzen.
+- [ ] **DB-Migration ausführen (X3):** `docs/feedback-2026-07/migration-search-history.sql`
+      im Supabase SQL-Editor laufen lassen, sonst bleibt „Letzte Suchen" leer.
 
 ## 4. Vor öffentlichem Launch (Reihenfolge empfohlen)
 

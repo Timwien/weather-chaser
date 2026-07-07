@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatRange } from '../../utils/dateFormat.ts';
 import { useAuthStore } from '../../stores/authStore.ts';
 import { useAppStore } from '../../stores/appStore.ts';
 import { supabaseConfigured } from '../../lib/supabase.ts';
@@ -9,7 +10,15 @@ import {
   getFavorites,
   deleteSavedRoute,
 } from '../../services/userdata.ts';
-import type { SavedRoute, SavedFinderSearch, Favorite } from '../../types/database.ts';
+import {
+  getSearchHistory,
+  deleteSavedSearch,
+  applySavedSearch,
+  saveSearch,
+  buildSearchName,
+  type SavedSearchConfigV1,
+} from '../../services/savedSearch.ts';
+import type { SavedRoute, SavedFinderSearch, Favorite, SearchHistory } from '../../types/database.ts';
 import type { Route } from '@weatherchaser/core';
 
 function TrashIcon() {
@@ -40,23 +49,12 @@ function BookmarkIcon() {
   );
 }
 
-function formatDateRange(from: string | null, to: string | null): string {
-  if (!from && !to) return '';
-  if (from && to) {
-    const f = new Date(from).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-    const t = new Date(to).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    return `${f} – ${t}`;
-  }
-  if (from) return new Date(from).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  return '';
-}
-
 interface SavedTabProps {
   onClose: () => void;
 }
 
 export function SavedTab({ onClose }: SavedTabProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuthStore();
   const setRoute = useAppStore((s) => s.setRoute);
   const setMode = useAppStore((s) => s.setMode);
@@ -65,6 +63,7 @@ export function SavedTab({ onClose }: SavedTabProps) {
   const [routes, setRoutes] = useState<SavedRoute[]>([]);
   const [searches, setSearches] = useState<SavedFinderSearch[]>([]);
   const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [history, setHistory] = useState<SearchHistory[]>([]);
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -76,12 +75,13 @@ export function SavedTab({ onClose }: SavedTabProps) {
     setLoading(true);
     setError(null);
 
-    Promise.all([getSavedRoutes(), getSavedFinderSearches(), getFavorites()])
-      .then(([r, s, f]) => {
+    Promise.all([getSavedRoutes(), getSavedFinderSearches(), getFavorites(), getSearchHistory()])
+      .then(([r, s, f, h]) => {
         if (cancelled) return;
         setRoutes(r);
         setSearches(s);
         setFavorites(f);
+        setHistory(h);
       })
       .catch((err) => {
         if (cancelled) return;
@@ -189,7 +189,36 @@ export function SavedTab({ onClose }: SavedTabProps) {
     }
   }
 
-  const hasAny = routes.length > 0 || searches.length > 0 || favorites.length > 0;
+  // X2: load a saved search (entry state) → user then picks a CTA.
+  function handleLoadSearch(config: SavedSearchConfigV1) {
+    applySavedSearch(config);
+    onClose();
+  }
+
+  async function handleDeleteSearch(id: string) {
+    setDeletingId(id);
+    try {
+      await deleteSavedSearch(id);
+      setSearches((prev) => prev.filter((s) => s.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('account.error_fallback'));
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  // X3: copy a history entry into the saved searches.
+  async function handleSaveHistoryAsSearch(config: SavedSearchConfigV1) {
+    try {
+      const saved = await saveSearch(config, i18n.language);
+      setSearches((prev) => [saved, ...prev]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('account.error_fallback'));
+    }
+  }
+
+  const hasAny =
+    routes.length > 0 || searches.length > 0 || favorites.length > 0 || history.length > 0;
 
   if (!hasAny) {
     return (
@@ -239,7 +268,7 @@ export function SavedTab({ onClose }: SavedTabProps) {
                   <div className="saved-card-name">{route.name}</div>
                   {(route.date_from || route.date_to) && (
                     <div className="saved-card-meta">
-                      {formatDateRange(route.date_from, route.date_to)}
+                      {formatRange(route.date_from, route.date_to, i18n.language)}
                     </div>
                   )}
                 </div>
@@ -258,7 +287,7 @@ export function SavedTab({ onClose }: SavedTabProps) {
         )}
       </section>
 
-      {/* Saved Finder Searches */}
+      {/* Saved Searches (X2) — clickable to restore entry state, deletable */}
       <section className="saved-section">
         <h3 className="saved-section-title">{t('account.saved_searches_title')}</h3>
         {searches.length === 0 ? (
@@ -266,7 +295,12 @@ export function SavedTab({ onClose }: SavedTabProps) {
         ) : (
           <ul className="saved-list">
             {searches.map((search) => (
-              <li key={search.id} className="saved-card">
+              <li
+                key={search.id}
+                className="saved-card saved-card--clickable"
+                onClick={() => handleLoadSearch(search.config_json as SavedSearchConfigV1)}
+                title={t('a11y.load_saved_search')}
+              >
                 <div className="saved-card-icon">
                   <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <circle cx="6.5" cy="6.5" r="4.5"/>
@@ -276,11 +310,61 @@ export function SavedTab({ onClose }: SavedTabProps) {
                 <div className="saved-card-body">
                   <div className="saved-card-name">{search.name}</div>
                 </div>
+                <button
+                  type="button"
+                  className="saved-card-delete"
+                  onClick={(e) => { e.stopPropagation(); handleDeleteSearch(search.id); }}
+                  disabled={deletingId === search.id}
+                  aria-label={t('a11y.delete_route')}
+                >
+                  <TrashIcon />
+                </button>
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      {/* Recent Searches (X3) */}
+      {history.length > 0 && (
+        <section className="saved-section">
+          <h3 className="saved-section-title">{t('account.history_title')}</h3>
+          <ul className="saved-list">
+            {history.map((h) => {
+              const config = h.config_json as SavedSearchConfigV1;
+              return (
+                <li
+                  key={h.id}
+                  className="saved-card saved-card--clickable"
+                  onClick={() => handleLoadSearch(config)}
+                  title={t('a11y.load_saved_search')}
+                >
+                  <div className="saved-card-icon">
+                    {h.kind === 'route' ? <BookmarkIcon /> : (
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="6.5" cy="6.5" r="4.5"/>
+                        <line x1="10" y1="10" x2="14" y2="14"/>
+                      </svg>
+                    )}
+                  </div>
+                  <div className="saved-card-body">
+                    <div className="saved-card-name">{buildSearchName(config, i18n.language)}</div>
+                  </div>
+                  <button
+                    type="button"
+                    className="saved-card-delete"
+                    onClick={(e) => { e.stopPropagation(); handleSaveHistoryAsSearch(config); }}
+                    aria-label={t('account.history_save_as')}
+                    title={t('account.history_save_as')}
+                  >
+                    <BookmarkIcon />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       {/* Favorites */}
       <section className="saved-section">

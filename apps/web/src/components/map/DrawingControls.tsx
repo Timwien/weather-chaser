@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useMap } from '@vis.gl/react-maplibre';
 import { useTranslation } from 'react-i18next';
 import type { MapMouseEvent } from 'maplibre-gl';
+import { useAppStore } from '../../stores/appStore.ts';
 import './DrawingControls.css';
 
 interface DrawingControlsProps {
@@ -30,7 +31,11 @@ function hexToRgba(hex: string, alpha: number): string {
 export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsProps) {
   const { t } = useTranslation('common');
   const { current: map } = useMap();
-  const [hasPolygon, setHasPolygon] = useState(false);
+  // X1: polygon existence is derived from the store (single source of truth),
+  // so the "Clear area" affordance survives DrawingControls remounts.
+  const hasPolygon = useAppStore((s) => s.searchAreas.some((a) => a.type === 'polygon'));
+  const mode = useAppStore((s) => s.mode);
+  const setIsDrawingArea = useAppStore((s) => s.setIsDrawingArea);
   const [isDrawing, setIsDrawing] = useState(false);
   // Drives the progressive hint + the "Done" button — mirrors verticesRef.length
   const [vertexCount, setVertexCount] = useState(0);
@@ -185,7 +190,8 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
     map.getMap().doubleClickZoom.enable();
     map.getMap().getCanvas().style.cursor = '';
     setIsDrawing(false);
-  }, [map, clearCanvas]);
+    setIsDrawingArea(false);
+  }, [map, clearCanvas, setIsDrawingArea]);
 
   const handleCancelDrawingRef = useRef(handleCancelDrawing);
   useEffect(() => { handleCancelDrawingRef.current = handleCancelDrawing; }, [handleCancelDrawing]);
@@ -199,11 +205,14 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
       m.doubleClickZoom.enable();
       m.getCanvas().style.cursor = '';
       cursorPxRef.current = null;
-      verticesRef.current = verts;
       setIsDrawing(false);
-      setHasPolygon(true);
-      setVertexCount(verts.length);
+      setIsDrawingArea(false);
       onCompleteRef.current([...verts, verts[0]]);
+      // The persistent SearchAreasLayer now owns rendering — clear our canvas
+      // so the polygon isn't painted twice.
+      verticesRef.current = [];
+      setVertexCount(0);
+      redraw();
     }
 
     const distToFirstPx = (x: number, y: number): number => {
@@ -270,7 +279,8 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
     map.getMap().doubleClickZoom.disable();
     map.getMap().getCanvas().style.cursor = 'crosshair';
     setIsDrawing(true);
-  }, [map, clearCanvas]);
+    setIsDrawingArea(true);
+  }, [map, clearCanvas, setIsDrawingArea]);
 
   /** Explicit finish — the touch-friendly alternative to tapping the first point. */
   const handleFinishDrawing = useCallback(() => {
@@ -282,9 +292,13 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
     m.getCanvas().style.cursor = '';
     cursorPxRef.current = null;
     setIsDrawing(false);
-    setHasPolygon(true);
+    setIsDrawingArea(false);
     onCompleteRef.current([...verts, verts[0]]);
-  }, [map]);
+    // Persisted layer owns rendering now → clear our canvas.
+    verticesRef.current = [];
+    setVertexCount(0);
+    clearCanvas();
+  }, [map, clearCanvas, setIsDrawingArea]);
 
   const handleClear = useCallback(() => {
     if (!map) return;
@@ -294,9 +308,9 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
     map.getMap().doubleClickZoom.enable();
     map.getMap().getCanvas().style.cursor = '';
     setIsDrawing(false);
-    setHasPolygon(false);
+    setIsDrawingArea(false);
     onClear();
-  }, [map, clearCanvas, onClear]);
+  }, [map, clearCanvas, onClear, setIsDrawingArea]);
 
   // Progressive hint: what to do next, not a manual
   const hint =
@@ -315,8 +329,12 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
       {/* Hint pill — centered at top (desktop), below the search pill (mobile) */}
       {isDrawing && <div className="draw-hint" role="status">{hint}</div>}
 
-      {/* Control buttons */}
-      <div className={`draw-controls${isDrawing ? ' draw-controls--drawing' : ''}`}>
+      {/* Control buttons — hidden in results mode (drawing is locked there; the
+          persisted polygon stays visible via SearchAreasLayer). */}
+      <div
+        className={`draw-controls${isDrawing ? ' draw-controls--drawing' : ''}`}
+        style={mode === 'results' ? { display: 'none' } : undefined}
+      >
         {!isDrawing && !hasPolygon && (
           <button type="button" className="draw-btn" onClick={handleStartDrawing}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor"

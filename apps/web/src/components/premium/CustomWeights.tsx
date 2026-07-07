@@ -27,30 +27,30 @@ function normalizeWeights(raw: ScoringWeights): ScoringWeights {
  *
  * Free tier: sliders render locked (dimmed, non-interactive) with an upgrade
  * CTA — this is UX gating only; the server-side gate is /api/premium/validate.
- * Premium tier: sliders adjust tripConfig.customWeights (normalized to sum 1).
+ * Premium tier: sliders adjust weatherPrefs.customWeights (normalized to sum 1).
  */
 export function CustomWeights() {
   const { t } = useTranslation('common');
-  const { tripConfig, setTripConfig } = useAppStore();
+  const { weatherPrefs, setWeatherPrefs } = useAppStore();
   const tier = useSubscriptionStore((s) => s.tier);
   const [showUpgrade, setShowUpgrade] = useState(false);
 
   const isPremium = tier === 'premium';
-  const enabled = tripConfig.customWeights !== null;
+  const enabled = weatherPrefs.customWeights !== null;
   // Slider display values: current custom weights or the active preset
-  const weights = tripConfig.customWeights ?? PRESETS[tripConfig.preset] ?? PRESETS.sightseeing;
+  const weights = weatherPrefs.customWeights ?? PRESETS[weatherPrefs.preset] ?? PRESETS.sightseeing;
 
   function handleToggle() {
     if (!isPremium) {
       setShowUpgrade(true);
       return;
     }
-    setTripConfig({ customWeights: enabled ? null : { ...weights } });
+    setWeatherPrefs({ customWeights: enabled ? null : { ...weights } });
   }
 
   function handleChange(dim: (typeof DIMENSIONS)[number], value: number) {
     const raw = { ...weights, [dim]: value / 100 };
-    setTripConfig({ customWeights: normalizeWeights(raw) });
+    setWeatherPrefs({ customWeights: normalizeWeights(raw) });
   }
 
   return (

@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { Map, useMap } from '@vis.gl/react-maplibre';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Map, useMap, Popup } from '@vis.gl/react-maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Map as MaplibreMap, MapMouseEvent } from 'maplibre-gl';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useThemeStore } from '../../stores/themeStore.ts';
 import { reverseGeocode } from '../../services/nominatim.ts';
 import { DrawingControls } from './DrawingControls.tsx';
+import { SearchAreasLayer } from './SearchAreasLayer.tsx';
 import { RouteLayer } from './RouteLayer.tsx';
 import { StopMarkers } from './StopMarkers.tsx';
 import { FinderMarkers } from './FinderMarkers.tsx';
@@ -40,10 +42,11 @@ interface MapContainerProps {
   sheetBottomPadding?: number;
 }
 
-/** Switch all symbol layers to prefer German names (name:de → name fallback) */
-function switchLabelsToGerman(map: MaplibreMap) {
-  // Runs again after every style swap (light↔dark); guarded because styledata
-  // can fire while the new style is still loading
+/** F4: switch all symbol layers to prefer the UI language (name:<lang> → name). */
+function applyMapLanguage(map: MaplibreMap, lang: string) {
+  const code = (lang || 'en').slice(0, 2).toLowerCase();
+  // Runs again after every style swap (light↔dark) and on language change;
+  // guarded because styledata can fire while the new style is still loading.
   try {
     const style = map.getStyle();
     if (!style?.layers) return;
@@ -53,13 +56,24 @@ function switchLabelsToGerman(map: MaplibreMap) {
       if (!field) continue;
       map.setLayoutProperty(layer.id, 'text-field', [
         'coalesce',
-        ['get', 'name:de'],
+        ['get', `name:${code}`],
         ['get', 'name'],
       ]);
     }
   } catch {
     /* style mid-load — the next styledata event retries */
   }
+}
+
+/** Re-applies the label language when the UI language changes. */
+function MapLanguage() {
+  const { current: map } = useMap();
+  const { i18n } = useTranslation();
+  useEffect(() => {
+    if (!map) return;
+    applyMapLanguage(map.getMap(), i18n.language);
+  }, [map, i18n.language]);
+  return null;
 }
 
 /** Fits the map to the full route bounding box when a new route loads or a stop is selected. */
@@ -158,42 +172,110 @@ function FlyToCity({ target }: { target?: { lat: number; lng: number; token: num
   return null;
 }
 
-/** Handles click-to-pick-location mode. */
-function PickLocationOnClick() {
+/**
+ * F3: tap the map to add a place — with a confirmation popup so a pan/mis-tap
+ * never silently adds a location. Always available in entry modes (idle /
+ * route-config / weather-finder), suppressed while drawing a polygon.
+ */
+const TAP_ADD_MODES = new Set(['idle', 'route-config', 'weather-finder']);
+
+function TapToAddLocation() {
+  const { t, i18n } = useTranslation('common');
   const { current: map } = useMap();
-  const { pickingLocation, setPickingLocation, addSearchArea } = useAppStore();
+  const mode = useAppStore((s) => s.mode);
+  const isDrawingArea = useAppStore((s) => s.isDrawingArea);
+  const pickingLocation = useAppStore((s) => s.pickingLocation);
+  const setPickingLocation = useAppStore((s) => s.setPickingLocation);
+  const addSearchArea = useAppStore((s) => s.addSearchArea);
+
+  const [pending, setPending] = useState<{ lat: number; lng: number; name: string; fullName: string } | null>(null);
+  const lastMoveEndRef = useRef(0);
+
+  const active = TAP_ADD_MODES.has(mode) && !isDrawingArea;
 
   useEffect(() => {
-    if (!map || !pickingLocation) return;
+    if (!map || !active) return;
     const nativeMap = map.getMap();
-    nativeMap.getCanvas().style.cursor = 'crosshair';
+
+    const onMoveEnd = () => { lastMoveEndRef.current = Date.now(); };
 
     async function handleClick(e: MapMouseEvent) {
+      // Debounce: ignore taps that land right after a pan/zoom settle (mis-taps
+      // while the map is stopping).
+      if (Date.now() - lastMoveEndRef.current < 300) return;
       const { lat, lng } = e.lngLat;
-      setPickingLocation(false);
-      nativeMap.getCanvas().style.cursor = '';
-      const result = await reverseGeocode(lat, lng);
-      const name = result
-        ? result.display_name.split(',')[0].trim()
-        : `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
-      addSearchArea({
-        type: 'place',
-        id: `picked-${Date.now()}`,
-        name,
-        fullName: result?.display_name ?? name,
-        lat,
-        lng,
-      });
+      // Optimistic placeholder while reverse-geocoding.
+      setPending({ lat, lng, name: `${lat.toFixed(3)}, ${lng.toFixed(3)}`, fullName: '' });
+      const result = await reverseGeocode(lat, lng, i18n.language);
+      const name = result ? result.display_name.split(',')[0].trim() : `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+      setPending({ lat, lng, name, fullName: result?.display_name ?? name });
     }
 
-    nativeMap.once('click', handleClick);
+    nativeMap.on('click', handleClick);
+    nativeMap.on('moveend', onMoveEnd);
     return () => {
       nativeMap.off('click', handleClick);
-      nativeMap.getCanvas().style.cursor = '';
+      nativeMap.off('moveend', onMoveEnd);
     };
-  }, [map, pickingLocation, setPickingLocation, addSearchArea]);
+  }, [map, active]);
 
-  return null;
+  // Leaving an eligible mode dismisses any open popup + the hint.
+  useEffect(() => {
+    if (!active) { setPending(null); }
+  }, [active]);
+
+  function confirmAdd() {
+    if (!pending) return;
+    addSearchArea({
+      type: 'place',
+      id: `picked-${Date.now()}`,
+      name: pending.name,
+      fullName: pending.fullName || pending.name,
+      lat: pending.lat,
+      lng: pending.lng,
+    });
+    setPending(null);
+    setPickingLocation(false);
+  }
+
+  return (
+    <>
+      {/* Hint nudge when the user explicitly pressed the pin button */}
+      {active && pickingLocation && !pending && (
+        <div className="map-tap-hint" role="status">{t('map.tap_hint')}</div>
+      )}
+
+      {pending && (
+        <Popup
+          longitude={pending.lng}
+          latitude={pending.lat}
+          anchor="bottom"
+          closeButton={false}
+          closeOnClick={false}
+          onClose={() => setPending(null)}
+          offset={12}
+        >
+          <div className="map-tap-popup">
+            <div className="map-tap-popup-title">{t('map.tap_add_title')}</div>
+            <div className="map-tap-popup-name">{pending.name}</div>
+            <div className="map-tap-popup-actions">
+              <button type="button" className="map-tap-popup-add" onClick={confirmAdd}>
+                {t('map.tap_add_confirm')}
+              </button>
+              <button
+                type="button"
+                className="map-tap-popup-close"
+                onClick={() => setPending(null)}
+                aria-label={t('a11y.close')}
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        </Popup>
+      )}
+    </>
+  );
 }
 
 export function MapContainer({
@@ -208,16 +290,20 @@ export function MapContainer({
   sheetBottomPadding,
 }: MapContainerProps) {
   const { route, mode } = useAppStore();
+  const { i18n } = useTranslation();
   const resolvedTheme = useThemeStore((s) => s.resolved);
+  // Read the current language inside the (stable) map event handlers.
+  const langRef = useRef(i18n.language);
+  langRef.current = i18n.language;
 
   const handleLoad = useCallback((event: { target: MaplibreMap }) => {
-    switchLabelsToGerman(event.target);
+    applyMapLanguage(event.target, langRef.current);
   }, []);
 
-  // styledata fires after setStyle (theme switch) — re-apply German labels,
-  // which reset with the new style. Idempotent, so repeated events are fine.
+  // styledata fires after setStyle (theme switch) — re-apply labels, which reset
+  // with the new style. Idempotent, so repeated events are fine.
   const handleStyleData = useCallback((event: { target: MaplibreMap }) => {
-    switchLabelsToGerman(event.target);
+    applyMapLanguage(event.target, langRef.current);
   }, []);
 
   return (
@@ -237,7 +323,10 @@ export function MapContainer({
         <FitRouteOnSelection selectedStopIndex={selectedStopIndex} sheetBottomPadding={sheetBottomPadding} />
         <FlyToFinderRank1 finderResults={finderResults} sheetBottomPadding={sheetBottomPadding} />
         <FlyToCity target={flyToCity} />
-        <PickLocationOnClick />
+        <TapToAddLocation />
+        <MapLanguage />
+        {/* X1: drawn areas persist here (store-backed), independent of DrawingControls' mount */}
+        <SearchAreasLayer />
         {/* DrawingControls must live inside <Map> so useMap() has a provider */}
         {onDrawComplete && onDrawClear && (
           <DrawingControls

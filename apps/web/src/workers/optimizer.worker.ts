@@ -7,6 +7,7 @@ import { fetchTownsInArea, fetchTownsInPolygon } from '../services/overpass.ts';
 import type { SearchGranularity } from '../services/overpass.ts';
 import type { BoundingBox } from '../services/nominatim.ts';
 import { dedupeByWeatherCell } from '../utils/spatialDedupe.ts';
+import { classifyError, type AppErrorCode } from '../services/errorCodes.ts';
 
 /** Maximum towns passed to the optimizer — keeps weather + matrix calls fast */
 const MAX_TOWNS = 120;
@@ -37,13 +38,15 @@ export interface OptimizerWorkerInput {
     customWeights?: ScoringWeights | null;
     /** Place granularity for Overpass queries (default 'auto') */
     granularity?: SearchGranularity;
+    /** F4: UI language for localized OSM place names (default 'en') */
+    lang?: string;
   };
 }
 
 export type OptimizerWorkerOutput =
   | { type: 'progress'; step: 'finding_towns' | 'fetching_weather' | 'optimizing_route' }
   | { type: 'complete'; result: ReturnType<typeof optimizeRoute> }
-  | { type: 'error'; message: string };
+  | { type: 'error'; code: AppErrorCode };
 
 self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
   if (event.data.type !== 'run') return;
@@ -54,6 +57,7 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
     self.postMessage({ type: 'progress', step: 'finding_towns' } satisfies OptimizerWorkerOutput);
 
     const granularity = config.granularity ?? 'auto';
+    const lang = config.lang ?? 'en';
     const townArrays = await Promise.all(
       searchAreas.map(async (area) => {
         if (area.type === 'pinned' && area.lat !== undefined && area.lng !== undefined && area.name) {
@@ -61,11 +65,11 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
           return [{ id: `pinned-${area.name}`, name: area.name, lat: area.lat, lng: area.lng }] as Town[];
         }
         if (area.type === 'polygon' && area.polygon) {
-          return fetchTownsInPolygon(area.polygon, granularity);
+          return fetchTownsInPolygon(area.polygon, granularity, lang);
         }
         if (area.bbox) {
           const [west, south, east, north] = area.bbox;
-          return fetchTownsInArea({ south, north, west, east } as BoundingBox, granularity);
+          return fetchTownsInArea({ south, north, west, east } as BoundingBox, granularity, lang);
         }
         return [] as Town[];
       }),
@@ -85,7 +89,7 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
     }
 
     if (pinned.length === 0 && fetched.length === 0) {
-      self.postMessage({ type: 'error', message: 'no_towns' } satisfies OptimizerWorkerOutput);
+      self.postMessage({ type: 'error', code: 'no_towns' } satisfies OptimizerWorkerOutput);
       return;
     }
 
@@ -219,7 +223,7 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
   } catch (err) {
     self.postMessage({
       type: 'error',
-      message: err instanceof Error ? err.message : 'unknown_error',
+      code: classifyError(err),
     } satisfies OptimizerWorkerOutput);
   }
 };

@@ -62,3 +62,19 @@ create policy "Users can read own subscription"
   on subscriptions for select to authenticated
   using ((select auth.uid()) = user_id);
 -- No insert/update/delete policies: only the service_role key (webhook) writes.
+
+-- search_history (X3 — recent searches, capped to newest 15 per user client-side)
+create table if not exists search_history (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  kind        text not null check (kind in ('finder','route')),
+  config_json jsonb not null,           -- SavedSearchConfigV1
+  created_at  timestamptz not null default now()
+);
+alter table search_history enable row level security;
+create policy "Users can CRUD own history"
+  on search_history for all to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+create index if not exists search_history_user_created_idx
+  on search_history (user_id, created_at desc);

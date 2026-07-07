@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { useAppStore } from '../stores/appStore.ts';
+import { useTranslation } from 'react-i18next';
+import { useAppStore, isPlaceArea, isPolygonArea, isRadiusArea, isLocatedPlace } from '../stores/appStore.ts';
+import { recordSearch, buildSearchConfigFromStore } from '../services/savedSearch.ts';
 import type { OptimizerWorkerInput, OptimizerWorkerOutput, SearchAreaSpec } from '../workers/optimizer.worker.ts';
 
 export function useOptimizer() {
+  const { i18n } = useTranslation();
   const workerRef = useRef<Worker | null>(null);
-  const { searchAreas, searchArea, searchRadiusKm, searchGranularity, tripConfig, setMode, setLoadingStep, setRoute, setError } =
+  const { searchAreas, searchRadiusKm, searchGranularity, tripConfig, weatherPrefs, setMode, setLoadingStep, setRoute, setError } =
     useAppStore();
 
   useEffect(() => {
@@ -32,29 +35,28 @@ export function useOptimizer() {
     const specs: SearchAreaSpec[] = [];
 
     // Multiple named places → pinned mode (only route through the exact entered cities)
-    const placeAreas = searchAreas.filter((a) => a.type === 'place');
-    const usesPinnedMode = placeAreas.length > 1 &&
-      placeAreas.every((a) => 'lat' in a && a.lat !== undefined);
+    const placeAreas = searchAreas.filter(isPlaceArea);
+    const usesPinnedMode = placeAreas.length > 1 && placeAreas.every(isLocatedPlace);
 
-    const singlePlace = searchAreas.length === 1 && searchAreas[0].type === 'place';
+    const singlePlace = searchAreas.length === 1 && isPlaceArea(searchAreas[0]);
 
     for (const area of searchAreas) {
-      if (area.type === 'place') {
-        if (usesPinnedMode && 'lat' in area && area.lat !== undefined) {
+      if (isPlaceArea(area)) {
+        if (usesPinnedMode && isLocatedPlace(area)) {
           specs.push({ type: 'pinned', lat: area.lat, lng: area.lng, name: area.name });
-        } else if (singlePlace && 'lat' in area && area.lat !== undefined) {
+        } else if (singlePlace && isLocatedPlace(area)) {
           // Single place: use radius slider to define the search area, not the raw Nominatim bbox
           const lat = area.lat;
-          const lng = area.lng ?? 0;
+          const lng = area.lng;
           const dLat = searchRadiusKm / 111;
           const dLng = searchRadiusKm / (111 * Math.cos((lat * Math.PI) / 180));
           specs.push({ type: 'place', bbox: [lng - dLng, lat - dLat, lng + dLng, lat + dLat] });
         } else if (area.bbox) {
           specs.push({ type: 'place', bbox: area.bbox });
         }
-      } else if (area.type === 'polygon' && 'polygon' in area) {
+      } else if (isPolygonArea(area)) {
         specs.push({ type: 'polygon', polygon: area.polygon as [number, number][] });
-      } else if (area.type === 'radius' && 'centerLat' in area) {
+      } else if (isRadiusArea(area)) {
         // Approximate radius as bbox (centre ± radiusKm)
         const dLat = area.radiusKm / 111;
         const dLng = area.radiusKm / (111 * Math.cos((area.centerLat * Math.PI) / 180));
@@ -74,19 +76,10 @@ export function useOptimizer() {
     let startLat = tripConfig.startLat;
     let startLng = tripConfig.startLng;
     if (startLat === null) {
-      const firstPlace = searchAreas.find((a) => a.type === 'place' && 'lat' in a && a.lat !== undefined);
-      if (firstPlace && 'lat' in firstPlace && firstPlace.lat !== undefined) {
+      const firstPlace = searchAreas.find(isLocatedPlace);
+      if (firstPlace) {
         startLat = firstPlace.lat;
-        startLng = firstPlace.lng ?? null;
-      }
-    }
-
-    // Fallback: legacy single searchArea (polygon draw from map)
-    if (specs.length === 0 && searchArea) {
-      if (searchArea.type === 'polygon' && searchArea.polygon) {
-        specs.push({ type: 'polygon', polygon: searchArea.polygon as [number, number][] });
-      } else if (searchArea.bbox) {
-        specs.push({ type: 'place', bbox: searchArea.bbox });
+        startLng = firstPlace.lng;
       }
     }
 
@@ -111,9 +104,11 @@ export function useOptimizer() {
         setRoute(msg.result);
         setMode('results');
         setLoadingStep(null);
+        // X3: record this completed search (fire-and-forget, guest/offline safe).
+        void recordSearch('route', buildSearchConfigFromStore());
       } else if (msg.type === 'error') {
-        console.error('[optimizer] worker error:', msg.message);
-        setError(msg.message);
+        console.error('[optimizer] worker error:', msg.code);
+        setError(msg.code);
         setMode('idle');
         setLoadingStep(null);
       }
@@ -121,7 +116,7 @@ export function useOptimizer() {
 
     workerRef.current.onerror = (err) => {
       console.error('[optimizer] worker onerror:', err);
-      setError(err.message ?? 'Worker error');
+      setError('unknown');
       setMode('idle');
       setLoadingStep(null);
     };
@@ -134,17 +129,18 @@ export function useOptimizer() {
         endDate,
         totalDays: tripConfig.totalDays,
         maxStay: tripConfig.maxStay,
-        preset: tripConfig.preset,
+        preset: weatherPrefs.preset,
         startLat,
         startLng,
         mustVisitCoords: tripConfig.mustVisitCoords,
-        customWeights: tripConfig.customWeights,
+        customWeights: weatherPrefs.customWeights,
         granularity: searchGranularity,
+        lang: i18n.language,
       },
     };
 
     workerRef.current.postMessage(input);
-  }, [searchAreas, searchArea, searchRadiusKm, searchGranularity, tripConfig, setMode, setLoadingStep, setRoute, setError]);
+  }, [searchAreas, searchRadiusKm, searchGranularity, tripConfig, weatherPrefs, i18n.language, setMode, setLoadingStep, setRoute, setError]);
 
   return { run };
 }

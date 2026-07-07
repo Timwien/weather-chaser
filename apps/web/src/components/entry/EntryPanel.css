@@ -564,9 +564,19 @@
   text-overflow: ellipsis;
 }
 
-.autocomplete-option:hover {
+.autocomplete-option:hover,
+.autocomplete-option--active {
   background: var(--color-accent-light);
   color: var(--color-accent);
+}
+
+/* B2: on mobile the pill body is a scroll container — an absolutely positioned
+   dropdown clips at its bottom edge. Inline variant renders the list in-flow. */
+.autocomplete-dropdown--inline {
+  position: static;
+  margin-top: var(--space-1);
+  box-shadow: none;
+  max-height: 240px;
 }
 
 /* Favorite suggestions in autocomplete */
@@ -1028,6 +1038,31 @@
 }
 
 /* =========================================================
+   Nearby suggestions (F2)
+   ========================================================= */
+
+.loc-nearby {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.loc-nearby-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.loc-nearby-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+/* =========================================================
    Must-visit suggestion pills
    ========================================================= */
 
@@ -1244,6 +1279,39 @@
   background: var(--color-accent-light);
 }
 
+/* F1: reload button sits at the far right of the footer */
+.entry-panel-reload-btn {
+  margin-left: auto;
+}
+
+/* X2: save-search button under the CTAs */
+.entry-save-search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 40px;
+  margin-top: var(--space-1);
+  padding: 0 var(--space-4);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+}
+
+.entry-save-search-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
 /* Avatar circle for logged-in users */
 .entry-panel-avatar {
   width: 28px;
@@ -1259,3 +1327,64 @@
 }
 
 /* Mobile overrides for .entry-panel inside .mobile-sheet-content are in global.css */
+
+/* =========================================================
+   U1 — Touch-target pass (mobile). Visible icons stay small;
+   hit-areas grow to ≥ var(--touch-target). Appended last so these
+   win over the base rules above at equal specificity.
+   ========================================================= */
+@media (max-width: 768px) {
+  /* Icon buttons in tags: enlarge hit-area with padding + negative margin
+     so the compact tag layout is preserved. */
+  .loc-tag-heart,
+  .loc-tag-remove {
+    padding: 10px;
+    margin: -10px -6px;
+  }
+
+  /* Tag height a touch larger for easier grabbing */
+  .loc-tag {
+    padding: 8px 10px 8px 14px;
+  }
+
+  /* Granularity chips: taller, larger font */
+  .loc-granularity-chip {
+    min-height: 40px;
+    padding: 8px var(--space-3);
+    font-size: var(--font-size-sm);
+  }
+
+  /* Autocomplete options: ≥ 44px rows */
+  .autocomplete-option {
+    padding: 12px var(--space-3);
+    min-height: var(--touch-target);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  /* Stepper buttons: full touch target */
+  .stepper-btn {
+    width: var(--touch-target);
+    height: var(--touch-target);
+  }
+
+  /* Suggestion pills: taller, readable */
+  .suggestion-pill {
+    min-height: 40px;
+    padding: 8px 14px;
+    font-size: var(--font-size-sm);
+  }
+
+  /* Must-visit rows: bigger remove hit-area */
+  .must-visit-remove {
+    padding: 10px 10px 10px var(--space-3);
+    margin: -10px -6px -10px 0;
+  }
+
+  /* Pick-on-map button: full touch target */
+  .loc-pick-map-btn {
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+  }
+}

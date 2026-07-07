@@ -135,3 +135,12 @@
 .finder-result-heart--guest {
   opacity: 0.5;
 }
+
+/* U1 — 44px hit-area for the favorite heart on mobile */
+@media (max-width: 768px) {
+  .finder-result-heart {
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    justify-content: center;
+  }
+}

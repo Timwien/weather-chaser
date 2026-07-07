@@ -1,10 +1,13 @@
 import { useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Town } from '@weatherchaser/core';
 import { useAppStore } from '../stores/appStore.ts';
+import { recordSearch, buildSearchConfigFromStore } from '../services/savedSearch.ts';
 import type { FinderWorkerInput, FinderWorkerOutput } from '../workers/finder.worker.ts';
 import type { HourlyWeatherData } from '../services/weatherHourly.ts';
 
 export function useFinder() {
+  const { i18n } = useTranslation();
   const workerRef = useRef<Worker | null>(null);
   const {
     searchAreas,
@@ -56,19 +59,21 @@ export function useFinder() {
           cache[entry.townId] = entry.hourly;
         }
         setFinderData(msg.towns, cache);
+        // X3: record this completed search (fire-and-forget, guest/offline safe).
+        void recordSearch('finder', buildSearchConfigFromStore());
         worker.terminate();
         workerRef.current = null;
       }
       if (msg.type === 'error') {
-        setFinderError(msg.message);
+        setFinderError(msg.code);
         setFinderLoading(false);
         worker.terminate();
         workerRef.current = null;
       }
     };
 
-    worker.onerror = (e) => {
-      setFinderError(e.message ?? 'worker_error');
+    worker.onerror = () => {
+      setFinderError('unknown');
       setFinderLoading(false);
       worker.terminate();
       workerRef.current = null;
@@ -114,6 +119,7 @@ export function useFinder() {
             startDate,
             endDate,
             granularity: searchGranularity,
+            lang: i18n.language,
           },
         };
       } else if (area.type === 'place' || area.type === 'radius') {
@@ -143,6 +149,7 @@ export function useFinder() {
             startDate,
             endDate,
             granularity: searchGranularity,
+            lang: i18n.language,
           },
         };
       } else {
@@ -155,7 +162,7 @@ export function useFinder() {
     }
 
     worker.postMessage(input);
-  }, [searchAreas, searchRadiusKm, searchGranularity, tripConfig, setFinderLoading, setFinderError, setFinderData, clearFinderData]);
+  }, [searchAreas, searchRadiusKm, searchGranularity, tripConfig, i18n.language, setFinderLoading, setFinderError, setFinderData, clearFinderData]);
 
   return { run };
 }

@@ -22,12 +22,18 @@ export default {
     }
 
     const limit = url.searchParams.get('limit') ?? '5';
+    // F4: forward the requested language (whitelisted) so results are localized.
+    // Cache stays correct because the param is part of the request URL / cache key.
+    const acceptLanguage = url.searchParams.get('accept-language');
 
     const upstream = new URL('https://nominatim.openstreetmap.org/search');
     upstream.searchParams.set('q', q);
     upstream.searchParams.set('format', 'json');
     upstream.searchParams.set('limit', limit);
     upstream.searchParams.set('addressdetails', '0');
+    if (acceptLanguage && /^[a-z]{2}$/.test(acceptLanguage)) {
+      upstream.searchParams.set('accept-language', acceptLanguage);
+    }
 
     const upstreamRes = await fetch(upstream.toString(), {
       headers: {

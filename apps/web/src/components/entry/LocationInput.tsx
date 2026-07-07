@@ -1,14 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppStore } from '../../stores/appStore.ts';
+import { useAppStore, isLocatedPlace } from '../../stores/appStore.ts';
 import { useAuthStore } from '../../stores/authStore.ts';
+import { useIsMobile } from '../../hooks/useIsMobile.ts';
 import { supabaseConfigured } from '../../lib/supabase.ts';
 import { getFavorites, toggleFavorite } from '../../services/userdata.ts';
-import { useLocationSearch } from '../../hooks/useLocationSearch.ts';
-import { parseBbox } from '../../services/nominatim.ts';
-import type { NominatimResult } from '../../services/nominatim.ts';
+import { PlaceAutocomplete, type SelectedPlace } from '../common/PlaceAutocomplete.tsx';
+import { suggestNearby, type NearbySuggestion } from '../../services/nearbyPlaces.ts';
 import type { SearchAreaItem } from '../../stores/appStore.ts';
-import type { Favorite } from '../../types/database.ts';
 
 /* ── Remove icon ────────────────────────────────────────── */
 function RemoveIcon() {
@@ -50,7 +49,6 @@ function RadiusSlider() {
   const { searchRadiusKm, setSearchRadiusKm } = useAppStore();
 
   const STEPS = [10, 25, 50, 100, 150, 200, 300, 500];
-  const idx = STEPS.findIndex((v) => v >= searchRadiusKm) ?? STEPS.length - 1;
 
   function handleSlider(e: React.ChangeEvent<HTMLInputElement>) {
     const i = Number(e.target.value);
@@ -110,47 +108,86 @@ function GranularityToggle() {
   );
 }
 
+/* ── Nearby suggestions (F2) ────────────────────────────── */
+
+interface NearbySuggestionsProps {
+  anchors: Array<{ lat: number; lng: number }>;
+  excludeNames: Set<string>;
+  onAdd: (s: NearbySuggestion) => void;
+}
+
+function NearbySuggestions({ anchors, excludeNames, onAdd }: NearbySuggestionsProps) {
+  const { t } = useTranslation('common');
+  const [suggestions, setSuggestions] = useState<NearbySuggestion[]>([]);
+
+  // Recompute whenever the anchor set or exclusion set changes.
+  const anchorKey = anchors.map((a) => `${a.lat.toFixed(3)},${a.lng.toFixed(3)}`).join('|');
+  const excludeKey = [...excludeNames].sort().join('|');
+
+  useEffect(() => {
+    let cancelled = false;
+    if (anchors.length === 0) {
+      setSuggestions([]);
+      return;
+    }
+    suggestNearby(anchors, { exclude: excludeNames, limit: 6 })
+      .then((s) => { if (!cancelled) setSuggestions(s); })
+      .catch(() => { if (!cancelled) setSuggestions([]); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [anchorKey, excludeKey]);
+
+  if (suggestions.length === 0) return null;
+
+  return (
+    <div className="loc-nearby">
+      <span className="loc-nearby-label">{t('entry.nearby_label')}</span>
+      <div className="loc-nearby-chips">
+        {suggestions.map((s) => (
+          <button
+            key={`${s.name}-${s.lat.toFixed(3)}`}
+            type="button"
+            className="suggestion-pill"
+            onClick={() => onAdd(s)}
+            aria-label={t('a11y.add_nearby', { name: s.name })}
+          >
+            + {s.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ── Main LocationInput component ───────────────────────── */
 
 export function LocationInput() {
   const { t } = useTranslation('common');
-  const { searchAreas, addSearchArea, removeSearchArea, searchRadiusKm, pickingLocation, setPickingLocation } = useAppStore();
+  const { searchAreas, addSearchArea, removeSearchArea, pickingLocation, setPickingLocation } = useAppStore();
   const { user } = useAuthStore();
-  const { search, results, loading } = useLocationSearch();
+  const isMobile = useIsMobile();
 
-  const [inputValue, setInputValue] = useState('');
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Favorites state for logged-in users
-  const [favorites, setFavorites] = useState<Favorite[]>([]);
-
-  // favoritedNames: set of place names the user has favorited (for tag heart state)
+  // favoritedNames: place names the user has favorited (drives the tag heart state).
   const [favoritedNames, setFavoritedNames] = useState<Set<string>>(new Set());
 
   // Load favorites when user changes
   useEffect(() => {
     if (!user || !supabaseConfigured) {
-      setFavorites([]);
       setFavoritedNames(new Set());
       return;
     }
     getFavorites()
-      .then((favs) => {
-        setFavorites(favs);
-        setFavoritedNames(new Set(favs.map((f) => f.place_name)));
-      })
+      .then((favs) => setFavoritedNames(new Set(favs.map((f) => f.place_name))))
       .catch(() => { /* non-critical */ });
   }, [user]);
 
   async function handleTagFavorite(area: SearchAreaItem) {
-    if (area.type !== 'place' || !('lat' in area) || area.lat === undefined) return;
-    const name = 'name' in area ? area.name : '';
+    if (!isLocatedPlace(area)) return;
+    const name = area.name;
     if (!name) return;
     if (!user || !supabaseConfigured) return; // requires auth
     try {
-      const { added } = await toggleFavorite(name, area.lat, area.lng ?? 0);
+      const { added } = await toggleFavorite(name, area.lat, area.lng);
       setFavoritedNames((prev) => {
         const next = new Set(prev);
         if (added) next.add(name); else next.delete(name);
@@ -158,17 +195,6 @@ export function LocationInput() {
       });
     } catch { /* non-critical */ }
   }
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleMouseDown(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleMouseDown);
-    return () => document.removeEventListener('mousedown', handleMouseDown);
-  }, []);
 
   // Cancel picking mode on Escape
   useEffect(() => {
@@ -180,79 +206,56 @@ export function LocationInput() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [pickingLocation, setPickingLocation]);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const value = e.target.value;
-    setInputValue(value);
-    setDropdownOpen(true);
-    search(value);
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Escape') {
-      setDropdownOpen(false);
-    } else if (e.key === 'Enter' && results.length > 0) {
-      selectResult(results[0]);
-    }
-  }
-
-  function handleFocus() {
-    setDropdownOpen(true);
-  }
-
-  function selectResult(result: NominatimResult) {
-    const bbox = parseBbox(result);
-    const shortName = result.display_name.split(',')[0].trim();
-
+  function handleSelect(place: SelectedPlace) {
     const area: SearchAreaItem = {
       type: 'place',
-      id: String(result.place_id),
-      name: shortName,
-      fullName: result.display_name,
-      bbox: [bbox.west, bbox.south, bbox.east, bbox.north],
-      lat: Number(result.lat),
-      lng: Number(result.lon),
-    };
-
-    addSearchArea(area);
-    setInputValue('');
-    setDropdownOpen(false);
-    inputRef.current?.focus();
-  }
-
-  function selectFavorite(fav: Favorite) {
-    const area: SearchAreaItem = {
-      type: 'place',
-      id: `fav-${fav.id}`,
-      name: fav.place_name,
-      fullName: fav.place_name,
-      lat: fav.lat,
-      lng: fav.lng,
+      id: place.placeId,
+      name: place.name,
+      fullName: place.fullName,
+      bbox: place.bbox,
+      lat: place.lat,
+      lng: place.lng,
     };
     addSearchArea(area);
-    setInputValue('');
-    setDropdownOpen(false);
-    inputRef.current?.focus();
   }
 
   const hasDrawnPolygon = searchAreas.some((a) => a.type === 'polygon');
-  const showRadius = searchAreas.filter((a) => a.type === 'place').length === 1 && searchAreas.length === 1;
 
-  // Names of places already added — exclude from favorites dropdown
+  const placeCount = searchAreas.filter((a) => a.type === 'place').length;
+  const showRadius = placeCount === 1 && searchAreas.length === 1;
+
+  // Names of places already added — exclude from favorites dropdown / suggestions
   const selectedNames = new Set(
     searchAreas.filter((a) => a.type === 'place').map((a) => ('name' in a ? a.name : ''))
   );
 
-  // Filter favorites by current input and exclude already-selected places
-  const matchedFavorites = favorites.filter((f) =>
-    !selectedNames.has(f.place_name) &&
-    (inputValue.trim() === '' || f.place_name.toLowerCase().includes(inputValue.toLowerCase()))
-  );
+  // F2: anchors for "nearby" = located places + polygon centroids.
+  const nearbyAnchors: Array<{ lat: number; lng: number }> = [];
+  for (const a of searchAreas) {
+    if (isLocatedPlace(a)) {
+      nearbyAnchors.push({ lat: a.lat, lng: a.lng });
+    } else if (a.type === 'polygon' && a.polygon.length > 0) {
+      const n = a.polygon.length;
+      const lng = a.polygon.reduce((s, p) => s + p[0], 0) / n;
+      const lat = a.polygon.reduce((s, p) => s + p[1], 0) / n;
+      nearbyAnchors.push({ lat, lng });
+    }
+  }
+  const showNearby = nearbyAnchors.length > 0 && searchAreas.length < 8;
 
-  // Show dropdown if open and (has Nominatim results OR has favorites)
-  const showDropdown = dropdownOpen && !hasDrawnPolygon && (results.length > 0 || matchedFavorites.length > 0);
+  function addNearby(s: NearbySuggestion) {
+    addSearchArea({
+      type: 'place',
+      id: `nearby-${s.name}-${s.lat.toFixed(3)}`,
+      name: s.name,
+      fullName: s.name,
+      lat: s.lat,
+      lng: s.lng,
+    });
+  }
 
   return (
-    <div className="location-input-wrapper" ref={containerRef}>
+    <div className="location-input-wrapper">
       <label className="input-label">{t('entry.location')}</label>
 
       {/* Tag list of selected places / drawn areas */}
@@ -260,10 +263,10 @@ export function LocationInput() {
         <div className="loc-tags">
           {searchAreas.map((area) => {
             const tagName = area.type === 'polygon'
-              ? t('entry.drawn_area', 'Gezeichnetes Gebiet')
+              ? t('entry.drawn_area')
               : ('name' in area ? area.name : '');
-            const isPlace = area.type === 'place' && 'lat' in area && area.lat !== undefined;
-            const isFavorited = isPlace && 'name' in area && favoritedNames.has(area.name);
+            const isPlace = isLocatedPlace(area);
+            const isFavorited = isPlace && favoritedNames.has(area.name);
             return (
               <span
                 key={area.id}
@@ -296,21 +299,15 @@ export function LocationInput() {
 
       {/* Search input row — dimmed when a drawn polygon is active */}
       <div className={`loc-input-row${hasDrawnPolygon ? ' loc-input-row--disabled' : ''}`}>
-        <div className="location-input-container">
-          <input
-            ref={inputRef}
-            type="text"
-            className="text-input"
-            value={inputValue}
-            onChange={hasDrawnPolygon ? undefined : handleChange}
-            onKeyDown={hasDrawnPolygon ? undefined : handleKeyDown}
-            onFocus={hasDrawnPolygon ? undefined : handleFocus}
-            placeholder={hasDrawnPolygon ? t('entry.polygon_active_placeholder', 'Gebiet gezeichnet') : t('entry.location_placeholder')}
-            autoComplete="off"
-            disabled={hasDrawnPolygon}
-          />
-          {loading && <div className="loading-bar" aria-hidden="true" />}
-        </div>
+        <PlaceAutocomplete
+          onSelect={handleSelect}
+          placeholder={hasDrawnPolygon ? t('entry.polygon_active_placeholder') : t('entry.location_placeholder')}
+          showFavorites
+          excludeNames={selectedNames}
+          clearOnSelect
+          disabled={hasDrawnPolygon}
+          inline={isMobile}
+        />
         <button
           type="button"
           className={`loc-pick-map-btn${pickingLocation ? ' loc-pick-map-btn--active' : ''}`}
@@ -322,31 +319,13 @@ export function LocationInput() {
         </button>
       </div>
 
-      {/* Autocomplete dropdown — favorites first, then Nominatim results */}
-      {showDropdown && (
-        <ul className="autocomplete-dropdown" role="listbox">
-          {matchedFavorites.slice(0, 5).map((fav) => (
-            <li
-              key={`fav-${fav.id}`}
-              role="option"
-              className="autocomplete-option autocomplete-option--favorite"
-              onMouseDown={() => selectFavorite(fav)}
-            >
-              <HeartIcon filled={true} />
-              <span>{fav.place_name}</span>
-            </li>
-          ))}
-          {results.slice(0, 5).map((result) => (
-            <li
-              key={result.place_id}
-              role="option"
-              className="autocomplete-option"
-              onMouseDown={() => selectResult(result)}
-            >
-              {result.display_name}
-            </li>
-          ))}
-        </ul>
+      {/* Nearby suggestions (F2) — larger towns near the chosen places */}
+      {showNearby && (
+        <NearbySuggestions
+          anchors={nearbyAnchors}
+          excludeNames={selectedNames}
+          onAdd={addNearby}
+        />
       )}
 
       {/* Radius selector — only when exactly one place */}

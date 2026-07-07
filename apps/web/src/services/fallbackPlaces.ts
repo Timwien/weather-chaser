@@ -11,13 +11,14 @@
 
 import type { Town } from '@weatherchaser/core';
 import type { BoundingBox } from './nominatim.ts';
+import { haversineKm, pointInPolygon } from '../utils/geo.ts';
 
 type PlaceTuple = [string, number, number, number];
 
 let cache: Town[] | null = null;
 let loading: Promise<Town[]> | null = null;
 
-async function loadPlaces(): Promise<Town[]> {
+export async function loadPlaces(): Promise<Town[]> {
   if (cache) return cache;
   loading ??= (async () => {
     const url = new URL('/fallback-places.json', self.location.origin);
@@ -34,29 +35,6 @@ async function loadPlaces(): Promise<Town[]> {
     return cache;
   })();
   return loading;
-}
-
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return 6371 * 2 * Math.asin(Math.sqrt(a));
-}
-
-/** Ray-casting point-in-polygon; polygon vertices are [lng, lat]. */
-function pointInPolygon(lat: number, lng: number, polygon: [number, number][]): boolean {
-  let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const [xi, yi] = polygon[i]; // lng, lat
-    const [xj, yj] = polygon[j];
-    if (yi > lat !== yj > lat && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) {
-      inside = !inside;
-    }
-  }
-  return inside;
 }
 
 export async function fallbackPlacesInBbox(bbox: BoundingBox): Promise<Town[]> {

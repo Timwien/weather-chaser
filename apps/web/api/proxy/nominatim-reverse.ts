@@ -22,10 +22,16 @@ export default {
       });
     }
 
+    // F4: forward the requested language (whitelisted).
+    const acceptLanguage = url.searchParams.get('accept-language');
+
     const upstream = new URL('https://nominatim.openstreetmap.org/reverse');
     upstream.searchParams.set('lat', lat);
     upstream.searchParams.set('lon', lon);
     upstream.searchParams.set('format', 'json');
+    if (acceptLanguage && /^[a-z]{2}$/.test(acceptLanguage)) {
+      upstream.searchParams.set('accept-language', acceptLanguage);
+    }
 
     const upstreamRes = await fetch(upstream.toString(), {
       headers: {

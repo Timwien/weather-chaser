@@ -54,9 +54,8 @@ export function WeatherFinderStep() {
     return (
       <div className="finder-step">
         <div className="finder-step-error">
-          {finderError === 'no_towns'
-            ? t('errors.no_towns', 'Keine Orte gefunden. Bitte ein größeres Gebiet wählen.')
-            : t('finder.error', 'Fehler beim Laden. Bitte erneut versuchen.')}
+          {/* R5: finderError is a typed AppErrorCode */}
+          {t(`errors.${finderError}`, { defaultValue: t('finder.error') })}
         </div>
         <button
           type="button"

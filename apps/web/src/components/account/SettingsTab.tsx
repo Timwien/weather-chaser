@@ -115,6 +115,23 @@ export function SettingsTab({ onClose }: SettingsTabProps) {
 
       <div className="settings-tab-divider" />
 
+      {/* F1: explicit app reload — the installed PWA has no browser reload chrome,
+          so a frozen UI would otherwise be a dead end. */}
+      <section className="settings-tab-section">
+        <h3 className="settings-tab-section-title">{t('account.settings_reload_title')}</h3>
+        <p className="settings-tab-guest-note">{t('account.settings_reload_hint')}</p>
+        <button
+          type="button"
+          className="settings-tab-link"
+          onClick={() => window.location.reload()}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
+        >
+          {t('common.reload')}
+        </button>
+      </section>
+
+      <div className="settings-tab-divider" />
+
       {/* Subscription — only for real (paid) premium; hidden during the free
           beta where there is no Stripe customer to manage */}
       {user && tier === 'premium' && !PREMIUM_FREE_BETA && (

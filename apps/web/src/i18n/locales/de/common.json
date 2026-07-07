@@ -1,4 +1,7 @@
 {
+  "common": {
+    "reload": "Neu laden"
+  },
   "app": {
     "title": "WeatherChaser",
     "tagline": "Jage das perfekte Wetter"
@@ -8,6 +11,7 @@
     "dates_placeholder": "Daten auswählen",
     "dates_select_end": "Enddatum auswählen",
     "location": "Wo",
+    "weather_prefs": "Wetter-Präferenz",
     "location_placeholder": "Ort hinzufügen...",
     "location_add": "Hinzufügen",
     "location_pick_map": "Auf Karte wählen",
@@ -24,6 +28,8 @@
       "temperature": "Wärme",
       "wind": "Ruhiger Wind"
     },
+    "drawn_area": "Gezeichnetes Gebiet",
+    "polygon_active_placeholder": "Gebiet gezeichnet",
     "draw_area": "Gebiet zeichnen",
     "draw_hint": "Klicken um Punkte zu setzen · ersten Punkt klicken zum Abschließen",
     "draw_hint_start": "Tippe auf die Karte, um Punkte zu setzen",
@@ -41,6 +47,7 @@
       "cities": "Nur Städte",
       "all": "Alle Orte"
     },
+    "nearby_label": "In der Nähe",
     "cta_missing_dates": "Wähle zuerst deine Reisedaten",
     "cta_missing_location": "Füge zuerst einen Ort hinzu oder zeichne ein Gebiet",
     "cta_missing_both": "Wähle Reisedaten und füge einen Ort hinzu, um zu starten"
@@ -61,7 +68,10 @@
     "label": "Wetterprofil",
     "beach": "Strand",
     "hiking": "Wandern",
-    "sightseeing": "Sightseeing"
+    "sightseeing": "Sightseeing",
+    "beach_desc": "Viel Sonne, warm, wenig Wind",
+    "hiking_desc": "Trocken, mild, wenig Wind",
+    "sightseeing_desc": "Vor allem trocken"
   },
   "itinerary": {
     "title": "Deine Route",
@@ -89,7 +99,10 @@
     "search": "Suche"
   },
   "map": {
-    "stop_popup": "Score: {{score}}"
+    "stop_popup": "Score: {{score}}",
+    "tap_add_title": "Ort hinzufügen?",
+    "tap_add_confirm": "Hinzufügen",
+    "tap_hint": "Tippe auf die Karte, um einen Ort zu wählen"
   },
   "share": {
     "export_google": "In Google Maps öffnen",
@@ -130,12 +143,15 @@
     "saving": "Speichern…",
     "saved": "Gespeichert ✓",
     "sign_in": "Anmelden zum Speichern",
-    "error_generic": "Fehler beim Speichern"
+    "error_generic": "Fehler beim Speichern",
+    "search": "Suche speichern",
+    "search_saved": "Suche gespeichert ✓"
   },
   "loading": {
     "finding_towns": "Orte werden gesucht...",
     "fetching_weather": "Wetterdaten werden geladen...",
-    "optimizing_route": "Route wird optimiert..."
+    "optimizing_route": "Route wird optimiert...",
+    "taking_long": "Dauert ungewöhnlich lange — neu laden?"
   },
   "finder": {
     "start_label": "Startpunkt",
@@ -189,11 +205,20 @@
   },
   "errors": {
     "no_towns": "Keine Orte in diesem Gebiet gefunden",
+    "no_towns_small_area": "In diesem Gebiet wurden keine größeren Orte gefunden. Gebiet vergrößern oder „Alle Orte“ wählen.",
     "no_towns_hint": "Versuche, das Suchgebiet zu vergrößern",
     "poor_weather": "Das Wetter in dieser Region ist für die gewählten Daten ungünstig",
     "weather_unavailable": "Wetterdaten für einige Stopps nicht verfügbar",
     "overpass": "Orte konnten gerade nicht geladen werden. Versuche ein kleineres Gebiet, „Nur Städte“ oder probiere es erneut.",
-    "weather_failed": "Der Wetterdienst ist gerade nicht erreichbar. Bitte in ein paar Minuten erneut versuchen."
+    "overpass_unavailable": "Orte konnten gerade nicht geladen werden. Versuche ein kleineres Gebiet, „Nur Städte“ oder probiere es erneut.",
+    "weather_failed": "Der Wetterdienst ist gerade nicht erreichbar. Bitte in ein paar Minuten erneut versuchen.",
+    "missing_config": "Bitte Reisedaten (Start und Ende) auswählen.",
+    "missing_polygon": "Bitte zuerst ein Gebiet zeichnen.",
+    "missing_coords": "Für diesen Ort fehlen Koordinaten. Bitte erneut auswählen.",
+    "no_location": "Bitte zuerst einen Ort hinzufügen oder ein Gebiet zeichnen.",
+    "unknown": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "boundary_title": "Etwas ist schiefgelaufen",
+    "boundary_text": "Die App ist auf einen unerwarteten Fehler gestoßen. Lade sie neu, um fortzufahren."
   },
   "account": {
     "tab_account": "Konto",
@@ -222,8 +247,11 @@
     "saved_not_logged_in": "Bitte anmelden, um gespeicherte Elemente zu sehen.",
     "saved_routes_title": "Routen",
     "saved_routes_empty": "Noch keine Routen gespeichert",
-    "saved_searches_title": "Finder-Suchen",
+    "saved_searches_title": "Gespeicherte Suchen",
     "saved_searches_empty": "Noch keine Suchen gespeichert",
+    "history_title": "Letzte Suchen",
+    "history_empty": "Noch keine Suchen",
+    "history_save_as": "Als Suche speichern",
     "saved_favorites_title": "Favoriten",
     "saved_favorites_empty": "Noch keine Favoriten gespeichert",
     "settings_privacy_title": "Datenschutz",
@@ -238,6 +266,8 @@
     "settings_delete_error": "Fehler {{status}}: Konto konnte nicht gelöscht werden.",
     "settings_guest_note": "Anmelden, um Einstellungen zu verwalten.",
     "settings_language_title": "Sprache",
+    "settings_reload_title": "App",
+    "settings_reload_hint": "Lädt die App neu, wenn sie nicht mehr reagiert.",
     "settings_theme_title": "Darstellung",
     "settings_theme_system": "System",
     "settings_theme_light": "Hell",
@@ -266,9 +296,12 @@
     "show_route_on_map": "Route auf der Karte anzeigen",
     "delete_route": "Route l\u00f6schen",
     "add_as_start": "Als Startort hinzuf\u00fcgen",
+    "load_saved_search": "Suche laden",
     "close": "Schlie\u00dfen",
     "loading": "L\u00e4dt\u2026",
     "remove_named": "{{name}} entfernen",
-    "max_days_ahead": "Max. {{days}} Tage im Voraus"
+    "max_days_ahead": "Max. {{days}} Tage im Voraus",
+    "reload": "App neu laden",
+    "add_nearby": "{{name}} hinzufügen"
   }
 }

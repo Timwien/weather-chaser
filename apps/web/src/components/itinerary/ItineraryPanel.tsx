@@ -1,15 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { WeatherPreset } from '@weatherchaser/core';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useAuthStore } from '../../stores/authStore.ts';
 import { supabaseConfigured } from '../../lib/supabase.ts';
 import { saveRoute } from '../../services/userdata.ts';
+import { runOptimizer } from '../../services/optimizerRunner.ts';
 import { SummaryBar } from './SummaryBar.tsx';
 import { StopCard } from './StopCard.tsx';
 import { ShareBar } from '../share/ShareBar.tsx';
 import { InlineSignInPrompt } from '../auth/InlineSignInPrompt.tsx';
 import { ErrorMessage } from '../common/ErrorMessage.tsx';
+import { BeachIcon, HikingIcon, SightseeingIcon } from '../finder/FinderIcons.tsx';
 import './ItineraryPanel.css';
+
+const REWEIGHT_PRESETS: WeatherPreset[] = ['beach', 'hiking', 'sightseeing'];
+
+const REWEIGHT_ICONS: Record<WeatherPreset, React.ComponentType<{ size?: number }>> = {
+  beach: BeachIcon,
+  hiking: HikingIcon,
+  sightseeing: SightseeingIcon,
+};
 
 interface ItineraryPanelProps {
   selectedStopIndex: number | null;
@@ -34,7 +45,7 @@ function SaveIcon() {
 
 export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPanelProps) {
   const { t } = useTranslation('common');
-  const { route, error, mode, reset, tripConfig } = useAppStore();
+  const { route, error, mode, reset, tripConfig, weatherPrefs, setWeatherPrefs, lastRoutePrefs } = useAppStore();
   const { user, pendingAction, setPendingAction } = useAuthStore();
   const stopRefs = useRef<Array<HTMLDivElement | null>>([]);
 
@@ -117,6 +128,48 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPan
       </div>
 
       <SummaryBar route={route} />
+
+      {/* Post-hoc re-weighting: pick a different weather profile and recompute
+          the route on explicit confirmation (recomputing takes time, so a mere
+          chip tap must never trigger it). Only offered when the route came from
+          a run this session (lastRoutePrefs set) — saved routes have no search
+          inputs in the store to recompute from. */}
+      {lastRoutePrefs && (
+        <div className="itinerary-reweight">
+          <span className="itinerary-reweight-label">{t('itinerary.reweight_label')}</span>
+          <div className="itinerary-reweight-chips" role="radiogroup" aria-label={t('itinerary.reweight_label')}>
+            {REWEIGHT_PRESETS.map((preset) => {
+              const Icon = REWEIGHT_ICONS[preset];
+              const active = weatherPrefs.customWeights === null && weatherPrefs.preset === preset;
+              return (
+                <button
+                  key={preset}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  className={`itinerary-reweight-chip${active ? ' itinerary-reweight-chip--active' : ''}`}
+                  onClick={() => setWeatherPrefs({ preset, customWeights: null })}
+                >
+                  <Icon size={14} />
+                  {t(`preset.${preset}`)}
+                </button>
+              );
+            })}
+          </div>
+          {JSON.stringify(weatherPrefs) !== JSON.stringify(lastRoutePrefs) && (
+            <div className="itinerary-reweight-confirm-row">
+              <span className="itinerary-reweight-hint">{t('itinerary.reweight_hint')}</span>
+              <button
+                type="button"
+                className="itinerary-reweight-confirm"
+                onClick={runOptimizer}
+              >
+                {t('itinerary.reweight_confirm')}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Save button — always visible; guest sees it dimmed */}
       <div className="itinerary-save-area">

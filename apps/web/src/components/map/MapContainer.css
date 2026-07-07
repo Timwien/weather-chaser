@@ -73,6 +73,31 @@
   border-bottom-color: var(--color-surface);
 }
 
+/* ── Place pins (added search places) ─────────────────────── */
+.place-marker {
+  cursor: pointer;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  /* U1: pad the hit area beyond the visible 28px pin */
+  padding: 8px;
+  margin: -8px;
+  touch-action: manipulation;
+}
+
+.place-marker-remove {
+  flex: 1;
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: 1.5px solid var(--color-error);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-error);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
 /* ── F3: tap hint pill (shown after pressing the pin button) ── */
 .map-tap-hint {
   position: absolute;

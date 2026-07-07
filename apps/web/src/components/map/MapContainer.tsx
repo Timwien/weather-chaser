@@ -8,6 +8,7 @@ import { useThemeStore } from '../../stores/themeStore.ts';
 import { reverseGeocode } from '../../services/nominatim.ts';
 import { DrawingControls } from './DrawingControls.tsx';
 import { SearchAreasLayer } from './SearchAreasLayer.tsx';
+import { PlaceMarkers } from './PlaceMarkers.tsx';
 import { RouteLayer } from './RouteLayer.tsx';
 import { StopMarkers } from './StopMarkers.tsx';
 import { FinderMarkers } from './FinderMarkers.tsx';
@@ -187,6 +188,7 @@ function TapToAddLocation() {
   const pickingLocation = useAppStore((s) => s.pickingLocation);
   const setPickingLocation = useAppStore((s) => s.setPickingLocation);
   const addSearchArea = useAppStore((s) => s.addSearchArea);
+  const hasAreas = useAppStore((s) => s.searchAreas.length > 0);
 
   const [pending, setPending] = useState<{ lat: number; lng: number; name: string; fullName: string } | null>(null);
   const lastMoveEndRef = useRef(0);
@@ -240,8 +242,10 @@ function TapToAddLocation() {
 
   return (
     <>
-      {/* Hint nudge when the user explicitly pressed the pin button */}
-      {active && pickingLocation && !pending && (
+      {/* Discoverability: show the hint whenever no place is chosen yet (the
+          moment guidance helps), and when the pin button was pressed. It
+          disappears as soon as the first place is added. */}
+      {active && !pending && !isDrawingArea && (pickingLocation || !hasAreas) && (
         <div className="map-tap-hint" role="status">{t('map.tap_hint')}</div>
       )}
 
@@ -327,6 +331,10 @@ export function MapContainer({
         <MapLanguage />
         {/* X1: drawn areas persist here (store-backed), independent of DrawingControls' mount */}
         <SearchAreasLayer />
+        {/* Pins for added places — entry modes only; results have their own markers */}
+        {(mode === 'idle' || mode === 'route-config' || (mode === 'weather-finder' && !finderResults)) && (
+          <PlaceMarkers />
+        )}
         {/* DrawingControls must live inside <Map> so useMap() has a provider */}
         {onDrawComplete && onDrawClear && (
           <DrawingControls

@@ -76,6 +76,9 @@
   "itinerary": {
     "title": "Deine Route",
     "back": "Zurück",
+    "reweight_label": "Wetterprofil",
+    "reweight_hint": "Profil geändert — die Route muss neu berechnet werden. Das kann einen Moment dauern.",
+    "reweight_confirm": "Route neu berechnen",
     "day_label_one": "Tag",
     "day_label_other": "Tage",
     "day": "Tag",
@@ -102,7 +105,8 @@
     "stop_popup": "Score: {{score}}",
     "tap_add_title": "Ort hinzufügen?",
     "tap_add_confirm": "Hinzufügen",
-    "tap_hint": "Tippe auf die Karte, um einen Ort zu wählen"
+    "tap_hint": "Tippe auf die Karte, um einen Ort zu wählen",
+    "pin_remove": "Entfernen"
   },
   "share": {
     "export_google": "In Google Maps öffnen",

@@ -76,6 +76,9 @@
   "itinerary": {
     "title": "Your Route",
     "back": "Back",
+    "reweight_label": "Weather profile",
+    "reweight_hint": "Profile changed — the route needs to be recomputed. This may take a moment.",
+    "reweight_confirm": "Recompute route",
     "day_label_one": "Day",
     "day_label_other": "Day",
     "day": "Day",
@@ -102,7 +105,8 @@
     "stop_popup": "Score: {{score}}",
     "tap_add_title": "Add place?",
     "tap_add_confirm": "Add",
-    "tap_hint": "Tap the map to pick a place"
+    "tap_hint": "Tap the map to pick a place",
+    "pin_remove": "Remove"
   },
   "share": {
     "export_google": "Open in Google Maps",

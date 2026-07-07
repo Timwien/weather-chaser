@@ -63,7 +63,7 @@ interface TripConfig {
  * Replaces the old tripConfig.preset / tripConfig.customWeights / tripConfig.criteria
  * and finderConfig.preset — those drifted and `criteria` was dead state.
  */
-interface WeatherPrefs {
+export interface WeatherPrefs {
   preset: WeatherPreset;
   /** Premium: custom scoring weights override the preset when set (must sum to 1). */
   customWeights: ScoringWeights | null;
@@ -109,6 +109,9 @@ interface AppState {
   tripConfig: TripConfig;
   /** U2: shared weather preference (preset + optional custom weights). */
   weatherPrefs: WeatherPrefs;
+  /** Snapshot of the prefs the current route was computed with — drives the
+   *  "profile changed → recompute?" confirmation in the itinerary panel. */
+  lastRoutePrefs: WeatherPrefs | null;
   route: Route | null;
   error: string | null;
   /** True while user is in "click to pick location" mode */
@@ -146,6 +149,7 @@ interface AppState {
   setSearchGranularity: (g: SearchGranularity) => void;
   setTripConfig: (config: Partial<TripConfig>) => void;
   setWeatherPrefs: (prefs: Partial<WeatherPrefs>) => void;
+  setLastRoutePrefs: (prefs: WeatherPrefs | null) => void;
   setRoute: (route: Route | null) => void;
   setError: (error: string | null) => void;
   reset: () => void;
@@ -186,6 +190,7 @@ export const useAppStore = create<AppState>((set) => ({
   searchGranularity: 'auto',
   tripConfig: defaultTripConfig,
   weatherPrefs: defaultWeatherPrefs,
+  lastRoutePrefs: null,
   route: null,
   error: null,
   pickingLocation: false,
@@ -213,6 +218,7 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({ tripConfig: { ...state.tripConfig, ...config } })),
   setWeatherPrefs: (prefs) =>
     set((state) => ({ weatherPrefs: { ...state.weatherPrefs, ...prefs } })),
+  setLastRoutePrefs: (prefs) => set({ lastRoutePrefs: prefs }),
   setRoute: (route) => set({ route }),
   setError: (error) => set({ error }),
   setFinderConfig: (config) =>

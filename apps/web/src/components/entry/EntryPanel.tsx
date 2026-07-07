@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useAuthStore } from '../../stores/authStore.ts';
-import { useOptimizer } from '../../hooks/useOptimizer.ts';
+import { runOptimizer } from '../../services/optimizerRunner.ts';
 import { DateRangePicker } from './DateRangePicker.tsx';
 import { LocationInput } from './LocationInput.tsx';
 import { WeatherPrefsSection } from './WeatherPrefsSection.tsx';
@@ -22,8 +22,6 @@ export function EntryPanel() {
   const { t, i18n } = useTranslation('common');
   const { mode, setMode, loadingStep, tripConfig, searchAreas, error, setError, route } = useAppStore();
   const user = useAuthStore((s) => s.user);
-  // Hoisted here so the worker ref survives when RouteConfigStep unmounts during loading
-  const optimizer = useOptimizer();
 
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [showRouteHint, setShowRouteHint] = useState(false);
@@ -140,8 +138,10 @@ export function EntryPanel() {
         </div>
       )}
 
-      {/* Route config second step — expands inline when mode is route-config */}
-      {isRouteConfig && <RouteConfigStep onGenerate={optimizer.run} onBack={() => setMode('idle')} />}
+      {/* Route config second step — expands inline when mode is route-config.
+          runOptimizer is a module singleton, so the worker survives any
+          component unmount (loading state, results re-weighting). */}
+      {isRouteConfig && <RouteConfigStep onGenerate={runOptimizer} onBack={() => setMode('idle')} />}
 
       {/* Loading state */}
       {mode === 'loading' && (

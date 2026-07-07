@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useMap } from '@vis.gl/react-maplibre';
-import { useAppStore } from '../../stores/appStore.ts';
+import { useAppStore, isPolygonArea } from '../../stores/appStore.ts';
 
 /**
  * X1: single source of truth for drawn-area RENDERING = the store.
@@ -27,8 +27,14 @@ function hexToRgba(hex: string, alpha: number): string {
 export function SearchAreasLayer() {
   const { current: map } = useMap();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const polygons = useAppStore((s) =>
-    s.searchAreas.filter((a) => a.type === 'polygon').map((a) => (a as { polygon: number[][] }).polygon),
+  // Select the stable array reference, derive in useMemo. A `filter().map()`
+  // INSIDE the selector returned a fresh array on every snapshot read, which
+  // zustand v5 (Object.is equality) treats as a change → infinite re-render
+  // loop (React error #185, caught by the AppErrorBoundary in prod).
+  const searchAreas = useAppStore((s) => s.searchAreas);
+  const polygons = useMemo(
+    () => searchAreas.filter(isPolygonArea).map((a) => a.polygon),
+    [searchAreas],
   );
   const polygonsRef = useRef(polygons);
   polygonsRef.current = polygons;

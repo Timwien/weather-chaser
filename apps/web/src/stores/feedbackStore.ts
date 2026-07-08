@@ -1,5 +1,5 @@
-// Feedback prompt + modal state. Callable from non-React modules
-// (optimizerRunner) via useFeedbackStore.getState().
+// Feedback modal state + one-time proactive trigger. Callable from non-React
+// modules (optimizerRunner) via useFeedbackStore.getState().
 
 import { create } from 'zustand';
 import { capture } from '../lib/analytics.ts';
@@ -12,6 +12,8 @@ const SHOWN_KEY = 'wc_feedback_prompt_shown';
 
 // Ask after the user has seen the app work twice — they can judge it by then.
 const PROMPT_AFTER_SUCCESSES = 2;
+// Let the results render first so the popup doesn't mask the payoff moment.
+const PROMPT_DELAY_MS = 1500;
 
 function readCount(): number {
   try {
@@ -26,19 +28,16 @@ function promptAlreadyShown(): boolean {
 }
 
 interface FeedbackState {
-  promptVisible: boolean;
   modalOpen: boolean;
   modalSource: FeedbackSource;
 
-  /** Called from both search 'complete' handlers. Fires the prompt once ever. */
+  /** Called from both search 'complete' handlers. Opens the modal once ever. */
   recordSearchSuccess: () => void;
-  dismissPrompt: () => void;
   openModal: (source: FeedbackSource) => void;
   closeModal: () => void;
 }
 
 export const useFeedbackStore = create<FeedbackState>((set) => ({
-  promptVisible: false,
   modalOpen: false,
   modalSource: 'prompt',
 
@@ -47,20 +46,17 @@ export const useFeedbackStore = create<FeedbackState>((set) => ({
       const count = readCount() + 1;
       localStorage.setItem(COUNT_KEY, String(count));
       if (count >= PROMPT_AFTER_SUCCESSES && !promptAlreadyShown()) {
-        // Mark shown immediately — once ever, even if the user never interacts.
+        // Mark shown immediately — once ever, even if the user just closes it.
         localStorage.setItem(SHOWN_KEY, '1');
-        set({ promptVisible: true });
-        capture('feedback_prompt_shown');
+        setTimeout(() => {
+          set({ modalOpen: true, modalSource: 'prompt' });
+          capture('feedback_prompt_shown');
+        }, PROMPT_DELAY_MS);
       }
     } catch { /* storage unavailable — skip silently */ }
   },
 
-  dismissPrompt: () => {
-    set({ promptVisible: false });
-    capture('feedback_prompt_dismissed');
-  },
-
-  openModal: (source) => set({ modalOpen: true, modalSource: source, promptVisible: false }),
+  openModal: (source) => set({ modalOpen: true, modalSource: source }),
 
   closeModal: () => set({ modalOpen: false }),
 }));

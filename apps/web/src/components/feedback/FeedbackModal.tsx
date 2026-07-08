@@ -1,21 +1,33 @@
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFeedbackStore } from '../../stores/feedbackStore.ts';
+import { capture } from '../../lib/analytics.ts';
 import { FeedbackForm } from './FeedbackForm.tsx';
 import './FeedbackModal.css';
 
 /**
  * Global feedback modal — mounted ONCE in routes/__root.tsx so it can be
- * opened from anywhere (proactive prompt, entry footer, account tab is a
- * separate inline form). UpgradeModal backdrop pattern.
+ * opened from anywhere. Opens proactively (source 'prompt') once after the
+ * 2nd successful search, and on demand from the entry footer.
  */
 export function FeedbackModal() {
   const { t } = useTranslation('common');
   const { modalOpen, modalSource, closeModal } = useFeedbackStore();
+  const submittedRef = useRef(false);
 
   if (!modalOpen) return null;
 
+  function handleClose() {
+    // Closing the proactive popup without submitting counts as a dismissal.
+    if (modalSource === 'prompt' && !submittedRef.current) {
+      capture('feedback_prompt_dismissed');
+    }
+    submittedRef.current = false;
+    closeModal();
+  }
+
   return (
-    <div className="feedback-modal-backdrop" onClick={closeModal}>
+    <div className="feedback-modal-backdrop" onClick={handleClose}>
       <div
         className="feedback-modal"
         role="dialog"
@@ -24,11 +36,13 @@ export function FeedbackModal() {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="feedback-modal-header">
-          <h2 className="feedback-modal-title">{t('feedback.title')}</h2>
+          <h2 className="feedback-modal-title">
+            {modalSource === 'prompt' ? t('feedback.prompt_title') : t('feedback.title')}
+          </h2>
           <button
             type="button"
             className="feedback-modal-close"
-            onClick={closeModal}
+            onClick={handleClose}
             aria-label={t('a11y.close')}
           >
             ×
@@ -36,7 +50,13 @@ export function FeedbackModal() {
         </div>
         <FeedbackForm
           source={modalSource}
-          onSubmitted={() => setTimeout(closeModal, 1500)}
+          onSubmitted={() => {
+            submittedRef.current = true;
+            setTimeout(() => {
+              submittedRef.current = false;
+              closeModal();
+            }, 1500);
+          }}
         />
       </div>
     </div>

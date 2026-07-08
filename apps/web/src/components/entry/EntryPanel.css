@@ -1284,6 +1284,15 @@
   margin-left: auto;
 }
 
+/* Feedback: icon + visible label, centered between account and reload */
+.entry-panel-feedback-btn {
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  min-height: var(--touch-target);
+}
+
 /* X2: save-search button under the CTAs */
 .entry-save-search-btn {
   display: inline-flex;

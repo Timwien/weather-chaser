@@ -154,7 +154,6 @@
   "feedback": {
     "title": "Feedback",
     "prompt_title": "Wie läuft's mit WeatherChaser?",
-    "prompt_cta": "Feedback geben",
     "rating_label": "Wie zufrieden bist du?",
     "rating_1": "Sehr unzufrieden",
     "rating_2": "Unzufrieden",

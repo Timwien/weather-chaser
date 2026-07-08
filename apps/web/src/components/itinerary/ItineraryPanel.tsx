@@ -12,7 +12,6 @@ import { StopCard } from './StopCard.tsx';
 import { ShareBar } from '../share/ShareBar.tsx';
 import { InlineSignInPrompt } from '../auth/InlineSignInPrompt.tsx';
 import { ErrorMessage } from '../common/ErrorMessage.tsx';
-import { FeedbackPromptCard } from '../feedback/FeedbackPromptCard.tsx';
 import { BeachIcon, HikingIcon, SightseeingIcon } from '../finder/FinderIcons.tsx';
 import './ItineraryPanel.css';
 
@@ -129,9 +128,6 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPan
         </button>
         <h2 className="itinerary-title">{t('itinerary.title')}</h2>
       </div>
-
-      {/* One-time feedback nudge after the 2nd successful search */}
-      <FeedbackPromptCard />
 
       <SummaryBar route={route} />
 

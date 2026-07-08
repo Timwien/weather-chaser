@@ -237,17 +237,17 @@ export function EntryPanel() {
           )}
         </button>
 
-        {/* Feedback — always reachable from the entry surface */}
+        {/* Feedback — permanently reachable below the menu, with visible label */}
         <button
           type="button"
-          className="entry-panel-account-btn"
+          className="entry-panel-account-btn entry-panel-feedback-btn"
           onClick={() => useFeedbackStore.getState().openModal('entry_footer')}
           aria-label={t('a11y.feedback')}
           title={t('a11y.feedback')}
         >
           <svg
-            width="20"
-            height="20"
+            width="18"
+            height="18"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -258,6 +258,7 @@ export function EntryPanel() {
           >
             <path d="M21 11.5a8.38 8.38 0 0 1-9 8.36 8.5 8.5 0 0 1-3.4-.7L3 21l1.84-4.6A8.38 8.38 0 0 1 3.5 11.5a8.5 8.5 0 1 1 17.5 0z" />
           </svg>
+          <span>{t('feedback.title')}</span>
         </button>
 
         {/* F1: always-reachable reload — a lifeline when the installed PWA

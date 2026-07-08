@@ -2,7 +2,10 @@ import { useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Town } from '@weatherchaser/core';
 import { useAppStore } from '../stores/appStore.ts';
+import { useFeedbackStore } from '../stores/feedbackStore.ts';
 import { recordSearch, buildSearchConfigFromStore } from '../services/savedSearch.ts';
+import { capture } from '../lib/analytics.ts';
+import { logError } from '../lib/logger.ts';
 import type { FinderWorkerInput, FinderWorkerOutput } from '../workers/finder.worker.ts';
 import type { HourlyWeatherData } from '../services/weatherHourly.ts';
 
@@ -46,6 +49,13 @@ export function useFinder() {
     setFinderLoading(true);
     setFinderError(null);
 
+    const t0 = performance.now();
+    capture('search_started', {
+      kind: 'finder',
+      areas_count: searchAreas.length,
+      granularity: searchGranularity,
+    });
+
     worker.onmessage = (event: MessageEvent<FinderWorkerOutput>) => {
       const msg = event.data;
       if (msg.type === 'progress') {
@@ -59,12 +69,26 @@ export function useFinder() {
           cache[entry.townId] = entry.hourly;
         }
         setFinderData(msg.towns, cache);
+        capture('search_completed', {
+          kind: 'finder',
+          duration_ms: Math.round(performance.now() - t0),
+          result_count: msg.towns.length,
+          granularity: searchGranularity,
+        });
         // X3: record this completed search (fire-and-forget, guest/offline safe).
         void recordSearch('finder', buildSearchConfigFromStore());
+        // Feedback prompt: counts successful searches, fires once after the 2nd.
+        useFeedbackStore.getState().recordSearchSuccess();
         worker.terminate();
         workerRef.current = null;
       }
       if (msg.type === 'error') {
+        logError('finder_worker', new Error(msg.code), { code: msg.code });
+        capture('search_failed', {
+          kind: 'finder',
+          error_code: msg.code,
+          duration_ms: Math.round(performance.now() - t0),
+        });
         setFinderError(msg.code);
         setFinderLoading(false);
         worker.terminate();
@@ -72,7 +96,13 @@ export function useFinder() {
       }
     };
 
-    worker.onerror = () => {
+    worker.onerror = (err) => {
+      logError('finder_worker_onerror', err.error ?? err.message ?? 'worker crashed');
+      capture('search_failed', {
+        kind: 'finder',
+        error_code: 'unknown',
+        duration_ms: Math.round(performance.now() - t0),
+      });
       setFinderError('unknown');
       setFinderLoading(false);
       worker.terminate();

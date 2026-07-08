@@ -6,11 +6,13 @@ import { useAuthStore } from '../../stores/authStore.ts';
 import { supabaseConfigured } from '../../lib/supabase.ts';
 import { saveRoute } from '../../services/userdata.ts';
 import { runOptimizer } from '../../services/optimizerRunner.ts';
+import { capture } from '../../lib/analytics.ts';
 import { SummaryBar } from './SummaryBar.tsx';
 import { StopCard } from './StopCard.tsx';
 import { ShareBar } from '../share/ShareBar.tsx';
 import { InlineSignInPrompt } from '../auth/InlineSignInPrompt.tsx';
 import { ErrorMessage } from '../common/ErrorMessage.tsx';
+import { FeedbackPromptCard } from '../feedback/FeedbackPromptCard.tsx';
 import { BeachIcon, HikingIcon, SightseeingIcon } from '../finder/FinderIcons.tsx';
 import './ItineraryPanel.css';
 
@@ -75,6 +77,7 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPan
     setSaveError(null);
     try {
       await saveRoute(route, tripConfig.startDate, tripConfig.endDate);
+      capture('route_saved', { stops_count: route.stops.length });
       setSaveState('saved');
       setTimeout(() => setSaveState('idle'), 2000);
     } catch (err) {
@@ -127,6 +130,9 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPan
         <h2 className="itinerary-title">{t('itinerary.title')}</h2>
       </div>
 
+      {/* One-time feedback nudge after the 2nd successful search */}
+      <FeedbackPromptCard />
+
       <SummaryBar route={route} />
 
       {/* Post-hoc re-weighting: pick a different weather profile and recompute
@@ -162,7 +168,10 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPan
               <button
                 type="button"
                 className="itinerary-reweight-confirm"
-                onClick={runOptimizer}
+                onClick={() => {
+                  capture('reweight_confirmed', { preset: weatherPrefs.preset });
+                  runOptimizer();
+                }}
               >
                 {t('itinerary.reweight_confirm')}
               </button>

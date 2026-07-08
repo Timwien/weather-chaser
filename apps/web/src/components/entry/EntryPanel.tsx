@@ -10,6 +10,8 @@ import { RouteConfigStep } from './RouteConfigStep.tsx';
 import { WeatherFinderStep } from './WeatherFinderStep.tsx';
 import { AccountModal } from '../account/AccountModal.tsx';
 import { saveSearch, buildSearchConfigFromStore } from '../../services/savedSearch.ts';
+import { capture } from '../../lib/analytics.ts';
+import { useFeedbackStore } from '../../stores/feedbackStore.ts';
 import { supabaseConfigured } from '../../lib/supabase.ts';
 import './EntryPanel.css';
 
@@ -36,6 +38,7 @@ export function EntryPanel() {
     }
     try {
       await saveSearch(buildSearchConfigFromStore(), i18n.language);
+      capture('search_saved');
       setSearchSaved(true);
       setTimeout(() => setSearchSaved(false), 2000);
     } catch { /* non-critical */ }
@@ -232,6 +235,29 @@ export function EntryPanel() {
               <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" />
             </svg>
           )}
+        </button>
+
+        {/* Feedback — always reachable from the entry surface */}
+        <button
+          type="button"
+          className="entry-panel-account-btn"
+          onClick={() => useFeedbackStore.getState().openModal('entry_footer')}
+          aria-label={t('a11y.feedback')}
+          title={t('a11y.feedback')}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M21 11.5a8.38 8.38 0 0 1-9 8.36 8.5 8.5 0 0 1-3.4-.7L3 21l1.84-4.6A8.38 8.38 0 0 1 3.5 11.5a8.5 8.5 0 1 1 17.5 0z" />
+          </svg>
         </button>
 
         {/* F1: always-reachable reload — a lifeline when the installed PWA

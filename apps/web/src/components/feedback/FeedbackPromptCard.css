@@ -1,0 +1,48 @@
+/* Styled after .entry-route-hint (inline one-time nudge) */
+.feedback-prompt-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 12px;
+  margin-bottom: var(--space-3);
+  background: var(--color-primary-light);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  flex-shrink: 0;
+}
+
+.feedback-prompt-text {
+  flex: 1;
+}
+
+.feedback-prompt-cta {
+  border: none;
+  background: none;
+  padding: 8px 10px;
+  margin: -8px 0;
+  color: var(--color-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+.feedback-prompt-cta:hover {
+  text-decoration: underline;
+}
+
+.feedback-prompt-dismiss {
+  border: none;
+  background: none;
+  padding: 8px 10px;
+  margin: -8px -10px -8px 0;
+  color: var(--color-text-muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+}

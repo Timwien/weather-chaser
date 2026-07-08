@@ -4,6 +4,7 @@ import { useAuthStore } from '../../stores/authStore.ts';
 import { useThemeStore } from '../../stores/themeStore.ts';
 import { useSubscriptionStore } from '../../stores/subscriptionStore.ts';
 import { PREMIUM_FREE_BETA } from '../../lib/premiumBeta.ts';
+import { capture } from '../../lib/analytics.ts';
 
 interface SettingsTabProps {
   onClose: () => void;
@@ -80,14 +81,14 @@ export function SettingsTab({ onClose }: SettingsTabProps) {
           <button
             type="button"
             className={`settings-tab-lang-btn${currentLang === 'de' ? ' settings-tab-lang-btn--active' : ''}`}
-            onClick={() => i18n.changeLanguage('de')}
+            onClick={() => { i18n.changeLanguage('de'); capture('language_changed', { lang: 'de' }); }}
           >
             Deutsch
           </button>
           <button
             type="button"
             className={`settings-tab-lang-btn${currentLang === 'en' ? ' settings-tab-lang-btn--active' : ''}`}
-            onClick={() => i18n.changeLanguage('en')}
+            onClick={() => { i18n.changeLanguage('en'); capture('language_changed', { lang: 'en' }); }}
           >
             English
           </button>
@@ -105,7 +106,7 @@ export function SettingsTab({ onClose }: SettingsTabProps) {
               key={m}
               type="button"
               className={`settings-tab-lang-btn${mode === m ? ' settings-tab-lang-btn--active' : ''}`}
-              onClick={() => setThemeMode(m)}
+              onClick={() => { setThemeMode(m); capture('theme_changed', { mode: m }); }}
             >
               {t(`account.settings_theme_${m}`)}
             </button>

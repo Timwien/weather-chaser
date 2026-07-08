@@ -7,6 +7,9 @@
 import i18n from '../i18n/index.ts';
 import { useAppStore, isPlaceArea, isPolygonArea, isRadiusArea, isLocatedPlace } from '../stores/appStore.ts';
 import { recordSearch, buildSearchConfigFromStore } from './savedSearch.ts';
+import { capture } from '../lib/analytics.ts';
+import { logError } from '../lib/logger.ts';
+import { useFeedbackStore } from '../stores/feedbackStore.ts';
 import type { OptimizerWorkerInput, OptimizerWorkerOutput, SearchAreaSpec } from '../workers/optimizer.worker.ts';
 
 let worker: Worker | null = null;
@@ -102,6 +105,14 @@ export function runOptimizer(): void {
   // to know when a re-weight needs a recompute.
   s.setLastRoutePrefs({ ...weatherPrefs });
 
+  const t0 = performance.now();
+  capture('search_started', {
+    kind: 'route',
+    areas_count: searchAreas.length,
+    granularity: searchGranularity,
+    days: tripConfig.totalDays,
+  });
+
   worker.onmessage = (event: MessageEvent<OptimizerWorkerOutput>) => {
     const st = useAppStore.getState();
     const msg = event.data;
@@ -111,11 +122,24 @@ export function runOptimizer(): void {
       st.setRoute(msg.result);
       st.setMode('results');
       st.setLoadingStep(null);
+      capture('search_completed', {
+        kind: 'route',
+        duration_ms: Math.round(performance.now() - t0),
+        result_count: msg.result.stops.length,
+        granularity: searchGranularity,
+      });
       // X3: record this completed search (fire-and-forget, guest/offline safe).
       void recordSearch('route', buildSearchConfigFromStore());
+      // Feedback prompt: counts successful searches, fires once after the 2nd.
+      useFeedbackStore.getState().recordSearchSuccess();
       terminate();
     } else if (msg.type === 'error') {
-      console.error('[optimizer] worker error:', msg.code);
+      logError('optimizer_worker', new Error(msg.code), { code: msg.code });
+      capture('search_failed', {
+        kind: 'route',
+        error_code: msg.code,
+        duration_ms: Math.round(performance.now() - t0),
+      });
       st.setError(msg.code);
       st.setMode('idle');
       st.setLoadingStep(null);
@@ -125,7 +149,12 @@ export function runOptimizer(): void {
 
   worker.onerror = (err) => {
     const st = useAppStore.getState();
-    console.error('[optimizer] worker onerror:', err);
+    logError('optimizer_worker_onerror', err.error ?? err.message ?? 'worker crashed');
+    capture('search_failed', {
+      kind: 'route',
+      error_code: 'unknown',
+      duration_ms: Math.round(performance.now() - t0),
+    });
     st.setError('unknown');
     st.setMode('idle');
     st.setLoadingStep(null);

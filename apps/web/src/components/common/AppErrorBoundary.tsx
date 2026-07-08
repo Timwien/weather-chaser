@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import i18n from '../../i18n/index.ts';
+import { logError } from '../../lib/logger.ts';
 import './AppErrorBoundary.css';
 
 interface Props {
@@ -26,8 +27,8 @@ export class AppErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    // Surface for debugging; non-fatal beyond logging.
-    console.error('AppErrorBoundary caught:', error, info.componentStack);
+    // Console + PostHog error tracking; non-fatal beyond logging.
+    logError('react_boundary', error, { componentStack: info.componentStack });
   }
 
   render() {

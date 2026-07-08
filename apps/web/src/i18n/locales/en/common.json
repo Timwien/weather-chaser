@@ -151,6 +151,24 @@
     "search": "Save search",
     "search_saved": "Search saved ✓"
   },
+  "feedback": {
+    "title": "Feedback",
+    "prompt_title": "How is WeatherChaser working for you?",
+    "prompt_cta": "Give feedback",
+    "rating_label": "How satisfied are you?",
+    "rating_1": "Very unsatisfied",
+    "rating_2": "Unsatisfied",
+    "rating_3": "Neutral",
+    "rating_4": "Satisfied",
+    "rating_5": "Very satisfied",
+    "message_label": "Anything you'd like to tell us? (optional)",
+    "message_placeholder": "What do you like, what's missing?",
+    "rating_required": "Please pick a rating.",
+    "submit": "Send",
+    "submitting": "Sending…",
+    "success": "Thanks for your feedback! ✓",
+    "error": "Sending failed — please try again later."
+  },
   "loading": {
     "finding_towns": "Finding towns...",
     "fetching_weather": "Fetching weather...",
@@ -228,6 +246,7 @@
     "tab_account": "Account",
     "tab_saved": "Saved",
     "tab_settings": "Settings",
+    "tab_feedback": "Feedback",
     "close": "Close",
     "welcome": "Welcome to WeatherChaser",
     "email_placeholder": "Email address",
@@ -289,6 +308,38 @@
     "sheet_summary_finder": "{{count}} places found",
     "sheet_summary_empty": "Tap to search"
   },
+  "legal": {
+    "back_to_app": "Back to app",
+    "updated": "Last updated: July 2026",
+    "privacy_title": "Privacy Policy",
+    "privacy_intro": "This privacy policy explains which personal data WeatherChaser processes and what rights you have. In short: we use no tracking cookies, host data in the EU, and collect as little as possible.",
+    "privacy_controller_h": "Controller",
+    "privacy_controller_b": "[OPERATOR NAME]\n[ADDRESS]\n[EMAIL ADDRESS]\n\nPlease contact us with any privacy questions at the email address above.",
+    "privacy_hosting_h": "Hosting",
+    "privacy_hosting_b": "The app is hosted by Vercel Inc. When you access the app, technically necessary data (IP address, timestamp, requested resource) is processed in server logs to keep the service running. Legal basis: legitimate interest (Art. 6(1)(f) GDPR).",
+    "privacy_account_h": "Account & saved content (Supabase, EU)",
+    "privacy_account_b": "If you create an account, we store your email address and an encrypted password or your OAuth identity (Google/Apple) with Supabase on servers in Frankfurt (EU). Saved routes, searches, favorites, your search history and your feedback are linked to your account. You can delete your account yourself at any time in the settings — all associated data is removed. Feedback can also be submitted without an account, in which case it is not linked to any user. Legal basis: performance of contract (Art. 6(1)(b) GDPR).",
+    "privacy_analytics_h": "Usage analytics & error logs (PostHog, EU)",
+    "privacy_analytics_b": "We use PostHog (PostHog EU, servers in Frankfurt) to understand how the app is used and to capture errors automatically. Analytics runs without cookies and without persistent identifiers on your device; IP addresses are not stored. We collect usage events (e.g. \"search started\"), technical error reports and masked session recordings (form inputs are never transmitted). If you are signed in, a pseudonymous user ID is used — never your email address. Legal basis: legitimate interest in improving the app (Art. 6(1)(f) GDPR).",
+    "privacy_apis_h": "Weather and map services",
+    "privacy_apis_b": "For its core features the app calls external services: Open-Meteo (weather forecasts), OpenStreetMap Nominatim (place search), Overpass API (place data), OSRM (route calculation) and CARTO (map tiles). Your entered search coordinates and your IP address are transmitted to the respective service as technically required. No account data is shared with these services.",
+    "privacy_storage_h": "Local storage",
+    "privacy_storage_b": "The app stores preferences (language, theme, hint flags, the feedback-prompt counter) in your browser's localStorage. This data never leaves your device and is not used for tracking.",
+    "privacy_rights_h": "Your rights",
+    "privacy_rights_b": "You have the right to access, rectification, erasure, restriction of processing, data portability and objection (Art. 15–21 GDPR). You can delete your account and all its data yourself in the settings. You also have the right to lodge a complaint with a data protection authority.",
+    "tos_title": "Terms of Service",
+    "tos_intro": "WeatherChaser is in beta and offered free of charge. By using the app you agree to the following terms.",
+    "tos_use_h": "Use",
+    "tos_use_b": "The app is intended for personal trip planning based on weather forecasts. Automated or abusive use (e.g. scraping, excessive requests) is not permitted.",
+    "tos_weather_h": "No warranty for weather data",
+    "tos_weather_b": "Weather forecasts come from third parties (including Open-Meteo, based on models from national weather services) and are inherently uncertain. We make no warranty as to the accuracy, availability or completeness of forecasts and accept no liability for decisions you make based on them.",
+    "tos_account_h": "Account",
+    "tos_account_b": "An account is optional. You are responsible for keeping your credentials confidential. You can delete your account at any time in the settings.",
+    "tos_liability_h": "Liability",
+    "tos_liability_b": "We are fully liable for intent and gross negligence and under product liability law. In cases of slight negligence we are liable only for damages resulting from the breach of essential contractual obligations, limited to the foreseeable damage typical for this kind of service. The app is provided without any availability guarantee.",
+    "tos_changes_h": "Changes",
+    "tos_changes_b": "We may change these terms and the app's feature set, especially during the beta phase. Significant changes will be announced in the app."
+  },
   "a11y": {
     "trip_config": "Trip configuration",
     "account": "Account",
@@ -306,6 +357,7 @@
     "remove_named": "Remove {{name}}",
     "max_days_ahead": "Max. {{days}} days ahead",
     "reload": "Reload app",
-    "add_nearby": "Add {{name}}"
+    "add_nearby": "Add {{name}}",
+    "feedback": "Give feedback"
   }
 }

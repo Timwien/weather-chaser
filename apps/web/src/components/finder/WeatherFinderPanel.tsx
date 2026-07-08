@@ -13,6 +13,8 @@ import type { FinderResultData } from './FinderResultRow.tsx';
 import type { Favorite } from '../../types/database.ts';
 import { ScoreIcon, SunIcon, TempIcon, RainIcon, WindIcon } from './FinderIcons.tsx';
 import { haversineKm } from '../../utils/geo.ts';
+import { capture } from '../../lib/analytics.ts';
+import { FeedbackPromptCard } from '../feedback/FeedbackPromptCard.tsx';
 import './WeatherFinderPanel.css';
 
 // Parse hour from ISO timestamp without new Date() to avoid timezone bugs.
@@ -201,6 +203,7 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
     try {
       const { added } = await toggleFavorite(result.townName, result.lat, result.lng);
       if (added) {
+        capture('favorite_added');
         // Optimistically add to local favorites state
         const newFav: Favorite = {
           id: `optimistic-${Date.now()}`,
@@ -233,6 +236,9 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
         </button>
         <h2 className="finder-panel-title">{t('finder.results_title', 'Beste Orte')}</h2>
       </div>
+
+      {/* One-time feedback nudge after the 2nd successful search */}
+      <FeedbackPromptCard />
 
       {/* Sort buttons */}
       <div className="finder-sort-bar">

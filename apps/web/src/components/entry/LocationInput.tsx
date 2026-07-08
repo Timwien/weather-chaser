@@ -7,6 +7,7 @@ import { supabaseConfigured } from '../../lib/supabase.ts';
 import { getFavorites, toggleFavorite } from '../../services/userdata.ts';
 import { PlaceAutocomplete, type SelectedPlace } from '../common/PlaceAutocomplete.tsx';
 import { suggestNearby, type NearbySuggestion } from '../../services/nearbyPlaces.ts';
+import { capture } from '../../lib/analytics.ts';
 import type { SearchAreaItem } from '../../stores/appStore.ts';
 
 /* ── Remove icon ────────────────────────────────────────── */
@@ -188,6 +189,7 @@ export function LocationInput() {
     if (!user || !supabaseConfigured) return; // requires auth
     try {
       const { added } = await toggleFavorite(name, area.lat, area.lng);
+      if (added) capture('favorite_added');
       setFavoritedNames((prev) => {
         const next = new Set(prev);
         if (added) next.add(name); else next.delete(name);

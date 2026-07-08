@@ -78,3 +78,17 @@ create policy "Users can CRUD own history"
   with check ((select auth.uid()) = user_id);
 create index if not exists search_history_user_created_idx
   on search_history (user_id, created_at desc);
+
+-- feedback (analytics-2026-07 — in-app feedback, guest-capable)
+-- Written ONLY by /api/feedback via service_role. RLS enabled with NO
+-- policies = deny-all for anon + authenticated (same posture as subscriptions).
+create table if not exists feedback (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid references auth.users(id) on delete set null,  -- null = guest
+  rating      smallint not null check (rating between 1 and 5),
+  message     text check (message is null or char_length(message) <= 2000),
+  context     jsonb,  -- { source, mode, locale, viewport_w, viewport_h, is_mobile }
+  created_at  timestamptz not null default now()
+);
+alter table feedback enable row level security;
+create index if not exists feedback_created_idx on feedback (created_at desc);

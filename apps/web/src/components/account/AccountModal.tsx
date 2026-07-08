@@ -4,9 +4,10 @@ import { useAuthStore } from '../../stores/authStore.ts';
 import { AccountTab } from './AccountTab.tsx';
 import { SavedTab } from './SavedTab.tsx';
 import { SettingsTab } from './SettingsTab.tsx';
+import { FeedbackForm } from '../feedback/FeedbackForm.tsx';
 import './AccountModal.css';
 
-type TabId = 'account' | 'saved' | 'settings';
+type TabId = 'account' | 'saved' | 'settings' | 'feedback';
 
 interface AccountModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export function AccountModal({ isOpen, onClose, initialTab = 'account' }: Accoun
     { id: 'account', label: t('account.tab_account') },
     { id: 'saved', label: t('account.tab_saved') },
     { id: 'settings', label: t('account.tab_settings') },
+    { id: 'feedback', label: t('account.tab_feedback') },
   ];
 
   // Close modal after successful sign-in (user goes from null to truthy)
@@ -84,6 +86,7 @@ export function AccountModal({ isOpen, onClose, initialTab = 'account' }: Accoun
           {activeTab === 'account' && <AccountTab />}
           {activeTab === 'saved' && <SavedTab onClose={onClose} />}
           {activeTab === 'settings' && <SettingsTab onClose={onClose} />}
+          {activeTab === 'feedback' && <FeedbackForm source="account_tab" />}
         </div>
       </div>
     </div>

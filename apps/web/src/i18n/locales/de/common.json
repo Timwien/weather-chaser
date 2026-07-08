@@ -151,6 +151,24 @@
     "search": "Suche speichern",
     "search_saved": "Suche gespeichert ✓"
   },
+  "feedback": {
+    "title": "Feedback",
+    "prompt_title": "Wie läuft's mit WeatherChaser?",
+    "prompt_cta": "Feedback geben",
+    "rating_label": "Wie zufrieden bist du?",
+    "rating_1": "Sehr unzufrieden",
+    "rating_2": "Unzufrieden",
+    "rating_3": "Neutral",
+    "rating_4": "Zufrieden",
+    "rating_5": "Sehr zufrieden",
+    "message_label": "Möchtest du uns mehr erzählen? (optional)",
+    "message_placeholder": "Was gefällt dir, was fehlt?",
+    "rating_required": "Bitte wähle eine Bewertung.",
+    "submit": "Absenden",
+    "submitting": "Wird gesendet…",
+    "success": "Danke für dein Feedback! ✓",
+    "error": "Senden fehlgeschlagen — bitte versuche es später erneut."
+  },
   "loading": {
     "finding_towns": "Orte werden gesucht...",
     "fetching_weather": "Wetterdaten werden geladen...",
@@ -228,6 +246,7 @@
     "tab_account": "Konto",
     "tab_saved": "Gespeichert",
     "tab_settings": "Einstellungen",
+    "tab_feedback": "Feedback",
     "close": "Schließen",
     "welcome": "Willkommen bei WeatherChaser",
     "email_placeholder": "E-Mail-Adresse",
@@ -289,6 +308,38 @@
     "sheet_summary_finder": "{{count}} Orte gefunden",
     "sheet_summary_empty": "Tippen um zu suchen"
   },
+  "legal": {
+    "back_to_app": "Zur App",
+    "updated": "Stand: Juli 2026",
+    "privacy_title": "Datenschutzerklärung",
+    "privacy_intro": "Diese Datenschutzerklärung informiert dich darüber, welche personenbezogenen Daten WeatherChaser verarbeitet und welche Rechte du hast. Kurzfassung: Wir verwenden keine Tracking-Cookies, hosten Daten in der EU und erheben so wenig wie möglich.",
+    "privacy_controller_h": "Verantwortlicher",
+    "privacy_controller_b": "[NAME DES BETREIBERS]\n[ADRESSE]\n[E-MAIL-ADRESSE]\n\nBitte kontaktiere uns bei allen Fragen zum Datenschutz unter der genannten E-Mail-Adresse.",
+    "privacy_hosting_h": "Hosting",
+    "privacy_hosting_b": "Die App wird bei Vercel Inc. gehostet. Beim Aufruf der App werden technisch notwendige Daten (IP-Adresse, Zeitpunkt, abgerufene Ressource) in Server-Logs verarbeitet, um den Betrieb sicherzustellen. Rechtsgrundlage: berechtigtes Interesse (Art. 6 Abs. 1 lit. f DSGVO).",
+    "privacy_account_h": "Konto & gespeicherte Inhalte (Supabase, EU)",
+    "privacy_account_b": "Wenn du ein Konto erstellst, speichern wir deine E-Mail-Adresse und ein verschlüsseltes Passwort bzw. deine OAuth-Identität (Google/Apple) bei Supabase auf Servern in Frankfurt (EU). Gespeicherte Routen, Suchen, Favoriten, dein Suchverlauf und dein Feedback werden deinem Konto zugeordnet. Du kannst dein Konto in den Einstellungen jederzeit selbst löschen — dabei werden alle zugeordneten Daten entfernt. Feedback kann auch ohne Konto abgegeben werden und ist dann keinem Nutzer zugeordnet. Rechtsgrundlage: Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO).",
+    "privacy_analytics_h": "Nutzungsanalyse & Fehlerprotokolle (PostHog, EU)",
+    "privacy_analytics_b": "Wir nutzen PostHog (PostHog EU, Server in Frankfurt), um zu verstehen, wie die App genutzt wird, und um Fehler automatisch zu erfassen. Die Analyse arbeitet ohne Cookies und ohne dauerhafte Kennungen auf deinem Gerät; IP-Adressen werden nicht gespeichert. Erfasst werden Nutzungsereignisse (z. B. „Suche gestartet\"), technische Fehlerberichte und maskierte Sitzungsaufzeichnungen (Eingaben in Formularfelder werden nicht übertragen). Bist du eingeloggt, wird eine pseudonyme Nutzer-ID verwendet — niemals deine E-Mail-Adresse. Rechtsgrundlage: berechtigtes Interesse an der Verbesserung der App (Art. 6 Abs. 1 lit. f DSGVO).",
+    "privacy_apis_h": "Wetter- und Kartendienste",
+    "privacy_apis_b": "Für die Kernfunktionen ruft die App externe Dienste auf: Open-Meteo (Wettervorhersagen), OpenStreetMap Nominatim (Ortssuche), Overpass API (Ortsdaten), OSRM (Routenberechnung) und CARTO (Kartenkacheln). Dabei werden die von dir eingegebenen Suchkoordinaten und deine IP-Adresse an den jeweiligen Dienst übertragen, soweit technisch erforderlich. Es werden keine Kontodaten an diese Dienste weitergegeben.",
+    "privacy_storage_h": "Lokale Speicherung",
+    "privacy_storage_b": "Die App speichert Einstellungen (Sprache, Design, Hinweis-Flags, Zähler für die Feedback-Anfrage) im localStorage deines Browsers. Diese Daten verlassen dein Gerät nicht und dienen keiner Nachverfolgung.",
+    "privacy_rights_h": "Deine Rechte",
+    "privacy_rights_b": "Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15–21 DSGVO). Dein Konto samt aller Daten kannst du in den Einstellungen selbst löschen. Außerdem hast du das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren.",
+    "tos_title": "Nutzungsbedingungen",
+    "tos_intro": "WeatherChaser befindet sich in der Beta-Phase und wird kostenlos angeboten. Mit der Nutzung erklärst du dich mit den folgenden Bedingungen einverstanden.",
+    "tos_use_h": "Nutzung",
+    "tos_use_b": "Die App dient der persönlichen Reiseplanung anhand von Wettervorhersagen. Eine automatisierte oder missbräuchliche Nutzung (z. B. Scraping, übermäßige Anfragen) ist nicht gestattet.",
+    "tos_weather_h": "Keine Gewähr für Wetterdaten",
+    "tos_weather_b": "Wettervorhersagen stammen von Drittanbietern (u. a. Open-Meteo auf Basis der Modelle nationaler Wetterdienste) und sind naturgemäß unsicher. Wir übernehmen keine Gewähr für Richtigkeit, Verfügbarkeit oder Vollständigkeit der Vorhersagen und keine Haftung für Entscheidungen, die du auf ihrer Grundlage triffst.",
+    "tos_account_h": "Konto",
+    "tos_account_b": "Ein Konto ist optional. Du bist für die Vertraulichkeit deiner Zugangsdaten verantwortlich. Du kannst dein Konto jederzeit in den Einstellungen löschen.",
+    "tos_liability_h": "Haftung",
+    "tos_liability_b": "Wir haften unbeschränkt bei Vorsatz und grober Fahrlässigkeit sowie nach dem Produkthaftungsgesetz. Bei einfacher Fahrlässigkeit haften wir nur für Schäden aus der Verletzung wesentlicher Vertragspflichten, begrenzt auf den vorhersehbaren, vertragstypischen Schaden. Die App wird ohne Verfügbarkeitszusage bereitgestellt.",
+    "tos_changes_h": "Änderungen",
+    "tos_changes_b": "Wir können diese Bedingungen und den Funktionsumfang der App anpassen, insbesondere während der Beta-Phase. Wesentliche Änderungen werden in der App angekündigt."
+  },
   "a11y": {
     "trip_config": "Reisekonfiguration",
     "account": "Konto",
@@ -306,6 +357,7 @@
     "remove_named": "{{name}} entfernen",
     "max_days_ahead": "Max. {{days}} Tage im Voraus",
     "reload": "App neu laden",
-    "add_nearby": "{{name}} hinzufügen"
+    "add_nearby": "{{name}} hinzufügen",
+    "feedback": "Feedback geben"
   }
 }

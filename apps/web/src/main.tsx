@@ -6,9 +6,14 @@ import { App } from './app.tsx';
 import { AppErrorBoundary } from './components/common/AppErrorBoundary.tsx';
 import { useAuthStore } from './stores/authStore.ts';
 import { initTheme } from './stores/themeStore.ts';
+import { initAnalytics } from './lib/analytics.ts';
+import { registerGlobalErrorHandlers } from './lib/logger.ts';
 
 function Root() {
   useEffect(() => {
+    // Both idempotent (guarded against StrictMode double-mount); no cleanup.
+    initAnalytics();
+    registerGlobalErrorHandlers();
     const unsubAuth = useAuthStore.getState().initialize();
     const cleanupTheme = initTheme();
     return () => { unsubAuth(); cleanupTheme(); };

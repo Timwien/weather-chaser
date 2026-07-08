@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Session, User } from '@supabase/supabase-js';
 import { getSupabase, supabaseConfigured } from '../lib/supabase.ts';
 import { useSubscriptionStore } from './subscriptionStore.ts';
+import { capture, identifyUser, resetIdentity } from '../lib/analytics.ts';
 
 export interface PendingAction {
   type: 'save_route' | 'favorite_place' | 'save_finder_search';
@@ -51,8 +52,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         // Keep the subscription tier in sync with the signed-in user (Phase 4)
         void useSubscriptionStore.getState().refresh(session?.user?.id ?? null);
 
-        if (event === 'SIGNED_IN' && !prevUser && pending) {
-          console.info('[auth] SIGNED_IN with pending action:', pending.type);
+        // Analytics identity: id only (no email/name). Reset on sign-out.
+        if (session?.user) {
+          identifyUser(session.user.id);
+        } else if (prevUser) {
+          resetIdentity();
+        }
+
+        if (event === 'SIGNED_IN' && !prevUser) {
+          capture('sign_in_completed', {
+            provider: session?.user?.app_metadata?.provider ?? 'unknown',
+          });
+          if (pending) console.info('[auth] SIGNED_IN with pending action:', pending.type);
         }
       }
     );

@@ -34,6 +34,16 @@ export interface SearchHistory {
   created_at: string;
 }
 
+/** In-app feedback (guest-capable, written only via /api/feedback). */
+export interface Feedback {
+  id: string;
+  user_id: string | null;  // null = guest
+  rating: number;          // 1-5
+  message: string | null;
+  context: unknown;        // { source, mode, locale, viewport_w, viewport_h, is_mobile }
+  created_at: string;
+}
+
 export interface Subscription {
   user_id: string;
   stripe_customer_id: string | null;
@@ -75,6 +85,12 @@ export interface Database {
         Row: SearchHistory;
         Insert: Omit<SearchHistory, 'id' | 'created_at'>;
         Update: Partial<Omit<SearchHistory, 'id' | 'user_id'>>;
+        Relationships: [];
+      };
+      feedback: {
+        Row: Feedback;
+        Insert: Omit<Feedback, 'id' | 'created_at'>;
+        Update: Partial<Omit<Feedback, 'id' | 'user_id'>>;
         Relationships: [];
       };
     };

@@ -1397,3 +1397,43 @@
     min-height: var(--touch-target);
   }
 }
+
+/* =========================================================
+   Reactive first-user guidance — soft pulse on the next
+   missing input, then a static glow until it's filled
+   ========================================================= */
+
+@keyframes wc-guide-pulse {
+  0%   { box-shadow: 0 0 0 0 var(--color-primary-glow); }
+  70%  { box-shadow: 0 0 0 8px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.drp-trigger--guide,
+.loc-input-row--guide {
+  box-shadow: 0 0 0 2px var(--color-primary-mid);
+  /* pulse 3x, then the animation ends and the static box-shadow above remains */
+  animation: wc-guide-pulse 1.5s ease-out 3;
+}
+
+.drp-trigger--guide {
+  border-color: var(--color-primary);
+}
+
+/* Borderless flex row — the ring needs its own rounding */
+.loc-input-row--guide {
+  border-radius: var(--radius-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drp-trigger--guide,
+  .loc-input-row--guide {
+    animation: none;
+  }
+}
+
+.entry-guide-hint {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+}

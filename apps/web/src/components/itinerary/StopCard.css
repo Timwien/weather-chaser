@@ -25,35 +25,23 @@
   background: var(--color-accent-light);
 }
 
-/* ── Day badge: gradient ring + day number ─────────────── */
+/* ── Day badge: one-line gradient pill ("Tag 3") ────────── */
 .stop-card-day {
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 var(--space-3);
   border-radius: var(--radius-full);
   background: var(--gradient-brand);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   color: #ffffff;
-  line-height: 1;
-  gap: 2px;
-  box-shadow: 0 3px 10px var(--color-primary-glow);
-}
-
-.stop-card-day-label {
-  font-size: 8px;
-  font-weight: var(--font-weight-medium);
-  opacity: 0.9;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.stop-card-day-number {
   font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: var(--font-weight-bold);
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px var(--color-primary-glow);
 }
 
 /* ── Body ──────────────────────────────────────────────── */

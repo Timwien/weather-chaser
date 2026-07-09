@@ -6,6 +6,7 @@ import { useIsMobile } from '../../hooks/useIsMobile.ts';
 import { supabaseConfigured } from '../../lib/supabase.ts';
 import { getFavorites, toggleFavorite } from '../../services/userdata.ts';
 import { PlaceAutocomplete, type SelectedPlace } from '../common/PlaceAutocomplete.tsx';
+import { InfoTip } from '../common/InfoTip.tsx';
 import { suggestNearby, type NearbySuggestion } from '../../services/nearbyPlaces.ts';
 import { capture } from '../../lib/analytics.ts';
 import type { SearchAreaItem } from '../../stores/appStore.ts';
@@ -59,7 +60,10 @@ function RadiusSlider() {
   return (
     <div className="loc-radius-wrapper">
       <div className="loc-radius-header">
-        <span className="loc-radius-label">{t('entry.location_radius_label')}</span>
+        <span className="input-label-row">
+          <span className="loc-radius-label">{t('entry.location_radius_label')}</span>
+          <InfoTip text={t('info.radius')} size={13} />
+        </span>
         <span className="loc-radius-value">{searchRadiusKm} km</span>
       </div>
       <input
@@ -90,7 +94,10 @@ function GranularityToggle() {
 
   return (
     <div className="loc-granularity-wrapper">
-      <span className="loc-radius-label">{t('entry.granularity_label')}</span>
+      <span className="input-label-row">
+        <span className="loc-radius-label">{t('entry.granularity_label')}</span>
+        <InfoTip text={t('info.granularity')} size={13} />
+      </span>
       <div className="loc-granularity-chips" role="radiogroup" aria-label={t('entry.granularity_label')}>
         {GRANULARITIES.map((g) => (
           <button
@@ -162,7 +169,7 @@ function NearbySuggestions({ anchors, excludeNames, onAdd }: NearbySuggestionsPr
 
 /* ── Main LocationInput component ───────────────────────── */
 
-export function LocationInput() {
+export function LocationInput({ highlight = false }: { highlight?: boolean } = {}) {
   const { t } = useTranslation('common');
   const { searchAreas, addSearchArea, removeSearchArea, pickingLocation, setPickingLocation } = useAppStore();
   const { user } = useAuthStore();
@@ -300,7 +307,7 @@ export function LocationInput() {
       )}
 
       {/* Search input row — dimmed when a drawn polygon is active */}
-      <div className={`loc-input-row${hasDrawnPolygon ? ' loc-input-row--disabled' : ''}`}>
+      <div className={`loc-input-row${hasDrawnPolygon ? ' loc-input-row--disabled' : ''}${highlight ? ' loc-input-row--guide' : ''}`}>
         <PlaceAutocomplete
           onSelect={handleSelect}
           placeholder={hasDrawnPolygon ? t('entry.polygon_active_placeholder') : t('entry.location_placeholder')}

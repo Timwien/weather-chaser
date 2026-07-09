@@ -6,6 +6,7 @@ import { useAppStore } from '../../stores/appStore.ts';
 import { useSubscriptionStore } from '../../stores/subscriptionStore.ts';
 import { PREMIUM_FREE_BETA } from '../../lib/premiumBeta.ts';
 import { UpgradeModal } from './UpgradeModal.tsx';
+import { InfoTip } from '../common/InfoTip.tsx';
 import './CustomWeights.css';
 
 const DIMENSIONS = ['sunshine', 'precipitation', 'temperature', 'wind'] as const;
@@ -61,6 +62,7 @@ export function CustomWeights() {
           <span className="custom-weights-badge">
             {PREMIUM_FREE_BETA ? t('premium.beta_badge') : t('premium.badge')}
           </span>
+          <InfoTip text={t('info.custom_weights')} size={13} />
         </span>
         {isPremium && (
           <button type="button" className="custom-weights-toggle" onClick={handleToggle}>

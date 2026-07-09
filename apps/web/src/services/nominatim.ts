@@ -13,12 +13,25 @@ const NOMINATIM_REVERSE_BASE = import.meta.env.PROD
   ? '/api/proxy/nominatim-reverse'
   : 'https://nominatim.openstreetmap.org/reverse';
 
+export interface NominatimAddress {
+  village?: string;
+  town?: string;
+  city?: string;
+  municipality?: string;
+  hamlet?: string;
+  suburb?: string;
+  county?: string;
+  state?: string;
+  country?: string;
+}
+
 export interface NominatimResult {
   display_name: string;
   lat: string;
   lon: string;
   boundingbox: [string, string, string, string]; // [south, north, west, east]
   place_id: number;
+  address?: NominatimAddress; // present when addressdetails=1
 }
 
 export interface BoundingBox {
@@ -67,11 +80,29 @@ export async function geocodeAddress(query: string, lang = 'en'): Promise<{ lat:
   return { lat: Number(first.lat), lng: Number(first.lon), name: first.display_name };
 }
 
+const SETTLEMENT_KEYS = ['village', 'town', 'city', 'municipality', 'hamlet'] as const;
+
+/** Best settlement-level name for a reverse result; null if nothing usable.
+ *  Deliberately skips `suburb` — a tap inside a city district should name the city. */
+export function settlementName(result: NominatimResult): string | null {
+  const addr = result.address;
+  if (addr) {
+    for (const key of SETTLEMENT_KEYS) {
+      if (addr[key]) return addr[key]!;
+    }
+  }
+  const first = result.display_name?.split(',')[0]?.trim();
+  return first || null;
+}
+
 export async function reverseGeocode(lat: number, lng: number, lang = 'en'): Promise<NominatimResult | null> {
   const url = new URL(NOMINATIM_REVERSE_BASE, self.location.origin);
   url.searchParams.set('lat', String(lat));
   url.searchParams.set('lon', String(lng));
   url.searchParams.set('format', 'json');
+  // zoom=13 caps detail at village/suburb level — never a street or house number
+  url.searchParams.set('zoom', '13');
+  url.searchParams.set('addressdetails', '1');
   url.searchParams.set('accept-language', normalizeLang(lang));
   const headers: Record<string, string> = {};
   if (import.meta.env.DEV) headers['Referer'] = self.location.origin;

@@ -177,7 +177,7 @@ function CalendarMonth({
 
 /* ── DateRangePicker main component ─────────────────────── */
 
-export function DateRangePicker() {
+export function DateRangePicker({ highlight = false }: { highlight?: boolean } = {}) {
   const { i18n } = useTranslation('common');
   const { t } = useTranslation('common');
   const { tripConfig, setTripConfig } = useAppStore();
@@ -251,7 +251,7 @@ export function DateRangePicker() {
       <button
         ref={triggerRef}
         type="button"
-        className={`drp-trigger${open ? ' drp-trigger--open' : ''}${startDate ? ' drp-trigger--filled' : ''}`}
+        className={`drp-trigger${open ? ' drp-trigger--open' : ''}${startDate ? ' drp-trigger--filled' : ''}${highlight && !open ? ' drp-trigger--guide' : ''}`}
         onClick={handleOpen}
         aria-expanded={open}
         aria-haspopup="dialog"
@@ -273,6 +273,10 @@ export function DateRangePicker() {
           </span>
         )}
       </button>
+
+      {highlight && !open && (
+        <p className="entry-guide-hint" role="status">{t('entry.guide_next_dates')}</p>
+      )}
 
       {open && (
         <div ref={panelRef} className="drp-popover" role="dialog" aria-modal="true" aria-label={t('a11y.date_range_picker')}>

@@ -9,6 +9,7 @@ import { getFavorites, toggleFavorite } from '../../services/userdata.ts';
 import { FinderResultRow } from './FinderResultRow.tsx';
 import { FinderFilterBar } from './FinderFilterBar.tsx';
 import { FinderEmptyState } from './FinderEmptyState.tsx';
+import { InfoTip } from '../common/InfoTip.tsx';
 import type { FinderResultData } from './FinderResultRow.tsx';
 import type { Favorite } from '../../types/database.ts';
 import { ScoreIcon, SunIcon, TempIcon, RainIcon, WindIcon } from './FinderIcons.tsx';
@@ -125,7 +126,8 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
         const hourly = finderHourlyCache[town.id];
         if (!hourly) return null;
 
-        let distanceKm = 0;
+        // null = no single origin (multi-place mode) — the row hides the distance then
+        let distanceKm: number | null = null;
         if (!isMultiPlace && startLat !== null && startLng !== null) {
           distanceKm = haversineKm(startLat, startLng, town.lat, town.lng);
           // Filter by current radius from store (uses "Wo?" radius slider — no re-fetch)
@@ -151,7 +153,7 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
       .filter(Boolean) as Array<{
         town: typeof finderTowns[0];
         score: ReturnType<typeof scoreLocation>;
-        distanceKm: number;
+        distanceKm: number | null;
         sunshineHoursPerDay: number;
         tempC: number;
         precipMm: number;
@@ -234,6 +236,7 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
           ← {t('itinerary.back', 'Zurück')}
         </button>
         <h2 className="finder-panel-title">{t('finder.results_title', 'Beste Orte')}</h2>
+        <InfoTip text={t('info.score')} />
       </div>
 
       {/* Sort buttons */}
@@ -270,6 +273,7 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
                 data={result}
                 isSelected={selectedFinderIndex === idx}
                 onClick={() => onResultSelect(idx)}
+                sortBy={finderConfig.sortBy}
                 isFavorited={isTownFavorited(result.townName, result.lat, result.lng)}
                 onFavoriteToggle={() => handleFavoriteToggle(result)}
                 isGuest={!user}

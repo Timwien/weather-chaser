@@ -1,0 +1,66 @@
+/* =========================================================
+   InfoTip — "i" icon + tap-to-open explanation bubble
+   ========================================================= */
+
+.info-tip-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.12s;
+}
+
+.info-tip-btn:hover,
+.info-tip-btn[aria-expanded='true'] {
+  color: var(--color-primary);
+}
+
+/* Extended hit area (44px-ish) without inflating the visual layout */
+.info-tip-btn::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+}
+
+/* Bubble is portaled to <body> and positioned fixed from the icon's rect */
+.info-tip-bubble {
+  position: fixed;
+  z-index: 200;
+  transform: translateX(-50%);
+  /* max-content: size from the text, not from the left-offset shrink-to-fit —
+     a fixed box near the right edge would otherwise get squeezed skinny+tall */
+  width: max-content;
+  max-width: min(260px, calc(100vw - 24px));
+  padding: var(--space-3);
+  font-size: var(--font-size-sm);
+  line-height: var(--leading-base);
+  color: var(--color-text-secondary);
+  background: var(--surface-frost-strong);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  animation: info-tip-in 0.12s ease-out;
+}
+
+@keyframes info-tip-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .info-tip-bubble { animation: none; }
+}
+
+/* Layout helper: label + InfoTip side by side (used at placement sites) */
+.input-label-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}

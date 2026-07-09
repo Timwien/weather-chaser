@@ -50,7 +50,9 @@
     "nearby_label": "In der Nähe",
     "cta_missing_dates": "Wähle zuerst deine Reisedaten",
     "cta_missing_location": "Füge zuerst einen Ort hinzu oder zeichne ein Gebiet",
-    "cta_missing_both": "Wähle Reisedaten und füge einen Ort hinzu, um zu starten"
+    "cta_missing_both": "Wähle Reisedaten und füge einen Ort hinzu, um zu starten",
+    "guide_next_dates": "Als Nächstes: Reisedaten wählen",
+    "guide_next_location": "Als Nächstes: Ort hinzufügen"
   },
   "route_config": {
     "start_location": "Startort",
@@ -81,6 +83,7 @@
     "reweight_confirm": "Route neu berechnen",
     "day_label_one": "Tag",
     "day_label_other": "Tage",
+    "day_badge": "Tag {{day}}",
     "day": "Tag",
     "nights": "Nächte",
     "nights_count_one": "{{count}} Nacht",
@@ -339,6 +342,14 @@
     "tos_changes_h": "Änderungen",
     "tos_changes_b": "Wir können diese Bedingungen und den Funktionsumfang der App anpassen, insbesondere während der Beta-Phase. Wesentliche Änderungen werden in der App angekündigt."
   },
+  "info": {
+    "max_stay": "Begrenzt, wie viele Nächte die Route an einem Ort bleibt. Kleiner = mehr Stopps und Abwechslung, größer = weniger Ortswechsel.",
+    "trip_duration": "Anzahl der Reisetage. Sobald du Reisedaten mit Enddatum wählst, wird sie automatisch übernommen.",
+    "radius": "Wie weit rund um deinen Ort nach besserem Wetter gesucht wird (Luftlinie). Größerer Radius findet mehr Orte, lädt aber länger.",
+    "granularity": "„Auto“ wählt die Ortsgröße passend zum Suchgebiet. „Nur Städte“ ist schnell und grob, „Alle Orte“ findet auch Dörfer, dauert aber länger.",
+    "score": "Der Score (0–100) kombiniert Sonne, Regen, Temperatur und Wind – gewichtet nach deinem Wetterprofil. 100 wäre perfektes Wetter für dein Profil.",
+    "custom_weights": "Lege selbst fest, wie stark Sonne, Regen, Temperatur und Wind in den Score einfließen. Die Regler werden automatisch auf 100 % normiert."
+  },
   "a11y": {
     "trip_config": "Reisekonfiguration",
     "account": "Konto",
@@ -357,6 +368,7 @@
     "max_days_ahead": "Max. {{days}} Tage im Voraus",
     "reload": "App neu laden",
     "add_nearby": "{{name}} hinzufügen",
-    "feedback": "Feedback geben"
+    "feedback": "Feedback geben",
+    "info": "Erklärung anzeigen"
   }
 }

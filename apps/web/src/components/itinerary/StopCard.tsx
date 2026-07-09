@@ -62,10 +62,7 @@ export function StopCard({ stop, stopNumber, isSelected, onClick, index = 0 }: S
       style={{ animationDelay: `${Math.min(index, 8) * 55}ms` }}
     >
       <div className="stop-card-day">
-        <span className="stop-card-day-label">
-          {t('itinerary.day_label', { count: stopNumber })}
-        </span>
-        <span className="stop-card-day-number">{stopNumber}</span>
+        {t('itinerary.day_badge', { day: stopNumber })}
       </div>
 
       <div className="stop-card-body">

@@ -33,6 +33,17 @@ export default {
       upstream.searchParams.set('accept-language', acceptLanguage);
     }
 
+    // Forward zoom + addressdetails (whitelisted) so pins resolve to
+    // settlement-level names instead of streets/house numbers.
+    const zoom = url.searchParams.get('zoom');
+    if (zoom && /^\d{1,2}$/.test(zoom)) {
+      upstream.searchParams.set('zoom', zoom);
+    }
+    const addressdetails = url.searchParams.get('addressdetails');
+    if (addressdetails === '0' || addressdetails === '1') {
+      upstream.searchParams.set('addressdetails', addressdetails);
+    }
+
     const upstreamRes = await fetch(upstream.toString(), {
       headers: {
         'User-Agent': 'WeatherChaser/1.0 (weatherchaser.vercel.app)',

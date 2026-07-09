@@ -5,7 +5,7 @@ import type { Map as MaplibreMap, MapMouseEvent } from 'maplibre-gl';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useThemeStore } from '../../stores/themeStore.ts';
-import { reverseGeocode } from '../../services/nominatim.ts';
+import { reverseGeocode, settlementName } from '../../services/nominatim.ts';
 import { DrawingControls } from './DrawingControls.tsx';
 import { SearchAreasLayer } from './SearchAreasLayer.tsx';
 import { PlaceMarkers } from './PlaceMarkers.tsx';
@@ -209,7 +209,7 @@ function TapToAddLocation() {
       // Optimistic placeholder while reverse-geocoding.
       setPending({ lat, lng, name: `${lat.toFixed(3)}, ${lng.toFixed(3)}`, fullName: '' });
       const result = await reverseGeocode(lat, lng, i18n.language);
-      const name = result ? result.display_name.split(',')[0].trim() : `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+      const name = (result && settlementName(result)) || `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
       setPending({ lat, lng, name, fullName: result?.display_name ?? name });
     }
 

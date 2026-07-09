@@ -50,6 +50,7 @@ export function MobileBottomSheet({
 }: MobileBottomSheetProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Live state during drag — stored in refs to avoid re-render on every pointermove
   const isDragging = useRef(false);
@@ -184,6 +185,61 @@ export function MobileBottomSheet({
     wrapper.style.transform = `translateY(${ty}px)`;
   }, [snapIndex]);
 
+  // ── Content swipe handoff ─────────────────────────────────────────────────
+  // Below full the content is scroll-locked (see .mbs-content--locked), so a
+  // swipe up on it unambiguously means "expand". At full, a swipe down while
+  // the content sits at scrollTop 0 collapses back to half. Listeners stay
+  // passive — we never preventDefault, so taps and normal scrolling at full
+  // are unaffected.
+  //
+  // All gesture state lives in refs and snapIndex is read through a ref: the
+  // snap change we trigger re-renders mid-gesture, and closure state would be
+  // reset by an effect re-bind — the remaining touchmoves of the same gesture
+  // would then read startY=0 and immediately snap back.
+  const snapIndexRef = useRef(snapIndex);
+  useEffect(() => {
+    snapIndexRef.current = snapIndex;
+  }, [snapIndex]);
+
+  const gestureStartY = useRef(0);
+  const gestureStartX = useRef(0);
+  const gestureFired = useRef(false);
+
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+
+    const onTouchStart = (e: TouchEvent) => {
+      gestureStartY.current = e.touches[0].clientY;
+      gestureStartX.current = e.touches[0].clientX;
+      gestureFired.current = false;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (gestureFired.current) return; // one snap change per gesture
+      const dy = gestureStartY.current - e.touches[0].clientY; // > 0 = swipe up
+      const dx = Math.abs(e.touches[0].clientX - gestureStartX.current);
+      // Threshold + vertical dominance: ignore taps and horizontal swipes
+      // (e.g. the finder sort bar scrolls sideways)
+      if (Math.abs(dy) < 14 || dx > Math.abs(dy)) return;
+      const snap = snapIndexRef.current;
+      if (snap < 2 && dy > 0) {
+        gestureFired.current = true;
+        onSnapChange(2);
+      } else if (snap === 2 && dy < 0 && el.scrollTop <= 0) {
+        gestureFired.current = true;
+        onSnapChange(1);
+      }
+    };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+    };
+  }, [onSnapChange]);
+
   // ── Scrim tap → collapse to half ─────────────────────────────────────────
   const onScrimClick = useCallback(() => {
     onSnapChange(1);
@@ -227,8 +283,13 @@ export function MobileBottomSheet({
             <div className="mbs-summary">{summary}</div>
           )}
 
-          {/* Independently-scrolling content area */}
-          <div className="mbs-content">{children}</div>
+          {/* Independently-scrolling content area (scroll-locked below full) */}
+          <div
+            ref={contentRef}
+            className={`mbs-content${snapIndex < 2 ? ' mbs-content--locked' : ''}`}
+          >
+            {children}
+          </div>
         </div>
       </div>
     </>

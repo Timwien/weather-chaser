@@ -106,6 +106,12 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Below full: content doesn't scroll — a swipe up on it expands the sheet
+   instead (standard sheet handoff; also means no preventDefault needed) */
+.mbs-content--locked {
+  overflow-y: hidden;
+}
+
 /* ── Landscape guard ───────────────────────────────────── */
 /* On very short landscape viewports the half-detent (~50dvh) would be tiny;
    cap the wrapper height to 70% so the peek/handle remain accessible. */

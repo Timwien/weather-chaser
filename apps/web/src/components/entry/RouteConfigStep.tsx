@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useAppStore, isLocatedPlace } from '../../stores/appStore.ts';
 import { PlaceAutocomplete, type SelectedPlace } from '../common/PlaceAutocomplete.tsx';
+import { InfoTip } from '../common/InfoTip.tsx';
 
 // Inline remove icon — no emoji per design decision
 function RemoveIcon() {
@@ -83,7 +84,10 @@ export function RouteConfigStep({ onGenerate, onBack }: { onGenerate: () => void
           fallback when no end date has been picked. */}
       {!hasDates && (
         <div className="route-config-field">
-          <label className="input-label">{t('route_config.trip_duration')}</label>
+          <div className="input-label-row">
+            <label className="input-label">{t('route_config.trip_duration')}</label>
+            <InfoTip text={t('info.trip_duration')} />
+          </div>
           <div className="stepper-row">
             <input
               type="number"
@@ -101,7 +105,10 @@ export function RouteConfigStep({ onGenerate, onBack }: { onGenerate: () => void
 
       {/* Max nights per stop */}
       <div className="route-config-field">
-        <label className="input-label">{t('route_config.max_stay')}</label>
+        <div className="input-label-row">
+          <label className="input-label">{t('route_config.max_stay')}</label>
+          <InfoTip text={t('info.max_stay')} />
+        </div>
         <div className="stepper-row">
           <button
             type="button"

@@ -50,7 +50,9 @@
     "nearby_label": "Nearby",
     "cta_missing_dates": "Choose your travel dates first",
     "cta_missing_location": "Add a place or draw an area first",
-    "cta_missing_both": "Choose travel dates and add a place to start"
+    "cta_missing_both": "Choose travel dates and add a place to start",
+    "guide_next_dates": "Next: pick your travel dates",
+    "guide_next_location": "Next: add a place"
   },
   "route_config": {
     "start_location": "Start location",
@@ -81,6 +83,7 @@
     "reweight_confirm": "Recompute route",
     "day_label_one": "Day",
     "day_label_other": "Day",
+    "day_badge": "Day {{day}}",
     "day": "Day",
     "nights": "nights",
     "nights_count_one": "{{count}} night",
@@ -339,6 +342,14 @@
     "tos_changes_h": "Changes",
     "tos_changes_b": "We may change these terms and the app's feature set, especially during the beta phase. Significant changes will be announced in the app."
   },
+  "info": {
+    "max_stay": "Caps how many nights the route stays in one place. Lower = more stops and variety, higher = fewer moves.",
+    "trip_duration": "Number of travel days. Filled in automatically once you pick travel dates with an end date.",
+    "radius": "How far around your place we look for better weather (straight-line distance). A larger radius finds more places but takes longer to load.",
+    "granularity": "\"Auto\" picks a place size that fits the search area. \"Cities only\" is fast and coarse, \"All places\" also finds villages but takes longer.",
+    "score": "The score (0–100) combines sunshine, rain, temperature and wind, weighted by your weather profile. 100 would be perfect weather for your profile.",
+    "custom_weights": "Choose how much sunshine, rain, temperature and wind count towards the score. Sliders are normalised to 100% automatically."
+  },
   "a11y": {
     "trip_config": "Trip configuration",
     "account": "Account",
@@ -357,6 +368,7 @@
     "max_days_ahead": "Max. {{days}} days ahead",
     "reload": "Reload app",
     "add_nearby": "Add {{name}}",
-    "feedback": "Give feedback"
+    "feedback": "Give feedback",
+    "info": "Show explanation"
   }
 }

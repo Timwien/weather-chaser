@@ -83,6 +83,15 @@ export function EntryPanel() {
   const isRouteConfig = mode === 'route-config';
   const isWeatherFinder = mode === 'weather-finder';
 
+  // Reactive first-user guidance: softly highlight the next missing input.
+  // Dates first (panel top-to-bottom); the map tap-hint independently covers
+  // the map side while no place is set. Derived state only — nothing persisted.
+  const guideTarget: 'dates' | 'location' | null =
+    mode !== 'idle' ? null
+    : !hasDates ? 'dates'
+    : !hasLocation ? 'location'
+    : null;
+
   // Avatar initial — first character of email or display name
   const avatarInitial = user
     ? (user.user_metadata?.full_name ?? user.email ?? 'U').charAt(0).toUpperCase()
@@ -98,8 +107,8 @@ export function EntryPanel() {
 
       {/* Input sections */}
       <div className="entry-panel-inputs">
-        <DateRangePicker />
-        <LocationInput />
+        <DateRangePicker highlight={guideTarget === 'dates'} />
+        <LocationInput highlight={guideTarget === 'location'} />
         <WeatherPrefsSection />
       </div>
 

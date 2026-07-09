@@ -92,7 +92,10 @@ export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderM
                     {result.townName}
                   </div>
                   <div style={{ fontSize: 'var(--font-size-xs)', color }}>
-                    Score: {Math.round(result.score.composite)} &middot; {Math.round(result.distanceKm)} km
+                    Score: {Math.round(result.score.composite)}
+                    {result.distanceKm !== null && Math.round(result.distanceKm) > 0 && (
+                      <> &middot; {Math.round(result.distanceKm)} km</>
+                    )}
                   </div>
                 </div>
               </Popup>

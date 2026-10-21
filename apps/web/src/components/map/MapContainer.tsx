@@ -14,6 +14,7 @@ import { RouteLayer } from './RouteLayer.tsx';
 import { StopMarkers } from './StopMarkers.tsx';
 import { FinderMarkers } from './FinderMarkers.tsx';
 import type { FinderResultData } from '../finder/FinderResultRow.tsx';
+import { getSheetHeights } from '../mobile/MobileBottomSheet.tsx';
 import './MapContainer.css';
 
 // CartoDB GL styles — free, no API key required.
@@ -176,7 +177,7 @@ function FlyToCity({ target, sheetBottomPadding }: { target?: { lat: number; lng
       zoom: 8,
       duration: 600,
       // center in the part of the map not covered by the mobile sheet
-      padding: { top: 0, right: 0, left: 0, bottom: sheetBottomPadding ?? 0 },
+      padding: { top: 0, right: 0, left: 0, bottom: Math.min(sheetBottomPadding ?? 0, getSheetHeights()[1]) },
     });
   }, [map, target, sheetBottomPadding]);
 

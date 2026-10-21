@@ -19,6 +19,12 @@ function terminate() {
   worker = null;
 }
 
+// A run only matters while the app is loading. Any other mode (Cancel, Back, browser
+// Back via reset()) drops the worker so a late result can't overwrite the user's state.
+useAppStore.subscribe((state) => {
+  if (state.mode !== 'loading') terminate();
+});
+
 /** Launch (or relaunch) the route optimization from the current store state. */
 export function runOptimizer(): void {
   const s = useAppStore.getState();

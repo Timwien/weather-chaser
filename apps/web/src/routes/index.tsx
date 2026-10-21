@@ -4,6 +4,7 @@ import { createRoute } from '@tanstack/react-router';
 import { Route as rootRoute } from './__root.tsx';
 import { useAppStore } from '../stores/appStore.ts';
 import { useIsMobile } from '../hooks/useIsMobile.ts';
+import { useResultsHistory } from '../hooks/useResultsHistory.ts';
 import { MapContainer } from '../components/map/MapContainer.tsx';
 import { EntryPanel } from '../components/entry/EntryPanel.tsx';
 import { ItineraryPanel } from '../components/itinerary/ItineraryPanel.tsx';
@@ -25,6 +26,7 @@ function IndexPage() {
   const { t } = useTranslation('common');
   const { addSearchArea, removeSearchArea, mode, finderTowns, reset, route } = useAppStore();
   const isMobile = useIsMobile();
+  useResultsHistory();
   const [selectedStopIndex, setSelectedStopIndex] = useState<number | null>(null);
   const [selectedFinderIndex, setSelectedFinderIndex] = useState<number | null>(null);
   const [computedFinderResults, setComputedFinderResults] = useState<FinderResultData[]>([]);
@@ -77,8 +79,8 @@ function IndexPage() {
     setSelectedFinderIndex(idx);
     const r = computedFinderResults[idx];
     if (r) setFlyToCity(prev => ({ lat: r.lat, lng: r.lng, token: (prev?.token ?? 0) + 1 }));
-    // M3: keep the map visible — never expand to full; return from peek to half
-    if (isMobile && sheetSnap === 0) setSheetSnap(1);
+    // M3: keep the map visible — always settle on half (from peek AND from full)
+    if (isMobile && sheetSnap !== 1) setSheetSnap(1);
   }
 
   // ── Map marker callbacks (popup + fly only — NO setSheetSnap, marker-tap decoupled) ──

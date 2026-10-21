@@ -3,6 +3,7 @@
 
 import { create } from 'zustand';
 import { capture } from '../lib/analytics.ts';
+import { useAppStore } from './appStore.ts';
 
 export type FeedbackSource = 'prompt' | 'entry_footer' | 'account_tab';
 
@@ -12,8 +13,10 @@ const SHOWN_KEY = 'wc_feedback_prompt_shown';
 
 // Ask after the user has seen the app work twice — they can judge it by then.
 const PROMPT_AFTER_SUCCESSES = 2;
-// Let the results render first so the popup doesn't mask the payoff moment.
-const PROMPT_DELAY_MS = 1500;
+// The prompt never pops up over results (D4: a backdrop appearing mid-interaction
+// swallowed the user's next click, e.g. the first "Back"). It is armed on the
+// 2nd success and shown the next time the user returns to the entry form.
+const PROMPT_DELAY_MS = 600;
 
 function readCount(): number {
   try {
@@ -27,11 +30,13 @@ function promptAlreadyShown(): boolean {
   } catch { return true; } // storage unavailable → never prompt
 }
 
+let promptArmed = false;
+
 interface FeedbackState {
   modalOpen: boolean;
   modalSource: FeedbackSource;
 
-  /** Called from both search 'complete' handlers. Opens the modal once ever. */
+  /** Called from both search 'complete' handlers. Arms the prompt once ever (shown on the next return to the entry form). */
   recordSearchSuccess: () => void;
   openModal: (source: FeedbackSource) => void;
   closeModal: () => void;
@@ -48,10 +53,7 @@ export const useFeedbackStore = create<FeedbackState>((set) => ({
       if (count >= PROMPT_AFTER_SUCCESSES && !promptAlreadyShown()) {
         // Mark shown immediately — once ever, even if the user just closes it.
         localStorage.setItem(SHOWN_KEY, '1');
-        setTimeout(() => {
-          set({ modalOpen: true, modalSource: 'prompt' });
-          capture('feedback_prompt_shown');
-        }, PROMPT_DELAY_MS);
+        promptArmed = true;
       }
     } catch { /* storage unavailable — skip silently */ }
   },
@@ -60,3 +62,16 @@ export const useFeedbackStore = create<FeedbackState>((set) => ({
 
   closeModal: () => set({ modalOpen: false }),
 }));
+
+// Show an armed prompt once the user is back on the entry form (mode 'idle').
+useAppStore.subscribe((state, prev) => {
+  if (!promptArmed || state.mode !== 'idle' || prev.mode === 'idle') return;
+  promptArmed = false;
+  setTimeout(() => {
+    useFeedbackStore.setState({ modalOpen: true, modalSource: 'prompt' });
+    capture('feedback_prompt_shown');
+  }, PROMPT_DELAY_MS);
+});
+
+/** Test hook: whether a proactive prompt is waiting for the entry form. */
+export const isPromptArmed = (): boolean => promptArmed;

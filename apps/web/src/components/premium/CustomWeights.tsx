@@ -68,14 +68,23 @@ export function CustomWeights() {
           </span>
           <InfoTip text={t('info.custom_weights')} size={13} />
         </span>
-        {isPremium && (
-          <button type="button" className="custom-weights-toggle" onClick={handleToggle}>
-            {enabled ? t('premium.weights_use_preset') : t('premium.weights_customize')}
-          </button>
-        )}
+        <button
+          type="button"
+          className="custom-weights-toggle"
+          onClick={handleToggle}
+          aria-expanded={isPremium && enabled}
+        >
+          {isPremium && enabled ? t('premium.weights_use_preset') : t('premium.weights_customize')}
+        </button>
       </div>
 
-      {DIMENSIONS.map((dim) => (
+      {/* M8: clear which one applies — custom weights replace the preset above */}
+      {isPremium && enabled && (
+        <p className="custom-weights-active" role="status">{t('premium.weights_active')}</p>
+      )}
+
+      {/* Collapsed by default: sliders only while custom weights are active */}
+      {isPremium && enabled && DIMENSIONS.map((dim) => (
         <div className="custom-weights-row" key={dim}>
           <span className="custom-weights-label">{t(`entry.criteria_options.${dim}`)}</span>
           <input
@@ -85,8 +94,7 @@ export function CustomWeights() {
             max={100}
             step={5}
             value={Math.round(weights[dim] * 100)}
-            disabled={!isPremium || !enabled}
-            onChange={(e) => handleChange(dim, Number(e.target.value))}
+                        onChange={(e) => handleChange(dim, Number(e.target.value))}
             aria-label={t(`entry.criteria_options.${dim}`)}
           />
           <span className="custom-weights-value">{Math.round(weights[dim] * 100)}%</span>

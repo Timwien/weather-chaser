@@ -14,6 +14,7 @@ import { RouteLayer } from './RouteLayer.tsx';
 import { StopMarkers } from './StopMarkers.tsx';
 import { FinderMarkers } from './FinderMarkers.tsx';
 import type { FinderResultData } from '../finder/FinderResultRow.tsx';
+import { usePanelInset } from '../../hooks/usePanelInset.ts';
 import { getSheetHeights } from '../mobile/MobileBottomSheet.tsx';
 import './MapContainer.css';
 
@@ -91,6 +92,7 @@ function FitRouteOnSelection({
   sheetBottomPadding?: number;
 }) {
   const { current: map } = useMap();
+  const inset = usePanelInset();
   const { route } = useAppStore();
   const prevIndexRef = useRef<number | null>(null);
   const prevRouteRef = useRef<typeof route>(null);
@@ -115,9 +117,9 @@ function FitRouteOnSelection({
     map.getMap().setPadding({ top: 0, right: 0, bottom: 0, left: 0 });
     map.getMap().fitBounds(
       [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
-      { padding: { top: 60, right: 60, left: 60, bottom: bp + 60 }, maxZoom: 9, duration: 600 },
+      { padding: { top: 60, right: 60, left: 60 + inset, bottom: bp + 60 }, maxZoom: 9, duration: 600 },
     );
-  }, [map, route, selectedStopIndex, sheetBottomPadding]);
+  }, [map, route, selectedStopIndex, sheetBottomPadding, inset]);
 
   return null;
 }
@@ -142,6 +144,7 @@ function FlyToFinderRank1({
   sheetBottomPadding?: number;
 }) {
   const { current: map } = useMap();
+  const inset = usePanelInset();
   const prevRank1IdRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -151,13 +154,26 @@ function FlyToFinderRank1({
     prevRank1IdRef.current = rank1.townId;
 
     const bp = sheetBottomPadding ?? 0;
+    if (inset > 0 && finderResults.length > 1) {
+      // Desktop/tablet: frame ALL results in the map area to the right of the side panel,
+      // so no marker ends up underneath it (D5).
+      const lngs = finderResults.map((r) => r.lng);
+      const lats = finderResults.map((r) => r.lat);
+      const nativeMap = map.getMap();
+      nativeMap.setPadding({ top: 0, right: 0, bottom: 0, left: 0 });
+      nativeMap.fitBounds(
+        [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+        { padding: { top: 60, right: 60, bottom: bp + 60, left: 60 + inset }, maxZoom: 8, duration: 800 },
+      );
+      return;
+    }
     map.getMap().flyTo({
       center: [rank1.lng, rank1.lat],
       zoom: 7,
       duration: 800,
-      padding: { top: 0, right: 0, left: 0, bottom: bp },
+      padding: { top: 0, right: 0, left: inset, bottom: bp },
     });
-  }, [map, finderResults, sheetBottomPadding]);
+  }, [map, finderResults, sheetBottomPadding, inset]);
 
   return null;
 }
@@ -165,6 +181,7 @@ function FlyToFinderRank1({
 /** Flies the map to an explicit target (e.g. user clicking a result row). */
 function FlyToCity({ target, sheetBottomPadding }: { target?: { lat: number; lng: number; token: number } | null; sheetBottomPadding?: number }) {
   const { current: map } = useMap();
+  const inset = usePanelInset();
   const prevTokenRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -176,10 +193,10 @@ function FlyToCity({ target, sheetBottomPadding }: { target?: { lat: number; lng
       center: [target.lng, target.lat],
       zoom: 8,
       duration: 600,
-      // center in the part of the map not covered by the mobile sheet
-      padding: { top: 0, right: 0, left: 0, bottom: Math.min(sheetBottomPadding ?? 0, getSheetHeights()[1]) },
+      // center in the part of the map not covered by the mobile sheet / desktop side panel
+      padding: { top: 0, right: 0, left: inset, bottom: Math.min(sheetBottomPadding ?? 0, getSheetHeights()[1]) },
     });
-  }, [map, target, sheetBottomPadding]);
+  }, [map, target, sheetBottomPadding, inset]);
 
   return null;
 }
@@ -206,6 +223,7 @@ function TapToAddLocation() {
   const lastMoveEndRef = useRef(0);
 
   const active = TAP_ADD_MODES.has(mode) && !isDrawingArea;
+  const inset = usePanelInset();
 
   useEffect(() => {
     if (!map || !active) return;
@@ -263,7 +281,12 @@ function TapToAddLocation() {
           moment guidance helps), and when the pin button was pressed. It
           disappears as soon as the first place is added. */}
       {active && !pending && !isDrawingArea && (pickingLocation || !hasAreas) && (
-        <div className="map-tap-hint" role="status">{t(isTouch ? 'map.tap_hint' : 'map.tap_hint_desktop')}</div>
+        <div
+          className="map-tap-hint"
+          role="status"
+          // desktop/tablet: centre over the visible map, not the full viewport
+          style={inset > 0 ? { left: `calc(50% + ${inset / 2}px)` } : undefined}
+        >{t(isTouch ? 'map.tap_hint' : 'map.tap_hint_desktop')}</div>
       )}
 
       {pending && (

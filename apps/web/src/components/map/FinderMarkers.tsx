@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
-import { Marker, Popup } from '@vis.gl/react-maplibre';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Marker, Popup, useMap } from '@vis.gl/react-maplibre';
 import { useTranslation } from 'react-i18next';
 import type { FinderResultData } from '../finder/FinderResultRow.tsx';
 import { TrophyIcon } from '../finder/FinderIcons.tsx';
 import { useAppStore, isLocatedPlace, isRadiusArea } from '../../stores/appStore.ts';
 import { getFinderMode } from '../../utils/finderMode.ts';
+import { computeDotIndices } from '../../utils/markerDeclutter.ts';
 
 interface FinderMarkersProps {
   results: FinderResultData[];
@@ -18,10 +19,44 @@ function scoreColor(score: number): string {
   return `hsl(${hue}, 65%, 45%)`;
 }
 
+// Full-size marker diameters (px). Rank labels stay >= 11px (M14).
+const SIZE_MAJOR = 36;
+const SIZE_MINOR = 30;
+const SIZE_SELECTED = 42;
+const DOT_SIZE = 12;
+
 export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderMarkersProps) {
   const { t } = useTranslation('common');
   const [popupIndex, setPopupIndex] = useState<number | null>(null);
   const searchAreas = useAppStore((st) => st.searchAreas);
+  const { current: map } = useMap();
+  const [dots, setDots] = useState<Set<number>>(() => new Set());
+
+  // Declutter in screen space after every pan/zoom: markers that would sit on top of a
+  // better-ranked (or the selected) marker collapse to a tappable dot.
+  const declutter = useCallback(() => {
+    if (!map) return;
+    const nativeMap = map.getMap();
+    const items = results.map((r, i) => {
+      const p = nativeMap.project([r.lng, r.lat]);
+      const selected = selectedIndex === i;
+      return { x: p.x, y: p.y, rank: r.rank, selected, size: selected ? SIZE_SELECTED : r.rank > 3 ? SIZE_MINOR : SIZE_MAJOR };
+    });
+    const next = computeDotIndices(items);
+    setDots((prev) => (prev.size === next.size && [...next].every((i) => prev.has(i)) ? prev : next));
+  }, [map, results, selectedIndex]);
+
+  useEffect(() => {
+    if (!map) return;
+    const nativeMap = map.getMap();
+    declutter();
+    nativeMap.on('moveend', declutter);
+    nativeMap.on('zoomend', declutter);
+    return () => {
+      nativeMap.off('moveend', declutter);
+      nativeMap.off('zoomend', declutter);
+    };
+  }, [map, declutter]);
 
   // Origin only exists for single-place / radius searches (same rule as the result list)
   const origin = useMemo(() => {
@@ -57,7 +92,8 @@ export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderM
         const isSelected = selectedIndex === idx;
         // Top 3 are large; lower ranks are smaller so overlapping clusters stay readable
         const isMinor = result.rank > 3;
-        const size = isSelected ? 40 : isMinor ? 26 : 34;
+        const isDot = dots.has(idx) && !isSelected;
+        const size = isSelected ? SIZE_SELECTED : isMinor ? SIZE_MINOR : SIZE_MAJOR;
 
         return (
           <Marker
@@ -72,6 +108,27 @@ export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderM
               setPopupIndex(idx);
             }}
           >
+            {isDot ? (
+              // Compact dot: still tappable (padded hit area), still selectable from the list
+              <div
+                role="img"
+                data-marker-dot=""
+                aria-label={`${result.townName}, ${t('finder.rank_label', '#{{rank}}', { rank: result.rank })}`}
+                style={{ padding: '8px', cursor: 'pointer', touchAction: 'manipulation' }}
+              >
+                <div
+                  style={{
+                    width: `${DOT_SIZE}px`,
+                    height: `${DOT_SIZE}px`,
+                    borderRadius: '50%',
+                    background: color,
+                    border: '2px solid white',
+                    boxShadow: 'var(--shadow-md)',
+                    boxSizing: 'content-box',
+                  }}
+                />
+              </div>
+            ) : (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
               {/* Trophy above rank #1 */}
               {result.rank === 1 && (
@@ -103,10 +160,10 @@ export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderM
                   cursor: 'pointer',
                   transition: 'width 0.15s, height 0.15s',
                   userSelect: 'none',
-                  padding: isMinor ? '0' : '2px',
+                  padding: '0',
                 }}
               >
-                <span style={{ fontSize: isMinor ? '8px' : '9px', fontWeight: 400, opacity: 0.85, lineHeight: 1 }}>
+                <span style={{ fontSize: '11px', fontWeight: 500, opacity: 0.9, lineHeight: 1 }}>
                   {t('finder.rank_label', '#{{rank}}', { rank: result.rank })}
                 </span>
                 <span style={{ fontSize: isMinor ? '11px' : '13px', fontWeight: 700, lineHeight: 1 }}>
@@ -114,6 +171,7 @@ export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderM
                 </span>
               </div>
             </div>
+            )}
             {popupIndex === idx && (
               <Popup
                 longitude={result.lng}

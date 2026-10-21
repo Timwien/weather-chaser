@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.ts';
+import { useModalA11y } from '../../hooks/useModalA11y.ts';
 import { getSupabase, supabaseConfigured } from '../../lib/supabase.ts';
 import './UpgradeModal.css';
 
@@ -19,6 +20,8 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
   const user = useAuthStore((s) => s.user);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const dialogRef = useModalA11y(onClose, isOpen);
 
   if (!isOpen) return null;
 
@@ -52,6 +55,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
   return (
     <div className="upgrade-modal-backdrop" onClick={onClose}>
       <div
+        ref={dialogRef}
         className="upgrade-modal"
         role="dialog"
         aria-modal="true"

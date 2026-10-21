@@ -186,6 +186,7 @@ export function EntryPanel() {
             type="button"
             className="entry-error-dismiss"
             onClick={() => setError(null)}
+            aria-label={t('a11y.close')}
           >
             ✕
           </button>

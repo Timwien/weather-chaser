@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.ts';
+import { useModalA11y } from '../../hooks/useModalA11y.ts';
 import { AccountTab } from './AccountTab.tsx';
 import { SavedTab } from './SavedTab.tsx';
 import { SettingsTab } from './SettingsTab.tsx';
@@ -43,6 +44,8 @@ export function AccountModal({ isOpen, onClose, initialTab = 'account' }: Accoun
     }
   }, [isOpen, initialTab]);
 
+  const dialogRef = useModalA11y(onClose, isOpen);
+
   if (!isOpen) return null;
 
   return (
@@ -52,7 +55,7 @@ export function AccountModal({ isOpen, onClose, initialTab = 'account' }: Accoun
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="account-modal-panel" role="dialog" aria-modal="true" aria-label={t('account.tab_account')}>
+      <div ref={dialogRef} className="account-modal-panel" role="dialog" aria-modal="true" aria-label={t('account.tab_account')}>
         {/* Header row */}
         <div className="account-modal-header">
           <button

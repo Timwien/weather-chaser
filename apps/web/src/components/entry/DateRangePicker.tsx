@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
+import { useModalA11y } from '../../hooks/useModalA11y.ts';
 
 /* ── helpers ────────────────────────────────────────────── */
 
@@ -187,7 +188,7 @@ export function DateRangePicker({ highlight = false }: { highlight?: boolean } =
   const [hovered, setHovered] = useState<Date | null>(null);
   const [viewMonth, setViewMonth] = useState<Date>(() => startOfMonth(today()));
 
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useModalA11y(() => setOpen(false), open);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const startDate = tripConfig.startDate ? new Date(tripConfig.startDate + 'T00:00:00') : null;

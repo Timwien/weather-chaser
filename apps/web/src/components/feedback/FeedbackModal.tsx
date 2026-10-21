@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFeedbackStore } from '../../stores/feedbackStore.ts';
 import { capture } from '../../lib/analytics.ts';
+import { useModalA11y } from '../../hooks/useModalA11y.ts';
 import { FeedbackForm } from './FeedbackForm.tsx';
 import './FeedbackModal.css';
 
@@ -15,8 +16,6 @@ export function FeedbackModal() {
   const { modalOpen, modalSource, closeModal } = useFeedbackStore();
   const submittedRef = useRef(false);
 
-  if (!modalOpen) return null;
-
   function handleClose() {
     // Closing the proactive popup without submitting counts as a dismissal.
     if (modalSource === 'prompt' && !submittedRef.current) {
@@ -26,9 +25,14 @@ export function FeedbackModal() {
     closeModal();
   }
 
+  const dialogRef = useModalA11y(handleClose, modalOpen);
+
+  if (!modalOpen) return null;
+
   return (
     <div className="feedback-modal-backdrop" onClick={handleClose}>
       <div
+        ref={dialogRef}
         className="feedback-modal"
         role="dialog"
         aria-modal="true"

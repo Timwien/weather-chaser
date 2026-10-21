@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { HourlyWeather } from '@weatherchaser/core';
 import { scoreLocation, PRESETS, sliceHoursByDays } from '@weatherchaser/core';
@@ -10,6 +10,7 @@ import { getFavorites, toggleFavorite } from '../../services/userdata.ts';
 import { FinderResultRow } from './FinderResultRow.tsx';
 import { FinderFilterBar } from './FinderFilterBar.tsx';
 import { FinderEmptyState } from './FinderEmptyState.tsx';
+import { useExpandRadius } from '../../hooks/useExpandRadius.ts';
 import { InfoTip } from '../common/InfoTip.tsx';
 import type { FinderResultData } from './FinderResultRow.tsx';
 import type { Favorite } from '../../types/database.ts';
@@ -50,6 +51,8 @@ interface WeatherFinderPanelProps {
   onResultsComputed: (results: FinderResultData[]) => void;
 }
 
+const SPARSE_RESULTS = 5;
+
 const SORT_OPTIONS = [
   { value: 'score',         labelKey: 'finder.sort_score',         default: 'Score' },
   { value: 'sunshine',      labelKey: 'finder.sort_sunshine',      default: 'Sonne' },
@@ -70,6 +73,10 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
   const { t } = useTranslation('common');
   const { finderTowns, finderHourlyCache, finderConfig, finderError, tripConfig, weatherPrefs, searchAreas, searchRadiusKm, setFinderConfig } = useAppStore();
   const { user } = useAuthStore();
+  const { nextKm, expand: expandRadius } = useExpandRadius();
+  const sortBarRef = useRef<HTMLDivElement | null>(null);
+  // True while more sort chips are hidden to the right — drives the edge fade.
+  const [sortMoreRight, setSortMoreRight] = useState(false);
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   // Favorites state
@@ -85,6 +92,21 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
       .then(setFavorites)
       .catch(() => { /* favorites load failure is non-critical */ });
   }, [user]);
+
+  const updateSortFade = useCallback(() => {
+    const el = sortBarRef.current;
+    if (!el) return;
+    setSortMoreRight(el.scrollWidth - el.clientWidth - el.scrollLeft > 4);
+  }, []);
+
+  useEffect(() => {
+    const el = sortBarRef.current;
+    if (!el) return;
+    updateSortFade();
+    const ro = new ResizeObserver(updateSortFade);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [updateSortFade]);
 
   // Scroll to selected row
   if (selectedFinderIndex !== null && rowRefs.current[selectedFinderIndex]) {
@@ -241,7 +263,11 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
       </div>
 
       {/* Sort buttons */}
-      <div className="finder-sort-bar">
+      <div
+        ref={sortBarRef}
+        className={`finder-sort-bar${sortMoreRight ? ' finder-sort-bar--more' : ''}`}
+        onScroll={updateSortFade}
+      >
         {SORT_OPTIONS.map(({ value, labelKey, default: def }) => {
           const Icon = SORT_ICONS[value];
           return (
@@ -281,6 +307,15 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
               />
             </div>
           ))}
+          {/* Sparse radius search: few hits, offer a wider radius. Not for polygon / multi-place. */}
+          {getFinderMode(searchAreas) === 'around' && finderResults.length < SPARSE_RESULTS && nextKm !== null && (
+            <div className="finder-sparse-hint">
+              <span>{t('finder.sparse_hint', { count: finderResults.length })}</span>
+              <button type="button" className="finder-sparse-btn" onClick={expandRadius}>
+                {t('finder.expand_radius', { km: nextKm })}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

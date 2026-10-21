@@ -1523,3 +1523,16 @@
   font-size: var(--font-size-xs);
   color: var(--color-primary);
 }
+
+/* Finder: a drawn polygon overrides named places — show them as inactive */
+.loc-tag--muted {
+  opacity: 0.5;
+  filter: grayscale(0.6);
+}
+
+.loc-polygon-hint {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}

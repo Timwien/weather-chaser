@@ -31,6 +31,7 @@
       "wind": "Calm wind"
     },
     "drawn_area": "Drawn area",
+    "polygon_priority_hint": "In the finder, the drawn area takes priority – only places inside it are searched.",
     "polygon_active_placeholder": "Area drawn",
     "draw_area": "Draw area",
     "draw_hint": "Click to set points · click first point to finish",
@@ -118,8 +119,8 @@
     "trip_page_title": "Shared trip",
     "export_google": "Open in Google Maps",
     "export_apple": "Open in Apple Maps",
-    "copy_link": "Copy shareable link",
     "jump_to": "Jump to share options",
+    "copy_link": "Copy shareable link",
     "link_copied": "Link copied",
     "google_limit": "Google Maps supports up to 9 stops"
   },
@@ -224,6 +225,8 @@
     "empty_no_results": "No results.",
     "empty_hint": "Try expanding the radius.",
     "empty_hint_polygon": "No places found in this area. Draw a larger area or choose “All places”.",
+    "sparse_hint_one": "Only {{count}} place within this radius.",
+    "sparse_hint_other": "Only {{count}} places within this radius.",
     "expand_radius": "Expand radius to {{km}} km",
     "results_title": "Best places",
     "sort_score": "Score",

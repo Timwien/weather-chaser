@@ -31,6 +31,7 @@
       "wind": "Ruhiger Wind"
     },
     "drawn_area": "Gezeichnetes Gebiet",
+    "polygon_priority_hint": "Im Finder hat das gezeichnete Gebiet Vorrang – gesucht wird nur darin.",
     "polygon_active_placeholder": "Gebiet gezeichnet",
     "draw_area": "Gebiet zeichnen",
     "draw_hint": "Klicken um Punkte zu setzen · ersten Punkt klicken zum Abschließen",
@@ -118,8 +119,8 @@
     "trip_page_title": "Geteilte Reise",
     "export_google": "In Google Maps öffnen",
     "export_apple": "In Apple Maps öffnen",
-    "copy_link": "Link kopieren",
     "jump_to": "Zu den Teilen-Optionen springen",
+    "copy_link": "Link kopieren",
     "link_copied": "Link kopiert",
     "google_limit": "Google Maps unterstützt bis zu 9 Stopps"
   },
@@ -224,6 +225,8 @@
     "empty_no_results": "Keine Ergebnisse.",
     "empty_hint": "Versuche, den Radius zu vergrößern.",
     "empty_hint_polygon": "Keine Orte in diesem Gebiet gefunden. Zeichne ein größeres Gebiet oder wähle „Alle Orte“.",
+    "sparse_hint_one": "Nur {{count}} Ort in diesem Radius.",
+    "sparse_hint_other": "Nur {{count}} Orte in diesem Radius.",
     "expand_radius": "Radius auf {{km}} km erweitern",
     "results_title": "Beste Orte",
     "sort_score": "Score",

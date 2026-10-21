@@ -8,6 +8,8 @@ import { getFavorites, toggleFavorite } from '../../services/userdata.ts';
 import { PlaceAutocomplete, type SelectedPlace } from '../common/PlaceAutocomplete.tsx';
 import { InfoTip } from '../common/InfoTip.tsx';
 import { suggestNearby, type NearbySuggestion } from '../../services/nearbyPlaces.ts';
+import { getFinderMode } from '../../utils/finderMode.ts';
+import { RADIUS_STEPS } from '../../utils/radiusSteps.ts';
 import { capture } from '../../lib/analytics.ts';
 import type { SearchAreaItem } from '../../stores/appStore.ts';
 
@@ -50,7 +52,7 @@ function RadiusSlider() {
   const { t } = useTranslation('common');
   const { searchRadiusKm, setSearchRadiusKm } = useAppStore();
 
-  const STEPS = [10, 25, 50, 100, 150, 200, 300, 500];
+  const STEPS = RADIUS_STEPS;
 
   function handleSlider(e: React.ChangeEvent<HTMLInputElement>) {
     const i = Number(e.target.value);
@@ -171,7 +173,7 @@ function NearbySuggestions({ anchors, excludeNames, onAdd }: NearbySuggestionsPr
 
 export function LocationInput({ highlight = false }: { highlight?: boolean } = {}) {
   const { t } = useTranslation('common');
-  const { searchAreas, addSearchArea, removeSearchArea, pickingLocation, setPickingLocation } = useAppStore();
+  const { searchAreas, addSearchArea, removeSearchArea, pickingLocation, setPickingLocation, mode } = useAppStore();
   const { user } = useAuthStore();
   const isMobile = useIsMobile();
 
@@ -229,6 +231,11 @@ export function LocationInput({ highlight = false }: { highlight?: boolean } = {
   }
 
   const hasDrawnPolygon = searchAreas.some((a) => a.type === 'polygon');
+  // Only the weather finder lets the polygon win over named places (finderMode.ts);
+  // route search combines both, so the muted tags + hint stay off in route steps.
+  // In idle the finder is still one of the two choices, hence the finder-scoped wording.
+  const polygonOverridesPlaces = (mode === 'idle' || mode === 'weather-finder') && getFinderMode(searchAreas) === 'polygon'
+    && searchAreas.some(isLocatedPlace);
 
   const placeCount = searchAreas.filter((a) => a.type === 'place').length;
   const showRadius = placeCount === 1 && searchAreas.length === 1;
@@ -279,7 +286,7 @@ export function LocationInput({ highlight = false }: { highlight?: boolean } = {
             return (
               <span
                 key={area.id}
-                className={`loc-tag${area.type === 'polygon' ? ' loc-tag--polygon' : ''}`}
+                className={`loc-tag${area.type === 'polygon' ? ' loc-tag--polygon' : ''}${polygonOverridesPlaces && area.type !== 'polygon' ? ' loc-tag--muted' : ''}`}
               >
                 <span className="loc-tag-name">{tagName}</span>
                 {isPlace && user && supabaseConfigured && (
@@ -304,6 +311,9 @@ export function LocationInput({ highlight = false }: { highlight?: boolean } = {
             );
           })}
         </div>
+      )}
+      {polygonOverridesPlaces && (
+        <p className="loc-polygon-hint">{t('entry.polygon_priority_hint')}</p>
       )}
 
       {/* Search input row — dimmed when a drawn polygon is active */}

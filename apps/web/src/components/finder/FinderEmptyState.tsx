@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
 import { getFinderMode } from '../../utils/finderMode.ts';
+import { useExpandRadius } from '../../hooks/useExpandRadius.ts';
 
 interface FinderEmptyStateProps {
   reason?: 'no_towns' | 'no_results';
@@ -8,13 +9,9 @@ interface FinderEmptyStateProps {
 
 export function FinderEmptyState({ reason = 'no_results' }: FinderEmptyStateProps) {
   const { t } = useTranslation('common');
-  const { finderConfig, setFinderConfig, searchAreas } = useAppStore();
+  const { searchAreas } = useAppStore();
   const mode = getFinderMode(searchAreas);
-
-  function expandRadius() {
-    const next = Math.min(finderConfig.radiusKm + 100, 500);
-    setFinderConfig({ radiusKm: next });
-  }
+  const { nextKm, expand } = useExpandRadius();
 
   return (
     <div style={{ padding: 'var(--space-6)', textAlign: 'center', color: 'var(--color-text-muted)' }}>
@@ -30,10 +27,10 @@ export function FinderEmptyState({ reason = 'no_results' }: FinderEmptyStateProp
             : t('finder.empty_hint', 'Versuche, den Radius zu vergrößern.')}
         </p>
       )}
-      {mode === 'around' && finderConfig.radiusKm < 500 && (
+      {mode === 'around' && nextKm !== null && (
         <button
           type="button"
-          onClick={expandRadius}
+          onClick={expand}
           style={{
             padding: 'var(--space-2) var(--space-4)',
             background: 'var(--color-accent)',
@@ -44,7 +41,7 @@ export function FinderEmptyState({ reason = 'no_results' }: FinderEmptyStateProp
             fontSize: 'var(--font-size-sm)',
           }}
         >
-          {t('finder.expand_radius', 'Radius auf {{km}} km erweitern', { km: Math.min(finderConfig.radiusKm + 100, 500) })}
+          {t('finder.expand_radius', 'Radius auf {{km}} km erweitern', { km: nextKm })}
         </button>
       )}
     </div>

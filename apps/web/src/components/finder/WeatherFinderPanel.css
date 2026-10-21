@@ -71,6 +71,12 @@
   margin: -2px -2px -6px;
 }
 
+/* Affordance: fade the right edge while more chips are scrolled out of view. */
+.finder-sort-bar--more {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+}
+
 .finder-sort-bar::-webkit-scrollbar {
   display: none;
 }
@@ -148,4 +154,36 @@
 [data-theme="dark"] .finder-sort-btn:not(.finder-sort-btn--active) {
   background: rgba(255, 255, 255, 0.10);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+/* ── Sparse-results hint (radius search with few hits) ──────── */
+
+.finder-sparse-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-border);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.finder-sparse-btn {
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.finder-sparse-btn:hover {
+  background: var(--color-accent-mid);
 }

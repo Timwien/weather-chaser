@@ -36,7 +36,7 @@ export function ShareBar() {
   };
 
   return (
-    <div className="share-bar">
+    <div className="share-bar" id="itinerary-share">
       {truncated && (
         <div className="share-truncation-notice">{t('share.google_limit')}</div>
       )}

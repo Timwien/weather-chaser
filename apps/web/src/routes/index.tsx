@@ -150,6 +150,7 @@ function IndexPage() {
                 <ItineraryPanel
                   selectedStopIndex={selectedStopIndex}
                   onStopSelect={handleStopSelectFromPanel}
+                  onExpandSheet={() => setSheetSnap(2)}
                 />
               )}
               {showFinderPanel && (

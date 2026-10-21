@@ -37,6 +37,26 @@
   gap: var(--space-3);
 }
 
+/* Mobile: jump to the share actions at the end of the list */
+.itinerary-share-jump {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: auto;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
+.itinerary-share-jump:active {
+  background: var(--color-accent-mid);
+}
+
 .itinerary-title {
   font-family: var(--font-display);
   font-size: var(--font-size-xl);

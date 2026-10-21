@@ -6,6 +6,7 @@ import { useAuthStore } from '../../stores/authStore.ts';
 import { supabaseConfigured } from '../../lib/supabase.ts';
 import { saveRoute } from '../../services/userdata.ts';
 import { runOptimizer } from '../../services/optimizerRunner.ts';
+import { useIsMobile } from '../../hooks/useIsMobile.ts';
 import { capture } from '../../lib/analytics.ts';
 import { SummaryBar } from './SummaryBar.tsx';
 import { StopCard } from './StopCard.tsx';
@@ -26,12 +27,25 @@ const REWEIGHT_ICONS: Record<WeatherPreset, React.ComponentType<{ size?: number 
 interface ItineraryPanelProps {
   selectedStopIndex: number | null;
   onStopSelect: (index: number) => void;
+  /** Mobile: open the bottom sheet fully (the share bar is below the fold at half height). */
+  onExpandSheet?: () => void;
 }
 
 function BackArrowIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
       <polyline points="9,2 4,7 9,12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function ShareIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="3.5" r="1.8"/>
+      <circle cx="4" cy="8" r="1.8"/>
+      <circle cx="12" cy="12.5" r="1.8"/>
+      <path d="M5.6 7.1l4.8-2.7M5.6 8.9l4.8 2.7"/>
     </svg>
   );
 }
@@ -44,10 +58,11 @@ function SaveIcon() {
   );
 }
 
-export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPanelProps) {
+export function ItineraryPanel({ selectedStopIndex, onStopSelect, onExpandSheet }: ItineraryPanelProps) {
   const { t } = useTranslation('common');
   const { route, error, mode, reset, tripConfig, weatherPrefs, setWeatherPrefs, lastRoutePrefs } = useAppStore();
   const { user, pendingAction, setPendingAction } = useAuthStore();
+  const isMobile = useIsMobile();
   const stopRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -96,6 +111,18 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPan
     }
   }
 
+  // The share actions sit below the stop list — on a phone the sheet hides them, so jump there.
+  function jumpToShare() {
+    onExpandSheet?.();
+    // Wait for the sheet's snap transition, then bring the share bar into view.
+    window.setTimeout(() => {
+      const bar = document.getElementById('itinerary-share');
+      if (!bar) return;
+      bar.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      bar.querySelector<HTMLElement>('.share-btn-primary')?.focus({ preventScroll: true });
+    }, 350);
+  }
+
   if (mode === 'idle' || mode === 'route-config') return null;
 
   if (error) {
@@ -127,6 +154,16 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect }: ItineraryPan
           <BackArrowIcon /> {t('itinerary.back')}
         </button>
         <h2 className="itinerary-title">{t('itinerary.title')}</h2>
+        {isMobile && (
+          <button
+            type="button"
+            className="itinerary-share-jump"
+            onClick={jumpToShare}
+            aria-label={t('share.jump_to')}
+          >
+            <ShareIcon />
+          </button>
+        )}
       </div>
 
       <SummaryBar route={route} />

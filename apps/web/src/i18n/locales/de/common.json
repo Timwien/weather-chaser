@@ -119,6 +119,7 @@
     "export_google": "In Google Maps öffnen",
     "export_apple": "In Apple Maps öffnen",
     "copy_link": "Link kopieren",
+    "jump_to": "Zu den Teilen-Optionen springen",
     "link_copied": "Link kopiert",
     "google_limit": "Google Maps unterstützt bis zu 9 Stopps"
   },

@@ -55,17 +55,36 @@ export function normalizeBbox(bbox: BoundingBox): BoundingBox {
   let north = clamp(ceil2(bbox.north), -90, 90);
   let west = clamp(floor2(bbox.west), -180, 180);
   let east = clamp(ceil2(bbox.east), -180, 180);
+  // round2(… - 0.01): plain `south + MAX` drifts to e.g. 64.02000000000001,
+  // which the server rejects as a span of 25.000000000000007.
   if (north - south > MAX_BBOX_LAT_SPAN) {
     const mid = (north + south) / 2;
     south = floor2(mid - MAX_BBOX_LAT_SPAN / 2);
-    north = south + MAX_BBOX_LAT_SPAN;
+    north = round2(south + MAX_BBOX_LAT_SPAN - 0.01);
   }
   if (east - west > MAX_BBOX_LNG_SPAN) {
     const mid = (east + west) / 2;
     west = floor2(mid - MAX_BBOX_LNG_SPAN / 2);
-    east = west + MAX_BBOX_LNG_SPAN;
+    east = round2(west + MAX_BBOX_LNG_SPAN - 0.01);
   }
   return { south, west, north, east };
+}
+
+/** Below this many candidates, 'auto' retries with the next lower threshold —
+ *  sparse regions (Lapland, Highlands, alpine valleys) have few large towns. */
+const MIN_AUTO_RESULTS = 10;
+
+export async function withSparseFallback(
+  minPop: number,
+  granularity: SearchGranularity,
+  query: (minPop: number) => Promise<Town[]>,
+): Promise<Town[]> {
+  let towns = await query(minPop);
+  while (granularity === 'auto' && towns.length < MIN_AUTO_RESULTS && minPop > MIN_POP_VILLAGE) {
+    minPop = minPop > MIN_POP_TOWN ? MIN_POP_TOWN : MIN_POP_VILLAGE;
+    towns = await query(minPop);
+  }
+  return towns;
 }
 
 function langOf(lang: string): 'de' | 'en' {
@@ -104,14 +123,16 @@ export async function fetchTownsInRadius(
   lang = 'en',
 ): Promise<Town[]> {
   const radius = clamp(Math.ceil(radiusKm), 1, MAX_RADIUS_KM);
-  return requestPlaces(new URLSearchParams({
-    lat: String(round2(lat)),
-    lng: String(round2(lng)),
-    radiusKm: String(radius),
-    minPop: String(minPopulation(Math.PI * radius * radius, granularity)),
-    limit: String(QUERY_LIMIT),
-    lang: langOf(lang),
-  }));
+  return withSparseFallback(minPopulation(Math.PI * radius * radius, granularity), granularity, (minPop) =>
+    requestPlaces(new URLSearchParams({
+      lat: String(round2(lat)),
+      lng: String(round2(lng)),
+      radiusKm: String(radius),
+      minPop: String(minPop),
+      limit: String(QUERY_LIMIT),
+      lang: langOf(lang),
+    })),
+  );
 }
 
 export async function fetchTownsInArea(
@@ -119,8 +140,8 @@ export async function fetchTownsInArea(
   granularity: SearchGranularity = 'auto',
   lang = 'en',
 ): Promise<Town[]> {
-  return requestPlaces(
-    bboxParams(bbox, minPopulation(bboxAreaKm2(bbox), granularity), QUERY_LIMIT, lang),
+  return withSparseFallback(minPopulation(bboxAreaKm2(bbox), granularity), granularity, (minPop) =>
+    requestPlaces(bboxParams(bbox, minPop, QUERY_LIMIT, lang)),
   );
 }
 
@@ -145,9 +166,13 @@ export async function fetchTownsInPolygon(
   const cached = polygonCache.get(cacheKey);
   if (cached) return cached;
 
-  const minPop = minPopulation(polygonAreaKm2(polygon), granularity);
-  const inBbox = await requestPlaces(bboxParams(bboxOfPolygon(polygon), minPop, POLYGON_QUERY_LIMIT, lang));
-  const towns = inBbox.filter((t) => pointInPolygon(t.lat, t.lng, polygon));
+  const bbox = bboxOfPolygon(polygon);
+  const towns = await withSparseFallback(minPopulation(polygonAreaKm2(polygon), granularity), granularity,
+    async (minPop) => {
+      const inBbox = await requestPlaces(bboxParams(bbox, minPop, POLYGON_QUERY_LIMIT, lang));
+      return inBbox.filter((t) => pointInPolygon(t.lat, t.lng, polygon));
+    },
+  );
 
   polygonCache.set(cacheKey, towns);
   return towns;

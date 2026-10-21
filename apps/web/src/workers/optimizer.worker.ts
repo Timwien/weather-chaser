@@ -122,9 +122,13 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
 
     // Towns whose weather batch failed are dropped; pinned and must-visit stops stay
     // (they score 0 instead of vanishing from the route the user asked for)
+    // A fetched town with a must-visit's name stands in for it (no must-visit-*
+    // id was injected above), so match by name as well.
     const withWeather = new Set(weatherData.map((d) => d.townId));
+    const mustVisitNames = new Set(config.mustVisitCoords.map((c) => c.name.toLowerCase()));
     towns = towns.filter(
-      (t) => withWeather.has(t.id) || t.id.startsWith('pinned-') || t.id.startsWith('must-visit-'),
+      (t) => withWeather.has(t.id) || t.id.startsWith('pinned-') || t.id.startsWith('must-visit-')
+        || mustVisitNames.has(t.name.toLowerCase()),
     );
 
     const weights: ScoringWeights = config.customWeights

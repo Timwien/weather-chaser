@@ -16,6 +16,11 @@ export type AppErrorCode =
 /** Map a thrown error to a stable code. Called from worker catch blocks. */
 export function classifyError(err: unknown): AppErrorCode {
   const msg = err instanceof Error ? err.message : String(err);
+  // AbortSignal.timeout() rejects with a DOMException whose message varies by
+  // browser ("signal timed out", "The operation timed out.") — check its name.
+  if (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError')) {
+    return 'weather_failed';
+  }
   if (msg === 'no_towns_small_area') return 'no_towns_small_area';
   if (msg === 'no_towns') return 'no_towns';
   if (msg.startsWith('places_unavailable')) return 'places_unavailable';

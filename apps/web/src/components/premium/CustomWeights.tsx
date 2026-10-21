@@ -1,13 +1,17 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ScoringWeights } from '@weatherchaser/core';
 import { PRESETS } from '@weatherchaser/core';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useSubscriptionStore } from '../../stores/subscriptionStore.ts';
 import { PREMIUM_FREE_BETA } from '../../lib/premiumBeta.ts';
-import { UpgradeModal } from './UpgradeModal.tsx';
 import { InfoTip } from '../common/InfoTip.tsx';
 import './CustomWeights.css';
+
+// Only fetched when the user opens it (named export → default for React.lazy).
+const UpgradeModal = lazy(() =>
+  import('./UpgradeModal.tsx').then((m) => ({ default: m.UpgradeModal })),
+);
 
 const DIMENSIONS = ['sunshine', 'precipitation', 'temperature', 'wind'] as const;
 
@@ -102,7 +106,11 @@ export function CustomWeights() {
         </div>
       )}
 
-      <UpgradeModal isOpen={showUpgrade} onClose={() => setShowUpgrade(false)} />
+      {showUpgrade && (
+        <Suspense fallback={null}>
+          <UpgradeModal isOpen onClose={() => setShowUpgrade(false)} />
+        </Suspense>
+      )}
     </div>
   );
 }

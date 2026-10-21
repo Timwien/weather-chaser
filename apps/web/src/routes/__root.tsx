@@ -1,13 +1,28 @@
+import { lazy, Suspense } from 'react';
 import { createRootRoute, Outlet } from '@tanstack/react-router';
-import { FeedbackModal } from '../components/feedback/FeedbackModal.tsx';
+import { useFeedbackStore } from '../stores/feedbackStore.ts';
 
-export const Route = createRootRoute({
-  // FeedbackModal is mounted once at the root so it can be opened from
-  // anywhere (proactive prompt, entry footer).
-  component: () => (
+// Only fetched the first time the modal is opened (named export → default for React.lazy).
+const FeedbackModal = lazy(() =>
+  import('../components/feedback/FeedbackModal.tsx').then((m) => ({ default: m.FeedbackModal })),
+);
+
+function RootLayout() {
+  const modalOpen = useFeedbackStore((s) => s.modalOpen);
+  return (
     <>
       <Outlet />
-      <FeedbackModal />
+      {/* Mounted at the root so it can be opened from anywhere (proactive
+          prompt, entry footer). */}
+      {modalOpen && (
+        <Suspense fallback={null}>
+          <FeedbackModal />
+        </Suspense>
+      )}
     </>
-  ),
+  );
+}
+
+export const Route = createRootRoute({
+  component: RootLayout,
 });

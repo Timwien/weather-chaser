@@ -20,7 +20,7 @@ export function AccountModal({ isOpen, onClose, initialTab = 'account' }: Accoun
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const user = useAuthStore((s) => s.user);
-  const prevUserRef = useRef<typeof user>(null);
+  const prevUserRef = useRef<typeof user>(user); // current user: mounting while signed in must not count as a sign-in
 
   const TABS: { id: TabId; label: string }[] = [
     { id: 'account', label: t('account.tab_account') },

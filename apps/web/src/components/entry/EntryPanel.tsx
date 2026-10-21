@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useAuthStore } from '../../stores/authStore.ts';
@@ -8,12 +8,16 @@ import { LocationInput } from './LocationInput.tsx';
 import { WeatherPrefsSection } from './WeatherPrefsSection.tsx';
 import { RouteConfigStep } from './RouteConfigStep.tsx';
 import { WeatherFinderStep } from './WeatherFinderStep.tsx';
-import { AccountModal } from '../account/AccountModal.tsx';
 import { saveSearch, buildSearchConfigFromStore } from '../../services/savedSearch.ts';
 import { capture } from '../../lib/analytics.ts';
 import { useFeedbackStore } from '../../stores/feedbackStore.ts';
 import { supabaseConfigured } from '../../lib/supabase.ts';
 import './EntryPanel.css';
+
+// Only fetched when the user opens it (named export → default for React.lazy).
+const AccountModal = lazy(() =>
+  import('../account/AccountModal.tsx').then((m) => ({ default: m.AccountModal })),
+);
 
 // One-time guest hint — fires after first route generation, never again
 const HINT_KEY = 'wc_first_route_hint_shown';
@@ -298,10 +302,11 @@ export function EntryPanel() {
       </div>
 
       {/* Account modal */}
-      <AccountModal
-        isOpen={isAccountModalOpen}
-        onClose={() => setIsAccountModalOpen(false)}
-      />
+      {isAccountModalOpen && (
+        <Suspense fallback={null}>
+          <AccountModal isOpen onClose={() => setIsAccountModalOpen(false)} />
+        </Suspense>
+      )}
     </aside>
   );
 }

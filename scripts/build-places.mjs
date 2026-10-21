@@ -54,7 +54,9 @@ const admin1ById = new Map(); // geonameId -> admin1 entry (to attach German nam
 for await (const line of lines(admin1Path)) {
   const c = line.split('\t');
   if (c.length < 4) continue;
-  const entry = { en: c[1], de: null, deRank: -1 };
+  // `name` is UTF-8 where GeoNames has one, but for many regions it equals the ASCII name
+  // ("Baden-Wurttemberg"); `diacritic` collects votes for the real spelling from alternate names (step 2).
+  const entry = { en: c[1], de: null, deRank: -1, diacritic: new Map() };
   admin1.set(c[0], entry);
   admin1ById.set(c[3], entry);
 }
@@ -76,9 +78,17 @@ for await (const line of lines(citiesPath)) {
 console.error(`cities in region: ${places.size}`);
 
 // 2. Localized names. Rank: preferred (2) > first plain name (1). Skip short/colloquial/historic.
+const MIN_DIACRITIC_VOTES = 7;
+const fold = (v) => v.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 for await (const line of lines(altPath)) {
   const c = line.split('\t');
   const lang = c[2];
+  // Region spelling with diacritics: any language's alternate name that folds to the ASCII name.
+  const regionForDiacritics = admin1ById.get(c[1]);
+  if (regionForDiacritics && c[3] && /[^\x00-\x7f]/.test(c[3]) && c[3] !== regionForDiacritics.en
+      && fold(c[3]).toLowerCase() === fold(regionForDiacritics.en).toLowerCase()) {
+    regionForDiacritics.diacritic.set(c[3], (regionForDiacritics.diacritic.get(c[3]) ?? 0) + 1);
+  }
   if (lang !== 'de' && lang !== 'en') continue;
   const [, , , name, preferred, short, colloquial, historic] = c;
   const region = admin1ById.get(c[1]);
@@ -106,6 +116,14 @@ const regions = [];
 function regionIndex(code) {
   const a = admin1.get(code);
   if (!a) return 0;
+  if (!a.fixed) {
+    a.fixed = true;
+    if (/^[\x00-\x7f]*$/.test(a.en) && a.diacritic.size > 0) {
+      // Needs real consensus across languages — single-language variants (Catalan "Sòfia") are noise.
+      const [best, votes] = [...a.diacritic.entries()].sort((x, y) => y[1] - x[1])[0];
+      if (votes >= MIN_DIACRITIC_VOTES) a.en = best;
+    }
+  }
   const de = a.de && a.de !== a.en ? a.de : 0;
   const key = `${a.en}|${de}`;
   if (!regionIdx.has(key)) { regions.push([a.en, de]); regionIdx.set(key, regions.length); }

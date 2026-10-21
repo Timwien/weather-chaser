@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.ts';
 import { useModalA11y } from '../../hooks/useModalA11y.ts';
@@ -48,7 +49,9 @@ export function AccountModal({ isOpen, onClose, initialTab = 'account' }: Accoun
 
   if (!isOpen) return null;
 
-  return (
+  // Portal to <body>: inside the search panel an ancestor's transform/backdrop-filter
+  // would make `position: fixed` relative to the panel instead of the viewport.
+  return createPortal(
     <div
       className="account-modal-overlay"
       onClick={(e) => {
@@ -92,6 +95,7 @@ export function AccountModal({ isOpen, onClose, initialTab = 'account' }: Accoun
           {activeTab === 'feedback' && <FeedbackForm source="account_tab" />}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

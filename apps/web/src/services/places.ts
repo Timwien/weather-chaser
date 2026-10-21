@@ -91,16 +91,41 @@ function langOf(lang: string): 'de' | 'en' {
   return lang.slice(0, 2).toLowerCase() === 'de' ? 'de' : 'en';
 }
 
+/** In-flight requests by URL — concurrent identical lookups (several components,
+ *  StrictMode double effects) share one network call. */
+const inFlight = new Map<string, Promise<Town[]>>();
+/** Small session cache of settled responses, oldest entry evicted first. */
+const responseCache = new Map<string, Town[]>();
+const RESPONSE_CACHE_MAX = 60;
+
 async function requestPlaces(params: URLSearchParams): Promise<Town[]> {
   const url = new URL('/api/places', self.location.origin);
   url.search = params.toString();
-  try {
-    const raw = await fetchJsonWithRetry(url.toString(), { attempts: 2, timeoutMs: 10_000 });
-    if (!Array.isArray(raw)) throw new Error('unexpected response');
-    return raw as Town[];
-  } catch (err) {
-    throw new Error(`places_unavailable: ${err instanceof Error ? err.message : String(err)}`);
-  }
+  const key = url.toString();
+
+  const cached = responseCache.get(key);
+  if (cached) return cached;
+  const pending = inFlight.get(key);
+  if (pending) return pending;
+
+  const request = (async () => {
+    try {
+      const raw = await fetchJsonWithRetry(key, { attempts: 2, timeoutMs: 10_000 });
+      if (!Array.isArray(raw)) throw new Error('unexpected response');
+      const towns = raw as Town[];
+      responseCache.set(key, towns);
+      if (responseCache.size > RESPONSE_CACHE_MAX) {
+        responseCache.delete(responseCache.keys().next().value as string);
+      }
+      return towns;
+    } catch (err) {
+      throw new Error(`places_unavailable: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      inFlight.delete(key);
+    }
+  })();
+  inFlight.set(key, request);
+  return request;
 }
 
 function bboxParams(

@@ -105,3 +105,10 @@ button, [role="button"], a, .loc-tag, .criteria-chip,
     z-index: auto;
   }
 }
+
+/* Attribution / control corners stay above marker layers (finder markers use z-index 1..9)
+   but below panels (20) and the mobile sheet (40). */
+.maplibregl-ctrl-bottom-right,
+.maplibregl-ctrl-bottom-left {
+  z-index: 10;
+}

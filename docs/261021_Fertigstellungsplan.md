@@ -42,13 +42,42 @@ Konsolenfehler; Manifest/Icons per HTTP abrufbar; Esc schließt jedes Modal;
 
 ---
 
-## Welle B — Gebietssuche & Overpass (folgt nach Ursachenanalyse)
+## Welle B — Ortsdaten, Gebietssuche, Wetter-Pipeline
 
-Offen bis Diagnose: M2 (großes Gebiet → 0 Treffer), M5 (kleines Gebiet
-195 s), C11 (Overpass-Proxy per POST ist nicht cachebar und ein offenes
-Relay). Geplante Richtung: Proxy nimmt nur geprüfte Parameter (Gebiet,
-Ortstypen, Limit) per GET, baut die Abfrage serverseitig und wird
-CDN-cachebar.
+Diagnose (21.10.2026):
+- **Overpass ist praktisch tot für uns.** overpass-api.de antwortet seit
+  April 2026 mit strengen Sperrregeln (406 auch mit eigenem User-Agent und
+  Referer); die zwei Spiegel antworten nicht. Der Proxy braucht 30 s bis zum
+  503, der Client bricht nach 12 s ab und nutzt still die kleine
+  GeoNames-Notfallliste (≥ 15k Einwohner). Jede Suche verliert dadurch 12 s
+  und findet nur größere Städte.
+- **Polygon ohne Ort → immer 0 Treffer**: `WeatherFinderPanel.tsx` verlangt
+  einen Ursprung (`return []`) und filtert zusätzlich nach Radius.
+  Ort + Polygon → `useFinder` wählt „multi-place" und ignoriert das Polygon.
+- **Wetter-Pipeline kann > 3 min hängen**: Batches laufen nacheinander,
+  Client-Timeout (15 s) < Proxy-Gesamtzeit (bis 37,8 s), Retries
+  multiplizieren sich, Split-Retry über 3 Ebenen, ein Fehl-Batch verwirft
+  alle Ergebnisse.
+
+Entscheidung: **Overpass wird ersetzt** durch einen eigenen Ortsdatensatz
+(GeoNames `cities1000`, CC BY 4.0, Europa-Ausschnitt, mit deutschen und
+englischen Namen aus `alternateNamesV2`), ausgeliefert über eine eigene
+GET-Schnittstelle `/api/places`, die am CDN cachebar ist. Damit entfallen die
+12-s-Wartezeit, die Abhängigkeit von einem überlasteten Fremddienst und das
+offene Overpass-Relay (C11).
+
+| # | Maßnahme |
+|---|---|
+| B1 | Build-Skript `scripts/build-places.mjs` (einmalig ausgeführt, Ergebnis eingecheckt): lädt GeoNames `cities1000` + `alternateNamesV2`, filtert auf den bisherigen Europa-Ausschnitt, behält Name, Lat, Lng, Einwohner, bevorzugten DE- und EN-Namen; kompaktes JSON unter `apps/web/api/_data/`. |
+| B2 | `GET /api/places?bbox=s,w,n,e` bzw. `?lat=&lng=&radiusKm=` + `minPop` + `limit` + `lang`; Validierung, Limits, `Cache-Control: s-maxage` langfristig. Ortsauswahl nach Einwohnerschwellen statt OSM-Ortstypen (gleiche Logik wie `placeTypes`/Granularität). Abfragelogik in einem reinen Modul mit Unit-Tests. |
+| B3 | Client: `services/overpass.ts` → `services/places.ts` (Radius, Gebiet, Polygon mit Point-in-Polygon wie bisher), Overpass-Proxy und Notfall-Datei entfernen. Dev-Server bedient `/api/*` über ein kleines Vite-Plugin mit denselben Funktionsdateien. |
+| B4 | Finder: Polygon-Modus ohne Ursprung und ohne Radiusfilter; Polygon hat Vorrang vor „multi-place"; leere Ergebnisse im Polygon zeigen einen passenden Hinweis (kein „Radius vergrößern"). |
+| B5 | Wetter: Batches parallel (max. 3), ein Gesamtbudget (~30 s) mit Rückgabe der erfolgreichen Batches, Client-Timeout > Proxy-Gesamtzeit, Proxy max. 1 Retry, Split-Retry nur eine Ebene, 429 `Retry-After` beachten. |
+| B6 | Quellenangabe „Ortsdaten: GeoNames (CC BY 4.0)" in Datenschutz/Nutzungsbedingungen bzw. Kartenattribution; Overpass-Erwähnungen in Datenschutz/Doku anpassen. |
+
+Prüfung: Unit-Tests für Ortsabfrage und Polygon-Filter; Finder Radius,
+kleines Polygon, großes Polygon, Ort + Polygon und Route jeweils mit
+Ergebnissen und Laufzeit < 20 s im Dev-Server (mobil + Desktop).
 
 Zusatzbefunde Desktop: D1 (Polygon ohne benannten Ort → Ergebnisliste
 immer leer, `WeatherFinderPanel` verlangt einen Ursprung), Overpass-Proxy

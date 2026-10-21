@@ -7,7 +7,8 @@
 /* ── Container (fixed at top, z-index 50 above sheet at 40) ─── */
 .mobile-search-bar {
   position: fixed;
-  top: var(--space-3);
+  top: var(--space-3); /* fallback */
+  top: calc(var(--space-3) + env(safe-area-inset-top, 0px));
   left: var(--space-3);
   right: var(--space-3);
   z-index: 50;

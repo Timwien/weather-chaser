@@ -17,4 +17,11 @@ i18n
     interpolation: { escapeValue: false },
   });
 
+// Keep <html lang> in sync with the active language (screen readers, hyphenation).
+const syncHtmlLang = (lng: string) => {
+  document.documentElement.lang = (lng || 'en').split('-')[0];
+};
+i18n.on('languageChanged', syncHtmlLang);
+syncHtmlLang(i18n.language);
+
 export default i18n;

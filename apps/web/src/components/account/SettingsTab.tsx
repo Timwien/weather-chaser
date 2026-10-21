@@ -161,6 +161,9 @@ export function SettingsTab({ onClose }: SettingsTabProps) {
           <a href="/tos" target="_blank" rel="noopener noreferrer" className="settings-tab-link">
             {t('account.settings_tos_link')}
           </a>
+          <a href="/impressum" target="_blank" rel="noopener noreferrer" className="settings-tab-link">
+            {t('account.settings_imprint_link')}
+          </a>
         </div>
       </section>
 

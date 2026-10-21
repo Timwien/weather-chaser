@@ -4,9 +4,10 @@ import { Route as indexRoute } from './routes/index.tsx';
 import { Route as tripRoute } from './routes/trip.tsx';
 import { Route as privacyRoute } from './routes/privacy.tsx';
 import { Route as tosRoute } from './routes/tos.tsx';
+import { Route as imprintRoute } from './routes/imprint.tsx';
 import { StatusPage } from './components/common/StatusPage.tsx';
 
-const routeTree = rootRoute.addChildren([indexRoute, tripRoute, privacyRoute, tosRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, tripRoute, privacyRoute, tosRoute, imprintRoute]);
 
 const router = createRouter({
   routeTree,

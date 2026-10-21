@@ -30,7 +30,7 @@
 }
 
 .custom-weights-badge {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -41,6 +41,8 @@
 }
 
 .custom-weights-toggle {
+  min-height: 40px;
+  padding: 0 var(--space-2);
   background: none;
   border: none;
   font-size: var(--font-size-xs);

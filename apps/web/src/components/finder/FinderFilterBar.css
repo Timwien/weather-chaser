@@ -64,7 +64,7 @@
 }
 
 .finder-filter-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--color-text-muted);
   text-transform: uppercase;
@@ -100,7 +100,7 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-height: 36px;
+  min-height: 40px;
   padding: 5px var(--space-3);
   border: none;
   border-radius: var(--radius-full);
@@ -167,4 +167,10 @@
   color: #ffffff;
   font-weight: var(--font-weight-semibold);
   box-shadow: 0 2px 8px rgba(245, 146, 30, 0.30);
+}
+
+/* M13: inactive chips need a visible surface on dark glass (6% dark tint vanishes) */
+[data-theme="dark"] .finder-filter-toggle-btn:not(.finder-filter-toggle-btn--active) {
+  background: rgba(255, 255, 255, 0.10);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }

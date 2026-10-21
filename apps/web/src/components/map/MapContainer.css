@@ -35,7 +35,7 @@
 
 .map-tap-popup-add {
   flex: 1;
-  min-height: 36px;
+  min-height: 40px;
   padding: 0 var(--space-3);
   border: none;
   border-radius: var(--radius-full);
@@ -49,8 +49,8 @@
 }
 
 .map-tap-popup-close {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border: none;
   border-radius: var(--radius-full);
   background: var(--surface-frost);
@@ -85,7 +85,7 @@
 
 .place-marker-remove {
   flex: 1;
-  min-height: 36px;
+  min-height: 40px;
   padding: 0 var(--space-3);
   border: 1.5px solid var(--color-error);
   border-radius: var(--radius-full);

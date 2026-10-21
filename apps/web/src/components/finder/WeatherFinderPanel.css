@@ -79,7 +79,8 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 5px 8px;
+  min-height: 40px;
+  padding: 5px 12px;
   border-radius: var(--radius-full);
   border: none;
   background: rgba(13, 36, 38, 0.06);
@@ -141,4 +142,10 @@
   .mobile-sheet-content .finder-panel-title {
     font-size: var(--font-size-lg);
   }
+}
+
+/* M13: inactive sort chips stay visible in dark mode */
+[data-theme="dark"] .finder-sort-btn:not(.finder-sort-btn--active) {
+  background: rgba(255, 255, 255, 0.10);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }

@@ -110,6 +110,7 @@
 
 /* Trigger button */
 .drp-trigger {
+  min-height: 40px;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -215,8 +216,8 @@
 
 .drp-nav-btn {
   pointer-events: all;
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background: var(--surface-frost-strong);
@@ -257,7 +258,7 @@
 
 .drp-weekday {
   text-align: center;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--color-text-muted);
   padding: var(--space-1) 0;
@@ -325,7 +326,8 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  min-height: 40px;
   border-radius: var(--radius-sm);
   transition: color 0.1s;
 }
@@ -392,6 +394,14 @@
   opacity: 0.6;
   transition: opacity 0.1s;
   flex-shrink: 0;
+  position: relative;
+}
+
+/* M13: visual icon stays small, hit area ≥ 40px */
+.loc-tag-remove::before {
+  content: '';
+  position: absolute;
+  inset: -16px;
 }
 
 .loc-tag-remove:hover {
@@ -468,8 +478,8 @@
 }
 
 .loc-pick-map-btn {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
   border-radius: var(--radius-md);
   border: 1.5px solid var(--color-border);
@@ -499,6 +509,7 @@
 
 .text-input {
   width: 100%;
+  min-height: 40px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 10px var(--space-3);
@@ -570,6 +581,30 @@
   color: var(--color-accent);
 }
 
+.autocomplete-option-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.autocomplete-option-name,
+.autocomplete-option-secondary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Region / country line that tells same-named towns apart */
+.autocomplete-option-secondary {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.autocomplete-option--active .autocomplete-option-secondary,
+.autocomplete-option:hover .autocomplete-option-secondary {
+  color: inherit;
+  opacity: 0.8;
+}
+
 /* B2: on mobile the pill body is a scroll container — an absolutely positioned
    dropdown clips at its bottom edge. Inline variant renders the list in-flow. */
 .autocomplete-dropdown--inline {
@@ -618,6 +653,7 @@
 
 .loc-granularity-chip {
   flex: 1;
+  min-height: 40px;
   padding: 6px var(--space-2);
   border-radius: var(--radius-full);
   border: 1.5px solid var(--color-border);
@@ -670,6 +706,10 @@
   -webkit-appearance: none;
   appearance: none;
   height: 4px;
+  /* M13: 40px tall touch area around the 4px track */
+  padding: 18px 0;
+  box-sizing: content-box;
+  background-clip: content-box;
   border-radius: var(--radius-full);
   background: var(--color-accent-light);
   outline: none;
@@ -701,7 +741,7 @@
 .loc-radius-ticks {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--color-text-light);
 }
 
@@ -875,7 +915,10 @@
 
 .route-config-back-btn {
   align-self: flex-start;
-  padding: var(--space-1) 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: var(--space-1) var(--space-2) var(--space-1) 0;
   background: none;
   border: none;
   color: var(--color-text-muted);
@@ -923,8 +966,8 @@
 }
 
 .stepper-btn {
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-md);
   border: 1.5px solid var(--color-border);
   background: var(--surface-frost);
@@ -1114,7 +1157,8 @@
 }
 
 .suggestion-pill {
-  padding: 4px 10px;
+  min-height: 40px;
+  padding: 4px 12px;
   border-radius: var(--radius-full);
   border: 1.5px dashed var(--color-border-strong);
   background: transparent;
@@ -1302,6 +1346,8 @@
 }
 
 .entry-panel-account-btn {
+  min-width: 40px;
+  min-height: 40px;
   background: none;
   border: none;
   cursor: pointer;

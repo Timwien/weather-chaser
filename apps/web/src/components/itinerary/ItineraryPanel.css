@@ -53,6 +53,7 @@
 .itinerary-back-btn {
   display: flex;
   align-items: center;
+  min-height: 40px;
   gap: var(--space-1);
   background: none;
   border: none;
@@ -121,6 +122,7 @@
   justify-content: center;
   gap: var(--space-2);
   width: 100%;
+  min-height: 40px;
   padding: 10px var(--space-4);
   border-radius: var(--radius-full);
   border: none;

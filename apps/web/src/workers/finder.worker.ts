@@ -1,8 +1,8 @@
 // Vite module worker — fetches towns + hourly weather for the finder mode
 import type { Town } from '@weatherchaser/core';
 import { fetchHourlyWeatherBatch } from '../services/weatherHourly.ts';
-import { fetchTownsInRadius, fetchTownsInPolygon } from '../services/overpass.ts';
-import type { SearchGranularity } from '../services/overpass.ts';
+import { fetchTownsInRadius, fetchTownsInPolygon } from '../services/places.ts';
+import type { SearchGranularity } from '../services/places.ts';
 import type { HourlyWeatherData } from '../services/weatherHourly.ts';
 import { dedupeByWeatherCell } from '../utils/spatialDedupe.ts';
 import { classifyError, type AppErrorCode } from '../services/errorCodes.ts';
@@ -19,11 +19,11 @@ export interface FinderWorkerInput {
     radiusKm?: number;
     // 'polygon' mode fields
     polygon?: [number, number][];
-    // 'multi-place' mode fields — towns passed directly, Overpass skipped
+    // 'multi-place' mode fields — towns passed directly, no place lookup
     towns?: Town[];
     startDate: string;   // ISO YYYY-MM-DD
     endDate: string;     // ISO YYYY-MM-DD
-    /** Place granularity for Overpass queries (default 'auto') */
+    /** Place granularity for place queries (default 'auto') */
     granularity?: SearchGranularity;
     /** F4: UI language for localized OSM place names (default 'en') */
     lang?: string;
@@ -46,7 +46,7 @@ self.onmessage = async (event: MessageEvent<FinderWorkerInput>) => {
     let towns: Town[];
 
     if (config.mode === 'multi-place') {
-      // Use the exact places the user entered — no Overpass call
+      // Use the exact places the user entered — no place lookup
       towns = config.towns ?? [];
     } else if (config.mode === 'polygon') {
       if (!config.polygon || config.polygon.length === 0) {

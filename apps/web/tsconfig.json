@@ -7,6 +7,6 @@
     "baseUrl": ".",
     "paths": {}
   },
-  "include": ["src", "api", "vite.config.ts"],
+  "include": ["src", "api", "build", "vite.config.ts"],
   "exclude": ["node_modules"]
 }

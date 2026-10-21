@@ -1,5 +1,4 @@
-// R7: shared geo helpers. Previously duplicated across fallbackPlaces.ts,
-// overpass.ts and WeatherFinderPanel.tsx (haversine ×2, point-in-polygon ×1,
+// R7: shared geo helpers. Previously duplicated across places.ts and WeatherFinderPanel.tsx (haversine ×2, point-in-polygon ×1,
 // deg→km area approximations ×3). One definition, reused by B6, F2, F3.
 
 import type { BoundingBox } from '../services/nominatim.ts';

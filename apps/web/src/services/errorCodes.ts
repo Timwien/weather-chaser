@@ -5,7 +5,7 @@
 export type AppErrorCode =
   | 'no_towns'
   | 'no_towns_small_area'
-  | 'overpass_unavailable'
+  | 'places_unavailable'
   | 'weather_failed'
   | 'missing_config'
   | 'missing_polygon'
@@ -18,7 +18,7 @@ export function classifyError(err: unknown): AppErrorCode {
   const msg = err instanceof Error ? err.message : String(err);
   if (msg === 'no_towns_small_area') return 'no_towns_small_area';
   if (msg === 'no_towns') return 'no_towns';
-  if (/overpass/i.test(msg)) return 'overpass_unavailable';
+  if (msg.startsWith('places_unavailable')) return 'places_unavailable';
   if (/HTTP \d|Open-?Meteo|TimeoutError|AbortError|Failed to fetch|weather/i.test(msg)) {
     return 'weather_failed';
   }

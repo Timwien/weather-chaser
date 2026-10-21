@@ -125,7 +125,7 @@ interface NearbySuggestionsProps {
 }
 
 function NearbySuggestions({ anchors, excludeNames, onAdd }: NearbySuggestionsProps) {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const [suggestions, setSuggestions] = useState<NearbySuggestion[]>([]);
 
   // Recompute whenever the anchor set or exclusion set changes.
@@ -138,7 +138,7 @@ function NearbySuggestions({ anchors, excludeNames, onAdd }: NearbySuggestionsPr
       setSuggestions([]);
       return;
     }
-    suggestNearby(anchors, { exclude: excludeNames, limit: 6 })
+    suggestNearby(anchors, { exclude: excludeNames, limit: 6, lang: i18n.language })
       .then((s) => { if (!cancelled) setSuggestions(s); })
       .catch(() => { if (!cancelled) setSuggestions([]); });
     return () => { cancelled = true; };
@@ -340,7 +340,7 @@ export function LocationInput({ highlight = false }: { highlight?: boolean } = {
       {/* Radius selector — only when exactly one place */}
       {showRadius && <RadiusSlider />}
 
-      {/* Place granularity — relevant when Overpass is queried (radius or drawn area) */}
+      {/* Place granularity — relevant when places are looked up (radius or drawn area) */}
       {(showRadius || hasDrawnPolygon) && <GranularityToggle />}
     </div>
   );

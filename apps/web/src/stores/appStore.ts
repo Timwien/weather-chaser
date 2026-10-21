@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { Route, WeatherPreset, ScoringWeights, Town, HourlyWeather } from '@weatherchaser/core';
-import type { SearchGranularity } from '../services/overpass.ts';
+import type { SearchGranularity } from '../services/places.ts';
 
 type AppMode = 'idle' | 'route-config' | 'weather-finder' | 'loading' | 'results';
 type LoadingStep = 'finding_towns' | 'fetching_weather' | 'optimizing_route' | null;

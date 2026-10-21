@@ -113,7 +113,7 @@ export function useFinder() {
     let input: FinderWorkerInput;
 
     if (searchAreas.length > 1) {
-      // Mode C: multiple named places — score them directly, skip Overpass
+      // Mode C: multiple named places — score them directly, skip place lookup
       const towns: Town[] = searchAreas
         .filter((a): a is Extract<typeof searchAreas[number], { type: 'place' }> =>
           a.type === 'place' &&

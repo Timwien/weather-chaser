@@ -1,8 +1,13 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { devApiPlugin } from './build/vite-api-plugin.ts';
+
+const apiDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'api');
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), devApiPlugin(apiDir)],
   worker: {
     format: 'es',
   },

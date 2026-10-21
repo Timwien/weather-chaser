@@ -1,8 +1,8 @@
 // F2: "Nearby" suggestions — larger towns/cities close to already-chosen places,
-// for one-tap adding. Fully offline & free: served from the bundled GeoNames
-// dataset (/fallback-places.json, 8 604 EU places ≥ 15k pop) via loadPlaces().
+// for one-tap adding. Served from our GeoNames-backed /api/places (towns ≥ 10k).
 
-import { loadPlaces } from './fallbackPlaces.ts';
+import type { Town } from '@weatherchaser/core';
+import { fetchTownsInRadius } from './places.ts';
 import { haversineKm } from '../utils/geo.ts';
 
 export interface NearbySuggestion {
@@ -23,7 +23,12 @@ interface SuggestOptions {
   maxKm?: number;
   /** Names already chosen — excluded from suggestions. */
   exclude?: Set<string>;
+  /** UI language for localized place names. */
+  lang?: string;
 }
+
+/** Anchors beyond this many are ignored (one request each). */
+const MAX_ANCHORS = 5;
 
 /**
  * Rank candidates near the anchors: prefer big cities, penalise distance.
@@ -33,10 +38,15 @@ export async function suggestNearby(
   anchors: Anchor[],
   opts: SuggestOptions = {},
 ): Promise<NearbySuggestion[]> {
-  const { limit = 6, maxKm = 75, exclude } = opts;
+  const { limit = 6, maxKm = 75, exclude, lang = 'en' } = opts;
   if (anchors.length === 0) return [];
 
-  const places = await loadPlaces();
+  const lists = await Promise.all(
+    anchors.slice(0, MAX_ANCHORS).map((a) => fetchTownsInRadius(a.lat, a.lng, maxKm, 'cities', lang)),
+  );
+  const byId = new Map<string, Town>();
+  for (const list of lists) for (const t of list) byId.set(t.id, t);
+  const places = [...byId.values()];
 
   const scored: Array<NearbySuggestion & { score: number }> = [];
   for (const p of places) {

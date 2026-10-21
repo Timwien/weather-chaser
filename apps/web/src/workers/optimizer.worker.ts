@@ -3,8 +3,8 @@ import { optimizeRoute, scoreDailyLocation, PRESETS } from '@weatherchaser/core'
 import type { Town, OptimizerInput, WeatherScore, ScoringWeights } from '@weatherchaser/core';
 import { fetchWeatherBatch } from '../services/weather.ts';
 import { fetchDistanceMatrix } from '../services/osrm.ts';
-import { fetchTownsInArea, fetchTownsInPolygon } from '../services/overpass.ts';
-import type { SearchGranularity } from '../services/overpass.ts';
+import { fetchTownsInArea, fetchTownsInPolygon } from '../services/places.ts';
+import type { SearchGranularity } from '../services/places.ts';
 import type { BoundingBox } from '../services/nominatim.ts';
 import { dedupeByWeatherCell } from '../utils/spatialDedupe.ts';
 import { classifyError, type AppErrorCode } from '../services/errorCodes.ts';
@@ -16,7 +16,7 @@ export interface SearchAreaSpec {
   type: 'place' | 'polygon' | 'radius' | 'pinned';
   bbox?: [number, number, number, number]; // [west, south, east, north]
   polygon?: [number, number][];
-  /** For pinned: exact city coordinates (skip Overpass, use only this town) */
+  /** For pinned: exact city coordinates (no lookup, use only this town) */
   lat?: number;
   lng?: number;
   name?: string;
@@ -36,7 +36,7 @@ export interface OptimizerWorkerInput {
     mustVisitCoords: Array<{ lat: number; lng: number; name: string }>;
     /** Premium: overrides the preset weights when set (validated server-side) */
     customWeights?: ScoringWeights | null;
-    /** Place granularity for Overpass queries (default 'auto') */
+    /** Place granularity for place queries (default 'auto') */
     granularity?: SearchGranularity;
     /** F4: UI language for localized OSM place names (default 'en') */
     lang?: string;
@@ -61,7 +61,7 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
     const townArrays = await Promise.all(
       searchAreas.map(async (area) => {
         if (area.type === 'pinned' && area.lat !== undefined && area.lng !== undefined && area.name) {
-          // Exact city — skip Overpass, use the supplied coordinates directly
+          // Exact city — no lookup, use the supplied coordinates directly
           return [{ id: `pinned-${area.name}`, name: area.name, lat: area.lat, lng: area.lng }] as Town[];
         }
         if (area.type === 'polygon' && area.polygon) {

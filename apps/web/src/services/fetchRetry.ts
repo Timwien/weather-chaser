@@ -1,7 +1,7 @@
 /**
  * fetchJsonWithRetry — resilient JSON fetch for the public weather/geo APIs.
  *
- * Open-Meteo (like Overpass) fails transiently under load: measured
+ * Open-Meteo fails transiently under load: measured
  * 2026-06-11 the same request returned 502 → 504 → 500 in a row, then
  * recovered. A couple of retries with a short backoff bridges these blips;
  * a per-attempt timeout stops a hung upstream from stalling the whole

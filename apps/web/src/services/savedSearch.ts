@@ -5,7 +5,7 @@
 import type { WeatherPreset, ScoringWeights } from '@weatherchaser/core';
 import { getSupabase, supabaseConfigured } from '../lib/supabase.ts';
 import { useAppStore, type SearchAreaItem } from '../stores/appStore.ts';
-import type { SearchGranularity } from './overpass.ts';
+import type { SearchGranularity } from './places.ts';
 import { saveFinderSearch } from './userdata.ts';
 import { formatRange } from '../utils/dateFormat.ts';
 import type { SearchHistory } from '../types/database.ts';

@@ -24,7 +24,7 @@ dieses Dokument ist die operative Kurzliste.
 - Open-Meteo Gratis-Tier: Retries + Batch-Splitting fangen Störungen ab,
   aber kein Fallback bei Totalausfall. Eskalation: `OPEN_METEO_API_KEY`
   in Vercel setzen (~29 €/Monat, dedizierte Server, kein Code nötig)
-- Ortsdaten: eigener Datensatz (GeoNames `cities1000`, CC BY 4.0, ~76k Orte
+- Ortsdaten: eigener Datensatz (GeoNames `cities1000`, CC BY 4.0, ~73k Orte
   in Europa, deutsche/englische Namen), ausgeliefert über `/api/places` mit
   CDN-Cache; kein Fremddienst mehr im Pfad (Overpass entfällt seit Welle B,
   Oktober 2026). Aktualisieren: `scripts/build-places.mjs` erneut ausführen.

@@ -53,6 +53,8 @@ for await (const line of lines(citiesPath)) {
   const lat = Number(c[4]);
   const lng = Number(c[5]);
   const pop = Number(c[14]) || 0;
+  // PPLX = section of a populated place (city districts like Berlin-Marzahn): same weather as the city
+  if (c[7] === 'PPLX') continue;
   if (lat < BBOX.south || lat > BBOX.north || lng < BBOX.west || lng > BBOX.east) continue;
   if (minPopFar > 0 && !CORE.has(c[8]) && pop < minPopFar) continue;
   places.set(c[0], { name: c[1], ascii: c[2], lat, lng, pop, de: null, en: null, deRank: -1, enRank: -1 });

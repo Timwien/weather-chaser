@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { HourlyWeather } from '@weatherchaser/core';
 import { scoreLocation, PRESETS, sliceHoursByDays } from '@weatherchaser/core';
-import { useAppStore } from '../../stores/appStore.ts';
+import { useAppStore, isLocatedPlace, isRadiusArea } from '../../stores/appStore.ts';
+import { getFinderMode } from '../../utils/finderMode.ts';
 import { useAuthStore } from '../../stores/authStore.ts';
 import { supabaseConfigured } from '../../lib/supabase.ts';
 import { getFavorites, toggleFavorite } from '../../services/userdata.ts';
@@ -105,19 +106,19 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
     const sliceStart  = isSingleDay ? new Date(finderConfig.selectedDay + 'T00:00:00Z') : startDate;
     const sliceDays   = isSingleDay ? 1 : fullDayCount;
 
-    // Origin from the first named place in "Wo?" (same source useFinder uses)
-    const firstPlace = searchAreas.find(
-      (a): a is Extract<typeof searchAreas[number], { type: 'place' }> =>
-        a.type === 'place' && typeof (a as { lat?: number }).lat === 'number',
-    ) as { lat?: number; lng?: number } | undefined;
-    const startLat = firstPlace?.lat ?? null;
-    const startLng = firstPlace?.lng ?? null;
+    // Origin only exists in single-place / radius mode (same source useFinder uses).
+    // Polygon and multi-place searches have no origin: no distance, no radius filter.
+    const mode = getFinderMode(searchAreas);
+    const firstArea = searchAreas[0];
+    const origin = mode !== 'around' || !firstArea
+      ? null
+      : isLocatedPlace(firstArea)
+        ? { lat: firstArea.lat, lng: firstArea.lng }
+        : isRadiusArea(firstArea)
+          ? { lat: firstArea.centerLat, lng: firstArea.centerLng }
+          : null;
 
-    // In multi-place mode (>1 searchArea) there is no "origin" to filter by distance.
-    // We show all finder towns regardless of distance.
-    const isMultiPlace = searchAreas.length > 1;
-
-    if (!isMultiPlace && (startLat === null || startLng === null)) return [];
+    if (mode === 'around' && origin === null) return [];
 
     const avg = (arr: number[]) => arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : 0;
 
@@ -126,10 +127,10 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
         const hourly = finderHourlyCache[town.id];
         if (!hourly) return null;
 
-        // null = no single origin (multi-place mode) — the row hides the distance then
+        // null = no single origin (polygon / multi-place) — the row hides the distance then
         let distanceKm: number | null = null;
-        if (!isMultiPlace && startLat !== null && startLng !== null) {
-          distanceKm = haversineKm(startLat, startLng, town.lat, town.lng);
+        if (origin !== null) {
+          distanceKm = haversineKm(origin.lat, origin.lng, town.lat, town.lng);
           // Filter by current radius from store (uses "Wo?" radius slider — no re-fetch)
           if (distanceKm > searchRadiusKm) return null;
         }

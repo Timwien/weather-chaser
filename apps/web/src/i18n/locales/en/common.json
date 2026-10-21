@@ -217,6 +217,7 @@
     "empty_no_towns": "No towns found.",
     "empty_no_results": "No results.",
     "empty_hint": "Try expanding the radius.",
+    "empty_hint_polygon": "No places found in this area. Draw a larger area or choose “All places”.",
     "expand_radius": "Expand radius to {{km}} km",
     "results_title": "Best places",
     "sort_score": "Score",

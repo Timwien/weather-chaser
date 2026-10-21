@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
+import { getFinderMode } from '../../utils/finderMode.ts';
 
 interface FinderEmptyStateProps {
   reason?: 'no_towns' | 'no_results';
@@ -7,7 +8,8 @@ interface FinderEmptyStateProps {
 
 export function FinderEmptyState({ reason = 'no_results' }: FinderEmptyStateProps) {
   const { t } = useTranslation('common');
-  const { finderConfig, setFinderConfig } = useAppStore();
+  const { finderConfig, setFinderConfig, searchAreas } = useAppStore();
+  const mode = getFinderMode(searchAreas);
 
   function expandRadius() {
     const next = Math.min(finderConfig.radiusKm + 100, 500);
@@ -21,10 +23,14 @@ export function FinderEmptyState({ reason = 'no_results' }: FinderEmptyStateProp
           ? t('finder.empty_no_towns', 'Keine Orte gefunden.')
           : t('finder.empty_no_results', 'Keine Ergebnisse für diesen Filter.')}
       </p>
-      <p style={{ fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-4)' }}>
-        {t('finder.empty_hint', 'Versuche, den Radius zu vergrößern.')}
-      </p>
-      {finderConfig.radiusKm < 500 && (
+      {mode !== 'multi-place' && (
+        <p style={{ fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-4)' }}>
+          {mode === 'polygon'
+            ? t('finder.empty_hint_polygon')
+            : t('finder.empty_hint', 'Versuche, den Radius zu vergrößern.')}
+        </p>
+      )}
+      {mode === 'around' && finderConfig.radiusKm < 500 && (
         <button
           type="button"
           onClick={expandRadius}

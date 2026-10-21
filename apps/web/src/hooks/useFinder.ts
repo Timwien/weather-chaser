@@ -1,7 +1,8 @@
 import { useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Town } from '@weatherchaser/core';
-import { useAppStore } from '../stores/appStore.ts';
+import { useAppStore, isLocatedPlace, isPolygonArea, isRadiusArea } from '../stores/appStore.ts';
+import { getFinderMode } from '../utils/finderMode.ts';
 import { useFeedbackStore } from '../stores/feedbackStore.ts';
 import { recordSearch, buildSearchConfigFromStore } from '../services/savedSearch.ts';
 import { capture } from '../lib/analytics.ts';
@@ -109,86 +110,62 @@ export function useFinder() {
       workerRef.current = null;
     };
 
-    // Detect mode from searchAreas
+    // Detect mode from searchAreas (polygon wins over named places)
     let input: FinderWorkerInput;
+    const mode = getFinderMode(searchAreas);
 
-    if (searchAreas.length > 1) {
-      // Mode C: multiple named places — score them directly, skip place lookup
-      const towns: Town[] = searchAreas
-        .filter((a): a is Extract<typeof searchAreas[number], { type: 'place' }> =>
-          a.type === 'place' &&
-          typeof (a as { lat?: number }).lat === 'number' &&
-          typeof (a as { lng?: number }).lng === 'number',
-        )
-        .map((a) => ({
-          id: a.id,
-          name: a.name,
-          lat: (a as { lat: number }).lat,
-          lng: (a as { lng: number }).lng,
-        }));
-
+    if (mode === 'polygon') {
+      const polygonArea = searchAreas.find(isPolygonArea)!;
       input = {
         type: 'run',
         config: {
-          mode: 'multi-place',
-          towns,
+          mode: 'polygon',
+          polygon: polygonArea.polygon as [number, number][],
           startDate,
           endDate,
+          granularity: searchGranularity,
+          lang: i18n.language,
         },
       };
+    } else if (mode === 'multi-place') {
+      // Several named places — score them directly, skip the place lookup
+      const towns: Town[] = searchAreas.filter(isLocatedPlace).map((a) => ({
+        id: a.id,
+        name: a.name,
+        lat: a.lat,
+        lng: a.lng,
+      }));
+      input = { type: 'run', config: { mode: 'multi-place', towns, startDate, endDate } };
     } else {
+      // Single place or radius: places within the radius around it
       const area = searchAreas[0];
-      if (area.type === 'polygon') {
-        // Mode B: drawn polygon
-        const polygon = area.polygon as [number, number][];
-        input = {
-          type: 'run',
-          config: {
-            mode: 'polygon',
-            polygon,
-            startDate,
-            endDate,
-            granularity: searchGranularity,
-            lang: i18n.language,
-          },
-        };
-      } else if (area.type === 'place' || area.type === 'radius') {
-        // Mode A: single place + radius
-        const lat = area.type === 'place'
-          ? (area as { lat?: number }).lat
-          : (area as { centerLat: number }).centerLat;
-        const lng = area.type === 'place'
-          ? (area as { lng?: number }).lng
-          : (area as { centerLng: number }).centerLng;
+      const origin = isLocatedPlace(area)
+        ? { lat: area.lat, lng: area.lng }
+        : isRadiusArea(area)
+          ? { lat: area.centerLat, lng: area.centerLng }
+          : null;
 
-        if (lat === undefined || lat === null || lng === undefined || lng === null) {
-          setFinderError('missing_config');
-          setFinderLoading(false);
-          worker.terminate();
-          workerRef.current = null;
-          return;
-        }
-
-        input = {
-          type: 'run',
-          config: {
-            mode: 'around',
-            startLat: lat,
-            startLng: lng,
-            radiusKm: searchRadiusKm,
-            startDate,
-            endDate,
-            granularity: searchGranularity,
-            lang: i18n.language,
-          },
-        };
-      } else {
+      if (!origin) {
         setFinderError('missing_config');
         setFinderLoading(false);
         worker.terminate();
         workerRef.current = null;
         return;
       }
+
+      input = {
+        type: 'run',
+        config: {
+          mode: 'around',
+          startLat: origin.lat,
+          startLng: origin.lng,
+          radiusKm: searchRadiusKm,
+          startDate,
+          endDate,
+          granularity: searchGranularity,
+          lang: i18n.language,
+        },
+      };
     }
 
     worker.postMessage(input);

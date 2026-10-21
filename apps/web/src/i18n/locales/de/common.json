@@ -217,6 +217,7 @@
     "empty_no_towns": "Keine Orte gefunden.",
     "empty_no_results": "Keine Ergebnisse.",
     "empty_hint": "Versuche, den Radius zu vergr\u00f6\u00dfern.",
+    "empty_hint_polygon": "Keine Orte in diesem Gebiet gefunden. Zeichne ein größeres Gebiet oder wähle „Alle Orte“.",
     "expand_radius": "Radius auf {{km}} km erweitern",
     "results_title": "Beste Orte",
     "sort_score": "Score",

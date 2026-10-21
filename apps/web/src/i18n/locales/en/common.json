@@ -54,9 +54,7 @@
     "nearby_label": "Nearby",
     "cta_missing_dates": "Choose your travel dates first",
     "cta_missing_location": "Add a place or draw an area first",
-    "cta_missing_both": "Choose travel dates and add a place to start",
-    "guide_next_dates": "Next: pick your travel dates",
-    "guide_next_location": "Next: add a place"
+    "cta_missing_both": "Choose travel dates and add a place to start"
   },
   "route_config": {
     "start_location": "Start location",

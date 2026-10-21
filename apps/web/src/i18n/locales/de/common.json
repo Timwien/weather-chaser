@@ -54,9 +54,7 @@
     "nearby_label": "In der Nähe",
     "cta_missing_dates": "Wähle zuerst deine Reisedaten",
     "cta_missing_location": "Füge zuerst einen Ort hinzu oder zeichne ein Gebiet",
-    "cta_missing_both": "Wähle Reisedaten und füge einen Ort hinzu, um zu starten",
-    "guide_next_dates": "Als Nächstes: Reisedaten wählen",
-    "guide_next_location": "Als Nächstes: Ort hinzufügen"
+    "cta_missing_both": "Wähle Reisedaten und füge einen Ort hinzu, um zu starten"
   },
   "route_config": {
     "start_location": "Startort",

@@ -12,9 +12,8 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.98.0",
     "@tanstack/react-router": "^1.0.0",
-    "@turf/turf": "^7.0.0",
     "@vis.gl/react-maplibre": "^8.1.0",
-    "@watergis/maplibre-gl-terradraw": "latest",
+    "@watergis/maplibre-gl-terradraw": "1.14.3",
     "@weatherchaser/core": "workspace:*",
     "i18next": "^24.0.0",
     "i18next-browser-languagedetector": "^8.0.0",

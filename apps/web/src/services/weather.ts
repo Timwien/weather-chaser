@@ -1,5 +1,6 @@
 import type { Town, DailyWeather } from '@weatherchaser/core';
 import { fetchJsonWithRetry } from './fetchRetry.ts';
+import { fetchInBatches } from './batchFetch.ts';
 
 export interface WeatherData {
   townId: string;
@@ -15,63 +16,31 @@ const EMPTY_DAILY: DailyWeather = {
   wind_speed_10m_max: [],
 };
 
-// In production: route through /api/proxy/weather (Vercel serverless)
-// In dev: call Open-Meteo directly (no Vercel CLI required for local dev)
+// Always through /api/proxy/weather — Vercel serverless in production, the
+// Vite dev API plugin (same function file) in dev.
 const WEATHER_PROXY = '/api/proxy/weather';
-const WEATHER_DIRECT = 'https://api.open-meteo.com/v1/forecast';
 
 /**
  * Fetch daily weather aggregates for a list of towns from Open-Meteo.
- * Batches requests in groups of 50 (API practical limit). Each batch is
- * retried on transient failures and recursively split in half when a whole
- * batch keeps failing — large multi-location requests are the first to die
- * when Open-Meteo is degraded.
+ * Batches of 50, max 3 in flight, one overall time budget (see batchFetch.ts).
+ * Towns whose batch failed are missing from the result; throws only if no
+ * batch succeeded.
  */
 export async function fetchWeatherBatch(
   towns: Town[],
   startDate: string,
   endDate: string,
 ): Promise<WeatherData[]> {
-  if (towns.length === 0) return [];
-
-  const BATCH_SIZE = 50;
-  const results: WeatherData[] = [];
-
-  for (let i = 0; i < towns.length; i += BATCH_SIZE) {
-    const batch = towns.slice(i, i + BATCH_SIZE);
-    const batchResults = await fetchBatchResilient(batch, startDate, endDate);
-    results.push(...batchResults);
-  }
-
-  return results;
-}
-
-async function fetchBatchResilient(
-  towns: Town[],
-  startDate: string,
-  endDate: string,
-): Promise<WeatherData[]> {
-  try {
-    return await fetchBatch(towns, startDate, endDate);
-  } catch (err) {
-    // Split-on-failure: halve the batch until single-digit sizes, then give up
-    if (towns.length <= 8) throw err;
-    const mid = Math.ceil(towns.length / 2);
-    const [a, b] = await Promise.all([
-      fetchBatchResilient(towns.slice(0, mid), startDate, endDate),
-      fetchBatchResilient(towns.slice(mid), startDate, endDate),
-    ]);
-    return [...a, ...b];
-  }
+  return fetchInBatches(towns, (batch, deadline) => fetchBatch(batch, startDate, endDate, deadline));
 }
 
 async function fetchBatch(
   towns: Town[],
   startDate: string,
   endDate: string,
+  deadline: number,
 ): Promise<WeatherData[]> {
-  const base = import.meta.env.PROD ? WEATHER_PROXY : WEATHER_DIRECT;
-  const url = new URL(base, self.location.origin);
+  const url = new URL(WEATHER_PROXY, self.location.origin);
   url.searchParams.set('latitude', towns.map((t) => t.lat.toFixed(4)).join(','));
   url.searchParams.set('longitude', towns.map((t) => t.lng.toFixed(4)).join(','));
   url.searchParams.set(
@@ -83,7 +52,7 @@ async function fetchBatch(
   url.searchParams.set('timezone', 'auto');
 
   // Single location → object; multiple → array
-  const raw = await fetchJsonWithRetry(url.toString());
+  const raw = await fetchJsonWithRetry(url.toString(), { deadline });
   const dataArray: Array<{ daily?: DailyWeather }> = Array.isArray(raw) ? raw : [raw];
 
   return towns.map((town, idx) => ({

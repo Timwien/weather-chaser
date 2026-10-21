@@ -81,10 +81,13 @@ self.onmessage = async (event: MessageEvent<FinderWorkerInput>) => {
       config.endDate,
     );
 
+    // Towns whose weather batch failed are dropped (partial results are fine)
+    const withWeather = new Set(hourlyData.map((d) => d.townId));
+
     // Post raw data — scoring happens in the main thread
     self.postMessage({
       type: 'complete',
-      towns,
+      towns: towns.filter((t) => withWeather.has(t.id)),
       hourlyData,
     } satisfies FinderWorkerOutput);
 

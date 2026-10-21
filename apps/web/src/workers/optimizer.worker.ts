@@ -120,6 +120,13 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
     self.postMessage({ type: 'progress', step: 'fetching_weather' } satisfies OptimizerWorkerOutput);
     const weatherData = await fetchWeatherBatch(towns, config.startDate, config.endDate);
 
+    // Towns whose weather batch failed are dropped; pinned and must-visit stops stay
+    // (they score 0 instead of vanishing from the route the user asked for)
+    const withWeather = new Set(weatherData.map((d) => d.townId));
+    towns = towns.filter(
+      (t) => withWeather.has(t.id) || t.id.startsWith('pinned-') || t.id.startsWith('must-visit-'),
+    );
+
     const weights: ScoringWeights = config.customWeights
       ? { ...config.customWeights }
       : { ...(PRESETS[config.preset as keyof typeof PRESETS] ?? PRESETS['sightseeing']) };

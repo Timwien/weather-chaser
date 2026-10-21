@@ -5,9 +5,9 @@
 // to 2 decimals so that nearby searches share cache entries.
 
 import data from './_data/places.json' with { type: 'json' };
-import { parsePlacesQuery, queryPlaces, type PlaceTuple } from './_lib/places.js';
+import { parsePlacesQuery, queryPlaces, type PlacesDataset } from './_lib/places.js';
 
-const places = data as unknown as PlaceTuple[];
+const { places, regions } = data as unknown as PlacesDataset;
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
@@ -25,7 +25,7 @@ export default {
       });
     }
 
-    return new Response(JSON.stringify(queryPlaces(places, parsed.query)), {
+    return new Response(JSON.stringify(queryPlaces(places, parsed.query, regions)), {
       status: 200,
       headers: {
         ...JSON_HEADERS,

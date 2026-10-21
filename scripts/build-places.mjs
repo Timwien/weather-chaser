@@ -2,17 +2,20 @@
 // Builds apps/web/api/_data/places.json from GeoNames dumps (CC BY 4.0, geonames.org).
 //
 // Usage:
-//   node scripts/build-places.mjs <cities1000.txt> <alternateNamesV2.txt> [out.json] [--min-pop-far=2000]
+//   node scripts/build-places.mjs <cities1000.txt> <alternateNamesV2.txt> <admin1CodesASCII.txt> [out.json] [--min-pop-far=2000]
 //
 // Inputs are the extracted text files of
 //   https://download.geonames.org/export/dump/cities1000.zip
 //   https://download.geonames.org/export/dump/alternateNamesV2.zip
+//   https://download.geonames.org/export/dump/admin1CodesASCII.txt   (region names)
 // The alternate-names file is ~800 MB and is streamed line by line.
 //
-// Output: JSON array of tuples
-//   [geonameId, name, lat, lng, population, nameDe|0, nameEn|0]
+// Output: { "regions": [[nameEn, nameDe|0], ...], "places": [tuple, ...] } with
+//   tuple = [geonameId, name, lat, lng, population, nameDe|0, nameEn|0, countryCode, regionIdx]
 // lat/lng are rounded to 4 decimals; nameDe/nameEn are only stored when they
-// differ from the base name (0 otherwise).
+// differ from the base name (0 otherwise). regionIdx is 1-based into "regions"
+// (admin1: Bundesland, county, ...), 0 = unknown — keeps the file small and lets the
+// API show "Neustadt - Rheinland-Pfalz, DE" in the UI language.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -26,9 +29,9 @@ const flags = Object.fromEntries(
     return [k, v ?? 'true'];
   }),
 );
-const [citiesPath, altPath, outArg] = args;
-if (!citiesPath || !altPath) {
-  console.error('usage: build-places.mjs <cities1000.txt> <alternateNamesV2.txt> [out.json] [--min-pop-far=N]');
+const [citiesPath, altPath, admin1Path, outArg] = args;
+if (!citiesPath || !altPath || !admin1Path) {
+  console.error('usage: build-places.mjs <cities1000.txt> <alternateNamesV2.txt> <admin1CodesASCII.txt> [out.json] [--min-pop-far=N]');
   process.exit(1);
 }
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -45,6 +48,17 @@ async function* lines(file) {
   for await (const line of rl) yield line;
 }
 
+// 0. Admin1 regions: "DE.08" -> { en, de, geonameId }
+const admin1 = new Map();
+const admin1ById = new Map(); // geonameId -> admin1 entry (to attach German names below)
+for await (const line of lines(admin1Path)) {
+  const c = line.split('\t');
+  if (c.length < 4) continue;
+  const entry = { en: c[1], de: null, deRank: -1 };
+  admin1.set(c[0], entry);
+  admin1ById.set(c[3], entry);
+}
+
 // 1. Cities
 const places = new Map(); // id -> { name, lat, lng, pop }
 for await (const line of lines(citiesPath)) {
@@ -57,7 +71,7 @@ for await (const line of lines(citiesPath)) {
   if (c[7] === 'PPLX') continue;
   if (lat < BBOX.south || lat > BBOX.north || lng < BBOX.west || lng > BBOX.east) continue;
   if (minPopFar > 0 && !CORE.has(c[8]) && pop < minPopFar) continue;
-  places.set(c[0], { name: c[1], ascii: c[2], lat, lng, pop, de: null, en: null, deRank: -1, enRank: -1 });
+  places.set(c[0], { name: c[1], ascii: c[2], lat, lng, pop, cc: c[8], a1: `${c[8]}.${c[10]}`, de: null, en: null, deRank: -1, enRank: -1 });
 }
 console.error(`cities in region: ${places.size}`);
 
@@ -66,9 +80,15 @@ for await (const line of lines(altPath)) {
   const c = line.split('\t');
   const lang = c[2];
   if (lang !== 'de' && lang !== 'en') continue;
+  const [, , , name, preferred, short, colloquial, historic] = c;
+  const region = admin1ById.get(c[1]);
+  // Regions: a *short* preferred name is the common one (Bayern, Niedersachsen), unlike for cities.
+  if (region && lang === 'de' && name && colloquial !== '1' && historic !== '1') {
+    const r = preferred === '1' ? (short === '1' ? 3 : 2) : 1;
+    if (r > region.deRank) { region.de = name; region.deRank = r; }
+  }
   const p = places.get(c[1]);
   if (!p) continue;
-  const [, , , name, preferred, short, colloquial, historic] = c;
   if (!name || short === '1' || colloquial === '1' || historic === '1') continue;
   const rank = preferred === '1' ? 2 : 1;
   // A plain-ASCII transliteration (Poznan for Poznań) is no real exonym.
@@ -80,7 +100,17 @@ for await (const line of lines(altPath)) {
   }
 }
 
-// 3. Emit
+// 3. Emit — only regions actually used, deduped by (en, de)
+const regionIdx = new Map(); // "en|de" -> 1-based index
+const regions = [];
+function regionIndex(code) {
+  const a = admin1.get(code);
+  if (!a) return 0;
+  const de = a.de && a.de !== a.en ? a.de : 0;
+  const key = `${a.en}|${de}`;
+  if (!regionIdx.has(key)) { regions.push([a.en, de]); regionIdx.set(key, regions.length); }
+  return regionIdx.get(key);
+}
 const rows = [...places.entries()].map(([id, p]) => [
   Number(id),
   p.name,
@@ -89,9 +119,11 @@ const rows = [...places.entries()].map(([id, p]) => [
   p.pop,
   p.de && p.de !== p.name ? p.de : 0,
   p.en && p.en !== p.name ? p.en : 0,
+  p.cc,
+  regionIndex(p.a1),
 ]);
 rows.sort((a, b) => b[4] - a[4]);
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
-fs.writeFileSync(outPath, JSON.stringify(rows));
+fs.writeFileSync(outPath, JSON.stringify({ regions, places: rows }));
 const size = fs.statSync(outPath).size;
 console.error(`wrote ${rows.length} places, ${(size / 1e6).toFixed(2)} MB -> ${outPath}`);

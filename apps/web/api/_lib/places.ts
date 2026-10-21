@@ -2,8 +2,17 @@
 // Data: GeoNames cities1000 (CC BY 4.0, https://www.geonames.org/), built by
 // scripts/build-places.mjs into api/_data/places.json (sorted by population desc).
 
-/** [geonameId, name, lat, lng, population, nameDe|0, nameEn|0] */
-export type PlaceTuple = readonly [number, string, number, number, number, string | 0, string | 0];
+/** [geonameId, name, lat, lng, population, nameDe|0, nameEn|0, countryCode, regionIdx (1-based, 0 = unknown)] */
+export type PlaceTuple = readonly [
+  number, string, number, number, number, string | 0, string | 0, string, number,
+];
+/** [nameEn, nameDe|0] — admin1 region lookup table referenced by PlaceTuple[8]. */
+export type RegionTuple = readonly [string, string | 0];
+/** Shape of api/_data/places.json */
+export interface PlacesDataset {
+  regions: readonly RegionTuple[];
+  places: readonly PlaceTuple[];
+}
 
 export type PlaceLang = 'de' | 'en';
 
@@ -13,6 +22,10 @@ export interface PlaceOut {
   lat: number;
   lng: number;
   population: number;
+  /** Prefix (autocomplete) results only: admin1 region in the requested language + ISO country code,
+   *  so same-named towns ("Neustadt") can be told apart. */
+  region?: string;
+  country?: string;
 }
 
 export interface PlacesQuery {
@@ -114,7 +127,11 @@ function localName(p: PlaceTuple, lang: PlaceLang): string {
 }
 
 /** Filter by bbox or radius + minPop, keep dataset order (population desc), cap at limit. */
-export function queryPlaces(data: readonly PlaceTuple[], q: PlacesQuery): PlaceOut[] {
+export function queryPlaces(
+  data: readonly PlaceTuple[],
+  q: PlacesQuery,
+  regions: readonly RegionTuple[] = [],
+): PlaceOut[] {
   if (q.prefix !== undefined) {
     const prefix = normalizeName(q.prefix);
     const hits: PlaceOut[] = [];
@@ -122,7 +139,12 @@ export function queryPlaces(data: readonly PlaceTuple[], q: PlacesQuery): PlaceO
       if (p[4] < q.minPop) continue;
       const names = [p[1], p[5], p[6]];
       if (!names.some((n) => n && normalizeName(n).startsWith(prefix))) continue;
-      hits.push({ id: `gn-${p[0]}`, name: localName(p, q.lang), lat: p[2], lng: p[3], population: p[4] });
+      const reg = p[8] > 0 ? regions[p[8] - 1] : undefined;
+      hits.push({
+        id: `gn-${p[0]}`, name: localName(p, q.lang), lat: p[2], lng: p[3], population: p[4],
+        ...(reg ? { region: (q.lang === 'de' ? reg[1] : 0) || reg[0] } : {}),
+        country: p[7],
+      });
       if (hits.length >= q.limit) break;
     }
     return hits;

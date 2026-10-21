@@ -1,19 +1,21 @@
 import { describe, it, expect } from 'vitest';
 import realData from '../_data/places.json' with { type: 'json' };
-import { parsePlacesQuery, queryPlaces, type PlaceTuple, type PlacesQuery } from './places.js';
+import { parsePlacesQuery, queryPlaces, type PlaceTuple, type PlacesQuery, type PlacesDataset } from './places.js';
 
 const FIXTURE: PlaceTuple[] = [
-  [1, 'Köln', 50.9333, 6.95, 1_000_000, 0, 'Cologne'],
-  [2, 'Freiburg im Breisgau', 47.9959, 7.8522, 230_000, 0, 0],
-  [3, 'Szczecin', 53.4289, 14.553, 395_000, 'Stettin', 0],
-  [4, 'Emmendingen', 48.1218, 7.8498, 27_000, 0, 0],
-  [5, 'Kirchzarten', 47.9667, 7.9667, 9_800, 0, 0],
-  [6, 'Hinterzarten', 47.9, 8.1, 1_100, 0, 0],
+  [1, 'Köln', 50.9333, 6.95, 1_000_000, 0, 'Cologne', 'DE', 0],
+  [2, 'Freiburg im Breisgau', 47.9959, 7.8522, 230_000, 0, 0, 'DE', 0],
+  [3, 'Szczecin', 53.4289, 14.553, 395_000, 'Stettin', 0, 'DE', 0],
+  [4, 'Emmendingen', 48.1218, 7.8498, 27_000, 0, 0, 'DE', 0],
+  [5, 'Kirchzarten', 47.9667, 7.9667, 9_800, 0, 0, 'DE', 0],
+  [6, 'Hinterzarten', 47.9, 8.1, 1_100, 0, 0, 'DE', 0],
 ];
 const sorted = [...FIXTURE].sort((a, b) => b[4] - a[4]);
 
 const q = (over: Partial<PlacesQuery>): PlacesQuery => ({ minPop: 0, limit: 100, lang: 'en', ...over });
 const parse = (qs: string) => parsePlacesQuery(new URLSearchParams(qs));
+
+const dataset = realData as unknown as PlacesDataset;
 
 describe('queryPlaces', () => {
   it('filters by bbox', () => {
@@ -83,7 +85,7 @@ describe('parsePlacesQuery', () => {
 });
 
 describe('real dataset', () => {
-  const data = realData as unknown as PlaceTuple[];
+  const data = dataset.places;
 
   it('finds Freiburg and localized Polish names', () => {
     expect(data.length).toBeGreaterThan(50_000);
@@ -120,7 +122,33 @@ describe('prefix search (q)', () => {
   });
 
   it('real dataset: "Inns" yields Innsbruck first', () => {
-    const r = queryPlaces(realData as unknown as PlaceTuple[], { prefix: 'inns', minPop: 0, limit: 5, lang: 'de' });
+    const r = queryPlaces(dataset.places, { prefix: 'inns', minPop: 0, limit: 5, lang: 'de' });
     expect(r[0]?.name).toBe('Innsbruck');
+  });
+});
+
+describe('region and country for disambiguation', () => {
+  it('returns region (UI language) and country for prefix results only', () => {
+    const regions = [['Bavaria', 'Bayern'], ['Lower Saxony', 'Niedersachsen'], ['Tyrol', 0]] as const;
+    const fx: PlaceTuple[] = [
+      [10, 'Neustadt an der Donau', 48.8, 11.8, 14_000, 0, 0, 'DE', 1],
+      [11, 'Neustadt am Rübenberge', 52.5, 9.5, 44_000, 0, 0, 'DE', 2],
+      [12, 'Neustadt', 47.0, 11.0, 900, 0, 0, 'AT', 0],
+    ];
+    const de = queryPlaces(fx, { prefix: 'neustadt', minPop: 0, limit: 10, lang: 'de' }, regions);
+    expect(de.map((p) => [p.region, p.country])).toEqual([
+      ['Bayern', 'DE'], ['Niedersachsen', 'DE'], [undefined, 'AT'],
+    ]);
+    const en = queryPlaces(fx, { prefix: 'neustadt', minPop: 0, limit: 10, lang: 'en' }, regions);
+    expect(en[0].region).toBe('Bavaria');
+    const area = queryPlaces(fx, q({ bbox: [40, 0, 60, 20] }), regions);
+    expect(area.every((p) => p.region === undefined && p.country === undefined)).toBe(true);
+  });
+
+  it('real dataset: the many "Neustadt" are distinguishable', () => {
+    const r = queryPlaces(dataset.places, { prefix: 'neustadt', minPop: 0, limit: 8, lang: 'de' }, dataset.regions);
+    const labels = r.map((p) => `${p.name}|${p.region}|${p.country}`);
+    expect(new Set(labels).size).toBe(labels.length);
+    expect(r.every((p) => p.region && p.country)).toBe(true);
   });
 });

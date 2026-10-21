@@ -58,6 +58,9 @@ function parseIsoDate(raw: string | null): number | null {
 function validate(params: URLSearchParams): string | null {
   for (const key of params.keys()) {
     if (!ALLOWED_PARAMS.has(key)) return `unknown parameter: ${key}`;
+    // Only the first value is validated below, but forwarding would send the
+    // last one — a repeated key would smuggle unvalidated values upstream.
+    if (params.getAll(key).length > 1) return `duplicate parameter: ${key}`;
   }
   const latitude = params.get('latitude');
   const longitude = params.get('longitude');

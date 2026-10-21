@@ -18,7 +18,9 @@ window.addEventListener('vite:preloadError', (event) => {
     if (Date.now() - last < 10_000) return;
     sessionStorage.setItem('wc_chunk_reload', String(Date.now()));
   } catch {
-    // Storage unavailable: still reload, a loop is unlikely without it.
+    // Storage unavailable: without the guard a reload could loop, so let the
+    // error boundary handle it instead.
+    return;
   }
   event.preventDefault();
   window.location.reload();

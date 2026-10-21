@@ -18,6 +18,8 @@ describe('weather proxy validation', () => {
     [`${daily}&start_date=2026-10-21`, 'together'],
     [`${daily}&forecast_days=17`, 'forecast_days'],
     ['start_date=2026-10-21&end_date=2026-10-22', 'daily or hourly'],
+    [`${daily}&forecast_days=3&latitude=1,2,3`, 'duplicate parameter'],
+    [`${daily}&forecast_days=3&daily=uv_index_max`, 'duplicate parameter'],
   ])('rejects %s', async (qs, msg) => {
     const res = await get(qs);
     expect(res.status).toBe(400);

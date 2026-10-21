@@ -126,3 +126,27 @@ Nach Welle B, nacheinander (gemeinsame Locale-Dateien).
   Autocomplete; deaktivierte CTAs korrekt (D8).
 - Touch-Ziele ≥ 40 px, Schrift ≥ 11 px für Bedienelemente (M13, M14);
   Dark-Mode-Chips mit sichtbarer Fläche (M13).
+
+---
+
+## Stand am Ende der Runde (21.10.2026)
+
+Alle Wellen A, B, C1–C4 umgesetzt; jede Welle durch frische Review-Agenten
+geprüft (A und B: Korrektheit + Sicherheit; C: Korrektheit), alle bestätigten
+Funde behoben. Zusätzlich: Impressum-Seite (`/impressum`, Platzhalter).
+
+Abschluss-QA (Browser-Durchlauf 390/360/820/1280/1440 px, DE/EN, hell/dunkel):
+alle 11 Prüfbereiche bestanden, keine blockierenden Fehler.
+
+Messwerte (Dev-Server, Live-Daten):
+- Finder Radius / Polygon / Ort + Polygon: < 1 s nach dem Tippen (vorher
+  13 s bzw. 195 s bzw. 0 Treffer)
+- Route Freiburg, 5 Nächte: < 1 s Berechnung, Neugewichtung ~4 s
+- Haupt-Bundle 736 kB → ~512 kB (gzip 231 → 160 kB)
+- Tests: Core 61, Web 69 (vorher Core 58, Web 0)
+
+Nicht verifiziert: Laufzeit der Vercel-Funktionen in der echten Vercel-Umgebung
+(Vorschau ist login-geschützt, CLI-Token abgelaufen). Ersatzprüfung: Build
+auf Vercel erfolgreich, Funktion `/api/places` unter reinem Node 20 korrekt.
+
+Offene Punkte für Tim: `docs/OPEN-ITEMS.md` §0.

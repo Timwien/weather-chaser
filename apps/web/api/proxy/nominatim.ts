@@ -42,8 +42,8 @@ export default {
     try {
       const upstreamRes = await fetch(upstream.toString(), {
         headers: {
-          'User-Agent': 'WeatherChaser/1.0 (weatherchaser.vercel.app)',
-          'Referer': 'https://weatherchaser.vercel.app',
+          'User-Agent': 'WeatherChaser/1.0 (weather-chaser.vercel.app)',
+          'Referer': 'https://weather-chaser.vercel.app',
         },
         signal: AbortSignal.timeout(8000),
       });

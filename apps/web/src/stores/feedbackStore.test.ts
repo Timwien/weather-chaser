@@ -34,6 +34,13 @@ describe('feedback prompt (D4)', () => {
     expect(isPromptArmed()).toBe(false);
   });
 
+  it('is not used up when the session ends before it was shown', () => {
+    useFeedbackStore.getState().recordSearchSuccess();
+    useFeedbackStore.getState().recordSearchSuccess(); // armed, still on results
+    expect(isPromptArmed()).toBe(true);
+    expect(mem.get('wc_feedback_prompt_shown')).toBeUndefined();
+  });
+
   it('shows at most once ever', () => {
     useFeedbackStore.getState().recordSearchSuccess();
     useFeedbackStore.getState().recordSearchSuccess();

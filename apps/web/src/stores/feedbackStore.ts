@@ -50,11 +50,9 @@ export const useFeedbackStore = create<FeedbackState>((set) => ({
     try {
       const count = readCount() + 1;
       localStorage.setItem(COUNT_KEY, String(count));
-      if (count >= PROMPT_AFTER_SUCCESSES && !promptAlreadyShown()) {
-        // Mark shown immediately — once ever, even if the user just closes it.
-        localStorage.setItem(SHOWN_KEY, '1');
-        promptArmed = true;
-      }
+      // Armed per session; marked shown only when it actually opens, so a user
+      // who closes the tab on the results still gets asked on a later visit.
+      if (count >= PROMPT_AFTER_SUCCESSES && !promptAlreadyShown()) promptArmed = true;
     } catch { /* storage unavailable — skip silently */ }
   },
 
@@ -68,6 +66,8 @@ useAppStore.subscribe((state, prev) => {
   if (!promptArmed || state.mode !== 'idle' || prev.mode === 'idle') return;
   promptArmed = false;
   setTimeout(() => {
+    // Once ever, even if the user just closes it.
+    try { localStorage.setItem(SHOWN_KEY, '1'); } catch { return; }
     useFeedbackStore.setState({ modalOpen: true, modalSource: 'prompt' });
     capture('feedback_prompt_shown');
   }, PROMPT_DELAY_MS);

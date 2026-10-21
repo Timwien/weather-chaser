@@ -38,15 +38,25 @@ export function useResultsHistory(): void {
     }
   }, [inResults, leaving, router]);
 
-  useEffect(
-    () =>
-      router.history.subscribe(({ location, action }) => {
-        if (action.type === 'PUSH' || action.type === 'REPLACE') return;
-        if (pushed.current && !isMarked(location.state)) {
-          poppedByBrowser.current = true;
-          useAppStore.getState().reset();
-        }
-      }),
-    [router],
-  );
+  useEffect(() => {
+    const history = router.history;
+    // A marked entry we did not push in this page life is stale (reload while on
+    // results, or Forward onto it after Back). Unmark it, otherwise the next
+    // search's entry sits on top of it and the following Back looks dead.
+    const clearStaleMark = () => {
+      if (!pushed.current && isMarked(history.location.state)) {
+        history.replace(history.location.href, {});
+      }
+    };
+    clearStaleMark();
+    return history.subscribe(({ location, action }) => {
+      if (action.type === 'PUSH' || action.type === 'REPLACE') return;
+      if (pushed.current && !isMarked(location.state)) {
+        poppedByBrowser.current = true;
+        useAppStore.getState().reset();
+      } else {
+        queueMicrotask(clearStaleMark);
+      }
+    });
+  }, [router]);
 }

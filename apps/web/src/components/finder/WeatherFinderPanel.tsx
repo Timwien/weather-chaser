@@ -73,7 +73,7 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
   const { t } = useTranslation('common');
   const { finderTowns, finderHourlyCache, finderConfig, finderError, tripConfig, weatherPrefs, searchAreas, searchRadiusKm, setFinderConfig } = useAppStore();
   const { user } = useAuthStore();
-  const { nextKm, expand: expandRadius } = useExpandRadius();
+  const { nextKm, expand: expandRadius, expanding } = useExpandRadius();
   const sortBarRef = useRef<HTMLDivElement | null>(null);
   // True while more sort chips are hidden to the right — drives the edge fade.
   const [sortMoreRight, setSortMoreRight] = useState(false);
@@ -311,8 +311,8 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
           {getFinderMode(searchAreas) === 'around' && finderResults.length < SPARSE_RESULTS && nextKm !== null && (
             <div className="finder-sparse-hint">
               <span>{t('finder.sparse_hint', { count: finderResults.length })}</span>
-              <button type="button" className="finder-sparse-btn" onClick={expandRadius}>
-                {t('finder.expand_radius', { km: nextKm })}
+              <button type="button" className="finder-sparse-btn" onClick={expandRadius} disabled={expanding}>
+                {expanding ? t('finder.searching') : t('finder.expand_radius', { km: nextKm })}
               </button>
             </div>
           )}

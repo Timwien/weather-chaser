@@ -60,7 +60,7 @@ export function WeatherFinderStep() {
         <button
           type="button"
           className="cta-btn cta-btn--primary"
-          onClick={run}
+          onClick={() => run()}
         >
           {t('finder.retry', 'Erneut versuchen')}
         </button>

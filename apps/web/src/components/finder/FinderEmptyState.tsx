@@ -11,7 +11,7 @@ export function FinderEmptyState({ reason = 'no_results' }: FinderEmptyStateProp
   const { t } = useTranslation('common');
   const { searchAreas } = useAppStore();
   const mode = getFinderMode(searchAreas);
-  const { nextKm, expand } = useExpandRadius();
+  const { nextKm, expand, expanding } = useExpandRadius();
 
   return (
     <div style={{ padding: 'var(--space-6)', textAlign: 'center', color: 'var(--color-text-muted)' }}>
@@ -31,6 +31,7 @@ export function FinderEmptyState({ reason = 'no_results' }: FinderEmptyStateProp
         <button
           type="button"
           onClick={expand}
+          disabled={expanding}
           style={{
             padding: 'var(--space-2) var(--space-4)',
             background: 'var(--color-accent)',
@@ -41,7 +42,9 @@ export function FinderEmptyState({ reason = 'no_results' }: FinderEmptyStateProp
             fontSize: 'var(--font-size-sm)',
           }}
         >
-          {t('finder.expand_radius', 'Radius auf {{km}} km erweitern', { km: nextKm })}
+          {expanding
+            ? t('finder.searching')
+            : t('finder.expand_radius', 'Radius auf {{km}} km erweitern', { km: nextKm })}
         </button>
       )}
     </div>

@@ -24,7 +24,9 @@ export function useFinder() {
     clearFinderData,
   } = useAppStore();
 
-  const run = useCallback(() => {
+  // keepResults: re-run in place (e.g. "expand radius") — the current results stay
+  // visible until the new ones arrive instead of unmounting the results panel.
+  const run = useCallback((opts?: { keepResults?: boolean }) => {
     const { startDate, endDate } = tripConfig;
 
     if (!startDate || !endDate) {
@@ -46,7 +48,7 @@ export function useFinder() {
     );
     workerRef.current = worker;
 
-    clearFinderData();
+    if (!opts?.keepResults) clearFinderData();
     setFinderLoading(true);
     setFinderError(null);
 

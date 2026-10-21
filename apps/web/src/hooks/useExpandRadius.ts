@@ -11,24 +11,27 @@ import { useFinder } from './useFinder.ts';
 export function useExpandRadius() {
   const searchRadiusKm = useAppStore((s) => s.searchRadiusKm);
   const setSearchRadiusKm = useAppStore((s) => s.setSearchRadiusKm);
+  const expanding = useAppStore((s) => s.finderLoading);
   const { run } = useFinder();
   const rerunPending = useRef(false);
 
   // `run` closes over the radius, so re-run only after the new value has rendered.
+  // keepResults: clearing would unmount the results panel and mount
+  // WeatherFinderStep, whose own auto-run would start a second search.
   useEffect(() => {
     if (!rerunPending.current) return;
     rerunPending.current = false;
-    run();
+    run({ keepResults: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchRadiusKm]);
 
   const nextKm = nextRadiusStep(searchRadiusKm);
 
   function expand() {
-    if (nextKm === null) return;
+    if (nextKm === null || expanding) return;
     rerunPending.current = true;
     setSearchRadiusKm(nextKm);
   }
 
-  return { nextKm, expand };
+  return { nextKm, expand, expanding };
 }

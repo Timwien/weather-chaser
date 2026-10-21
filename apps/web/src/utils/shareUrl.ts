@@ -75,6 +75,7 @@ export interface ParsedShareData {
 
 const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 const isStr = (v: unknown): v is string => typeof v === 'string';
+const VALID_PRESETS = ['beach', 'hiking', 'sightseeing'];
 
 /** Minimal shape check so a hand-edited or truncated link yields null instead
  *  of a half-built route that crashes the itinerary panel. */
@@ -82,6 +83,8 @@ function isValidPayload(p: unknown): p is SharePayload {
   if (!p || typeof p !== 'object') return false;
   const o = p as Record<string, unknown>;
   if (!isStr(o.startDate) || !isStr(o.endDate) || !isStr(o.preset)) return false;
+  // Unknown presets would index PRESETS/PRESET_ICONS with e.g. "constructor".
+  if (!VALID_PRESETS.includes(o.preset)) return false;
   if (!isNum(o.totalDays) || !isNum(o.maxStay)) return false;
   const r = o.route as Record<string, unknown> | undefined;
   if (!r || !Array.isArray(r.stops) || r.stops.length === 0) return false;

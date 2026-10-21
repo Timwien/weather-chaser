@@ -24,7 +24,9 @@ export default {
     const customerId = data?.stripe_customer_id as string | undefined;
     if (!customerId) return json({ error: 'no_subscription' }, 404);
 
-    const origin = request.headers.get('origin') ?? process.env.PUBLIC_APP_URL ?? '';
+    // Never derive redirect targets from the request's Origin header (open redirect
+    // behind a genuine Stripe page).
+    const origin = process.env.PUBLIC_APP_URL ?? 'https://weather-chaser.vercel.app';
 
     try {
       const session = await stripeRequest('/billing_portal/sessions', {

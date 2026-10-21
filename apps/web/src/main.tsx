@@ -9,6 +9,21 @@ import { initTheme } from './stores/themeStore.ts';
 import { initAnalytics } from './lib/analytics.ts';
 import { registerGlobalErrorHandlers } from './lib/logger.ts';
 
+// After a deploy, lazy chunks of the old build are gone and the SPA rewrite
+// serves index.html instead → the dynamic import fails. Reload once to pick up
+// the new build; the timestamp guard prevents a reload loop if it keeps failing.
+window.addEventListener('vite:preloadError', (event) => {
+  try {
+    const last = Number(sessionStorage.getItem('wc_chunk_reload') ?? 0);
+    if (Date.now() - last < 10_000) return;
+    sessionStorage.setItem('wc_chunk_reload', String(Date.now()));
+  } catch {
+    // Storage unavailable: still reload, a loop is unlikely without it.
+  }
+  event.preventDefault();
+  window.location.reload();
+});
+
 function Root() {
   useEffect(() => {
     // Both idempotent (guarded against StrictMode double-mount); no cleanup.

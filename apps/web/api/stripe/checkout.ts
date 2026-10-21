@@ -16,7 +16,9 @@ export default {
     const user = await authenticateRequest(request);
     if (!user) return new Response('Unauthorized', { status: 401 });
 
-    const origin = request.headers.get('origin') ?? process.env.PUBLIC_APP_URL ?? '';
+    // Never derive redirect targets from the request's Origin header (open redirect
+    // behind a genuine Stripe page).
+    const origin = process.env.PUBLIC_APP_URL ?? 'https://weather-chaser.vercel.app';
 
     try {
       const session = await stripeRequest('/checkout/sessions', {

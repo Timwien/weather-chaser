@@ -91,7 +91,7 @@ async function searchLocalPrefix(query: string, lang: string): Promise<Nominatim
   if (!res.ok) return [];
   const raw = (await res.json()) as Array<{ id: string; name: string; lat: number; lng: number }>;
   if (!Array.isArray(raw)) return [];
-  return raw.map((p, i) => ({
+  return raw.map((p) => ({
     display_name: p.name,
     lat: String(p.lat),
     lon: String(p.lng),
@@ -99,7 +99,8 @@ async function searchLocalPrefix(query: string, lang: string): Promise<Nominatim
       String(p.lat - LOCAL_BBOX_PAD), String(p.lat + LOCAL_BBOX_PAD),
       String(p.lng - LOCAL_BBOX_PAD), String(p.lng + LOCAL_BBOX_PAD),
     ] as [string, string, string, string],
-    place_id: -(i + 1) - Number(p.id.replace(/\D/g, '') || 0),
+    // GeoNames ids are unique -> stable, collision-free (addSearchArea de-duplicates by id)
+    place_id: -Number(p.id.replace(/\D/g, '') || 0),
   }));
 }
 
@@ -123,8 +124,10 @@ export async function searchPlace(query: string, lang = 'en'): Promise<Nominatim
   const localRes = local.status === 'fulfilled' ? local.value : [];
   let remoteRes = remote.status === 'fulfilled' ? remote.value : [];
 
-  if (remote.status === 'fulfilled' && remoteRes.length === 0 && localRes.length === 0) {
-    remoteRes = await nominatimSearch(query, lang);
+  if (remote.status === 'fulfilled' && remoteRes.length === 0) {
+    // Settlement-filtered search found nothing: regions/islands/mountains ("Harz") — retry unfiltered,
+    // regardless of local prefix hits.
+    remoteRes = await nominatimSearch(query, lang).catch(() => []);
   } else if (remote.status === 'rejected' && localRes.length === 0) {
     throw remote.reason;
   }

@@ -123,12 +123,13 @@ export function ScoreBar({ score, weatherAvg, showComposite = true }: ScoreBarPr
             <Metric icon={<WindIcon />}        label={`${Math.round(weatherAvg.windKmh)} km/h`}          dimScore={breakdown.wind} />
           </>
         ) : (
-          // Fallback: show scores if no raw weather data
+          // Fallback (no raw weather data, e.g. old share links): labelled sub-scores,
+          // never bare numbers.
           <>
-            <Metric icon={<SunIcon />}        label={String(Math.round(breakdown.sunshine))}      dimScore={breakdown.sunshine} />
-            <Metric icon={<ThermometerIcon />} label={String(Math.round(breakdown.temperature))}   dimScore={breakdown.temperature} />
-            <Metric icon={<RainIcon />}        label={String(Math.round(breakdown.precipitation))} dimScore={breakdown.precipitation} />
-            <Metric icon={<WindIcon />}        label={String(Math.round(breakdown.wind))}          dimScore={breakdown.wind} />
+            <Metric icon={<SunIcon />}        label={`${t('itinerary.score_breakdown.sunshine')} ${Math.round(breakdown.sunshine)}`}           dimScore={breakdown.sunshine} />
+            <Metric icon={<ThermometerIcon />} label={`${t('itinerary.score_breakdown.temperature')} ${Math.round(breakdown.temperature)}`}     dimScore={breakdown.temperature} />
+            <Metric icon={<RainIcon />}        label={`${t('itinerary.score_breakdown.precipitation')} ${Math.round(breakdown.precipitation)}`} dimScore={breakdown.precipitation} />
+            <Metric icon={<WindIcon />}        label={`${t('itinerary.score_breakdown.wind')} ${Math.round(breakdown.wind)}`}                   dimScore={breakdown.wind} />
           </>
         )}
       </div>

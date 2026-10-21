@@ -1,4 +1,4 @@
-import type { Route } from '@weatherchaser/core';
+import type { Route, StopWeatherAvg } from '@weatherchaser/core';
 
 interface SharePayload {
   v: 1;                        // version for future compatibility
@@ -17,6 +17,9 @@ interface SharePayload {
       nights: number;
       composite: number;
       breakdown: { sunshine: number; precipitation: number; temperature: number; wind: number };
+      /** Compact weather values [sunshine h/day (1 dp), max temp deg C, precipitation mm/day (1 dp), wind km/h].
+       *  Optional: links created before this field existed fall back to labelled sub-scores. */
+      w?: [number, number, number, number];
       distanceToNextKm?: number;
     }>;
     totalDistanceKm: number;
@@ -24,6 +27,8 @@ interface SharePayload {
     avgScore: number;
   };
 }
+
+const round1 = (n: number): number => Math.round(n * 10) / 10;
 
 export function buildShareUrl(
   config: {
@@ -53,6 +58,14 @@ export function buildShareUrl(
           temperature: Math.round(s.score.breakdown.temperature),
           wind: Math.round(s.score.breakdown.wind),
         },
+        w: s.weatherAvg
+          ? [
+              round1(s.weatherAvg.sunshineHoursPerDay),
+              Math.round(s.weatherAvg.tempMaxC),
+              round1(s.weatherAvg.precipitationMmPerDay),
+              Math.round(s.weatherAvg.windKmh),
+            ]
+          : undefined,
         distanceToNextKm:
           s.distanceToNextKm !== undefined ? Math.round(s.distanceToNextKm) : undefined,
       })),
@@ -101,6 +114,12 @@ function isValidPayload(p: unknown): p is SharePayload {
   });
 }
 
+function parseWeatherValues(w: unknown): StopWeatherAvg | undefined {
+  if (!Array.isArray(w) || w.length !== 4 || !w.every(isNum)) return undefined;
+  const [sunshineHoursPerDay, tempMaxC, precipitationMmPerDay, windKmh] = w as number[];
+  return { sunshineHoursPerDay, tempMaxC, precipitationMmPerDay, windKmh };
+}
+
 export function parseShareUrl(search: string): ParsedShareData | null {
   try {
     const params = new URLSearchParams(search);
@@ -119,6 +138,7 @@ export function parseShareUrl(search: string): ParsedShareData | null {
           composite: s.composite,
           breakdown: s.breakdown,
         },
+        weatherAvg: parseWeatherValues(s.w),
         distanceToNextKm: s.distanceToNextKm,
       })),
       totalDistanceKm: payload.route.totalDistanceKm,

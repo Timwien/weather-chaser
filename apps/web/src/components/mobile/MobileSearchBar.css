@@ -62,9 +62,20 @@
 
 .mobile-search-pill__icon {
   flex-shrink: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 1px;
+  max-width: 84px;
+}
+
+.mobile-search-pill__icon-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  line-height: 1.1;
 }
 
 /* ── Expanded drop-down container ──────────────────────────── */

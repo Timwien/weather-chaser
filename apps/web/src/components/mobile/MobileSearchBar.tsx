@@ -61,6 +61,11 @@ export function MobileSearchBar({ isExpanded, onExpandedChange, hidden = false, 
   const dateFragment = formatDateFragment();
   const PresetIcon = PRESET_ICONS[weatherPrefs.preset];
   const criterionIcon = <PresetIcon size={14} />;
+  // M7: explain the otherwise cryptic icon — shown preset or custom weights
+  const profileName = weatherPrefs.customWeights
+    ? t('premium.weights_title')
+    : t(`preset.${weatherPrefs.preset}`);
+  const profileTitle = `${t('preset.label')}: ${profileName}`;
 
   function buildPillLabel(): string {
     const parts: string[] = [];
@@ -91,8 +96,9 @@ export function MobileSearchBar({ isExpanded, onExpandedChange, hidden = false, 
         >
           <span className="mobile-search-pill__label">{pillLabel}</span>
           {criterionIcon && (
-            <span className="mobile-search-pill__icon" aria-hidden="true">
+            <span className="mobile-search-pill__icon" role="img" aria-label={profileTitle} title={profileTitle}>
               {criterionIcon}
+              <span className="mobile-search-pill__icon-label" aria-hidden="true">{profileName}</span>
             </span>
           )}
         </button>

@@ -767,9 +767,45 @@
   gap: var(--space-3);
 }
 
+/* M7: CTA block stays visible while the form scrolls (mobile search body + desktop panel).
+   Opaque background + top border so scrolled content never shows through. */
+.entry-panel-ctas,
+.entry-sticky-cta {
+  position: sticky;
+  bottom: calc(-1 * var(--space-6));
+  z-index: 5;
+  margin: 0 calc(-1 * var(--space-6));
+  padding: var(--space-3) var(--space-6) var(--space-3);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Inside the mobile search surface the panel has no padding */
+.mobile-search-body .entry-panel-ctas,
+.mobile-search-body .entry-sticky-cta {
+  bottom: 0;
+  margin: 0 calc(-1 * var(--space-1));
+  padding: var(--space-2) var(--space-1);
+}
+
+.cta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cta-desc {
+  margin: 0;
+  text-align: center;
+  font-size: var(--font-size-xs);
+  line-height: 1.3;
+  color: var(--color-text-secondary);
+}
+
 .cta-btn {
   width: 100%;
-  padding: 13px var(--space-4);
+  min-height: 44px;
+  padding: 11px var(--space-4);
   border-radius: var(--radius-full);
   font-size: var(--font-size-base);
   font-family: var(--font-sans);
@@ -815,7 +851,10 @@
    the click can surface WHAT is missing via .entry-cta-hint */
 .cta-btn--disabled,
 .cta-btn--disabled:hover {
-  opacity: 0.45;
+  /* Intentionally disabled but readable: flat neutral surface, secondary-contrast text */
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  border: 1px dashed var(--color-border-strong);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -823,8 +862,9 @@
 
 .entry-cta-hint {
   margin: 0;
-  font-size: var(--font-size-xs);
-  color: var(--color-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
   text-align: center;
   animation: wc-fade-up 0.3s var(--ease-spring) both;
 }

@@ -119,24 +119,40 @@ export function EntryPanel() {
       {/* CTAs — always visible in idle; disabled with feedback until inputs are set */}
       {showCTAs && (
         <div className="entry-panel-ctas">
-          <button
-            type="button"
-            className={`cta-btn cta-btn--primary${!ctasReady ? ' cta-btn--disabled' : ''}`}
-            aria-disabled={!ctasReady}
-            onClick={() => handleCtaClick('route-config')}
-          >
-            {t('entry.cta.findRoute')}
-          </button>
-          <button
-            type="button"
-            className={`cta-btn cta-btn--secondary${!ctasReady ? ' cta-btn--disabled' : ''}`}
-            aria-disabled={!ctasReady}
-            onClick={() => handleCtaClick('weather-finder')}
-          >
-            {t('entry.cta.findWeather')}
-          </button>
-          {showMissingHint && !ctasReady && (
-            <p className="entry-cta-hint" role="status">{t(missingHintKey)}</p>
+          <div className="cta-item">
+            <button
+              type="button"
+              className={`cta-btn cta-btn--primary${!ctasReady ? ' cta-btn--disabled' : ''}`}
+              aria-disabled={!ctasReady}
+              aria-describedby="cta-route-desc"
+              onClick={() => handleCtaClick('route-config')}
+            >
+              {t('entry.cta.findRoute')}
+            </button>
+            <p id="cta-route-desc" className="cta-desc">{t('entry.cta.findRouteDesc')}</p>
+          </div>
+          <div className="cta-item">
+            <button
+              type="button"
+              className={`cta-btn cta-btn--secondary${!ctasReady ? ' cta-btn--disabled' : ''}`}
+              aria-disabled={!ctasReady}
+              aria-describedby="cta-finder-desc"
+              onClick={() => handleCtaClick('weather-finder')}
+            >
+              {t('entry.cta.findWeather')}
+            </button>
+            <p id="cta-finder-desc" className="cta-desc">{t('entry.cta.findWeatherDesc')}</p>
+          </div>
+          {/* Next-step guidance sits right next to the CTAs; a click on a disabled CTA
+              escalates it to the full "what is missing" message. */}
+          {!ctasReady && (
+            <p className="entry-cta-hint" role="status">
+              {showMissingHint
+                ? t(missingHintKey)
+                : guideTarget === 'dates'
+                  ? t('entry.guide_next_dates')
+                  : t('entry.guide_next_location')}
+            </p>
           )}
           {/* X2: save the current search (bookmark) — visible once inputs are set */}
           {ctasReady && supabaseConfigured && (

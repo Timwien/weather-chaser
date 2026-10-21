@@ -275,10 +275,6 @@ export function DateRangePicker({ highlight = false }: { highlight?: boolean } =
         )}
       </button>
 
-      {highlight && !open && (
-        <p className="entry-guide-hint" role="status">{t('entry.guide_next_dates')}</p>
-      )}
-
       {open && (
         <div ref={panelRef} className="drp-popover" role="dialog" aria-modal="true" aria-label={t('a11y.date_range_picker')}>
           {showHint && (

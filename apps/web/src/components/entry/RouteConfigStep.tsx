@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppStore, isLocatedPlace } from '../../stores/appStore.ts';
 import { PlaceAutocomplete, type SelectedPlace } from '../common/PlaceAutocomplete.tsx';
 import { InfoTip } from '../common/InfoTip.tsx';
+import { haversineKm } from '../../utils/geo.ts';
 
 // Inline remove icon — no emoji per design decision
 function RemoveIcon() {
@@ -20,10 +21,20 @@ export function RouteConfigStep({ onGenerate, onBack }: { onGenerate: () => void
   // Names already chosen as must-visit stops (dedupe suggestions + autocomplete).
   const mustVisitNames = new Set(tripConfig.mustVisitCoords.map((c) => c.name));
 
-  // Quick-add: located places from searchAreas not yet added as a must-visit.
+  // D11: the start place is where the trip begins — never suggest it as a must-visit stop.
+  const firstPlace = searchAreas.find(isLocatedPlace);
+  const startName = tripConfig.startLocation || firstPlace?.name || '';
+  const startLat = tripConfig.startLocation ? tripConfig.startLat : firstPlace?.lat;
+  const startLng = tripConfig.startLocation ? tripConfig.startLng : firstPlace?.lng;
+  const isStartPlace = (name: string, lat: number, lng: number) =>
+    (startName !== '' && name.trim().toLowerCase() === startName.trim().toLowerCase()) ||
+    (typeof startLat === 'number' && typeof startLng === 'number' &&
+      haversineKm(startLat, startLng, lat, lng) < 2);
+
+  // Quick-add: located places from searchAreas not yet added as a must-visit (and not the start).
   const mustVisitSuggestions = searchAreas
     .filter(isLocatedPlace)
-    .filter((a) => !mustVisitNames.has(a.name));
+    .filter((a) => !mustVisitNames.has(a.name) && !isStartPlace(a.name, a.lat, a.lng));
 
   // B4: adding a stop always carries coordinates → the optimizer actually sees it.
   function addMustVisitCoord(name: string, lat: number, lng: number) {
@@ -52,8 +63,7 @@ export function RouteConfigStep({ onGenerate, onBack }: { onGenerate: () => void
   const hasDates = Boolean(tripConfig.startDate && tripConfig.endDate);
 
   // Pre-fill start field from an explicit start or the first located place.
-  const firstPlace = searchAreas.find(isLocatedPlace);
-  const startInitial = tripConfig.startLocation || firstPlace?.name || '';
+  const startInitial = startName;
 
   function handleStartSelect(place: SelectedPlace) {
     setTripConfig({ startLocation: place.name, startLat: place.lat, startLng: place.lng });
@@ -158,7 +168,7 @@ export function RouteConfigStep({ onGenerate, onBack }: { onGenerate: () => void
           <PlaceAutocomplete
             onSelect={handleStopSelect}
             placeholder={t('route_config.add_must_visit')}
-            excludeNames={mustVisitNames}
+            excludeNames={startName ? new Set([...mustVisitNames, startName]) : mustVisitNames}
             clearOnSelect
             showFavorites
           />
@@ -182,14 +192,16 @@ export function RouteConfigStep({ onGenerate, onBack }: { onGenerate: () => void
         )}
       </div>
 
-      {/* Generate Route CTA */}
-      <button
-        type="button"
-        className="cta-btn cta-btn--primary"
-        onClick={onGenerate}
-      >
-        {t('route_config.generate')}
-      </button>
+      {/* Generate Route CTA — sticky so it stays visible while the form scrolls */}
+      <div className="entry-sticky-cta">
+        <button
+          type="button"
+          className="cta-btn cta-btn--primary"
+          onClick={onGenerate}
+        >
+          {t('route_config.generate')}
+        </button>
+      </div>
     </div>
   );
 }

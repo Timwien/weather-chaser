@@ -1,4 +1,4 @@
-import type { HourlyWeather, DailyWeather, WeatherScore, ScoringWeights } from '../types/index.js';
+import type { HourlyWeather, DailyWeather, WeatherScore, ScoringWeights, StopWeatherAvg } from '../types/index.js';
 import { sliceHoursByDays } from './sliceHoursByDays.js';
 
 // Re-export so callers can import sliceHoursByDays from this module (test imports it from here)
@@ -79,6 +79,52 @@ export function scoreLocation(
 }
 
 // ---------------------------------------------------------------------------
+// Stay-window helpers (shared by the score AND the displayed weather values)
+// ---------------------------------------------------------------------------
+
+/** Indices of `daily` that fall into [arrivalDate, arrivalDate + nightsStay) (UTC dates). */
+export function dailyWindowIndices(
+  daily: DailyWeather,
+  arrivalDate: Date,
+  nightsStay: number,
+): number[] {
+  const dates = new Set<string>();
+  for (let i = 0; i < nightsStay; i++) {
+    const d = new Date(arrivalDate.getTime() + i * 86_400_000);
+    const yyyy = d.getUTCFullYear();
+    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(d.getUTCDate()).padStart(2, '0');
+    dates.add(`${yyyy}-${mm}-${dd}`);
+  }
+  const indices: number[] = [];
+  for (let i = 0; i < daily.time.length; i++) {
+    if (dates.has(daily.time[i])) indices.push(i);
+  }
+  return indices;
+}
+
+/**
+ * Real weather values (h, mm, deg C, km/h) averaged over the SAME stay window the
+ * sub-scores of `scoreDailyLocation` use — so a displayed "6.5 h" can never sit
+ * next to a sun score computed from different days. Null if the window has no data.
+ */
+export function averageDailyWeather(
+  daily: DailyWeather,
+  arrivalDate: Date,
+  nightsStay: number,
+): StopWeatherAvg | null {
+  const idx = dailyWindowIndices(daily, arrivalDate, nightsStay);
+  if (idx.length === 0) return null;
+  const avg = (arr: number[]) => idx.reduce((s, i) => s + arr[i], 0) / idx.length;
+  return {
+    sunshineHoursPerDay: avg(daily.sunshine_duration) / 3600,
+    precipitationMmPerDay: avg(daily.precipitation_sum),
+    tempMaxC: avg(daily.temperature_2m_max),
+    windKmh: avg(daily.wind_speed_10m_max),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // scoreDailyLocation
 // ---------------------------------------------------------------------------
 
@@ -97,20 +143,7 @@ export function scoreDailyLocation(
   nightsStay: number,
   weights: ScoringWeights,
 ): WeatherScore {
-  // Build the set of YYYY-MM-DD strings for the stay window
-  const dates = new Set<string>();
-  for (let i = 0; i < nightsStay; i++) {
-    const d = new Date(arrivalDate.getTime() + i * 86_400_000);
-    const yyyy = d.getUTCFullYear();
-    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-    const dd = String(d.getUTCDate()).padStart(2, '0');
-    dates.add(`${yyyy}-${mm}-${dd}`);
-  }
-
-  const indices: number[] = [];
-  for (let i = 0; i < daily.time.length; i++) {
-    if (dates.has(daily.time[i])) indices.push(i);
-  }
+  const indices = dailyWindowIndices(daily, arrivalDate, nightsStay);
 
   const n = indices.length;
   if (n === 0) {

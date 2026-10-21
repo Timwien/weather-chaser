@@ -1,5 +1,5 @@
 // Vite module worker — can import from packages/core and services
-import { optimizeRoute, scoreDailyLocation, PRESETS } from '@weatherchaser/core';
+import { optimizeRoute, scoreDailyLocation, averageDailyWeather, PRESETS } from '@weatherchaser/core';
 import type { Town, OptimizerInput, WeatherScore, ScoringWeights } from '@weatherchaser/core';
 import { fetchWeatherBatch } from '../services/weather.ts';
 import { fetchDistanceMatrix } from '../services/osrm.ts';
@@ -197,27 +197,16 @@ self.onmessage = async (event: MessageEvent<OptimizerWorkerInput>) => {
 
     const result = optimizeRoute(optimizerInput);
 
-    // Attach real weather averages to each stop so the UI can show
-    // actual values (°C, mm, km/h, hours) instead of 0–100 scores.
-    const avg = (arr: number[]) =>
-      arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
-
+    // Attach real weather values (hours, °C, mm, km/h) to each stop — averaged over the
+    // SAME stay window as the re-scored sub-scores, so value and score always agree.
     const stopsWithWeather = result.stops.map((stop) => {
       const wd = weatherData.find((d) => d.townId === stop.town.id);
       if (!wd || wd.daily.time.length === 0) return stop;
       const { daily } = wd;
       // Re-score at actual arrival date + nights (initial scores were all at startDate/1-night)
       const score = scoreDailyLocation(daily, stop.arrivalDate, stop.nights, weights);
-      return {
-        ...stop,
-        score,
-        weatherAvg: {
-          sunshineHoursPerDay: avg(daily.sunshine_duration) / 3600,
-          precipitationMmPerDay: avg(daily.precipitation_sum),
-          tempMaxC: avg(daily.temperature_2m_max),
-          windKmh: avg(daily.wind_speed_10m_max),
-        },
-      };
+      const weatherAvg = averageDailyWeather(daily, stop.arrivalDate, stop.nights) ?? undefined;
+      return { ...stop, score, weatherAvg };
     });
 
     // Recompute avgScore from the re-scored stops (day-weighted) — the core

@@ -1,2 +1,2 @@
-export { normalize, sliceHoursByDays, scoreLocation, scoreDailyLocation } from './weatherScore.js';
+export { normalize, sliceHoursByDays, scoreLocation, scoreDailyLocation, dailyWindowIndices, averageDailyWeather } from './weatherScore.js';
 export { PRESETS } from './presets.js';

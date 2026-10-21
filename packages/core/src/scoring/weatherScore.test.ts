@@ -209,3 +209,45 @@ describe('PRESETS', () => {
     expect(PRESETS.beach.precipitation).not.toBe(PRESETS.sightseeing.precipitation);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Displayed weather values must come from the same window as the sub-scores
+// ---------------------------------------------------------------------------
+
+import { scoreDailyLocation, averageDailyWeather } from './weatherScore.js';
+import type { DailyWeather } from '../types/index.js';
+
+describe('stay-window consistency (sun sub-score vs displayed hours)', () => {
+  // 5 days: two sunny days (~9.5 h) followed by three grey days (0 h) -> trip average 3.8 h
+  const daily: DailyWeather = {
+    time: ['2026-07-01', '2026-07-02', '2026-07-03', '2026-07-04', '2026-07-05'],
+    temperature_2m_max: [24, 25, 18, 17, 16],
+    temperature_2m_min: [12, 13, 10, 10, 9],
+    precipitation_sum: [0, 0, 6, 8, 9],
+    sunshine_duration: [34_200, 34_200, 0, 0, 0],
+    wind_speed_10m_max: [10, 12, 30, 35, 30],
+  };
+  const w = PRESETS.sightseeing;
+
+  it('values and sun score describe the stop window, not the whole trip', () => {
+    const arrival = new Date('2026-07-03T00:00:00Z'); // grey days only
+    const score = scoreDailyLocation(daily, arrival, 2, w);
+    const avg = averageDailyWeather(daily, arrival, 2)!;
+    expect(score.breakdown.sunshine).toBe(0);
+    expect(avg.sunshineHoursPerDay).toBe(0); // was 3.8 h (trip-wide) before the fix
+    expect(avg.precipitationMmPerDay).toBeCloseTo(7, 5);
+  });
+
+  it('a sunny window shows hours and a matching positive score', () => {
+    const arrival = new Date('2026-07-01T00:00:00Z');
+    const score = scoreDailyLocation(daily, arrival, 2, w);
+    const avg = averageDailyWeather(daily, arrival, 2)!;
+    expect(avg.sunshineHoursPerDay).toBeCloseTo(9.5, 5);
+    // score = hours / 12 h * 100
+    expect(score.breakdown.sunshine).toBeCloseTo((avg.sunshineHoursPerDay / 12) * 100, 5);
+  });
+
+  it('returns null when the window has no data', () => {
+    expect(averageDailyWeather(daily, new Date('2026-08-01T00:00:00Z'), 2)).toBeNull();
+  });
+});

@@ -16,6 +16,8 @@ export interface PlaceOut {
 }
 
 export interface PlacesQuery {
+  /** Name-prefix search (autocomplete): matches the original, German or English name. */
+  prefix?: string;
   /** [south, west, north, east] */
   bbox?: [number, number, number, number];
   center?: { lat: number; lng: number; radiusKm: number };
@@ -30,7 +32,7 @@ export const MAX_RADIUS_KM = 600;
 export const MAX_BBOX_LAT_SPAN = 25;
 export const MAX_BBOX_LNG_SPAN = 40;
 
-const ALLOWED_PARAMS = new Set(['bbox', 'lat', 'lng', 'radiusKm', 'minPop', 'limit', 'lang']);
+const ALLOWED_PARAMS = new Set(['bbox', 'lat', 'lng', 'radiusKm', 'minPop', 'limit', 'lang', 'q']);
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const toRad = (d: number) => (d * Math.PI) / 180;
@@ -66,6 +68,15 @@ export function parsePlacesQuery(params: URLSearchParams): ParseResult {
   const langRaw = params.get('lang') ?? 'en';
   const lang: PlaceLang = langRaw === 'de' ? 'de' : 'en';
 
+  if (params.has('q')) {
+    if (params.has('bbox') || params.has('lat') || params.has('lng') || params.has('radiusKm')) {
+      return { ok: false, error: 'q cannot be combined with bbox or lat,lng,radiusKm' };
+    }
+    const prefix = normalizeName((params.get('q') ?? '').trim());
+    if (prefix.length < 2 || prefix.length > 40) return { ok: false, error: 'invalid q' };
+    return { ok: true, query: { prefix, minPop, limit: Math.min(limit, 20), lang } };
+  }
+
   const hasBbox = params.has('bbox');
   const hasCenter = params.has('lat') || params.has('lng') || params.has('radiusKm');
   if (hasBbox === hasCenter) return { ok: false, error: 'provide either bbox or lat,lng,radiusKm' };
@@ -92,6 +103,11 @@ export function parsePlacesQuery(params: URLSearchParams): ParseResult {
   return { ok: true, query: { center: { lat, lng, radiusKm }, minPop, limit, lang } };
 }
 
+/** Lower-case, strip diacritics, ß→ss — so "Zurich" finds "Zürich". */
+export function normalizeName(s: string): string {
+  return s.toLowerCase().replace(/ß/g, 'ss').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 function localName(p: PlaceTuple, lang: PlaceLang): string {
   const local = lang === 'de' ? p[5] : p[6];
   return local || p[1];
@@ -99,6 +115,19 @@ function localName(p: PlaceTuple, lang: PlaceLang): string {
 
 /** Filter by bbox or radius + minPop, keep dataset order (population desc), cap at limit. */
 export function queryPlaces(data: readonly PlaceTuple[], q: PlacesQuery): PlaceOut[] {
+  if (q.prefix !== undefined) {
+    const prefix = normalizeName(q.prefix);
+    const hits: PlaceOut[] = [];
+    for (const p of data) {
+      if (p[4] < q.minPop) continue;
+      const names = [p[1], p[5], p[6]];
+      if (!names.some((n) => n && normalizeName(n).startsWith(prefix))) continue;
+      hits.push({ id: `gn-${p[0]}`, name: localName(p, q.lang), lat: p[2], lng: p[3], population: p[4] });
+      if (hits.length >= q.limit) break;
+    }
+    return hits;
+  }
+
   let south = -90, west = -180, north = 90, east = 180;
   if (q.bbox) {
     [south, west, north, east] = q.bbox;

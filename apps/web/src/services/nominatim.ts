@@ -48,7 +48,11 @@ function normalizeLang(lang: string): string {
   return (lang || 'en').slice(0, 2).toLowerCase();
 }
 
-export async function searchPlace(query: string, lang = 'en'): Promise<NominatimResult[]> {
+async function nominatimSearch(
+  query: string,
+  lang: string,
+  featureType?: 'settlement',
+): Promise<NominatimResult[]> {
   const url = new URL(NOMINATIM_BASE, self.location.origin);
   url.searchParams.set('q', query);
   url.searchParams.set('format', 'json');
@@ -57,6 +61,8 @@ export async function searchPlace(query: string, lang = 'en'): Promise<Nominatim
   // F4: language as a URL param (not a header) so the proxy cache separates per
   // language — cache key is the full URL. Nominatim honours accept-language here.
   url.searchParams.set('accept-language', normalizeLang(lang));
+  // D9: prefer settlements over pubs/companies/streets
+  if (featureType) url.searchParams.set('featureType', featureType);
 
   const headers: Record<string, string> = {};
   if (import.meta.env.DEV) {
@@ -68,6 +74,64 @@ export async function searchPlace(query: string, lang = 'en'): Promise<Nominatim
 
   if (!res.ok) throw new Error(`Nominatim error: ${res.status}`);
   return res.json();
+}
+
+/** Half-width (degrees) of the synthetic bbox for a point-only local match. */
+const LOCAL_BBOX_PAD = 0.05;
+
+/** Name-prefix match against our bundled GeoNames dataset (Nominatim does no prefix matching). */
+async function searchLocalPrefix(query: string, lang: string): Promise<NominatimResult[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const url = new URL('/api/places', self.location.origin);
+  url.searchParams.set('q', q);
+  url.searchParams.set('lang', normalizeLang(lang) === 'de' ? 'de' : 'en');
+  url.searchParams.set('limit', '4');
+  const res = await fetch(url.toString(), { signal: AbortSignal.timeout(TIMEOUT_MS) });
+  if (!res.ok) return [];
+  const raw = (await res.json()) as Array<{ id: string; name: string; lat: number; lng: number }>;
+  if (!Array.isArray(raw)) return [];
+  return raw.map((p, i) => ({
+    display_name: p.name,
+    lat: String(p.lat),
+    lon: String(p.lng),
+    boundingbox: [
+      String(p.lat - LOCAL_BBOX_PAD), String(p.lat + LOCAL_BBOX_PAD),
+      String(p.lng - LOCAL_BBOX_PAD), String(p.lng + LOCAL_BBOX_PAD),
+    ] as [string, string, string, string],
+    place_id: -(i + 1) - Number(p.id.replace(/\D/g, '') || 0),
+  }));
+}
+
+/** True when two results are the same place (same lowercase first name part and < 5 km apart). */
+function samePlace(a: NominatimResult, b: NominatimResult): boolean {
+  const name = (r: NominatimResult) => r.display_name.split(',')[0].trim().toLowerCase();
+  if (name(a) !== name(b)) return false;
+  return Math.hypot(Number(a.lat) - Number(b.lat), Number(a.lon) - Number(b.lon)) < 0.05;
+}
+
+/**
+ * D9: place search that prefers settlements. Local GeoNames prefix matches
+ * (so "Inns" finds Innsbruck) come first, then Nominatim restricted to
+ * featureType=settlement; if that yields nothing we fall back to the plain search.
+ */
+export async function searchPlace(query: string, lang = 'en'): Promise<NominatimResult[]> {
+  const [local, remote] = await Promise.allSettled([
+    searchLocalPrefix(query, lang),
+    nominatimSearch(query, lang, 'settlement'),
+  ]);
+  const localRes = local.status === 'fulfilled' ? local.value : [];
+  let remoteRes = remote.status === 'fulfilled' ? remote.value : [];
+
+  if (remote.status === 'fulfilled' && remoteRes.length === 0 && localRes.length === 0) {
+    remoteRes = await nominatimSearch(query, lang);
+  } else if (remote.status === 'rejected' && localRes.length === 0) {
+    throw remote.reason;
+  }
+
+  const merged = [...localRes];
+  for (const r of remoteRes) if (!merged.some((m) => samePlace(m, r))) merged.push(r);
+  return merged.slice(0, 6);
 }
 
 export function parseBbox(result: NominatimResult): BoundingBox {

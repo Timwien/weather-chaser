@@ -28,6 +28,9 @@ export default {
     // Cache stays correct because the param is part of the request URL / cache key.
     const acceptLanguage = url.searchParams.get('accept-language');
 
+    // D9: optional featureType (whitelisted) so the main search can prefer settlements.
+    const featureType = url.searchParams.get('featureType');
+
     const upstream = new URL('https://nominatim.openstreetmap.org/search');
     upstream.searchParams.set('q', q);
     upstream.searchParams.set('format', 'json');
@@ -35,6 +38,10 @@ export default {
     upstream.searchParams.set('addressdetails', '0');
     if (acceptLanguage && /^[a-z]{2}$/.test(acceptLanguage)) {
       upstream.searchParams.set('accept-language', acceptLanguage);
+    }
+
+    if (featureType && ['country', 'state', 'city', 'settlement'].includes(featureType)) {
+      upstream.searchParams.set('featureType', featureType);
     }
 
     // Nominatim can hang or fail under load — bound the wait and report a 502

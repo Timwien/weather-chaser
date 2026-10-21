@@ -98,3 +98,29 @@ describe('real dataset', () => {
     );
   });
 });
+
+describe('prefix search (q)', () => {
+  it('finds settlements by name prefix, population-first, accent-insensitive', () => {
+    const r = queryPlaces(sorted, { prefix: 'koln', minPop: 0, limit: 5, lang: 'de' });
+    expect(r.map((p) => p.name)).toEqual(['Köln']);
+    const ems = queryPlaces(sorted, { prefix: 'em', minPop: 0, limit: 5, lang: 'de' });
+    expect(ems.map((p) => p.name)).toEqual(['Emmendingen']);
+  });
+
+  it('matches localized names and returns the localized name', () => {
+    const r = queryPlaces(sorted, { prefix: 'stet', minPop: 0, limit: 5, lang: 'de' });
+    expect(r.map((p) => p.name)).toEqual(['Stettin']);
+  });
+
+  it('parses q and rejects combination with bbox or too-short q', () => {
+    const ok = parse('q=Inns&lang=de');
+    expect(ok.ok && ok.query.prefix).toBe('inns');
+    expect(parse('q=I').ok).toBe(false);
+    expect(parse('q=Inns&bbox=1,2,3,4').ok).toBe(false);
+  });
+
+  it('real dataset: "Inns" yields Innsbruck first', () => {
+    const r = queryPlaces(realData as unknown as PlaceTuple[], { prefix: 'inns', minPop: 0, limit: 5, lang: 'de' });
+    expect(r[0]?.name).toBe('Innsbruck');
+  });
+});

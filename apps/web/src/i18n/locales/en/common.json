@@ -117,6 +117,7 @@
     "pin_remove": "Remove"
   },
   "share": {
+    "trip_page_title": "Shared trip",
     "export_google": "Open in Google Maps",
     "export_apple": "Open in Apple Maps",
     "copy_link": "Copy shareable link",

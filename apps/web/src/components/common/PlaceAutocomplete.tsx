@@ -189,6 +189,13 @@ export function PlaceAutocomplete({
       return;
     }
     if (!showDropdown) {
+      // ArrowDown reopens a closed list (standard combobox behaviour)
+      if (e.key === 'ArrowDown' && options.length > 0 && !disabled) {
+        e.preventDefault();
+        setOpen(true);
+        setActiveIdx(0);
+        return;
+      }
       if (e.key === 'Enter' && options.length > 0) handleSelect(options[0]);
       return;
     }
@@ -249,7 +256,12 @@ export function PlaceAutocomplete({
                 }}
               >
                 {isFav && <HeartIcon />}
-                <span>{label}</span>
+                <span className="autocomplete-option-text">
+                  <span className="autocomplete-option-name">{label}</span>
+                  {!isFav && opt.result.secondary && (
+                    <span className="autocomplete-option-secondary">{opt.result.secondary}</span>
+                  )}
+                </span>
               </li>
             );
           })}

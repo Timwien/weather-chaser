@@ -122,17 +122,6 @@ function IndexPage() {
   if (isMobile) {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-        <MapContainer
-          selectedStopIndex={selectedStopIndex}
-          onStopClick={handleStopClickFromMap}
-          onDrawComplete={(polygon) => addSearchArea({ type: 'polygon', id: DRAWN_AREA_ID, polygon })}
-          onDrawClear={() => removeSearchArea(DRAWN_AREA_ID)}
-          finderResults={computedFinderResults.length > 0 ? computedFinderResults : undefined}
-          selectedFinderIndex={selectedFinderIndex}
-          onFinderClick={handleFinderClickFromMap}
-          flyToCity={flyToCity}
-          sheetBottomPadding={sheetPx}
-        />
         {/* Pill hidden while results are showing — the sheet's Back button returns to search.
             Without this, tapping the pill in results mode expands an empty surface
             (EntryPanel only renders when showEntryPanel). */}
@@ -174,6 +163,19 @@ function IndexPage() {
             </div>
           </MobileBottomSheet>
         )}
+        {/* D8: map comes AFTER the search surface in DOM order so Tab reaches the
+            entry controls first (stacking is handled by z-index, not DOM order). */}
+        <MapContainer
+          selectedStopIndex={selectedStopIndex}
+          onStopClick={handleStopClickFromMap}
+          onDrawComplete={(polygon) => addSearchArea({ type: 'polygon', id: DRAWN_AREA_ID, polygon })}
+          onDrawClear={() => removeSearchArea(DRAWN_AREA_ID)}
+          finderResults={computedFinderResults.length > 0 ? computedFinderResults : undefined}
+          selectedFinderIndex={selectedFinderIndex}
+          onFinderClick={handleFinderClickFromMap}
+          flyToCity={flyToCity}
+          sheetBottomPadding={sheetPx}
+        />
         <LoadingOverlay />
       </div>
     );
@@ -185,33 +187,6 @@ function IndexPage() {
     <div
       style={{ position: 'relative', width: '100%', height: '100%' }}
     >
-      {/*
-        Map: always mounted (never unmounted — keeps MapLibre state).
-        Desktop: always visible.
-      */}
-      <div
-        className="screen-map"
-        style={{
-          position: 'absolute',
-          inset: 0,
-        }}
-      >
-        <MapContainer
-          selectedStopIndex={selectedStopIndex}
-          onStopClick={setSelectedStopIndex}
-          onDrawComplete={(polygon) => addSearchArea({ type: 'polygon', id: DRAWN_AREA_ID, polygon })}
-          onDrawClear={() => removeSearchArea(DRAWN_AREA_ID)}
-          finderResults={computedFinderResults.length > 0 ? computedFinderResults : undefined}
-          selectedFinderIndex={selectedFinderIndex}
-          onFinderClick={(idx) => {
-            setSelectedFinderIndex(idx);
-            const r = computedFinderResults[idx];
-            if (r) setFlyToCity(prev => ({ lat: r.lat, lng: r.lng, token: (prev?.token ?? 0) + 1 }));
-          }}
-          flyToCity={flyToCity}
-        />
-      </div>
-
       {/*
         Itinerary / EntryPanel / WeatherFinderPanel overlay:
         Desktop: always rendered as a fixed overlay panel.
@@ -244,6 +219,34 @@ function IndexPage() {
             onResultsComputed={setComputedFinderResults}
           />
         )}
+      </div>
+
+      {/* D8: DOM order = Tab order — the map follows the panel. */}
+      {/*
+        Map: always mounted (never unmounted — keeps MapLibre state).
+        Desktop: always visible.
+      */}
+      <div
+        className="screen-map"
+        style={{
+          position: 'absolute',
+          inset: 0,
+        }}
+      >
+        <MapContainer
+          selectedStopIndex={selectedStopIndex}
+          onStopClick={setSelectedStopIndex}
+          onDrawComplete={(polygon) => addSearchArea({ type: 'polygon', id: DRAWN_AREA_ID, polygon })}
+          onDrawClear={() => removeSearchArea(DRAWN_AREA_ID)}
+          finderResults={computedFinderResults.length > 0 ? computedFinderResults : undefined}
+          selectedFinderIndex={selectedFinderIndex}
+          onFinderClick={(idx) => {
+            setSelectedFinderIndex(idx);
+            const r = computedFinderResults[idx];
+            if (r) setFlyToCity(prev => ({ lat: r.lat, lng: r.lng, token: (prev?.token ?? 0) + 1 }));
+          }}
+          flyToCity={flyToCity}
+        />
       </div>
 
       <LoadingOverlay />

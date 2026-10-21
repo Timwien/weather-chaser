@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useDocumentTitle } from '../hooks/useDocumentTitle.ts';
 import { parseShareUrl } from '../utils/shareUrl.ts';
 import { useAppStore } from '../stores/appStore.ts';
 import { MapContainer } from '../components/map/MapContainer.tsx';
@@ -6,11 +8,14 @@ import { StatusPage } from '../components/common/StatusPage.tsx';
 import { ItineraryPanel } from '../components/itinerary/ItineraryPanel.tsx';
 
 export function TripPage() {
+  const { t } = useTranslation('common');
   const [selectedStopIndex, setSelectedStopIndex] = useState<number | null>(null);
   const { setRoute, setTripConfig, setWeatherPrefs, setMode } = useAppStore();
 
   // Parsed once; null = missing/damaged link → notice instead of an empty map.
   const parsed = useMemo(() => parseShareUrl(window.location.search), []);
+  // An invalid link renders StatusPage, which sets its own title.
+  useDocumentTitle(parsed ? t('share.trip_page_title') : null);
 
   useEffect(() => {
     if (parsed) {

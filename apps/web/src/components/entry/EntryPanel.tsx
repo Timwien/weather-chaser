@@ -63,13 +63,6 @@ export function EntryPanel() {
   const hasLocation = searchAreas.length > 0;
   const ctasReady = hasDates && hasLocation;
   const showCTAs = mode === 'idle';
-  const [showMissingHint, setShowMissingHint] = useState(false);
-
-  // Clear the hint as soon as the missing inputs are filled
-  useEffect(() => {
-    if (ctasReady) setShowMissingHint(false);
-  }, [ctasReady]);
-
   const missingHintKey = !hasDates && !hasLocation
     ? 'entry.cta_missing_both'
     : !hasDates
@@ -77,10 +70,7 @@ export function EntryPanel() {
       : 'entry.cta_missing_location';
 
   function handleCtaClick(nextMode: 'route-config' | 'weather-finder') {
-    if (!ctasReady) {
-      setShowMissingHint(true);
-      return;
-    }
+    if (!ctasReady) return;
     setMode(nextMode);
   }
 
@@ -123,7 +113,7 @@ export function EntryPanel() {
             <button
               type="button"
               className={`cta-btn cta-btn--primary${!ctasReady ? ' cta-btn--disabled' : ''}`}
-              aria-disabled={!ctasReady}
+              disabled={!ctasReady}
               aria-describedby="cta-route-desc"
               onClick={() => handleCtaClick('route-config')}
             >
@@ -135,7 +125,7 @@ export function EntryPanel() {
             <button
               type="button"
               className={`cta-btn cta-btn--secondary${!ctasReady ? ' cta-btn--disabled' : ''}`}
-              aria-disabled={!ctasReady}
+              disabled={!ctasReady}
               aria-describedby="cta-finder-desc"
               onClick={() => handleCtaClick('weather-finder')}
             >
@@ -143,15 +133,11 @@ export function EntryPanel() {
             </button>
             <p id="cta-finder-desc" className="cta-desc">{t('entry.cta.findWeatherDesc')}</p>
           </div>
-          {/* Next-step guidance sits right next to the CTAs; a click on a disabled CTA
-              escalates it to the full "what is missing" message. */}
+          {/* Next-step guidance sits right next to the (natively disabled) CTAs and
+              says exactly what is still missing. */}
           {!ctasReady && (
             <p className="entry-cta-hint" role="status">
-              {showMissingHint
-                ? t(missingHintKey)
-                : guideTarget === 'dates'
-                  ? t('entry.guide_next_dates')
-                  : t('entry.guide_next_location')}
+              {t(missingHintKey)}
             </p>
           )}
           {/* X2: save the current search (bookmark) — visible once inputs are set */}

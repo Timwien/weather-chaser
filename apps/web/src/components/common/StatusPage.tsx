@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle.ts';
 import './StatusPage.css';
 
 interface StatusPageProps {
@@ -10,6 +11,7 @@ interface StatusPageProps {
  *  way back to the app. Distinct from AppErrorBoundary (render crashes). */
 export function StatusPage({ titleKey, textKey }: StatusPageProps) {
   const { t } = useTranslation('common');
+  useDocumentTitle(t(titleKey));
 
   return (
     <div className="status-page">

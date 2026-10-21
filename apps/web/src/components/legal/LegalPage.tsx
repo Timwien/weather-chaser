@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle.ts';
 import './LegalPage.css';
 
 interface LegalSection {
@@ -21,6 +22,7 @@ interface LegalPageProps {
  */
 export function LegalPage({ titleKey, updatedKey, introKey, sections }: LegalPageProps) {
   const { t } = useTranslation('common');
+  useDocumentTitle(t(titleKey));
 
   return (
     <div className="legal-page">

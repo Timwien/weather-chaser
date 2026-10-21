@@ -34,6 +34,8 @@ export interface NominatimResult {
   boundingbox: [string, string, string, string]; // [south, north, west, east]
   place_id: number;
   address?: NominatimAddress; // present when addressdetails=1
+  /** Disambiguation line for local GeoNames hits, e.g. "Rheinland-Pfalz, DE". */
+  secondary?: string;
 }
 
 export interface BoundingBox {
@@ -89,7 +91,7 @@ async function searchLocalPrefix(query: string, lang: string): Promise<Nominatim
   url.searchParams.set('limit', '4');
   const res = await fetch(url.toString(), { signal: AbortSignal.timeout(TIMEOUT_MS) });
   if (!res.ok) return [];
-  const raw = (await res.json()) as Array<{ id: string; name: string; lat: number; lng: number }>;
+  const raw = (await res.json()) as Array<{ id: string; name: string; lat: number; lng: number; region?: string; country?: string }>;
   if (!Array.isArray(raw)) return [];
   return raw.map((p) => ({
     display_name: p.name,
@@ -99,6 +101,7 @@ async function searchLocalPrefix(query: string, lang: string): Promise<Nominatim
       String(p.lat - LOCAL_BBOX_PAD), String(p.lat + LOCAL_BBOX_PAD),
       String(p.lng - LOCAL_BBOX_PAD), String(p.lng + LOCAL_BBOX_PAD),
     ] as [string, string, string, string],
+    secondary: [p.region, p.country].filter(Boolean).join(', ') || undefined,
     // GeoNames ids are unique -> stable, collision-free (addSearchArea de-duplicates by id)
     place_id: -Number(p.id.replace(/\D/g, '') || 0),
   }));

@@ -208,7 +208,12 @@ function TapToAddLocation() {
       const { lat, lng } = e.lngLat;
       // Optimistic placeholder while reverse-geocoding.
       setPending({ lat, lng, name: `${lat.toFixed(3)}, ${lng.toFixed(3)}`, fullName: '' });
-      const result = await reverseGeocode(lat, lng, i18n.language);
+      // A timeout/network error must not leave the popup stuck on the
+      // placeholder — fall back to the coordinate name.
+      let result: Awaited<ReturnType<typeof reverseGeocode>> = null;
+      try {
+        result = await reverseGeocode(lat, lng, i18n.language);
+      } catch { /* fall through to coordinate name */ }
       const name = (result && settlementName(result)) || `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
       setPending({ lat, lng, name, fullName: result?.display_name ?? name });
     }

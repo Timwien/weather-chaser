@@ -1,6 +1,6 @@
 // Vercel serverless proxy for Nominatim reverse geocoding API
 // Nominatim policy: requires User-Agent + Referer; prohibits direct production browser use
-// Cache: 1h (s-maxage=3600) with 10min stale-while-revalidate
+// Cache: 1h (s-maxage=3600) with 10min stale-while-revalidate — successes only
 
 export default {
   async fetch(request: Request): Promise<Response> {
@@ -15,8 +15,11 @@ export default {
     const lat = url.searchParams.get('lat');
     const lon = url.searchParams.get('lon');
 
-    if (!lat || !lon) {
-      return new Response(JSON.stringify({ error: 'lat/lon required' }), {
+    const latN = Number(lat);
+    const lonN = Number(lon);
+    if (!lat || !lon || !Number.isFinite(latN) || !Number.isFinite(lonN)
+        || Math.abs(latN) > 90 || Math.abs(lonN) > 180) {
+      return new Response(JSON.stringify({ error: 'valid lat/lon required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -44,22 +47,39 @@ export default {
       upstream.searchParams.set('addressdetails', addressdetails);
     }
 
-    const upstreamRes = await fetch(upstream.toString(), {
-      headers: {
-        'User-Agent': 'WeatherChaser/1.0 (weatherchaser.vercel.app)',
-        'Referer': 'https://weatherchaser.vercel.app',
-      },
-    });
+    // Nominatim can hang or fail under load — bound the wait and report a 502
+    // instead of holding the function open until Vercel kills it.
+    try {
+      const upstreamRes = await fetch(upstream.toString(), {
+        headers: {
+          'User-Agent': 'WeatherChaser/1.0 (weatherchaser.vercel.app)',
+          'Referer': 'https://weatherchaser.vercel.app',
+        },
+        signal: AbortSignal.timeout(8000),
+      });
 
-    const body = await upstreamRes.text();
+      const body = await upstreamRes.text();
 
-    return new Response(body, {
-      status: upstreamRes.status,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=600',
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
+      return new Response(body, {
+        status: upstreamRes.status,
+        headers: {
+          'Content-Type': 'application/json',
+          // Cache ONLY successes — error bodies must never sit in the CDN
+          'Cache-Control': upstreamRes.ok
+            ? 'public, s-maxage=3600, stale-while-revalidate=600'
+            : 'no-store',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    } catch {
+      return new Response(JSON.stringify({ error: 'nominatim_unavailable' }), {
+        status: 502,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    }
   },
 };

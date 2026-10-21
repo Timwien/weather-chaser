@@ -13,6 +13,8 @@ const NOMINATIM_REVERSE_BASE = import.meta.env.PROD
   ? '/api/proxy/nominatim-reverse'
   : 'https://nominatim.openstreetmap.org/reverse';
 
+const TIMEOUT_MS = 8000;
+
 export interface NominatimAddress {
   village?: string;
   town?: string;
@@ -62,7 +64,7 @@ export async function searchPlace(query: string, lang = 'en'): Promise<Nominatim
     headers['Referer'] = self.location.origin;
   }
 
-  const res = await fetch(url.toString(), { headers });
+  const res = await fetch(url.toString(), { headers, signal: AbortSignal.timeout(TIMEOUT_MS) });
 
   if (!res.ok) throw new Error(`Nominatim error: ${res.status}`);
   return res.json();
@@ -106,7 +108,7 @@ export async function reverseGeocode(lat: number, lng: number, lang = 'en'): Pro
   url.searchParams.set('accept-language', normalizeLang(lang));
   const headers: Record<string, string> = {};
   if (import.meta.env.DEV) headers['Referer'] = self.location.origin;
-  const res = await fetch(url.toString(), { headers });
+  const res = await fetch(url.toString(), { headers, signal: AbortSignal.timeout(TIMEOUT_MS) });
   if (!res.ok) return null;
   return res.json();
 }

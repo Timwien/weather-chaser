@@ -16,8 +16,13 @@ export default {
     const latitude = url.searchParams.get('latitude');
     const longitude = url.searchParams.get('longitude');
 
-    if (!latitude || !longitude) {
-      return new Response(JSON.stringify({ error: 'latitude and longitude are required' }), {
+    // Open-Meteo accepts comma-separated lists (batch mode): every entry must be
+    // a finite number within range.
+    const validList = (raw: string | null, max: number): raw is string =>
+      !!raw && raw.split(',').every((v) => v.trim() !== '' && Number.isFinite(Number(v)) && Math.abs(Number(v)) <= max);
+
+    if (!validList(latitude, 90) || !validList(longitude, 180)) {
+      return new Response(JSON.stringify({ error: 'valid latitude and longitude are required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });

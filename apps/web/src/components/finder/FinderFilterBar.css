@@ -1,16 +1,60 @@
 /* FinderFilterBar — pinned filter section above results */
 
 .finder-filter-bar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  /* Opaque panel-matched bg so content scrolling behind is hidden */
-  background: var(--surface-frost-strong);
+  flex-shrink: 0;
   border-bottom: 1px solid var(--color-border);
-  padding: var(--space-3) 0 var(--space-2);
+  padding: 0 0 var(--space-2);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+.finder-filter-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Collapsible "Filter" row with compact summary of active filters (M4) */
+.finder-filter-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--surface-frost);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  text-align: left;
+}
+
+.finder-filter-toggle-title {
+  font-weight: var(--font-weight-semibold);
+  flex-shrink: 0;
+}
+
+.finder-filter-summary {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-secondary);
+}
+
+.finder-filter-chevron {
+  flex-shrink: 0;
+  transition: transform 0.15s;
+  color: var(--color-text-muted);
+}
+
+.finder-filter-chevron--open {
+  transform: rotate(180deg);
 }
 
 .finder-filter-group {
@@ -40,6 +84,10 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
   flex-wrap: nowrap;
+  /* padding so the active chip's shadow is not clipped by overflow */
+  padding: 2px 2px 6px;
+  margin: -2px -2px -6px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .finder-filter-toggle--scroll::-webkit-scrollbar {
@@ -52,7 +100,8 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 5px var(--space-2);
+  min-height: 36px;
+  padding: 5px var(--space-3);
   border: none;
   border-radius: var(--radius-full);
   background: rgba(13, 36, 38, 0.06);

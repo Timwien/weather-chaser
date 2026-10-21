@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Marker, Popup } from '@vis.gl/react-maplibre';
 import { useTranslation } from 'react-i18next';
 import type { FinderResultData } from '../finder/FinderResultRow.tsx';
 import { TrophyIcon } from '../finder/FinderIcons.tsx';
+import { useAppStore, isLocatedPlace, isRadiusArea } from '../../stores/appStore.ts';
+import { getFinderMode } from '../../utils/finderMode.ts';
 
 interface FinderMarkersProps {
   results: FinderResultData[];
@@ -19,12 +21,43 @@ function scoreColor(score: number): string {
 export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderMarkersProps) {
   const { t } = useTranslation('common');
   const [popupIndex, setPopupIndex] = useState<number | null>(null);
+  const searchAreas = useAppStore((st) => st.searchAreas);
+
+  // Origin only exists for single-place / radius searches (same rule as the result list)
+  const origin = useMemo(() => {
+    const first = searchAreas[0];
+    if (getFinderMode(searchAreas) !== 'around' || !first) return null;
+    if (isLocatedPlace(first)) return { lat: first.lat, lng: first.lng, name: first.name };
+    if (isRadiusArea(first)) return { lat: first.centerLat, lng: first.centerLng, name: undefined };
+    return null;
+  }, [searchAreas]);
 
   return (
     <>
+      {origin && (
+        <Marker longitude={origin.lng} latitude={origin.lat} anchor="center" style={{ zIndex: 1 }}>
+          <div
+            role="img"
+            aria-label={t('finder.origin_marker', 'Startort')}
+            title={origin.name ? `${t('finder.origin_marker', 'Startort')}: ${origin.name}` : t('finder.origin_marker', 'Startort')}
+            style={{
+              width: '16px',
+              height: '16px',
+              borderRadius: '50%',
+              background: 'var(--color-text, #0d2426)',
+              border: '3px solid white',
+              boxShadow: '0 0 0 2px var(--color-text, #0d2426), var(--shadow-md)',
+              pointerEvents: 'none',
+            }}
+          />
+        </Marker>
+      )}
       {results.map((result, idx) => {
         const color = scoreColor(result.score.composite);
         const isSelected = selectedIndex === idx;
+        // Top 3 are large; lower ranks are smaller so overlapping clusters stay readable
+        const isMinor = result.rank > 3;
+        const size = isSelected ? 40 : isMinor ? 26 : 34;
 
         return (
           <Marker
@@ -32,6 +65,8 @@ export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderM
             longitude={result.lng}
             latitude={result.lat}
             anchor="center"
+            // Better rank sits on top; the selected marker always wins. Stay below map controls (z 10), panels (z 20) and the mobile sheet (z 40).
+            style={{ zIndex: isSelected ? 9 : 8 - Math.min(result.rank - 1, 7) }}
             onClick={() => {
               onMarkerClick(idx);
               setPopupIndex(idx);
@@ -53,11 +88,11 @@ export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderM
               )}
               <div
                 style={{
-                  width: isSelected ? '40px' : '34px',
-                  height: isSelected ? '40px' : '34px',
+                  width: `${size}px`,
+                  height: `${size}px`,
                   borderRadius: '50%',
                   background: color,
-                  border: isSelected ? '3px solid white' : '2px solid white',
+                  border: isSelected ? '3px solid white' : isMinor ? '1.5px solid white' : '2px solid white',
                   boxShadow: 'var(--shadow-md)',
                   display: 'flex',
                   flexDirection: 'column',
@@ -68,13 +103,13 @@ export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderM
                   cursor: 'pointer',
                   transition: 'width 0.15s, height 0.15s',
                   userSelect: 'none',
-                  padding: '2px',
+                  padding: isMinor ? '0' : '2px',
                 }}
               >
-                <span style={{ fontSize: '9px', fontWeight: 400, opacity: 0.85, lineHeight: 1 }}>
+                <span style={{ fontSize: isMinor ? '8px' : '9px', fontWeight: 400, opacity: 0.85, lineHeight: 1 }}>
                   {t('finder.rank_label', '#{{rank}}', { rank: result.rank })}
                 </span>
-                <span style={{ fontSize: '13px', fontWeight: 700, lineHeight: 1 }}>
+                <span style={{ fontSize: isMinor ? '11px' : '13px', fontWeight: 700, lineHeight: 1 }}>
                   {Math.round(result.score.composite)}
                 </span>
               </div>
@@ -92,7 +127,7 @@ export function FinderMarkers({ results, selectedIndex, onMarkerClick }: FinderM
                     {result.townName}
                   </div>
                   <div style={{ fontSize: 'var(--font-size-xs)', color }}>
-                    Score: {Math.round(result.score.composite)}
+                    {t('finder.popup_score', 'Score: {{score}}', { score: Math.round(result.score.composite) })}
                     {result.distanceKm !== null && Math.round(result.distanceKm) > 0 && (
                       <> &middot; {Math.round(result.distanceKm)} km</>
                     )}

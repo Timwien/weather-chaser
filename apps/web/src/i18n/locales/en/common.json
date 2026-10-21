@@ -20,7 +20,9 @@
     "criteria": "What matters",
     "cta": {
       "findRoute": "Find Best Route",
-      "findWeather": "Find Best Weather"
+      "findWeather": "Find Best Weather",
+      "findRouteDesc": "Multi-day route to the best weather",
+      "findWeatherDesc": "Find the places with the best weather"
     },
     "criteria_options": {
       "sunshine": "Sunshine",
@@ -33,8 +35,10 @@
     "draw_area": "Draw area",
     "draw_hint": "Click to set points · click first point to finish",
     "draw_hint_start": "Tap the map to set points",
+    "draw_hint_start_desktop": "Click the map to set points",
     "draw_hint_more": "Set at least {{count}} more points",
     "draw_hint_close": "Tap the first point or “Done” to finish",
+    "draw_hint_close_desktop": "Click the first point or “Done” to finish",
     "draw_finish": "Done",
     "cancel_draw": "Cancel",
     "clear_area": "Clear area",
@@ -109,6 +113,7 @@
     "tap_add_title": "Add place?",
     "tap_add_confirm": "Add",
     "tap_hint": "Tap the map to pick a place",
+    "tap_hint_desktop": "Click the map to pick a place",
     "pin_remove": "Remove"
   },
   "share": {
@@ -124,6 +129,7 @@
     "weights_title": "Custom weights",
     "weights_locked": "Fine-tune how sunshine, rain, warmth and wind are weighted — a Premium feature.",
     "weights_customize": "Customize",
+    "weights_active": "Active: custom weights (replaces the selected profile)",
     "weights_use_preset": "Use preset",
     "upgrade_cta": "Upgrade to Premium",
     "modal_title": "WeatherChaser Premium",
@@ -226,7 +232,11 @@
     "sort_precipitation": "Rain",
     "sort_wind": "Wind",
     "rank_label": "#{{rank}}",
-    "distance_label": "{{km}} km away"
+    "filter_label": "Filter",
+    "origin_marker": "Start location",
+    "popup_score": "Score: {{score}}",
+    "distance_label": "{{km}} km away",
+    "distance_short": "{{km}} km"
   },
   "errors": {
     "no_towns": "No towns found in this area",
@@ -311,7 +321,8 @@
     "search_bar_close": "Close",
     "search_bar_open": "Edit search",
     "sheet_summary_route": "Route: {{stops}} stops · {{km}} km",
-    "sheet_summary_finder": "{{count}} places found",
+    "sheet_summary_finder_one": "{{count}} place found",
+    "sheet_summary_finder_other": "{{count}} places found",
     "sheet_summary_empty": "Tap to search"
   },
   "legal": {

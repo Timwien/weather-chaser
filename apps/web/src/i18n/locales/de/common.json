@@ -20,7 +20,9 @@
     "criteria": "Was ist wichtig",
     "cta": {
       "findRoute": "Beste Route finden",
-      "findWeather": "Bestes Wetter finden"
+      "findWeather": "Bestes Wetter finden",
+      "findRouteDesc": "Mehrtägige Route zum besten Wetter",
+      "findWeatherDesc": "Orte mit dem besten Wetter finden"
     },
     "criteria_options": {
       "sunshine": "Sonnenschein",
@@ -33,8 +35,10 @@
     "draw_area": "Gebiet zeichnen",
     "draw_hint": "Klicken um Punkte zu setzen · ersten Punkt klicken zum Abschließen",
     "draw_hint_start": "Tippe auf die Karte, um Punkte zu setzen",
+    "draw_hint_start_desktop": "Klicke auf die Karte, um Punkte zu setzen",
     "draw_hint_more": "Setze noch mindestens {{count}} Punkte",
     "draw_hint_close": "Tippe den ersten Punkt oder „Fertig“ zum Abschließen",
+    "draw_hint_close_desktop": "Klicke den ersten Punkt oder „Fertig“ zum Abschließen",
     "draw_finish": "Fertig",
     "cancel_draw": "Abbrechen",
     "clear_area": "Gebiet löschen",
@@ -109,6 +113,7 @@
     "tap_add_title": "Ort hinzufügen?",
     "tap_add_confirm": "Hinzufügen",
     "tap_hint": "Tippe auf die Karte, um einen Ort zu wählen",
+    "tap_hint_desktop": "Klicke auf die Karte, um einen Ort zu wählen",
     "pin_remove": "Entfernen"
   },
   "share": {
@@ -125,6 +130,7 @@
     "weights_locked": "Feinjustiere, wie Sonne, Regen, Wärme und Wind gewichtet werden — ein Premium-Feature.",
     "weights_customize": "Anpassen",
     "weights_use_preset": "Preset verwenden",
+    "weights_active": "Aktiv: eigene Gewichtung (ersetzt das gewählte Profil)",
     "upgrade_cta": "Auf Premium upgraden",
     "modal_title": "WeatherChaser Premium",
     "modal_text": "Schalte die volle Power des Routen-Optimierers frei.",
@@ -226,7 +232,11 @@
     "sort_precipitation": "Regen",
     "sort_wind": "Wind",
     "rank_label": "#{{rank}}",
-    "distance_label": "{{km}} km Luftlinie"
+    "filter_label": "Filter",
+    "origin_marker": "Startort",
+    "popup_score": "Score: {{score}}",
+    "distance_label": "{{km}} km Luftlinie",
+    "distance_short": "{{km}} km"
   },
   "errors": {
     "no_towns": "Keine Orte in diesem Gebiet gefunden",
@@ -311,7 +321,8 @@
     "search_bar_close": "Schließen",
     "search_bar_open": "Suche bearbeiten",
     "sheet_summary_route": "Route: {{stops}} Stopps · {{km}} km",
-    "sheet_summary_finder": "{{count}} Orte gefunden",
+    "sheet_summary_finder_one": "{{count}} Ort gefunden",
+    "sheet_summary_finder_other": "{{count}} Orte gefunden",
     "sheet_summary_empty": "Tippen um zu suchen"
   },
   "legal": {

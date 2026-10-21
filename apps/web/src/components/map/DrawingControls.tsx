@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useMap } from '@vis.gl/react-maplibre';
 import { useTranslation } from 'react-i18next';
+import { useIsTouch } from '../../hooks/useIsTouch.ts';
 import type { MapMouseEvent } from 'maplibre-gl';
 import { useAppStore } from '../../stores/appStore.ts';
 import './DrawingControls.css';
@@ -30,6 +31,7 @@ function hexToRgba(hex: string, alpha: number): string {
 
 export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsProps) {
   const { t } = useTranslation('common');
+  const isTouch = useIsTouch();
   const { current: map } = useMap();
   // X1: polygon existence is derived from the store (single source of truth),
   // so the "Clear area" affordance survives DrawingControls remounts.
@@ -313,12 +315,13 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
   }, [map, clearCanvas, onClear, setIsDrawingArea]);
 
   // Progressive hint: what to do next, not a manual
+  const sfx = isTouch ? '' : '_desktop';
   const hint =
     vertexCount === 0
-      ? t('entry.draw_hint_start')
+      ? t(`entry.draw_hint_start${sfx}`)
       : vertexCount < MIN_VERTICES
         ? t('entry.draw_hint_more', { count: MIN_VERTICES - vertexCount })
-        : t('entry.draw_hint_close');
+        : t(`entry.draw_hint_close${sfx}`);
 
   // ── UI ─────────────────────────────────────────────────────────────────────
   return (

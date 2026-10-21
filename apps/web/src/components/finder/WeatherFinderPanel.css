@@ -61,16 +61,25 @@
 
 .finder-sort-bar {
   display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
+  gap: 4px;
+  flex-wrap: nowrap;
   flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* room for the active chip's shadow, which overflow would otherwise clip */
+  padding: 2px 2px 6px;
+  margin: -2px -2px -6px;
+}
+
+.finder-sort-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .finder-sort-btn {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 5px 10px;
+  padding: 5px 8px;
   border-radius: var(--radius-full);
   border: none;
   background: rgba(13, 36, 38, 0.06);
@@ -81,6 +90,7 @@
   cursor: pointer;
   transition: background 0.12s, color 0.12s, box-shadow 0.12s;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Finder mode color = sunset/orange, matching FinderFilterBar */
@@ -113,5 +123,22 @@
   .finder-sort-btn {
     min-height: 40px;
     padding: 8px 14px;
+  }
+}
+
+/* M4: compact chrome inside the mobile sheet so the first results show at half snap */
+@media (max-width: 768px) {
+  .mobile-sheet-content .weather-finder-panel {
+    padding: var(--space-2) var(--space-4) var(--space-4);
+    gap: var(--space-2);
+  }
+
+  .mobile-sheet-content .finder-panel-header {
+    padding-bottom: var(--space-1);
+    gap: var(--space-2);
+  }
+
+  .mobile-sheet-content .finder-panel-title {
+    font-size: var(--font-size-lg);
   }
 }

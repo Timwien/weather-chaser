@@ -3,6 +3,7 @@ import { Map, useMap, Popup } from '@vis.gl/react-maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Map as MaplibreMap, MapMouseEvent } from 'maplibre-gl';
 import { useTranslation } from 'react-i18next';
+import { useIsTouch } from '../../hooks/useIsTouch.ts';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useThemeStore } from '../../stores/themeStore.ts';
 import { reverseGeocode, settlementName } from '../../services/nominatim.ts';
@@ -161,7 +162,7 @@ function FlyToFinderRank1({
 }
 
 /** Flies the map to an explicit target (e.g. user clicking a result row). */
-function FlyToCity({ target }: { target?: { lat: number; lng: number; token: number } | null }) {
+function FlyToCity({ target, sheetBottomPadding }: { target?: { lat: number; lng: number; token: number } | null; sheetBottomPadding?: number }) {
   const { current: map } = useMap();
   const prevTokenRef = useRef<number | null>(null);
 
@@ -170,8 +171,14 @@ function FlyToCity({ target }: { target?: { lat: number; lng: number; token: num
     if (target.token === prevTokenRef.current) return;
     prevTokenRef.current = target.token;
 
-    map.getMap().flyTo({ center: [target.lng, target.lat], zoom: 8, duration: 600 });
-  }, [map, target]);
+    map.getMap().flyTo({
+      center: [target.lng, target.lat],
+      zoom: 8,
+      duration: 600,
+      // center in the part of the map not covered by the mobile sheet
+      padding: { top: 0, right: 0, left: 0, bottom: sheetBottomPadding ?? 0 },
+    });
+  }, [map, target, sheetBottomPadding]);
 
   return null;
 }
@@ -185,6 +192,7 @@ const TAP_ADD_MODES = new Set(['idle', 'route-config', 'weather-finder']);
 
 function TapToAddLocation() {
   const { t, i18n } = useTranslation('common');
+  const isTouch = useIsTouch();
   const { current: map } = useMap();
   const mode = useAppStore((s) => s.mode);
   const isDrawingArea = useAppStore((s) => s.isDrawingArea);
@@ -254,7 +262,7 @@ function TapToAddLocation() {
           moment guidance helps), and when the pin button was pressed. It
           disappears as soon as the first place is added. */}
       {active && !pending && !isDrawingArea && (pickingLocation || !hasAreas) && (
-        <div className="map-tap-hint" role="status">{t('map.tap_hint')}</div>
+        <div className="map-tap-hint" role="status">{t(isTouch ? 'map.tap_hint' : 'map.tap_hint_desktop')}</div>
       )}
 
       {pending && (
@@ -335,7 +343,7 @@ export function MapContainer({
         {/* Always-present: map-positioning helpers */}
         <FitRouteOnSelection selectedStopIndex={selectedStopIndex} sheetBottomPadding={sheetBottomPadding} />
         <FlyToFinderRank1 finderResults={finderResults} sheetBottomPadding={sheetBottomPadding} />
-        <FlyToCity target={flyToCity} />
+        <FlyToCity target={flyToCity} sheetBottomPadding={sheetBottomPadding} />
         <TapToAddLocation />
         <MapLanguage />
         {/* X1: drawn areas persist here (store-backed), independent of DrawingControls' mount */}

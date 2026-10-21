@@ -77,7 +77,8 @@ function IndexPage() {
     setSelectedFinderIndex(idx);
     const r = computedFinderResults[idx];
     if (r) setFlyToCity(prev => ({ lat: r.lat, lng: r.lng, token: (prev?.token ?? 0) + 1 }));
-    if (isMobile) setSheetSnap(2);
+    // M3: keep the map visible — never expand to full; return from peek to half
+    if (isMobile && sheetSnap === 0) setSheetSnap(1);
   }
 
   // ── Map marker callbacks (popup + fly only — NO setSheetSnap, marker-tap decoupled) ──

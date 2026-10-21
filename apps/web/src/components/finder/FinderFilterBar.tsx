@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../stores/appStore.ts';
+import { useIsMobile } from '../../hooks/useIsMobile.ts';
 import { formatWeekday } from '../../utils/dateFormat.ts';
 import {
   FullDayIcon, MorningIcon, EveningIcon,
@@ -36,13 +38,40 @@ export function FinderFilterBar() {
   const { t, i18n } = useTranslation('common');
   const { finderConfig, setFinderConfig, weatherPrefs, setWeatherPrefs, tripConfig } = useAppStore();
 
+  const isMobile = useIsMobile();
+  // Collapsed by default on mobile so the results are visible first (M4)
+  const [open, setOpen] = useState(!isMobile);
+
   const days =
     tripConfig.startDate && tripConfig.endDate
       ? dateRange(tripConfig.startDate, tripConfig.endDate)
       : [];
 
+  const customActive = weatherPrefs.customWeights !== null;
+  const dayLabel = finderConfig.selectedDay === 'all' || !finderConfig.selectedDay
+    ? t('finder.day.all', '\u00d8 Alle Tage')
+    : formatWeekday(finderConfig.selectedDay, i18n.language);
+  const timeOpt = TIME_OPTIONS.find((o) => o.value === finderConfig.timeOfDay) ?? TIME_OPTIONS[0];
+  const profileLabel = customActive
+    ? t('premium.weights_title')
+    : t(`preset.${weatherPrefs.preset}`);
+  const summary = [dayLabel, t(timeOpt.labelKey, timeOpt.default), profileLabel].join(' \u00b7 ');
+
   return (
     <div className="finder-filter-bar">
+      <button
+        type="button"
+        className="finder-filter-toggle-row"
+        aria-expanded={open}
+        aria-controls="finder-filter-body"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span className="finder-filter-toggle-title">{t('finder.filter_label', 'Filter')}</span>
+        <span className="finder-filter-summary">{summary}</span>
+        <span className={`finder-filter-chevron${open ? ' finder-filter-chevron--open' : ''}`} aria-hidden="true">{'\u25be'}</span>
+      </button>
+      {open && (
+      <div id="finder-filter-body" className="finder-filter-body">
       {/* Day picker row */}
       {days.length > 0 && (
         <div className="finder-filter-group">
@@ -104,6 +133,8 @@ export function FinderFilterBar() {
           ))}
         </div>
       </div>
+      </div>
+      )}
     </div>
   );
 }

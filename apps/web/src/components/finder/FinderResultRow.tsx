@@ -96,16 +96,18 @@ export function FinderResultRow({ data, isSelected, onClick, sortBy, isFavorited
 
       {/* Town name + KPI meta row */}
       <div className="finder-result-body">
-        <div className="finder-result-name">{townName}</div>
-        <div className="finder-result-meta">
+        <div className="finder-result-title">
+          <span className="finder-result-name">{townName}</span>
           {distanceKm !== null && Math.round(distanceKm) > 0 && (
-            <>
-              <span className="finder-result-dist">
-                {t('finder.distance_label', '{{km}} km', { km: Math.round(distanceKm) })}
-              </span>
-              <span className="finder-result-sep">·</span>
-            </>
+            <span
+              className="finder-result-dist"
+              title={t('finder.distance_label', '{{km}} km', { km: Math.round(distanceKm) })}
+            >
+              {t('finder.distance_short', '{{km}} km', { km: Math.round(distanceKm) })}
+            </span>
           )}
+        </div>
+        <div className="finder-result-meta">
           <span className="finder-result-kpis">
             <span className="finder-result-kpi" aria-label={t('finder.kpi.sun', 'Sonne')}>
               <SunIcon size={11} /> {sunshineHoursPerDay.toFixed(1)}h

@@ -10,13 +10,14 @@ import './MobileBottomSheet.css';
  *
  * Returns [peekPx, halfPx, fullPx]
  *  peekPx — handle + summary strip only (≈84px)
- *  halfPx — ~50% of the visual viewport height
+ *  halfPx — ~50% of the viewport height (62% on short phones)
  *  fullPx — full visual viewport height (100dvh)
  */
 export function getSheetHeights(): [number, number, number] {
   const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
   const PEEK = 84; // handle pill (4px) + padding + summary strip (~60px)
-  return [PEEK, Math.round(vh * 0.5), vh];
+  // Short phones (≤700px) need a taller half detent so at least ~2 result rows fit
+  return [PEEK, Math.round(vh * (vh <= 700 ? 0.62 : 0.5)), vh];
 }
 
 /** Derive CSS translateY from a coverage height: sheet wrapper is 100dvh and

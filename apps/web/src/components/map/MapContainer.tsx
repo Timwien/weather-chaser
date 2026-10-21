@@ -20,6 +20,9 @@ import './MapContainer.css';
 // dark-mode glass panels never float over a glaring light map (mobile
 // readability issue: blur over light map turns dark glass into muddy gray).
 const MAP_STYLE_LIGHT = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+// Place data attribution (GeoNames, CC BY 4.0) — shown in the map's attribution control.
+const GEONAMES_ATTRIBUTION =
+  '<a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer">GeoNames</a> (CC BY 4.0)';
 const MAP_STYLE_DARK = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
 interface MapContainerProps {
@@ -325,6 +328,7 @@ export function MapContainer({
         }}
         mapStyle={resolvedTheme === 'dark' ? MAP_STYLE_DARK : MAP_STYLE_LIGHT}
         style={{ width: '100%', height: '100%' }}
+        attributionControl={{ compact: true, customAttribution: GEONAMES_ATTRIBUTION }}
         onLoad={handleLoad}
         onStyleData={handleStyleData}
       >

@@ -24,10 +24,11 @@ dieses Dokument ist die operative Kurzliste.
 - Open-Meteo Gratis-Tier: Retries + Batch-Splitting fangen Störungen ab,
   aber kein Fallback bei Totalausfall. Eskalation: `OPEN_METEO_API_KEY`
   in Vercel setzen (~29 €/Monat, dedizierte Server, kein Code nötig)
-- Overpass-Ausfälle: abgefedert durch Retries über 3 Mirrors + GeoNames-Fallback
-  (8,6k EU-Städte ≥15k Einwohner, gebündelt). Feedback-Runde 2026-07 (B6):
-  Polygon-Suche nutzt jetzt BBox-Query + clientseitigen Point-in-Polygon-Filter,
-  12s-Gesamt-Deadline, Session-Cache; der Proxy verwirft Soft-Timeouts.
+- Ortsdaten: eigener Datensatz (GeoNames `cities1000`, CC BY 4.0, ~76k Orte
+  in Europa, deutsche/englische Namen), ausgeliefert über `/api/places` mit
+  CDN-Cache; kein Fremddienst mehr im Pfad (Overpass entfällt seit Welle B,
+  Oktober 2026). Aktualisieren: `scripts/build-places.mjs` erneut ausführen.
+  Orte mit weniger als 1.000 Einwohnern fehlen bewusst.
 - Supabase-Standard-SMTP: ~4 Mails/Stunde (Registrierungs-Limit für Tester)
 
 ## 3. Kleinere Produkt-Todos

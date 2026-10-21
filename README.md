@@ -9,7 +9,7 @@ best stops for your dates.
 ```
 weather-chaser/
 ├── apps/web/            # Web app: Vite + React + TanStack Router + MapLibre (deployed on Vercel)
-│   └── api/             # Vercel functions: Nominatim / Open-Meteo / Overpass proxies, Stripe, feedback
+│   └── api/             # Vercel functions: Places (GeoNames), Nominatim / Open-Meteo proxies, Stripe, feedback
 ├── apps/mobile/         # Mobile app (Expo), see its own README
 ├── packages/core/       # Scoring and route optimizer (shared, unit-tested)
 ├── packages/typescript-config/
@@ -37,7 +37,7 @@ Environment variables for the web app (all optional locally) are read from
 
 - Weather: [Open-Meteo](https://open-meteo.com/)
 - Geocoding: [Nominatim](https://nominatim.openstreetmap.org/) (OpenStreetMap)
-- Places: OpenStreetMap via Overpass
+- Places: [GeoNames](https://www.geonames.org/) `cities1000` (CC BY 4.0), served by our own `/api/places` (rebuild with `scripts/build-places.mjs`)
 - Maps: [MapLibre GL](https://maplibre.org/)
 
 ## Conventions

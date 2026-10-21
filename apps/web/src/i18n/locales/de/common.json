@@ -242,7 +242,11 @@
     "no_location": "Bitte zuerst einen Ort hinzufügen oder ein Gebiet zeichnen.",
     "unknown": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
     "boundary_title": "Etwas ist schiefgelaufen",
-    "boundary_text": "Die App ist auf einen unerwarteten Fehler gestoßen. Lade sie neu, um fortzufahren."
+    "boundary_text": "Die App ist auf einen unerwarteten Fehler gestoßen. Lade sie neu, um fortzufahren.",
+    "not_found_title": "Seite nicht gefunden",
+    "not_found_text": "Diese Seite existiert nicht oder wurde verschoben.",
+    "trip_invalid_title": "Dieser Reise-Link funktioniert nicht",
+    "trip_invalid_text": "Der Link ist unvollständig oder beschädigt. Bitte den Absender, die Reise erneut zu teilen."
   },
   "account": {
     "tab_account": "Konto",

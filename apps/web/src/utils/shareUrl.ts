@@ -73,14 +73,39 @@ export interface ParsedShareData {
   route: Route;
 }
 
+const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
+const isStr = (v: unknown): v is string => typeof v === 'string';
+
+/** Minimal shape check so a hand-edited or truncated link yields null instead
+ *  of a half-built route that crashes the itinerary panel. */
+function isValidPayload(p: unknown): p is SharePayload {
+  if (!p || typeof p !== 'object') return false;
+  const o = p as Record<string, unknown>;
+  if (!isStr(o.startDate) || !isStr(o.endDate) || !isStr(o.preset)) return false;
+  if (!isNum(o.totalDays) || !isNum(o.maxStay)) return false;
+  const r = o.route as Record<string, unknown> | undefined;
+  if (!r || !Array.isArray(r.stops) || r.stops.length === 0) return false;
+  if (!isNum(r.totalDistanceKm) || !isNum(r.totalDays) || !isNum(r.avgScore)) return false;
+  return r.stops.every((s: unknown) => {
+    if (!s || typeof s !== 'object') return false;
+    const st = s as Record<string, unknown>;
+    const b = st.breakdown as Record<string, unknown> | undefined;
+    return (
+      isStr(st.name) && isNum(st.lat) && isNum(st.lng) && isNum(st.nights) && isNum(st.composite) &&
+      isStr(st.arrivalDate) && !Number.isNaN(new Date(st.arrivalDate).getTime()) &&
+      !!b && isNum(b.sunshine) && isNum(b.precipitation) && isNum(b.temperature) && isNum(b.wind)
+    );
+  });
+}
+
 export function parseShareUrl(search: string): ParsedShareData | null {
   try {
     const params = new URLSearchParams(search);
     const data = params.get('data');
     if (!data) return null;
 
-    const payload: SharePayload = JSON.parse(decodeURIComponent(atob(data)));
-    if (payload.v !== 1) return null;
+    const payload: unknown = JSON.parse(decodeURIComponent(atob(data)));
+    if (!isValidPayload(payload) || payload.v !== 1) return null;
 
     const route: Route = {
       stops: payload.route.stops.map((s) => ({

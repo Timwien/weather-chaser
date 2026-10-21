@@ -242,7 +242,11 @@
     "no_location": "Please add a place or draw an area first.",
     "unknown": "Something went wrong. Please try again.",
     "boundary_title": "Something went wrong",
-    "boundary_text": "The app hit an unexpected error. Reload to continue."
+    "boundary_text": "The app hit an unexpected error. Reload to continue.",
+    "not_found_title": "Page not found",
+    "not_found_text": "This page doesn’t exist or has been moved.",
+    "trip_invalid_title": "This trip link doesn’t work",
+    "trip_invalid_text": "The link is incomplete or damaged. Ask the sender to share the trip again."
   },
   "account": {
     "tab_account": "Account",

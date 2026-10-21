@@ -4,10 +4,16 @@ import { Route as indexRoute } from './routes/index.tsx';
 import { Route as tripRoute } from './routes/trip.tsx';
 import { Route as privacyRoute } from './routes/privacy.tsx';
 import { Route as tosRoute } from './routes/tos.tsx';
+import { StatusPage } from './components/common/StatusPage.tsx';
 
 const routeTree = rootRoute.addChildren([indexRoute, tripRoute, privacyRoute, tosRoute]);
 
-const router = createRouter({ routeTree });
+const router = createRouter({
+  routeTree,
+  defaultNotFoundComponent: () => (
+    <StatusPage titleKey="errors.not_found_title" textKey="errors.not_found_text" />
+  ),
+});
 
 declare module '@tanstack/react-router' {
   interface Register {

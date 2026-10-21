@@ -1,9 +1,10 @@
 import { createRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Route as rootRoute } from './__root.tsx';
 import { parseShareUrl } from '../utils/shareUrl.ts';
 import { useAppStore } from '../stores/appStore.ts';
 import { MapContainer } from '../components/map/MapContainer.tsx';
+import { StatusPage } from '../components/common/StatusPage.tsx';
 import { ItineraryPanel } from '../components/itinerary/ItineraryPanel.tsx';
 
 export const Route = createRoute({
@@ -16,8 +17,10 @@ function TripPage() {
   const [selectedStopIndex, setSelectedStopIndex] = useState<number | null>(null);
   const { setRoute, setTripConfig, setWeatherPrefs, setMode } = useAppStore();
 
+  // Parsed once; null = missing/damaged link → notice instead of an empty map.
+  const parsed = useMemo(() => parseShareUrl(window.location.search), []);
+
   useEffect(() => {
-    const parsed = parseShareUrl(window.location.search);
     if (parsed) {
       setTripConfig({
         startDate: parsed.config.startDate,
@@ -30,7 +33,11 @@ function TripPage() {
       setRoute(parsed.route);
       setMode('results');
     }
-  }, [setRoute, setTripConfig, setWeatherPrefs, setMode]);
+  }, [parsed, setRoute, setTripConfig, setWeatherPrefs, setMode]);
+
+  if (!parsed) {
+    return <StatusPage titleKey="errors.trip_invalid_title" textKey="errors.trip_invalid_text" />;
+  }
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>

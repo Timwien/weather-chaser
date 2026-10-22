@@ -22,6 +22,9 @@ export class WmsOverlay {
   private destroyed = false;
   /** First/any addSlot failed (style not ready) — the next styledata event retries. */
   private needsRetry = false;
+  private held = false;
+  private heldSlot = 0;
+  private heldLoaded = false;
   private retries = 0;
 
   constructor(private map: MaplibreMap) {
@@ -96,40 +99,77 @@ export class WmsOverlay {
     });
   }
 
-  /** Shows a frame; resolves once it is visible (or given up). Same frame twice is a no-op. */
-  show(frame: WmsFrame, opacity: number): Promise<void> {
+  /** Makes the loaded hidden slot visible and hides the previous one. */
+  private swapIn(slot: number, opacity: number) {
+    try {
+      if (!this.map.getLayer(this.lyr(slot))) return; // replaced meanwhile (theme swap)
+      this.map.setPaintProperty(this.lyr(slot), 'raster-opacity', opacity);
+      if (this.front >= 0 && this.map.getLayer(this.lyr(this.front))) {
+        this.map.setPaintProperty(this.lyr(this.front), 'raster-opacity', 0);
+      }
+      const old = this.front;
+      this.front = slot;
+      // Only if no newer show() started meanwhile — it may be reusing this very slot.
+      const swapToken = this.token;
+      if (old >= 0) {
+        setTimeout(() => {
+          if (!this.destroyed && this.token === swapToken && this.front !== old) this.clearSlot(old);
+        }, 250);
+      }
+    } catch { /* style swapped meanwhile — ensure() re-adds */ }
+  }
+
+  /**
+   * Shows a frame; resolves once it is visible (or given up). Same frame twice is a no-op.
+   * With `hold` the frame is only loaded into the hidden slot (preload for animations);
+   * a later show() of the same frame swaps it in without another load.
+   */
+  show(frame: WmsFrame, opacity: number, hold = false): Promise<void> {
     const key = `${frame.layer}|${frame.time}|${frame.format}|${opacity}`;
-    if (key === this.lastKey) return this.pending;
+    if (key === this.lastKey) {
+      if (hold) return this.pending;
+      if (!this.held) return this.pending;
+      // preloaded earlier → swap it in as soon as its load finished
+      this.held = false;
+      const slot = this.heldSlot;
+      const mine = this.token;
+      this.pending = this.pending.then(() => {
+        if (mine === this.token && !this.destroyed && this.heldLoaded) this.swapIn(slot, opacity);
+      });
+      return this.pending;
+    }
     this.lastKey = key;
     this.spec = { frame, opacity };
     const mine = ++this.token;
     const slot = this.front === 0 ? 1 : 0;
+    this.held = hold;
+    this.heldSlot = slot;
+    this.heldLoaded = false;
 
     this.pending = (async () => {
       if (!(await this.addSlot(slot, frame))) {
-        if (mine === this.token && !this.destroyed) { this.lastKey = ''; this.needsRetry = true; }
+        if (mine === this.token && !this.destroyed) { this.lastKey = ''; this.needsRetry = true; this.held = false; }
         return;
       }
       await this.waitLoaded(slot);
       if (mine !== this.token || this.destroyed) return; // superseded by a newer frame
-      try {
-        if (!this.map.getLayer(this.lyr(slot))) return; // replaced meanwhile (theme swap)
-        this.map.setPaintProperty(this.lyr(slot), 'raster-opacity', opacity);
-        if (this.front >= 0 && this.map.getLayer(this.lyr(this.front))) {
-          this.map.setPaintProperty(this.lyr(this.front), 'raster-opacity', 0);
-        }
-        const old = this.front;
-        this.front = slot;
-        // Only if no newer show() started meanwhile — it may be reusing this very slot.
-        const swapToken = this.token;
-        if (old >= 0) {
-          setTimeout(() => {
-            if (!this.destroyed && this.token === swapToken && this.front !== old) this.clearSlot(old);
-          }, 250);
-        }
-      } catch { /* style swapped meanwhile — ensure() re-adds */ }
+      this.heldLoaded = true;
+      if (this.held) return; // preload only
+      this.swapIn(slot, opacity);
     })();
     return this.pending;
+  }
+
+  /** Hides the raster (time outside the layer's range); the next show() brings it back. */
+  hide() {
+    this.token++;
+    this.lastKey = '';
+    this.held = false;
+    try {
+      if (this.front >= 0 && this.map.getLayer(this.lyr(this.front))) {
+        this.map.setPaintProperty(this.lyr(this.front), 'raster-opacity', 0);
+      }
+    } catch { /* style swapped meanwhile */ }
   }
 
   /** After a base-style swap (theme) the raster sources are gone — add them again. */

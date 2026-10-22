@@ -32,28 +32,32 @@ export function stepForZoom(zoom: number): Step {
 export const tileEdge = (step: Step) => GRID_N * step;
 export const tileKey = (t: TileRef) => `${t.step}/${t.lat0}/${t.lng0}`;
 
-/**
- * Tiles (aligned to the lattice) covering `bounds`, clipped to the supported
- * area. If more than `cap` tiles would be needed the next coarser step is used.
- */
-export function tilesForBounds(bounds: Bounds, zoom: number, cap = MAX_TILES): { step: Step; tiles: TileRef[] } {
+/** All lattice-aligned tiles of one step overlapping `bounds`, clipped to the supported area. */
+export function tilesAtStep(bounds: Bounds, step: Step): TileRef[] {
   const south = Math.max(bounds.south, LAT_RANGE[0]);
   const north = Math.min(bounds.north, LAT_RANGE[1]);
   const west = Math.max(bounds.west, LNG_RANGE[0]);
   const east = Math.min(bounds.east, LNG_RANGE[1]);
+  const edge = tileEdge(step);
+  const tiles: TileRef[] = [];
+  if (south >= north || west >= east) return tiles;
+  for (let lat0 = Math.floor(south / edge) * edge; lat0 < north; lat0 += edge) {
+    for (let lng0 = Math.floor(west / edge) * edge; lng0 < east; lng0 += edge) {
+      tiles.push({ step, lat0, lng0 });
+    }
+  }
+  return tiles;
+}
+
+/**
+ * Tiles covering `bounds` at the step for `zoom`. If more than `cap` tiles would
+ * be needed the next coarser step is used.
+ */
+export function tilesForBounds(bounds: Bounds, zoom: number, cap = MAX_TILES): { step: Step; tiles: TileRef[] } {
   let idx = STEPS.indexOf(stepForZoom(zoom));
   for (;;) {
-    const step = STEPS[idx];
-    const edge = tileEdge(step);
-    const tiles: TileRef[] = [];
-    if (south < north && west < east) {
-      for (let lat0 = Math.floor(south / edge) * edge; lat0 < north; lat0 += edge) {
-        for (let lng0 = Math.floor(west / edge) * edge; lng0 < east; lng0 += edge) {
-          tiles.push({ step, lat0, lng0 });
-        }
-      }
-    }
-    if (tiles.length <= cap || idx === 0) return { step, tiles };
+    const tiles = tilesAtStep(bounds, STEPS[idx]);
+    if (tiles.length <= cap || idx === 0) return { step: STEPS[idx], tiles };
     idx--;
   }
 }

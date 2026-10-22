@@ -25,6 +25,8 @@ interface WeatherLayerState {
   /** Selected instant (ms) or null = type-specific default (radar: now, forecast: first trip day, clouds: latest). */
   timeMs: number | null;
   playing: boolean;
+  /** State of the cloud-forecast tiles (layer 'forecast' only). */
+  cloudStatus: 'loading' | 'ready' | 'error';
   /** Capabilities per UI layer type (stable object identities — safe as selectors). */
   axes: Partial<Record<WeatherLayerType, LayerAxes>>;
   status: Record<WeatherLayerType, AxesStatus>;
@@ -32,6 +34,9 @@ interface WeatherLayerState {
   setLayer: (l: WeatherLayerChoice) => void;
   setTimeMs: (t: number | null) => void;
   setPlaying: (p: boolean) => void;
+  setCloudStatus: (s: 'loading' | 'ready' | 'error') => void;
+  /** Switches to the combined clouds + rain forecast at `timeMs` and starts the playback. */
+  openTimeline: (timeMs: number | null) => void;
   /** Fetch (cached 10 min in the service) the time axes for a layer type. */
   ensureAxes: (type: WeatherLayerType, force?: boolean) => Promise<void>;
 }
@@ -40,6 +45,7 @@ export const useWeatherLayerStore = create<WeatherLayerState>((set, get) => ({
   layer: readStored(),
   timeMs: null,
   playing: false,
+  cloudStatus: 'loading',
   axes: {},
   status: { radar: 'idle', forecast: 'idle', clouds: 'idle' },
 
@@ -49,6 +55,11 @@ export const useWeatherLayerStore = create<WeatherLayerState>((set, get) => ({
   },
   setTimeMs: (t) => set({ timeMs: t }),
   setPlaying: (p) => set({ playing: p }),
+  setCloudStatus: (cloudStatus) => set({ cloudStatus }),
+  openTimeline: (t) => {
+    writeStored('forecast');
+    set({ layer: 'forecast', timeMs: t, playing: true });
+  },
   ensureAxes: async (type, force = false) => {
     const st = get().status[type];
     if (st === 'loading') return;

@@ -5,7 +5,7 @@ import {
   LAYER_NAMES, resolveFrame, type LayerAxes, type WeatherLayerType, type WmsFrame,
 } from '../services/dwdLayers.ts';
 import {
-  axisEnd, axisTimes, mergeAxes, radarFrames, snapToAxis, timesOnLocalDay, type TimeAxis,
+  axisEnd, axisTimes, localDayBounds, mergeAxes, radarFrames, snapToAxis, timesOnLocalDay, type TimeAxis,
 } from '../utils/wmsTime.ts';
 
 const HOUR = 3_600_000;
@@ -16,6 +16,38 @@ export function forecastAxis(axes: LayerAxes): TimeAxis | null {
   const gl = axes[LAYER_NAMES.forecastGlobal];
   if (eu && gl) return mergeAxes(eu, gl);
   return eu ?? gl ?? null;
+}
+
+const CLOUD_DAYS = 7;
+const THREE_H = 3 * HOUR;
+
+/** Last hour for which /api/cloudgrid has data: the forecast starts at 00:00 GMT today and spans 7 days. */
+export function cloudHorizon(now: number): number {
+  const d = new Date(now);
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) + CLOUD_DAYS * 24 * HOUR - HOUR;
+}
+
+/**
+ * Forecast time grid: the DWD rain grid, extended in 3-h steps to the end of the
+ * cloud forecast (Open-Meteo, 7 days) so clouds can be shown where rain is not available.
+ */
+export function cloudForecastAxis(axes: LayerAxes, now: number): TimeAxis | null {
+  const rain = forecastAxis(axes);
+  if (!rain) return null;
+  const end = axisEnd(rain);
+  const horizon = cloudHorizon(now);
+  if (horizon <= end + THREE_H) return rain;
+  const extra: number[] = [];
+  for (let t = end + THREE_H; t <= horizon; t += THREE_H) extra.push(t);
+  return { kind: 'list', times: [...axisTimes(rain), ...extra] };
+}
+
+/** Frames of the playback loop: grid instants on the given days, in order. */
+export function playbackFrames(grid: TimeAxis, days: string[]): number[] {
+  if (days.length === 0) return [];
+  const from = localDayBounds(days[0])[0];
+  const to = localDayBounds(days[days.length - 1])[1];
+  return axisTimes(grid).filter((t) => t >= from && t < to);
 }
 
 /** Instants selectable for a layer type (radar: last 2 h; clouds: last ~24 h; forecast: full range). */
@@ -30,7 +62,7 @@ export function framesFor(type: WeatherLayerType, axes: LayerAxes, now: number):
     const end = axisEnd(a);
     return axisTimes(a).filter((t) => t >= end - 24 * HOUR);
   }
-  const a = forecastAxis(axes);
+  const a = cloudForecastAxis(axes, now);
   return a ? axisTimes(a) : [];
 }
 
@@ -62,7 +94,7 @@ export function useWeatherTimeline(): WeatherTimeline {
   const time = useMemo(() => {
     if (!type || !axes || frames.length === 0) return null;
     if (type === 'forecast') {
-      const grid = forecastAxis(axes)!;
+      const grid = cloudForecastAxis(axes, now)!;
       if (timeMs !== null) return snapToAxis(grid, timeMs);
       if (startDate) {
         const noon = new Date(`${startDate}T12:00:00`).getTime();

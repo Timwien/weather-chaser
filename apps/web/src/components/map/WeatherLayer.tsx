@@ -1,13 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMap } from '@vis.gl/react-maplibre';
 import { LAYER_OPACITY } from '../../services/dwdLayers.ts';
+import { useAppStore } from '../../stores/appStore.ts';
+import { useThemeStore } from '../../stores/themeStore.ts';
 import { useWeatherLayerStore } from '../../stores/weatherLayerStore.ts';
-import { useWeatherTimeline } from '../../hooks/useWeatherTimeline.ts';
+import {
+  cloudForecastAxis, dayKeysForChips, playbackFrames, useWeatherTimeline,
+} from '../../hooks/useWeatherTimeline.ts';
 import { resolveFrame } from '../../services/dwdLayers.ts';
 import { WmsOverlay } from './wmsOverlay.ts';
+import type { CloudOverlay } from './CloudOverlay.ts'; // implementation is loaded lazily (keeps the entry chunk small)
 
 const FRAME_MS = 650;
 const LATEST_DWELL_MS = 900;
+/** Forecast playback: one 3-h step per tick; clouds glide between the steps. */
+const FORECAST_STEP_MS = 800;
+const FORECAST_DWELL_MS = 700;
+const CLOUD_GLIDE_MS = 500;
 const REFRESH_MS = 10 * 60 * 1000;
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -22,7 +31,10 @@ export function WeatherLayer() {
   const playing = useWeatherLayerStore((s) => s.playing);
   const setPlaying = useWeatherLayerStore((s) => s.setPlaying);
   const setTimeMs = useWeatherLayerStore((s) => s.setTimeMs);
+  const setCloudStatus = useWeatherLayerStore((s) => s.setCloudStatus);
+  const scheme = useThemeStore((s) => s.resolved);
   const [overlay, setOverlay] = useState<WmsOverlay | null>(null);
+  const [cloud, setCloud] = useState<CloudOverlay | null>(null);
   const tlRef = useRef(tl);
   tlRef.current = tl;
   const type = tl.type;
@@ -56,15 +68,34 @@ export function WeatherLayer() {
     };
   }, [map, type]);
 
+  // Cloud forecast overlay: only for the combined clouds + rain layer.
+  useEffect(() => {
+    if (!map || type !== 'forecast') { setCloud(null); return; }
+    let co: CloudOverlay | null = null;
+    let cancelled = false;
+    void import('./CloudOverlay.ts').then(({ CloudOverlay: Impl }) => {
+      if (cancelled) return;
+      co = new Impl(map.getMap(), setCloudStatus);
+      setCloud(co);
+    });
+    return () => { cancelled = true; co?.destroy(); setCloud(null); };
+  }, [map, type, setCloudStatus]);
+  useEffect(() => { cloud?.setScheme(scheme === 'dark' ? 'dark' : 'light'); }, [cloud, scheme]);
+  useEffect(() => {
+    cloud?.setTime(tl.time, playing ? CLOUD_GLIDE_MS : 0);
+  }, [cloud, tl.time, playing]);
+
   // Show the current frame (debounced so slider scrubbing doesn't thrash tile loads).
   const frameKey = tl.frame ? `${tl.frame.layer}|${tl.frame.time}` : '';
   useEffect(() => {
-    if (!overlay || !tl.frame || !type) return;
+    if (!overlay || !type) return;
+    if (!tl.frame) { if (tl.time !== null) overlay.hide(); return; } // e.g. clouds-only hours beyond the rain forecast
+    if (playing && type === 'forecast') return; // the playback loop owns the raster (preloads the next frame)
     const frame = tl.frame;
     const id = setTimeout(() => { void overlay.show(frame, LAYER_OPACITY[type]); }, playing ? 0 : 120);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [overlay, frameKey, type]);
+  }, [overlay, frameKey, type, playing]);
 
   // Radar animation: advance only after the next frame has loaded; pause when the tab is hidden.
   useEffect(() => {
@@ -87,6 +118,40 @@ export function WeatherLayer() {
         if (cancelled) break;
         const dwell = i === frames.length - 1 ? LATEST_DWELL_MS : 0;
         await sleep(Math.max(0, FRAME_MS - (Date.now() - started)) + dwell);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', onVis);
+    };
+  }, [playing, overlay, type, tl.axes, setPlaying, setTimeMs]);
+
+  // Forecast playback over the trip days (3-h steps): show frame i, preload i+1, loop.
+  useEffect(() => {
+    if (!playing || !overlay || type !== 'forecast' || !tl.axes) return;
+    let cancelled = false;
+    const onVis = () => { if (document.hidden) setPlaying(false); };
+    document.addEventListener('visibilitychange', onVis);
+    void (async () => {
+      const { axes, time, now } = tlRef.current;
+      const grid = axes ? cloudForecastAxis(axes, now) : null;
+      const { startDate, endDate } = useAppStore.getState().tripConfig;
+      const frames = grid ? playbackFrames(grid, dayKeysForChips(startDate, endDate, now)) : [];
+      if (!axes || frames.length < 2) { setPlaying(false); return; }
+      const opacity = LAYER_OPACITY.forecast;
+      let i = Math.max(0, frames.findIndex((f) => time !== null && f >= time));
+      while (!cancelled) {
+        const started = Date.now();
+        const frame = resolveFrame('forecast', frames[i], axes);
+        if (frame) await overlay.show(frame, opacity); else overlay.hide();
+        // The frame is on the map even if pause hit meanwhile → keep the label in sync.
+        if (useWeatherLayerStore.getState().layer === 'forecast') setTimeMs(frames[i]);
+        if (cancelled) break;
+        const next = (i + 1) % frames.length;
+        const nextFrame = resolveFrame('forecast', frames[next], axes);
+        if (nextFrame) void overlay.show(nextFrame, opacity, true);
+        await sleep(Math.max(0, FORECAST_STEP_MS - (Date.now() - started)) + (next === 0 ? FORECAST_DWELL_MS : 0));
+        i = next;
       }
     })();
     return () => {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMap } from '@vis.gl/react-maplibre';
 import { LAYER_OPACITY } from '../../services/dwdLayers.ts';
 import { useAppStore } from '../../stores/appStore.ts';
@@ -18,6 +18,11 @@ const FORECAST_STEP_MS = 800;
 const FORECAST_DWELL_MS = 700;
 const CLOUD_GLIDE_MS = 500;
 const REFRESH_MS = 10 * 60 * 1000;
+/** Noon of the first trip day when it is still ahead, else now. */
+function fallbackCloudTime(startDate: string | null): number {
+  const noon = startDate ? new Date(`${startDate}T12:00:00`).getTime() : NaN;
+  return Number.isFinite(noon) && noon >= Date.now() - 12 * 3_600_000 ? noon : Date.now();
+}
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 /**
@@ -76,14 +81,22 @@ export function WeatherLayer() {
     void import('./CloudOverlay.ts').then(({ CloudOverlay: Impl }) => {
       if (cancelled) return;
       co = new Impl(map.getMap(), setCloudStatus);
+      // dev-only handle for the performance check (lastRenderMs)
+      if (import.meta.env.DEV) (window as unknown as { __wxCloud?: CloudOverlay }).__wxCloud = co;
       setCloud(co);
     });
     return () => { cancelled = true; co?.destroy(); setCloud(null); };
   }, [map, type, setCloudStatus]);
   useEffect(() => { cloud?.setScheme(scheme === 'dark' ? 'dark' : 'light'); }, [cloud, scheme]);
+  // Clouds do not depend on the DWD capabilities: until the rain time axis is known
+  // (slow GetCapabilities / probing), show the clouds for the chosen or default instant.
+  const storedTime = useWeatherLayerStore((s) => s.timeMs);
+  const tripStart = useAppStore((s) => s.tripConfig.startDate);
+  const fallbackTime = useMemo(() => fallbackCloudTime(tripStart), [tripStart]);
+  const cloudTime = tl.time ?? storedTime ?? fallbackTime;
   useEffect(() => {
-    cloud?.setTime(tl.time, playing ? CLOUD_GLIDE_MS : 0);
-  }, [cloud, tl.time, playing]);
+    cloud?.setTime(cloudTime, playing ? CLOUD_GLIDE_MS : 0);
+  }, [cloud, cloudTime, playing]);
 
   // Show the current frame (debounced so slider scrubbing doesn't thrash tile loads).
   const frameKey = tl.frame ? `${tl.frame.layer}|${tl.frame.time}` : '';

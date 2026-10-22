@@ -36,6 +36,18 @@ html, body {
   }
 }
 
+/* Form controls do not inherit the page font by default (UA stylesheet uses
+   system fonts) — make every button/input use the app font. */
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+/* maplibre-gl.css sets "Helvetica Neue", Arial on the map root, which all
+   markers/popups inherit — use the app font instead. */
+html .maplibregl-map {
+  font-family: inherit;
+}
+
 /* B5: remove the 300ms double-tap delay + double-tap zoom on interactive
    elements so taps feel instant and don't trigger page zoom. */
 button, [role="button"], a, .loc-tag, .criteria-chip,
@@ -71,7 +83,7 @@ button, [role="button"], a, .loc-tag, .criteria-chip,
 }
 
 /* maplibre-gl container reset */
-.maplibregl-map {
+html .maplibregl-map {
   position: absolute;
   top: 0;
   left: 0;

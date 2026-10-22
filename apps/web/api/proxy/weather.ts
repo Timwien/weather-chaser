@@ -4,17 +4,13 @@
 // Hardened: the paid OPEN_METEO_API_KEY must not be usable as an open relay, so
 // only the exact query shape the client sends is accepted — unknown parameters,
 // unknown variables, oversized coordinate lists and long date spans get a 400.
-//
-// Time budget (client timeout is 20 s, this stays below it):
-//   max 2 attempts × 8 s upstream timeout + short backoff; a 429 with a short
-//   Retry-After is waited out once, a longer one is passed on to the client.
+// Upstream access (timeout, retry, API key) lives in ../_lib/openMeteo.ts.
+
+import { badRequest as bad, fetchOpenMeteo, jsonResponse as json } from '../_lib/openMeteo.js';
 
 const MAX_COORDS = 50;
 const MAX_SPAN_DAYS = 16;
 const MAX_FORECAST_DAYS = 16;
-const UPSTREAM_TIMEOUT_MS = 8000;
-const ATTEMPTS = 2;
-const MAX_INLINE_RETRY_AFTER_S = 2;
 
 const ALLOWED_PARAMS = new Set([
   'latitude', 'longitude', 'daily', 'hourly', 'start_date', 'end_date', 'forecast_days', 'timezone',
@@ -25,14 +21,6 @@ const ALLOWED_DAILY = new Set([
 const ALLOWED_HOURLY = new Set([
   'temperature_2m', 'precipitation', 'sunshine_duration', 'wind_speed_10m',
 ]);
-
-const json = (body: unknown, status: number, extra: Record<string, string> = {}) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', ...extra },
-  });
-
-const bad = (error: string) => json({ error }, 400, { 'Cache-Control': 'no-store' });
 
 /** Comma-separated finite numbers within ±max, at most MAX_COORDS entries. */
 function validList(raw: string | null, max: number): raw is string {
@@ -106,57 +94,16 @@ export default {
     const error = validate(url.searchParams);
     if (error) return bad(error);
 
-    const upstream = new URL('https://api.open-meteo.com/v1/forecast');
-    for (const [key, value] of url.searchParams) upstream.searchParams.set(key, value);
-
-    const apiKey = process.env.OPEN_METEO_API_KEY;
-    if (apiKey) {
-      upstream.searchParams.set('apikey', apiKey);
-    }
-
-    // Open-Meteo fails transiently under load (measured: 502 → 504 → 500 in a
-    // row, then recovery). One retry with a per-attempt timeout.
-    let lastStatus = 502;
-    for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
-      if (attempt > 0) await new Promise((r) => setTimeout(r, 600));
-      try {
-        const upstreamRes = await fetch(upstream.toString(), {
-          signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
-        });
-        lastStatus = upstreamRes.status;
-
-        if (upstreamRes.status === 429) {
-          const retryAfter = Number(upstreamRes.headers.get('Retry-After'));
-          const known = Number.isFinite(retryAfter) && retryAfter > 0;
-          if (known && retryAfter <= MAX_INLINE_RETRY_AFTER_S && attempt < ATTEMPTS - 1) {
-            await new Promise((r) => setTimeout(r, retryAfter * 1000));
-            continue;
-          }
-          // Let the client decide (it bounds the wait by its own deadline)
-          return json({ error: 'rate_limited' }, 429, {
-            'Cache-Control': 'no-store',
-            ...(known ? { 'Retry-After': String(Math.ceil(retryAfter)) } : {}),
-          });
-        }
-        if (!upstreamRes.ok) continue;
-
-        const body = await upstreamRes.text();
-        return new Response(body, {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            // Cache ONLY successes — error bodies must never sit in the CDN
-            'Cache-Control': 'public, s-maxage=21600, stale-while-revalidate=3600',
-            'Access-Control-Allow-Origin': '*',
-          },
-        });
-      } catch {
-        lastStatus = 504; // timeout / network — try again
-      }
-    }
-
-    return json({ error: 'open_meteo_unavailable' }, lastStatus >= 400 ? lastStatus : 502, {
-      'Cache-Control': 'no-store',
+    const result = await fetchOpenMeteo(url.searchParams);
+    if (!result.ok) return result.response;
+    return new Response(result.body, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        // Cache ONLY successes — error bodies must never sit in the CDN
+        'Cache-Control': 'public, s-maxage=21600, stale-while-revalidate=3600',
+        'Access-Control-Allow-Origin': '*',
+      },
     });
   },
 };

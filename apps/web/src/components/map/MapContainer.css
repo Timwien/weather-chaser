@@ -61,6 +61,12 @@
   touch-action: manipulation;
 }
 
+/* Always above the floating map controls (draw button, hints). The tapped
+   point is also panned into the free area, see revealPopupArea(). */
+.maplibregl-popup {
+  z-index: 20;
+}
+
 /* Neutralise the default MapLibre popup chrome so our card shows cleanly */
 .maplibregl-popup-content {
   padding: var(--space-3);

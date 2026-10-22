@@ -206,6 +206,32 @@ function FlyToCity({ target, sheetBottomPadding }: { target?: { lat: number; lng
  * never silently adds a location. Always available in entry modes (idle /
  * route-config / weather-finder), suppressed while drawing a polygon.
  */
+/** Approximate popup card size (px) incl. tip + offset. */
+const POPUP_W = 240;
+const POPUP_H = 150;
+
+/**
+ * Pan the map so the tapped point sits in the free area: the popup (anchored
+ * above the point) must clear the floating controls at the top (mobile search
+ * pill + draw button, desktop draw button) and stay inside the visible map.
+ */
+function revealPopupArea(
+  nativeMap: { getContainer(): HTMLElement; panBy(o: [number, number], opts?: { duration: number }): unknown },
+  x: number,
+  y: number,
+  inset: number,
+) {
+  const { clientWidth: w } = nativeMap.getContainer();
+  const mobile = window.matchMedia('(max-width: 768px)').matches;
+  const topReserved = mobile ? 116 : 64;
+  const minY = topReserved + POPUP_H;
+  const minX = inset + POPUP_W / 2 + 8;
+  const maxX = w - POPUP_W / 2 - 8;
+  const dy = y < minY ? minY - y : 0;
+  const dx = x < minX ? minX - x : x > maxX ? maxX - x : 0;
+  if (dx || dy) nativeMap.panBy([-dx, -dy], { duration: 300 });
+}
+
 const TAP_ADD_MODES = new Set(['idle', 'route-config', 'weather-finder']);
 
 function TapToAddLocation() {
@@ -236,6 +262,7 @@ function TapToAddLocation() {
       // while the map is stopping).
       if (Date.now() - lastMoveEndRef.current < 300) return;
       const { lat, lng } = e.lngLat;
+      revealPopupArea(nativeMap, e.point.x, e.point.y, inset);
       // Optimistic placeholder while reverse-geocoding.
       setPending({ lat, lng, name: `${lat.toFixed(3)}, ${lng.toFixed(3)}`, fullName: '' });
       // A timeout/network error must not leave the popup stuck on the
@@ -254,7 +281,7 @@ function TapToAddLocation() {
       nativeMap.off('click', handleClick);
       nativeMap.off('moveend', onMoveEnd);
     };
-  }, [map, active]);
+  }, [map, active, inset]);
 
   // Leaving an eligible mode dismisses any open popup + the hint.
   useEffect(() => {

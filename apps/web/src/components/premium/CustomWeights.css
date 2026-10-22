@@ -22,11 +22,19 @@
 
 .custom-weights-title {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  min-width: 0;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text);
+}
+
+.custom-weights-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .custom-weights-badge {
@@ -38,19 +46,20 @@
   background: var(--gradient-premium);
   border-radius: var(--radius-full);
   padding: 2px 8px;
+  white-space: nowrap;
 }
 
 .custom-weights-toggle {
+  flex-shrink: 0;
   min-height: 40px;
-  padding: 0 var(--space-2);
+  padding: 2px 10px;
   background: none;
   border: none;
   font-size: var(--font-size-xs);
   color: var(--color-primary);
   cursor: pointer;
   font-weight: var(--font-weight-medium);
-  min-height: 40px;
-  padding: 2px 10px;
+  white-space: nowrap;
   border-radius: var(--radius-sm);
 }
 

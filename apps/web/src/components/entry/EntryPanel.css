@@ -185,6 +185,14 @@
   width: calc(var(--panel-width) - 48px);
 }
 
+/* Narrow screens: never wider than the trigger wrapper (no cut-off at the right edge) */
+@media (max-width: 768px) {
+  .drp-popover {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
 .drp-hint {
   font-size: var(--font-size-xs);
   font-weight: 600;
@@ -246,8 +254,13 @@
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text);
-  padding: 0 36px; /* leave room for nav arrows */
-  line-height: 28px;
+  padding: 0 48px; /* leave room for nav arrows */
+  /* same 40px row as the absolutely-positioned nav buttons → both centred */
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
 }
 
 .drp-grid {
@@ -820,6 +833,44 @@
   border-top: 1px solid var(--color-border);
 }
 
+/* Soft fade so scrolled form content dissolves instead of being sliced */
+.entry-panel-ctas::before,
+.entry-sticky-cta::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: var(--space-4);
+  background: linear-gradient(to bottom, transparent, var(--color-surface));
+  pointer-events: none;
+}
+
+/* Short viewports: the sticky CTA block must not eat half the panel */
+@media (max-height: 700px) {
+  .entry-panel-ctas,
+  .entry-sticky-cta {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+  .mobile-search-body .entry-panel-ctas,
+  .mobile-search-body .entry-sticky-cta {
+    padding-top: var(--space-1);
+    padding-bottom: var(--space-1);
+  }
+  .entry-panel-ctas { gap: var(--space-2); }
+  .cta-item { gap: 0; }
+  .cta-btn {
+    min-height: 40px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  .cta-desc {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+}
+
 /* Inside the mobile search surface the panel has no padding */
 .mobile-search-body .entry-panel-ctas,
 .mobile-search-body .entry-sticky-cta {
@@ -1341,13 +1392,15 @@
   margin-top: auto;
   padding-top: var(--space-3);
   border-top: 1px solid var(--color-border);
-  display: flex;
+  /* account | feedback (truly centred) | reload */
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
 }
 
 .entry-panel-account-btn {
-  min-width: 40px;
-  min-height: 40px;
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
   background: none;
   border: none;
   cursor: pointer;
@@ -1367,7 +1420,7 @@
 
 /* F1: reload button sits at the far right of the footer */
 .entry-panel-reload-btn {
-  margin-left: auto;
+  justify-self: end;
 }
 
 /* Feedback: icon + visible label, centered between account and reload */
@@ -1376,7 +1429,7 @@
   font-family: var(--font-sans);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  min-height: var(--touch-target);
+  justify-self: center;
 }
 
 /* X2: save-search button under the CTAs */

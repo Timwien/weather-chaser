@@ -73,11 +73,13 @@
 .itinerary-back-btn {
   display: flex;
   align-items: center;
-  min-height: 40px;
+  min-height: var(--touch-target);
   gap: var(--space-1);
   background: none;
   border: none;
   padding: var(--space-1) var(--space-2);
+  /* optical alignment: the label's left edge lines up with the content below */
+  margin-left: calc(-1 * var(--space-2));
   border-radius: var(--radius-sm);
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);

@@ -61,6 +61,14 @@
   box-shadow: 0 4px 14px var(--color-primary-glow);
 }
 
+/* Fertig / Abbrechen: same width (container shrink-wraps the widest) */
+.draw-controls--drawing {
+  align-items: stretch;
+}
+.draw-controls--drawing .draw-btn {
+  justify-content: center;
+}
+
 /* ── Hint pill (top center, away from the buttons) ──────── */
 .draw-hint {
   position: absolute;

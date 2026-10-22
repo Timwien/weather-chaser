@@ -62,11 +62,13 @@ export function CustomWeights() {
     <div className={`custom-weights${!isPremium ? ' custom-weights--locked' : ''}`}>
       <div className="custom-weights-header">
         <span className="custom-weights-title">
-          {t('premium.weights_title')}
+          <span className="custom-weights-title-row">
+            {t('premium.weights_title')}
+            <InfoTip text={t('info.custom_weights')} size={13} />
+          </span>
           <span className="custom-weights-badge">
             {PREMIUM_FREE_BETA ? t('premium.beta_badge') : t('premium.badge')}
           </span>
-          <InfoTip text={t('info.custom_weights')} size={13} />
         </span>
         <button
           type="button"

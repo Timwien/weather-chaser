@@ -80,18 +80,19 @@ function capabilitiesUrl(layer: string): string {
 
 const SIX_H = 6 * 3_600_000;
 
-/** Tiny GetMap over Germany — true when the layer really has an image for that instant. */
-async function hasImage(layer: string, timeMs: number, signal: AbortSignal): Promise<boolean> {
+/**
+ * Tiny GetMap over Germany — true when the layer really has an image for that instant.
+ * DWD answers "no data" with HTTP 200 + XML; everything else (abort/timeout, network error,
+ * 429, 5xx) is NOT "no data" and throws, so a probe failure can never move the boundary.
+ */
+export async function hasImage(layer: string, timeMs: number, signal: AbortSignal): Promise<boolean> {
   const url =
     `${DWD_WMS}?service=WMS&version=1.3.0&request=GetMap&layers=${layer}&styles=&format=image/png` +
     `&transparent=true&crs=EPSG:3857&bbox=1000000,6000000,1300000,6300000&width=32&height=32` +
     `&time=${encodeURIComponent(new Date(timeMs).toISOString())}`;
-  try {
-    const res = await fetch(url, { signal });
-    return res.ok && (res.headers.get('content-type') ?? '').startsWith('image/');
-  } catch {
-    return false;
-  }
+  const res = await fetch(url, { signal });
+  if (res.status !== 200) throw new Error(`probe ${res.status}`);
+  return (res.headers.get('content-type') ?? '').startsWith('image/');
 }
 
 /**
@@ -154,6 +155,8 @@ export function getLayerAxis(layer: string, force = false): Promise<TimeAxis> {
   if (pending) return pending;
   const p = fetchAxis(layer)
     .then((axis) => { cache.set(layer, { at: Date.now(), axis }); return axis; })
+    // probing failed (timeout, 429, 5xx, offline): keep the previous axis instead of a wrong boundary
+    .catch((err) => { if (hit) return hit.axis; throw err; })
     .finally(() => inflight.delete(layer));
   inflight.set(layer, p);
   return p;

@@ -70,3 +70,26 @@ describe('FramePreloader', () => {
     expect(pre.isReady(0)).toBe(true);
   });
 });
+
+describe('FramePreloader pump while running', () => {
+  it('re-pumps once more when called during a run (evicted tiles are reloaded)', async () => {
+    const { pre, cache } = setup({ concurrency: 1 });
+    pre.start(frames);
+    // a pump arrives while the first run is busy, then the cache evicts a loaded tile
+    await new Promise((r) => setTimeout(r, 3));
+    void pre.pump();
+    cache.delete('a1');
+    await drain();
+    expect(cache.has('a1')).toBe(true);
+    expect(pre.readyCount()).toBe(3);
+  });
+
+  it('can be pumped again after a run finished', async () => {
+    const { pre, cache } = setup();
+    pre.start(frames);
+    await drain();
+    cache.delete('c1');
+    await pre.pump();
+    expect(cache.has('c1')).toBe(true);
+  });
+});

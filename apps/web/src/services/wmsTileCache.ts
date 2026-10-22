@@ -69,7 +69,7 @@ export class TileCache {
   private map = new Map<string, Entry>();
   private total = 0;
 
-  constructor(private maxEntries = 1200, private maxBytes = 64 * 1024 * 1024, private now: () => number = Date.now) {}
+  constructor(private maxEntries = 4000, private maxBytes = 64 * 1024 * 1024, private now: () => number = Date.now) {}
 
   get size() { return this.map.size; }
   get bytes() { return this.total; }

@@ -131,7 +131,7 @@ export class WmsOverlay {
    * a later show() of the same frame swaps it in without another load.
    */
   show(frame: WmsFrame, opacity: number, hold = false): Promise<void> {
-    const key = `${frame.layer}|${frame.time}|${frame.format}|${opacity}`;
+    const key = `${frame.layer}|${frame.time}|${frame.format}|${frame.variant ?? ''}|${opacity}`;
     if (key === this.lastKey) {
       if (hold) return this.pending;
       if (!this.held) return this.pending;

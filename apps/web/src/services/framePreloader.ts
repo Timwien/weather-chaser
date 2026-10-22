@@ -27,6 +27,8 @@ export class FramePreloader {
   /** Tiles that failed in this run: they count as settled so a gap cannot stall the animation. */
   private failed = new Set<string>();
   private running = false;
+  /** pump() was called while a run was active: loop once more afterwards (the cache may have evicted tiles meanwhile). */
+  private again = false;
 
   constructor(private deps: PreloaderDeps) {}
 
@@ -45,6 +47,7 @@ export class FramePreloader {
     this.ctrl?.abort();
     this.ctrl = null;
     this.running = false;
+    this.again = false;
   }
 
   isReady(id: number): boolean {
@@ -66,30 +69,34 @@ export class FramePreloader {
    */
   async pump(order?: number[]): Promise<void> {
     if (order) this.order = order;
-    if (this.running || !this.ctrl) return;
+    if (!this.ctrl) return;
+    if (this.running) { this.again = true; return; }
     this.running = true;
     const ctrl = this.ctrl;
-    const queue: Array<{ url: string; key: string }> = [];
-    const seen = new Set<string>();
-    for (const id of this.order) {
-      for (const it of this.frames[id]?.items ?? []) {
-        if (!seen.has(it.key) && !this.deps.has(it.key) && !this.failed.has(it.key)) { seen.add(it.key); queue.push(it); }
-      }
-    }
-    const worker = async () => {
-      for (;;) {
-        const it = queue.shift();
-        if (it === undefined || ctrl.signal.aborted) return;
-        try {
-          await this.deps.load(it.url, ctrl.signal);
-        } catch {
-          if (ctrl.signal.aborted) return;
-          this.failed.add(it.key);
+    do {
+      this.again = false;
+      const queue: Array<{ url: string; key: string }> = [];
+      const seen = new Set<string>();
+      for (const id of this.order) {
+        for (const it of this.frames[id]?.items ?? []) {
+          if (!seen.has(it.key) && !this.deps.has(it.key) && !this.failed.has(it.key)) { seen.add(it.key); queue.push(it); }
         }
-        if (!ctrl.signal.aborted) this.deps.onChange?.();
       }
-    };
-    await Promise.all(Array.from({ length: this.deps.concurrency ?? 6 }, worker));
+      const worker = async () => {
+        for (;;) {
+          const it = queue.shift();
+          if (it === undefined || ctrl.signal.aborted) return;
+          try {
+            await this.deps.load(it.url, ctrl.signal);
+          } catch {
+            if (ctrl.signal.aborted) return;
+            this.failed.add(it.key);
+          }
+          if (!ctrl.signal.aborted) this.deps.onChange?.();
+        }
+      };
+      await Promise.all(Array.from({ length: this.deps.concurrency ?? 6 }, worker));
+    } while (this.again && this.ctrl === ctrl && !ctrl.signal.aborted);
     if (this.ctrl === ctrl) this.running = false;
   }
 }

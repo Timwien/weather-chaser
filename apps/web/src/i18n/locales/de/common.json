@@ -453,6 +453,7 @@
     "play_title": "Die ganze Reise abspielen: Der Camper fährt die Route ab, das Wetter wechselt mit",
     "night_at": "Nacht {{night}} in {{town}}",
     "at": "In {{town}}",
-    "driving_to": "Unterwegs nach {{town}}"
+    "driving_to": "Unterwegs nach {{town}}",
+    "beyond_horizon": "Wettervorhersage reicht noch nicht bis zu deiner Reise (verfügbar bis {{until}})."
   }
 }

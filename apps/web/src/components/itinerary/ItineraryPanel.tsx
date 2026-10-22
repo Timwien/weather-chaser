@@ -17,6 +17,8 @@ import { BeachIcon, HikingIcon, SightseeingIcon } from '../finder/FinderIcons.ts
 import { useRouteVan } from '../../hooks/useRouteVan.ts';
 import { useWeatherLayerStore } from '../../stores/weatherLayerStore.ts';
 import { WeatherTimelineButton } from '../common/WeatherTimelineButton.tsx';
+import { useForecastReach } from '../../hooks/useForecastReach.ts';
+import { formatDateTime } from '../../utils/dateFormat.ts';
 import { RoutePlayButton } from '../common/RoutePlayButton.tsx';
 import './ItineraryPanel.css';
 
@@ -65,13 +67,15 @@ function SaveIcon() {
 }
 
 export function ItineraryPanel({ selectedStopIndex, onStopSelect, onExpandSheet, onShowTimeline }: ItineraryPanelProps) {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const { route, error, mode, reset, tripConfig, weatherPrefs, setWeatherPrefs, lastRoutePrefs } = useAppStore();
   const { user, pendingAction, setPendingAction } = useAuthStore();
   const isMobile = useIsMobile();
   const van = useRouteVan();
-  const activeIdx = van?.pos.focusStopIndex ?? null;
+  const activeIdx = van?.inTrip ? van.pos.focusStopIndex : null; // no highlight / auto-scroll outside the trip
   const focusStop = useWeatherLayerStore((st) => st.focusStop);
+  const reach = useForecastReach();
+  const beyondHint = reach.startsBeyond && reach.until !== null ? t('route.beyond_horizon', { until: formatDateTime(reach.until, i18n.language) }) : null;
   const stopRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -263,6 +267,7 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect, onExpandSheet,
                 isSelected={selectedStopIndex === idx}
                 onClick={() => { onStopSelect(idx); focusStop(idx); }}
                 isActive={activeIdx === idx}
+                weatherHereDisabledHint={beyondHint}
                 onWeatherHere={() => { onStopSelect(idx); focusStop(idx, true); onShowTimeline?.(); }}
                 index={idx}
               />

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import type { Route } from '@weatherchaser/core';
 import { useAppStore } from '../stores/appStore.ts';
 import { useWeatherLayerStore } from '../stores/weatherLayerStore.ts';
-import { buildRouteSchedule, positionAt, type RouteSchedule, type VanPosition } from '../utils/routeSchedule.ts';
+import { buildRouteSchedule, isWithinTrip, positionAt, type RouteSchedule, type VanPosition } from '../utils/routeSchedule.ts';
 
 export function scheduleForRoute(route: Route | null): RouteSchedule | null {
   if (!route) return null;
@@ -21,8 +21,10 @@ export interface RouteVanState {
   schedule: RouteSchedule;
   /** Instant of the weather picture on the map. */
   shownMs: number;
-  /** Where the camper is at `shownMs`. */
+  /** Where the camper is at `shownMs` (clamped to the first / last stop outside the trip). */
   pos: VanPosition;
+  /** `shownMs` lies within the trip; outside, the camper only waits at the start / end stop (no highlight, no caption). */
+  inTrip: boolean;
 }
 
 /** Camper state for the weather picture that is shown — null unless the weather layer is on in the route results. */
@@ -33,6 +35,6 @@ export function useRouteVan(): RouteVanState | null {
   const shownMs = useWeatherLayerStore((s) => s.shownMs);
   return useMemo(() => {
     if (!schedule || mode !== 'results' || layer === 'off' || shownMs === null) return null;
-    return { schedule, shownMs, pos: positionAt(schedule, shownMs) };
+    return { schedule, shownMs, pos: positionAt(schedule, shownMs), inTrip: isWithinTrip(schedule, shownMs) };
   }, [schedule, mode, layer, shownMs]);
 }

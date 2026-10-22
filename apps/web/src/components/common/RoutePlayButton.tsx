@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useWeatherLayerStore } from '../../stores/weatherLayerStore.ts';
+import { useForecastReach } from '../../hooks/useForecastReach.ts';
+import { formatDateTime } from '../../utils/dateFormat.ts';
 import '../map/WeatherControls.css';
 
 interface Props {
@@ -9,13 +11,18 @@ interface Props {
 
 /** "Route abspielen": fits the whole route, then drives the camper along it while the weather changes. */
 export function RoutePlayButton({ onShown }: Props) {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
+  const reach = useForecastReach();
+  const hint = reach.startsBeyond && reach.until !== null ? t('route.beyond_horizon', { until: formatDateTime(reach.until, i18n.language) }) : null;
   const requestRoutePlay = useWeatherLayerStore((s) => s.requestRoutePlay);
   return (
+    <>
     <button
       type="button"
       className="wx-timeline-btn wx-route-play-btn"
-      title={t('route.play_title')}
+      title={hint ?? t('route.play_title')}
+      disabled={hint !== null}
+      aria-describedby={hint ? 'route-play-hint' : undefined}
       onClick={() => { requestRoutePlay(); onShown?.(); }}
     >
       <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor"
@@ -25,5 +32,7 @@ export function RoutePlayButton({ onShown }: Props) {
       </svg>
       {t('route.play')}
     </button>
+    {hint && <span id="route-play-hint" className="wx-route-play-hint" role="note">{hint}</span>}
+    </>
   );
 }

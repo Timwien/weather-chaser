@@ -203,7 +203,7 @@ export function WeatherLayer() {
     engine = new PlaybackEngine({
       count: () => range.length,
       loop: !sch,
-      onEnd: () => setPlaying(false), // route played to the end: stay on the last frame, camper at the last stop
+      onEnd: () => store.getState().endRoutePlay(), // route played to the end: stay on the last frame, camper at the last stop
       isReady: (i) => preloader.isReady(i) && cloudOk(specs[i]),
       pump: () => { void preloader.pump(orderFrom(engine.index)); },
       show: async (i) => {

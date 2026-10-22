@@ -160,20 +160,35 @@ export function stayFocusMs(sch: RouteSchedule, stopIndex: number): number {
   return Math.min(Math.max(s.arrivalMs, noon) + 1.5 * HOUR, s.departureMs);
 }
 
+/** Tolerance around the trip: the play frames bracket it by up to one forecast step (<= 6 h). */
+export const TRIP_EDGE_TOLERANCE_MS = 6 * HOUR;
+
+/** Is the instant inside the trip (start to end, give or take one forecast step)? Outside, the camper is not "on" the route. */
+export function isWithinTrip(sch: RouteSchedule, t: number): boolean {
+  return t >= sch.startMs - TRIP_EDGE_TOLERANCE_MS && t <= sch.endMs + TRIP_EDGE_TOLERANCE_MS;
+}
+
+/** True when the forecast ends before the trip begins, i.e. there is nothing to play yet. */
+export function tripStartsBeyondForecast(frames: number[], sch: RouteSchedule): boolean {
+  return frames.length > 0 && sch.startMs > frames[frames.length - 1];
+}
+
 /**
  * Frames of "play route": the available weather instants from the trip start to the trip end, plus one frame
- * on each side so the camper begins at the first stop and ends at the last one.
+ * on each side so the camper begins at the first stop and ends at the last one. A trip that starts beyond the
+ * forecast yields no frames; a trip that only partly fits plays the covered part.
  */
 export function routePlayFrames(frames: number[], sch: RouteSchedule): number[] {
+  if (frames.length === 0 || tripStartsBeyondForecast(frames, sch)) return [];
   const before = frames.filter((t) => t <= sch.startMs).pop();
   const inside = frames.filter((t) => t > sch.startMs && t < sch.endMs);
   const after = frames.find((t) => t >= sch.endMs);
-  const out = [...(before !== undefined ? [before] : []), ...inside, ...(after !== undefined ? [after] : [])];
-  return out;
+  return [...(before !== undefined ? [before] : []), ...inside, ...(after !== undefined ? [after] : [])];
 }
 
 /** Stop caption state at an instant: where the camper is and which night it is. */
-export function captionAt(sch: RouteSchedule, t: number): { stopIndex: number; kind: 'at' | 'to' | 'night'; night: number } {
+export function captionAt(sch: RouteSchedule, t: number): { stopIndex: number; kind: 'at' | 'to' | 'night'; night: number } | null {
+  if (!isWithinTrip(sch, t)) return null; // before the trip / after it the camper is not on the route
   const pos = positionAt(sch, t);
   if (pos.stopIndex === null) return { stopIndex: pos.focusStopIndex, kind: 'to', night: 0 };
   const h = new Date(t).getHours();

@@ -3,11 +3,13 @@ import { useRouteVan } from '../../hooks/useRouteVan.ts';
 import { useGlidedTime } from '../../hooks/useGlidedTime.ts';
 import { useWeatherLayerStore } from '../../stores/weatherLayerStore.ts';
 import { CADENCE_MS } from '../../services/playbackEngine.ts';
-import { positionAt } from '../../utils/routeSchedule.ts';
+import { isWithinTrip, positionAt } from '../../utils/routeSchedule.ts';
 import './RouteVan.css';
 
 /** Vertical lift (px) while the camper stands at a stop. */
 const VAN_PARKED_LIFT_PX = 24;
+/** Before the trip starts / after it ended the camper waits at the start / end stop, greyed. */
+const VAN_OUTSIDE_OPACITY = 0.45;
 
 /** Small campervan (faces right); white outline keeps it readable on light and dark maps. */
 function VanIcon() {
@@ -42,6 +44,7 @@ export function RouteVan() {
   const t = useGlidedTime(van?.shownMs ?? null, playing ? CADENCE_MS : 450);
   if (!van || t === null) return null;
   const pos = positionAt(van.schedule, t);
+  const inTrip = isWithinTrip(van.schedule, t);
   return (
     <Marker longitude={pos.lng} latitude={pos.lat} anchor="center" style={{ zIndex: 4, pointerEvents: 'none' }}>
       <div
@@ -49,10 +52,11 @@ export function RouteVan() {
         data-route-van=""
         data-t={Math.round(t)}
         data-shown={van.shownMs}
+        data-in-trip={inTrip ? '' : undefined}
         data-stop={pos.stopIndex ?? ''}
         data-heading={pos.heading}
         // parked: lift the camper just above the stop marker so the (highlighted) marker stays visible
-        style={{ transform: `translateY(${pos.stopIndex !== null ? -VAN_PARKED_LIFT_PX : 0}px)${pos.heading < 0 ? ' scaleX(-1)' : ''}` }}
+        style={{ opacity: inTrip ? 1 : VAN_OUTSIDE_OPACITY, transform: `translateY(${pos.stopIndex !== null ? -VAN_PARKED_LIFT_PX : 0}px)${pos.heading < 0 ? ' scaleX(-1)' : ''}` }}
       >
         <VanIcon />
       </div>

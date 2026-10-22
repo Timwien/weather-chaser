@@ -17,7 +17,8 @@ function scoreColor(value: number): string {
 
 export function StopMarkers({ route, selectedStopIndex, onStopClick }: StopMarkersProps) {
   const { t } = useTranslation('common');
-  const activeStopIndex = useRouteVan()?.pos.focusStopIndex ?? null; // stop the camper is at / heading to
+  const van = useRouteVan();
+  const activeStopIndex = van?.inTrip ? van.pos.focusStopIndex : null; // stop the camper is at / heading to
   const [popupIndex, setPopupIndex] = useState<number | null>(null);
 
   let cumulativeDay = 1;

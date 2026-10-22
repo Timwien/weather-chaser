@@ -51,6 +51,10 @@ interface WeatherLayerState {
 
   setLayer: (l: WeatherLayerChoice) => void;
   setTimeMs: (t: number | null) => void;
+  /** The user moved the time (slider, day chip, "Jetzt"): leaves route-play mode so Play runs the normal loop. */
+  scrubTo: (t: number | null) => void;
+  /** Route playback reached its end: back to the normal loop mode. */
+  endRoutePlay: () => void;
   /** The engine reports the frame it has put on screen (also keeps the slider in step). */
   setShown: (t: number | null, followSlider?: boolean) => void;
   setPlayback: (p: WeatherLayerState['playback']) => void;
@@ -93,6 +97,8 @@ export const useWeatherLayerStore = create<WeatherLayerState>((set, get) => ({
     });
   },
   setTimeMs: (t) => set({ timeMs: t }),
+  scrubTo: (t) => set({ timeMs: t, routePlay: false }),
+  endRoutePlay: () => set({ playing: false, routePlay: false }),
   setShown: (t, followSlider = false) => set(followSlider ? { shownMs: t, timeMs: t } : { shownMs: t }),
   setPlayback: (playback) => set({ playback }),
   setPlaying: (p) => set({ playing: p }),
@@ -105,7 +111,7 @@ export const useWeatherLayerStore = create<WeatherLayerState>((set, get) => ({
   focusStop: (idx, force = false) => {
     if (!force && get().layer === 'off') return;
     if (get().layer === 'off') { writeStored('weather'); set({ layer: 'weather', timeMs: null, shownMs: null, routePlay: false }); }
-    set((s) => ({ playing: false, stopFocus: { idx, seq: (s.stopFocus?.seq ?? 0) + 1 } }));
+    set((s) => ({ playing: false, routePlay: false, stopFocus: { idx, seq: (s.stopFocus?.seq ?? 0) + 1 } }));
   },
   requestRoutePlay: () => {
     if (get().layer === 'off') { writeStored('weather'); set({ layer: 'weather', timeMs: null, shownMs: null }); }

@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
-  buildRouteSchedule, captionAt, positionAt, routePlayFrames, stayFocusMs, type ScheduleStopInput,
+  buildRouteSchedule, captionAt, isWithinTrip, positionAt, routePlayFrames, stayFocusMs, tripStartsBeyondForecast, type ScheduleStopInput,
 } from './routeSchedule.ts';
 
 const H = 3_600_000;
@@ -131,5 +131,48 @@ describe('stayFocusMs / routePlayFrames / captionAt', () => {
     expect(captionAt(s, local(2026, 10, 25, 23))).toMatchObject({ stopIndex: 0, kind: 'night', night: 2 });
     expect(captionAt(s, local(2026, 10, 25, 14))).toMatchObject({ stopIndex: 0, kind: 'at' });
     expect(captionAt(s, local(2026, 10, 26, 10, 30))).toMatchObject({ stopIndex: 1, kind: 'to' });
+  });
+});
+
+describe('outside the trip', () => {
+  it('captionAt is null well before the start and after the end, but works at the edges', () => {
+    const s = buildRouteSchedule(stops())!;
+    expect(captionAt(s, local(2026, 10, 20, 12))).toBeNull();
+    expect(captionAt(s, local(2026, 11, 2, 12))).toBeNull();
+    expect(captionAt(s, s.startMs)).toMatchObject({ stopIndex: 0 });
+    expect(captionAt(s, s.endMs)).toMatchObject({ stopIndex: 2 });
+    expect(captionAt(s, s.startMs - 3 * H)).not.toBeNull(); // the play frame just before the start
+    expect(captionAt(s, s.endMs + 3 * H)).not.toBeNull(); // and just after the end
+  });
+
+  it('isWithinTrip matches', () => {
+    const s = buildRouteSchedule(stops())!;
+    expect([isWithinTrip(s, s.startMs - 24 * H), isWithinTrip(s, s.startMs + H), isWithinTrip(s, s.endMs + 24 * H)]).toEqual([false, true, false]);
+  });
+});
+
+describe('routePlayFrames edge cases', () => {
+  const s = () => buildRouteSchedule(stops())!;
+  const grid = (from: number, count: number) => Array.from({ length: count }, (_, i) => from + i * 3 * H);
+
+  it('returns no frames when the trip starts beyond the forecast', () => {
+    const sch = s();
+    const frames = grid(sch.startMs - 30 * 24 * H, 100); // ends long before the trip
+    expect(tripStartsBeyondForecast(frames, sch)).toBe(true);
+    expect(routePlayFrames(frames, sch)).toEqual([]);
+  });
+
+  it('plays the covered part when only the start of the trip is inside the forecast', () => {
+    const sch = s();
+    const frames = grid(sch.startMs - 6 * H, 10); // ends about a day after the start
+    expect(tripStartsBeyondForecast(frames, sch)).toBe(false);
+    const r = routePlayFrames(frames, sch);
+    expect(r.length).toBeGreaterThanOrEqual(2);
+    expect(r[r.length - 1]).toBe(frames[frames.length - 1]);
+  });
+
+  it('handles an empty frame list', () => {
+    expect(routePlayFrames([], s())).toEqual([]);
+    expect(tripStartsBeyondForecast([], s())).toBe(false);
   });
 });

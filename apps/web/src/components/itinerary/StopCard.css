@@ -46,6 +46,8 @@
   touch-action: manipulation;
 }
 .stop-card-weather:hover { background: var(--color-primary-mid); }
+.stop-card-weather:disabled { opacity: 0.55; cursor: not-allowed; }
+.stop-card-weather:disabled:hover { background: var(--color-primary-light); }
 
 /* ── Day badge: one-line gradient pill ("Tag 3") ────────── */
 .stop-card-day {

@@ -323,3 +323,13 @@
   color: var(--color-text);
   font-weight: var(--font-weight-semibold);
 }
+
+/* hint under a disabled "Route abspielen" (forecast does not reach the trip yet) */
+.wx-timeline-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.wx-timeline-btn:disabled:hover { background: var(--color-primary-light); }
+.wx-route-play-hint {
+  flex-basis: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs, 12px);
+  color: var(--color-text-secondary, inherit);
+}

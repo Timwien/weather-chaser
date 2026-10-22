@@ -48,7 +48,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
   const { t, i18n } = useTranslation('common');
   const scheme = useThemeStore((s) => (s.resolved === 'dark' ? 'dark' : 'light'));
   const tl = useWeatherTimeline(scheme);
-  const setTimeMs = useWeatherLayerStore((s) => s.setTimeMs);
+  const scrubTo = useWeatherLayerStore((s) => s.scrubTo);
   const playing = useWeatherLayerStore((s) => s.playing);
   const setPlaying = useWeatherLayerStore((s) => s.setPlaying);
   const playback = useWeatherLayerStore((s) => s.playback);
@@ -126,7 +126,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
         type="button"
         className={`wx-chip${isNow ? ' wx-chip--on' : ''}`}
         aria-pressed={isNow}
-        onClick={() => { setPlaying(false); setTimeMs(nowMs); }}
+        onClick={() => { setPlaying(false); scrubTo(nowMs); }}
       >
         {t('weather.now')}
       </button>
@@ -144,7 +144,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
               if (!ok) return;
               setPlaying(false);
               const noon = localDayBounds(k)[0] + 12 * HOUR;
-              setTimeMs(frames.filter((f) => f > nowMs).reduce((b, f) => (Math.abs(f - noon) < Math.abs(b - noon) ? f : b), noon));
+              scrubTo(frames.filter((f) => f > nowMs).reduce((b, f) => (Math.abs(f - noon) < Math.abs(b - noon) ? f : b), noon));
             }}
           >
             {formatWeekday(k, lang)}
@@ -163,7 +163,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
     : formatWeekday(localDayKey(label), lang);
 
   // "Nacht 1 in Colmar" / "Unterwegs nach Colmar": where the camper is at the shown instant (route results only)
-  const cap = van && label !== null ? captionAt(van.schedule, label) : null;
+  const cap = van && label !== null ? captionAt(van.schedule, label) : null; // null outside the trip
   const capTown = cap ? route?.stops[cap.stopIndex]?.town.name ?? '' : '';
   const routeCaption = cap
     ? t(cap.kind === 'to' ? 'route.driving_to' : cap.kind === 'night' ? 'route.night_at' : 'route.at', { town: capTown, night: cap.night })
@@ -203,7 +203,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
             value={idx}
             aria-label={t('weather.time_slider')}
             aria-valuetext={timeLabel}
-            onChange={(e) => { setPlaying(false); setTimeMs(frames[Number(e.target.value)]); }}
+            onChange={(e) => { setPlaying(false); scrubTo(frames[Number(e.target.value)]); }}
           />
           <span className="wx-now-tick" aria-hidden="true"><span>{t('weather.now_marker')}</span></span>
         </div>

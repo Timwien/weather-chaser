@@ -12,6 +12,8 @@ interface StopCardProps {
   isActive?: boolean;
   /** "Weather here": switch on the weather layer and jump to this stop's stay */
   onWeatherHere?: () => void;
+  /** When set, "Wetter hier" is disabled and this text explains why (forecast does not reach the trip yet). */
+  weatherHereDisabledHint?: string | null;
   /** Position in the list — drives the entrance animation stagger */
   index?: number;
 }
@@ -49,7 +51,7 @@ function ScoreRing({ value }: { value: number }) {
   );
 }
 
-export function StopCard({ stop, stopNumber, isSelected, onClick, isActive = false, onWeatherHere, index = 0 }: StopCardProps) {
+export function StopCard({ stop, stopNumber, isSelected, onClick, isActive = false, onWeatherHere, weatherHereDisabledHint = null, index = 0 }: StopCardProps) {
   const { t, i18n } = useTranslation('common');
   const { town, arrivalDate, nights, score, weatherAvg } = stop;
 
@@ -81,6 +83,8 @@ export function StopCard({ stop, stopNumber, isSelected, onClick, isActive = fal
           <button
             type="button"
             className="stop-card-weather"
+            disabled={weatherHereDisabledHint !== null}
+            title={weatherHereDisabledHint ?? undefined}
             onClick={(e) => { e.stopPropagation(); onWeatherHere(); }}
           >
             {t('itinerary.weather_here')}

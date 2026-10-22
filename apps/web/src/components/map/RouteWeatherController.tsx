@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useMap } from '@vis.gl/react-maplibre';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useWeatherLayerStore } from '../../stores/weatherLayerStore.ts';
+import { useForecastReach } from '../../hooks/useForecastReach.ts';
 import { useRouteSchedule } from '../../hooks/useRouteVan.ts';
 import { usePanelInset } from '../../hooks/usePanelInset.ts';
 import { getSheetHeights } from '../mobile/MobileBottomSheet.tsx';
@@ -27,6 +28,8 @@ export function RouteWeatherController({ sheetBottomPadding = 0 }: { sheetBottom
   const playReq = useWeatherLayerStore((s) => s.routePlayReq);
   const setTimeMs = useWeatherLayerStore((s) => s.setTimeMs);
   const beginRoutePlay = useWeatherLayerStore((s) => s.beginRoutePlay);
+  const beyondRef = useRef(false);
+  beyondRef.current = useForecastReach().startsBeyond;
   const seenFocus = useRef(stopFocus?.seq ?? 0);
   const seenPlay = useRef(playReq?.seq ?? 0);
 
@@ -36,7 +39,7 @@ export function RouteWeatherController({ sheetBottomPadding = 0 }: { sheetBottom
     const route = useAppStore.getState().route;
     const stop = route?.stops[stopFocus.idx];
     if (!schedule || !stop) return;
-    setTimeMs(stayFocusMs(schedule, stopFocus.idx));
+    if (!beyondRef.current) setTimeMs(stayFocusMs(schedule, stopFocus.idx)); // forecast does not reach the trip: only fly there
     const native = map.getMap();
     native.flyTo({
       center: [stop.town.lng, stop.town.lat],

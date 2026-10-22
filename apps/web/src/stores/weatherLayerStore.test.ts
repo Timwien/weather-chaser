@@ -73,3 +73,31 @@ describe('route actions', () => {
     expect(useWeatherLayerStore.getState().routePlay).toBe(false);
   });
 });
+
+describe('route play mode', () => {
+  beforeEach(() => useWeatherLayerStore.setState({ layer: 'weather', timeMs: null, playing: true, routePlay: true }));
+
+  it('scrubTo sets the time and leaves route-play mode', () => {
+    useWeatherLayerStore.getState().scrubTo(5000);
+    const s = useWeatherLayerStore.getState();
+    expect([s.timeMs, s.routePlay]).toEqual([5000, false]);
+  });
+
+  it('setTimeMs alone keeps route-play mode (internal moves)', () => {
+    useWeatherLayerStore.getState().setTimeMs(5000);
+    expect(useWeatherLayerStore.getState().routePlay).toBe(true);
+  });
+
+  it('endRoutePlay stops playback and clears route-play mode', () => {
+    useWeatherLayerStore.getState().endRoutePlay();
+    const s = useWeatherLayerStore.getState();
+    expect([s.playing, s.routePlay]).toEqual([false, false]);
+  });
+
+  it('focusStop leaves route-play mode, beginRoutePlay enters it', () => {
+    useWeatherLayerStore.getState().focusStop(1);
+    expect(useWeatherLayerStore.getState().routePlay).toBe(false);
+    useWeatherLayerStore.getState().beginRoutePlay(1000);
+    expect(useWeatherLayerStore.getState().routePlay).toBe(true);
+  });
+});

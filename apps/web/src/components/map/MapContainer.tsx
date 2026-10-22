@@ -10,6 +10,8 @@ import { reverseGeocode, settlementName } from '../../services/nominatim.ts';
 import { DrawingControls } from './DrawingControls.tsx';
 import { SearchAreasLayer } from './SearchAreasLayer.tsx';
 import { PlaceMarkers } from './PlaceMarkers.tsx';
+import { WeatherLayer } from './WeatherLayer.tsx';
+import { WeatherTimeBar } from './WeatherTimeBar.tsx';
 import { RouteLayer } from './RouteLayer.tsx';
 import { StopMarkers } from './StopMarkers.tsx';
 import { FinderMarkers } from './FinderMarkers.tsx';
@@ -397,6 +399,8 @@ export function MapContainer({
         <FlyToCity target={flyToCity} sheetBottomPadding={sheetBottomPadding} />
         <TapToAddLocation />
         <MapLanguage />
+        {/* D1/D2: DWD weather layers, inserted below the base labels, under routes/markers */}
+        <WeatherLayer />
         {/* X1: drawn areas persist here (store-backed), independent of DrawingControls' mount */}
         <SearchAreasLayer />
         {/* Pins for added places — entry modes only; results have their own markers */}
@@ -432,6 +436,7 @@ export function MapContainer({
           />
         )}
       </Map>
+      <WeatherTimeBar sheetBottomPadding={sheetBottomPadding} />
     </div>
   );
 }

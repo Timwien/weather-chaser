@@ -113,7 +113,8 @@
     "tap_add_confirm": "Add",
     "tap_hint": "Tap the map to pick a place",
     "tap_hint_desktop": "Click the map to pick a place",
-    "pin_remove": "Remove"
+    "pin_remove": "Remove",
+    "pin_drag_hint": "Drag to move"
   },
   "share": {
     "trip_page_title": "Shared trip",
@@ -401,5 +402,32 @@
     "add_nearby": "Add {{name}}",
     "feedback": "Give feedback",
     "info": "Show explanation"
+  },
+  "weather": {
+    "toggle": "Weather layers",
+    "layer_off": "Off",
+    "layer_radar": "Rain radar",
+    "layer_forecast": "Rain forecast",
+    "layer_clouds": "Clouds",
+    "unavailable": "Weather layer currently unavailable",
+    "loading": "Loading weather layer …",
+    "now": "now",
+    "play": "Play animation",
+    "pause": "Pause animation",
+    "time_slider": "Select time",
+    "day": "Select day",
+    "radar_ago": "{{min}} min ago",
+    "legend": "Legend",
+    "legend_alt": "Precipitation legend",
+    "clouds_note": "Satellite image (Meteosat): bright = clouds, last 24 hours",
+    "forecast_note_3h": "Precipitation in the 3 hours up to the selected time",
+    "forecast_note_6h": "Precipitation in the 6 hours up to the selected time (global model)",
+    "beyond_one": "No forecast yet for {{date}} (available until {{until}}).",
+    "beyond_other": "No forecast yet for {{count}} trip days (available until {{until}}).",
+    "legend_light": "light",
+    "legend_heavy": "heavy",
+    "legend_range_radar": "0.1 to over 150 mm/h",
+    "legend_range_3h": "0.1 to over 160 mm/3 h",
+    "legend_range_6h": "Precipitation in mm/6 h"
   }
 }

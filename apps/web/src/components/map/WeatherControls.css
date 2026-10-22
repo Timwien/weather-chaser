@@ -1,0 +1,212 @@
+/* =========================================================
+   Weather layers — toggle popover + time bar (token-driven)
+   Toggle lives in the floating control column (top-right);
+   the time bar sits bottom-centre of the visible map area
+   (mobile: just above the bottom sheet).
+   ========================================================= */
+
+.wx-control {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+.draw-controls--drawing .wx-control { justify-content: stretch; }
+.draw-controls--drawing .wx-control .wx-toggle { width: 100%; justify-content: center; }
+
+.draw-btn.wx-toggle {
+  min-height: var(--touch-target);
+}
+.draw-btn.wx-toggle--active {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: transparent;
+}
+[data-theme="dark"] .draw-btn.wx-toggle--active { color: #06191c; }
+
+.wx-popover {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  min-width: 190px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-1);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+  z-index: 12;
+}
+
+.wx-option {
+  min-height: var(--touch-target);
+  padding: 0 var(--space-4);
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.wx-option:hover { background: var(--color-primary-light); }
+.wx-option--on {
+  background: var(--color-primary-mid);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ── time bar ───────────────────────────────────────────── */
+.wx-bar {
+  position: absolute;
+  bottom: 44px; /* clears the compact attribution control */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9;
+  width: min(460px, calc(100% - 2 * var(--space-4)));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  pointer-events: auto;
+}
+.wx-bar--note {
+  width: auto;
+  max-width: calc(100% - 2 * var(--space-4));
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.wx-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.wx-play, .wx-legend-btn {
+  flex: none;
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.wx-legend-btn { padding: 0 var(--space-3); }
+
+.wx-slider {
+  flex: 1;
+  min-width: 0;
+  height: var(--touch-target);
+  margin: 0;
+  accent-color: var(--color-primary);
+  touch-action: pan-y;
+  cursor: pointer;
+}
+
+.wx-time {
+  flex: none;
+  min-width: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+.wx-time strong {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.wx-chips {
+  display: flex;
+  gap: var(--space-1);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.wx-chips::-webkit-scrollbar { display: none; }
+.wx-chip {
+  flex: none;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.wx-chip--on {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+}
+[data-theme="dark"] .wx-chip--on { color: #06191c; }
+.wx-chip--off {
+  opacity: 0.5;
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+.wx-note {
+  font-size: var(--font-size-xs);
+  line-height: 1.35;
+  color: var(--color-text-secondary);
+}
+.wx-note--warn { color: var(--color-warning, #b45309); font-weight: var(--font-weight-medium); }
+[data-theme="dark"] .wx-note--warn { color: #fbbf24; }
+
+.wx-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.wx-legend-strip {
+  display: flex;
+  height: 12px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+.wx-legend-strip span { flex: 1; }
+.wx-legend-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .wx-bar {
+    bottom: calc(var(--sheet-peek, 84px) + var(--space-2));
+    padding: var(--space-2);
+  }
+}

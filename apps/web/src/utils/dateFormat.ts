@@ -29,3 +29,15 @@ export function formatRange(fromISO: string | null, toISO: string | null, lang: 
   if (fromISO) return new Date(fromISO).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
   return '';
 }
+
+/** Local date + time of an instant, e.g. "Do., 22. Okt., 14:15" / "Thu, 22 Oct, 14:15". */
+export function formatDateTime(ms: number, lang: string): string {
+  return new Intl.DateTimeFormat(toLocale(lang), {
+    weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+  }).format(new Date(ms));
+}
+
+/** Local clock time only, e.g. "14:15". */
+export function formatClock(ms: number, lang: string): string {
+  return new Intl.DateTimeFormat(toLocale(lang), { hour: '2-digit', minute: '2-digit' }).format(new Date(ms));
+}

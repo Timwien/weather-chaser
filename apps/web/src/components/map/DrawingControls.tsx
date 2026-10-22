@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useIsTouch } from '../../hooks/useIsTouch.ts';
 import type { MapMouseEvent } from 'maplibre-gl';
 import { useAppStore } from '../../stores/appStore.ts';
+import { WeatherControls } from './WeatherControls.tsx';
 import './DrawingControls.css';
 
 interface DrawingControlsProps {
@@ -334,10 +335,8 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
 
       {/* Control buttons — hidden in results mode (drawing is locked there; the
           persisted polygon stays visible via SearchAreasLayer). */}
-      <div
-        className={`draw-controls${isDrawing ? ' draw-controls--drawing' : ''}`}
-        style={mode === 'results' ? { display: 'none' } : undefined}
-      >
+      <div className={`draw-controls${isDrawing ? ' draw-controls--drawing' : ''}`}>
+        <div className="draw-actions" style={mode === 'results' ? { display: 'none' } : undefined}>
         {!isDrawing && !hasPolygon && (
           <button type="button" className="draw-btn" onClick={handleStartDrawing}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor"
@@ -366,6 +365,9 @@ export function DrawingControls({ onPolygonComplete, onClear }: DrawingControlsP
             {t('entry.clear_area')}
           </button>
         )}
+        </div>
+        {/* D1: weather layer toggle — stays available in results mode too */}
+        <WeatherControls />
       </div>
     </>
   );

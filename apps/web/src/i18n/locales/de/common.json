@@ -113,7 +113,8 @@
     "tap_add_confirm": "Hinzufügen",
     "tap_hint": "Tippe auf die Karte, um einen Ort zu wählen",
     "tap_hint_desktop": "Klicke auf die Karte, um einen Ort zu wählen",
-    "pin_remove": "Entfernen"
+    "pin_remove": "Entfernen",
+    "pin_drag_hint": "Ziehen zum Verschieben"
   },
   "share": {
     "trip_page_title": "Geteilte Reise",
@@ -401,5 +402,32 @@
     "add_nearby": "{{name}} hinzufügen",
     "feedback": "Feedback geben",
     "info": "Erklärung anzeigen"
+  },
+  "weather": {
+    "toggle": "Wetterebenen",
+    "layer_off": "Aus",
+    "layer_radar": "Regenradar",
+    "layer_forecast": "Regen-Vorhersage",
+    "layer_clouds": "Wolken",
+    "unavailable": "Wetterebene derzeit nicht verfügbar",
+    "loading": "Wetterebene lädt …",
+    "now": "jetzt",
+    "play": "Animation abspielen",
+    "pause": "Animation pausieren",
+    "time_slider": "Zeitpunkt wählen",
+    "day": "Tag wählen",
+    "radar_ago": "vor {{min}} Min.",
+    "legend": "Legende",
+    "legend_alt": "Legende der Niederschlagsmenge",
+    "clouds_note": "Satellitenbild (Meteosat): hell = Wolken, die letzten 24 Stunden",
+    "forecast_note_3h": "Niederschlag in den 3 Stunden bis zur gewählten Uhrzeit",
+    "forecast_note_6h": "Niederschlag in den 6 Stunden bis zur gewählten Uhrzeit (globales Modell)",
+    "beyond_one": "Für {{date}} gibt es noch keine Vorhersage (verfügbar bis {{until}}).",
+    "beyond_other": "Für {{count}} Reisetage gibt es noch keine Vorhersage (verfügbar bis {{until}}).",
+    "legend_light": "leicht",
+    "legend_heavy": "stark",
+    "legend_range_radar": "0,1 bis über 150 mm/h",
+    "legend_range_3h": "0,1 bis über 160 mm/3 h",
+    "legend_range_6h": "Niederschlag in mm/6 h"
   }
 }

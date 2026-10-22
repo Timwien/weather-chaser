@@ -1,6 +1,6 @@
 import type { CanvasSource, Map as MaplibreMap } from 'maplibre-gl'; // type-only: maplibre stays a lazy chunk
 import {
-  getCachedTile, loadTile, tilesAtStep, tilesForBounds, type Bounds, type CloudTile,
+  getCachedTile, loadTile, tilesAtStep, tilesForBounds, tilesHorizon, type Bounds, type CloudTile,
 } from '../../services/cloudGrid.ts';
 import { buildColorLut, renderCloudPixels } from '../../utils/cloudRender.ts';
 
@@ -38,7 +38,8 @@ export class CloudOverlay {
   /** Wall time of the last draw (ms) — read by the perf check. */
   lastRenderMs = 0;
 
-  constructor(private map: MaplibreMap, private onStatus?: (s: CloudStatus) => void) {
+  constructor(private map: MaplibreMap, private onStatus?: (s: CloudStatus) => void, private onHorizon?: (t: number | null) => void) {
+    this.onStatus?.('loading'); // a fresh overlay must not inherit a stale 'error' in the store
     this.canvas.width = 2;
     this.canvas.height = 2;
     map.on('moveend', this.schedule);
@@ -165,6 +166,7 @@ export class CloudOverlay {
       if (hit) have.push(hit);
     }
     if (missing === 0 && wanted.tiles.length > 0) this.setStatus('ready');
+    if (missing === 0) this.onHorizon?.(tilesHorizon(have));
     else if (missing > 0 && this.status !== 'error') this.setStatus('loading');
 
     if (this.canvas.width !== width || this.canvas.height !== height || !this.image || !this.pixels) {

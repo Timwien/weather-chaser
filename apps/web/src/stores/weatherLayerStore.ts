@@ -27,6 +27,10 @@ interface WeatherLayerState {
   playing: boolean;
   /** State of the cloud-forecast tiles (layer 'forecast' only). */
   cloudStatus: 'loading' | 'ready' | 'error';
+  /** Last instant the loaded cloud tiles actually cover (null = unknown, assume the 7-day default). */
+  cloudHorizonMs: number | null;
+  /** Bumped by openTimeline so a running forecast playback restarts at the new time. */
+  playSeq: number;
   /** Capabilities per UI layer type (stable object identities — safe as selectors). */
   axes: Partial<Record<WeatherLayerType, LayerAxes>>;
   status: Record<WeatherLayerType, AxesStatus>;
@@ -35,6 +39,7 @@ interface WeatherLayerState {
   setTimeMs: (t: number | null) => void;
   setPlaying: (p: boolean) => void;
   setCloudStatus: (s: 'loading' | 'ready' | 'error') => void;
+  setCloudHorizon: (t: number | null) => void;
   /** Switches to the combined clouds + rain forecast at `timeMs` and starts the playback. */
   openTimeline: (timeMs: number | null) => void;
   /** Fetch (cached 10 min in the service) the time axes for a layer type. */
@@ -46,6 +51,8 @@ export const useWeatherLayerStore = create<WeatherLayerState>((set, get) => ({
   timeMs: null,
   playing: false,
   cloudStatus: 'loading',
+  cloudHorizonMs: null,
+  playSeq: 0,
   axes: {},
   status: { radar: 'idle', forecast: 'idle', clouds: 'idle' },
 
@@ -56,9 +63,10 @@ export const useWeatherLayerStore = create<WeatherLayerState>((set, get) => ({
   setTimeMs: (t) => set({ timeMs: t }),
   setPlaying: (p) => set({ playing: p }),
   setCloudStatus: (cloudStatus) => set({ cloudStatus }),
+  setCloudHorizon: (cloudHorizonMs) => set({ cloudHorizonMs }),
   openTimeline: (t) => {
     writeStored('forecast');
-    set({ layer: 'forecast', timeMs: t, playing: true });
+    set((s) => ({ layer: 'forecast', timeMs: t, playing: true, playSeq: s.playSeq + 1 }));
   },
   ensureAxes: async (type, force = false) => {
     const st = get().status[type];

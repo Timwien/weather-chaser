@@ -22,20 +22,22 @@ const CLOUD_DAYS = 7;
 const THREE_H = 3 * HOUR;
 
 /** Last hour for which /api/cloudgrid has data: the forecast starts at 00:00 GMT today and spans 7 days. */
-export function cloudHorizon(now: number): number {
+export function cloudHorizon(now: number, observed: number | null = null): number {
   const d = new Date(now);
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) + CLOUD_DAYS * 24 * HOUR - HOUR;
+  const assumed = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) + CLOUD_DAYS * 24 * HOUR - HOUR;
+  // Loaded tiles may start earlier (CDN / long-open tab) → their real end wins.
+  return observed !== null && observed < assumed ? observed : assumed;
 }
 
 /**
  * Forecast time grid: the DWD rain grid, extended in 3-h steps to the end of the
  * cloud forecast (Open-Meteo, 7 days) so clouds can be shown where rain is not available.
  */
-export function cloudForecastAxis(axes: LayerAxes, now: number): TimeAxis | null {
+export function cloudForecastAxis(axes: LayerAxes, now: number, observedHorizon: number | null = null): TimeAxis | null {
   const rain = forecastAxis(axes);
   if (!rain) return null;
   const end = axisEnd(rain);
-  const horizon = cloudHorizon(now);
+  const horizon = cloudHorizon(now, observedHorizon);
   if (horizon <= end + THREE_H) return rain;
   const extra: number[] = [];
   for (let t = end + THREE_H; t <= horizon; t += THREE_H) extra.push(t);
@@ -51,7 +53,7 @@ export function playbackFrames(grid: TimeAxis, days: string[]): number[] {
 }
 
 /** Instants selectable for a layer type (radar: last 2 h; clouds: last ~24 h; forecast: full range). */
-export function framesFor(type: WeatherLayerType, axes: LayerAxes, now: number): number[] {
+export function framesFor(type: WeatherLayerType, axes: LayerAxes, now: number, observedHorizon: number | null = null): number[] {
   if (type === 'radar') {
     const a = axes[LAYER_NAMES.radar];
     return a ? radarFrames(a, now) : [];
@@ -62,7 +64,7 @@ export function framesFor(type: WeatherLayerType, axes: LayerAxes, now: number):
     const end = axisEnd(a);
     return axisTimes(a).filter((t) => t >= end - 24 * HOUR);
   }
-  const a = cloudForecastAxis(axes, now);
+  const a = cloudForecastAxis(axes, now, observedHorizon);
   return a ? axisTimes(a) : [];
 }
 
@@ -75,6 +77,8 @@ export interface WeatherTimeline {
   time: number | null;
   frame: WmsFrame | null;
   now: number;
+  /** Last instant the loaded cloud tiles cover (null = unknown). */
+  cloudEnd: number | null;
 }
 
 /** Single source of truth for "which instant of which layer is visible". */
@@ -85,16 +89,17 @@ export function useWeatherTimeline(): WeatherTimeline {
   const axes = useWeatherLayerStore((s) => (type ? s.axes[type] ?? null : null));
   const status = useWeatherLayerStore((s) => (type ? s.status[type] : 'idle'));
   const startDate = useAppStore((s) => s.tripConfig.startDate);
+  const cloudEnd = useWeatherLayerStore((s) => s.cloudHorizonMs);
 
   // "now" is pinned per capabilities load so frames stay stable between renders
   const now = useMemo(() => Date.now(), [axes]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const frames = useMemo(() => (type && axes ? framesFor(type, axes, now) : []), [type, axes, now]);
+  const frames = useMemo(() => (type && axes ? framesFor(type, axes, now, cloudEnd) : []), [type, axes, now, cloudEnd]);
 
   const time = useMemo(() => {
     if (!type || !axes || frames.length === 0) return null;
     if (type === 'forecast') {
-      const grid = cloudForecastAxis(axes, now)!;
+      const grid = cloudForecastAxis(axes, now, cloudEnd)!;
       if (timeMs !== null) return snapToAxis(grid, timeMs);
       if (startDate) {
         const noon = new Date(`${startDate}T12:00:00`).getTime();
@@ -104,14 +109,14 @@ export function useWeatherTimeline(): WeatherTimeline {
     }
     if (timeMs !== null && frames.includes(timeMs)) return timeMs;
     return frames[frames.length - 1];
-  }, [type, axes, frames, timeMs, startDate, now]);
+  }, [type, axes, frames, timeMs, startDate, now, cloudEnd]);
 
   const frame = useMemo(
     () => (type && axes && time !== null ? resolveFrame(type, time, axes) : null),
     [type, axes, time],
   );
 
-  return { type, axes, status, frames, time, frame, now };
+  return { type, axes, status, frames, time, frame, now, cloudEnd };
 }
 
 /** Days offered as chips: trip range (capped to 14) or today + next 5. */

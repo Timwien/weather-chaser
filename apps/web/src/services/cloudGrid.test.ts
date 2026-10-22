@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   cloudGridRequestCount, decodeBase64, loadTile, parseTilePayload, resetCloudGridCache, stepForZoom,
-  tilesForBounds, MAX_CONCURRENT,
+  tilesForBounds, tilesAtStep, tilesHorizon, utcDayStart, CACHE_TTL_MS, getCachedTile, MAX_CONCURRENT,
+  type Bounds, type CloudTile,
 } from './cloudGrid.ts';
 
 describe('stepForZoom', () => {
@@ -34,6 +35,59 @@ describe('tilesForBounds', () => {
   });
 });
 
+describe('tilesAtStep coverage', () => {
+  // Every lattice cell touching the view needs its tile: floor/ceil lattice points around each corner.
+  it.each([0.25, 0.5, 1] as const)('covers all corners of a view incl. the strip beyond a tile\'s last point (step %s)', (step) => {
+    const view: Bounds = { south: 48.9, north: 49.9, west: 11.0, east: 11.95 };
+    const tiles = tilesAtStep(view, step);
+    const edge = 8 * step;
+    const covers = (lat: number, lng: number) => tiles.some((t) => lat >= t.lat0 && lat < t.lat0 + edge && lng >= t.lng0 && lng < t.lng0 + edge);
+    for (const lat of [view.south, view.north]) for (const lng of [view.west, view.east]) {
+      // the interpolation at (lat,lng) reads the lattice points floor and floor+step
+      for (const dl of [0, step]) for (const dg of [0, step]) {
+        expect(covers(Math.floor(lat / step) * step + dl, Math.floor(lng / step) * step + dg)).toBe(true);
+      }
+    }
+  });
+  it('requests the next tile at step 0.25 for the Bavaria repro (north 49.9 → lat0 50)', () => {
+    const tiles = tilesAtStep({ south: 48.9, north: 49.9, west: 11.0, east: 11.95 }, 0.25);
+    expect(tiles.map((t) => `${t.lat0}/${t.lng0}`).sort()).toEqual(['48/10', '48/12', '50/10', '50/12']);
+  });
+  it('never exceeds the served range', () => {
+    const tiles = tilesAtStep({ south: 71, north: 72, west: 44, east: 45 }, 0.25);
+    expect(tiles.every((t) => t.lat0 < 72 && t.lng0 < 45)).toBe(true);
+  });
+});
+
+describe('cache freshness', () => {
+  afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
+  const mk = (startMs: number) => new Response(JSON.stringify({
+    start: new Date(startMs).toISOString(), hours: 1, step: 1, lat0: 40, lng0: 0,
+    values: btoa(String.fromCharCode(...new Uint8Array(64).fill(50))),
+  }), { status: 200 });
+  it('refetches after the TTL and when the tile starts before today (UTC)', async () => {
+    resetCloudGridCache();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(Date.UTC(2026, 9, 22, 10));
+    const f = vi.fn(async () => mk(Date.UTC(2026, 9, 22)));
+    vi.stubGlobal('fetch', f);
+    const ref = { step: 1 as const, lat0: 40, lng0: 0 };
+    await loadTile(ref); await loadTile(ref);
+    expect(f).toHaveBeenCalledTimes(1);
+    vi.setSystemTime(Date.UTC(2026, 9, 22, 10) + CACHE_TTL_MS + 1);
+    expect(getCachedTile(ref)).toBeUndefined();
+    await loadTile(ref);
+    expect(f).toHaveBeenCalledTimes(2);
+    vi.setSystemTime(Date.UTC(2026, 9, 23, 0, 30)); // tab open overnight, within no TTL issue → still stale by date
+    expect(getCachedTile(ref)).toBeUndefined();
+  });
+  it('tilesHorizon is the minimum end across tiles', () => {
+    const t = (startMs: number, hours: number) => ({ startMs, hours } as CloudTile);
+    expect(tilesHorizon([])).toBeNull();
+    expect(tilesHorizon([t(0, 169), t(-24 * 3_600_000, 169)])).toBe(168 * 3_600_000 - 24 * 3_600_000);
+  });
+});
+
 describe('parseTilePayload', () => {
   const ref = { step: 1 as const, lat0: 40, lng0: 0 };
   const b64 = (n: number) => btoa(String.fromCharCode(...new Uint8Array(n).fill(7)));
@@ -54,7 +108,7 @@ describe('loadTile', () => {
   const reply = (url: string) => {
     const u = new URL(url, 'http://x');
     return new Response(JSON.stringify({
-      start: '2026-10-22T00:00:00.000Z', hours: 1, step: Number(u.searchParams.get('step')),
+      start: new Date(utcDayStart(Date.now())).toISOString(), hours: 1, step: Number(u.searchParams.get('step')),
       lat0: Number(u.searchParams.get('lat0')), lng0: Number(u.searchParams.get('lng0')),
       values: btoa(String.fromCharCode(...new Uint8Array(64).fill(50))),
     }), { status: 200 });

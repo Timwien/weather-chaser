@@ -77,7 +77,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
   let rainNote: string | null = null;
 
   if (type === 'forecast') {
-    const grid = cloudForecastAxis(axes, tl.now)!; // rain grid + clouds-only tail (Open-Meteo, 7 days)
+    const grid = cloudForecastAxis(axes, tl.now, tl.cloudEnd)!; // rain grid + clouds-only tail (Open-Meteo, 7 days)
     const end = axisEnd(grid);
     const rainEnd = axisEnd(forecastAxis(axes)!);
     const days = dayKeysForChips(startDate, endDate, tl.now);

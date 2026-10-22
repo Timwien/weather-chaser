@@ -11,6 +11,13 @@ export const MAX_TILES = 16;
 export const MAX_CONCURRENT = 4;
 const FAIL_COOLDOWN_MS = 30_000;
 const CACHE_MAX = 96;
+/** Client session cache lifetime (the CDN refreshes tiles every ~3 h; a tab can stay open for days). */
+export const CACHE_TTL_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * 3_600_000;
+const HOUR_MS = 3_600_000;
+
+/** 00:00 UTC of the day containing `now`. */
+export const utcDayStart = (now: number) => Math.floor(now / DAY_MS) * DAY_MS;
 
 export type Step = 1 | 0.5 | 0.25;
 const STEPS: Step[] = [1, 0.5, 0.25];
@@ -41,8 +48,12 @@ export function tilesAtStep(bounds: Bounds, step: Step): TileRef[] {
   const edge = tileEdge(step);
   const tiles: TileRef[] = [];
   if (south >= north || west >= east) return tiles;
-  for (let lat0 = Math.floor(south / edge) * edge; lat0 < north; lat0 += edge) {
-    for (let lng0 = Math.floor(west / edge) * edge; lng0 < east; lng0 += edge) {
+  // A tile's last lattice point is lat0 + 7·step; the strip up to the next tile needs that
+  // tile's first point for interpolation → include one extra step (capped at the served range).
+  const latEnd = Math.min(north + step, LAT_RANGE[1]);
+  const lngEnd = Math.min(east + step, LNG_RANGE[1]);
+  for (let lat0 = Math.floor(south / edge) * edge; lat0 < latEnd; lat0 += edge) {
+    for (let lng0 = Math.floor(west / edge) * edge; lng0 < lngEnd; lng0 += edge) {
       tiles.push({ step, lat0, lng0 });
     }
   }
@@ -83,6 +94,7 @@ export function parseTilePayload(raw: unknown, ref: TileRef): CloudTile | null {
 
 // ── fetch with cache / dedupe / concurrency cap ───────────────────────────
 const cache = new Map<string, CloudTile>();
+const cachedAt = new Map<string, number>();
 const inFlight = new Map<string, Promise<CloudTile>>();
 const failedAt = new Map<string, number>();
 const queue: Array<() => void> = [];
@@ -102,8 +114,14 @@ function release() {
 }
 
 export function getCachedTile(ref: TileRef): CloudTile | undefined {
-  const hit = cache.get(tileKey(ref));
-  if (hit) { cache.delete(tileKey(ref)); cache.set(tileKey(ref), hit); } // LRU touch
+  const key = tileKey(ref);
+  const hit = cache.get(key);
+  // Expired, or the forecast starts before today (UTC) → treat as stale and refetch.
+  if (hit && (Date.now() - (cachedAt.get(key) ?? 0) > CACHE_TTL_MS || hit.startMs < utcDayStart(Date.now()))) {
+    cache.delete(key); cachedAt.delete(key);
+    return undefined;
+  }
+  if (hit) { cache.delete(key); cache.set(key, hit); } // LRU touch
   return hit;
 }
 
@@ -124,7 +142,11 @@ export function loadTile(ref: TileRef): Promise<CloudTile> {
       const tile = parseTilePayload(await fetchJsonWithRetry(url, { attempts: 2, timeoutMs: 15_000 }), ref);
       if (!tile) throw new Error('unexpected response');
       cache.set(key, tile);
-      if (cache.size > CACHE_MAX) cache.delete(cache.keys().next().value as string);
+      cachedAt.set(key, Date.now());
+      if (cache.size > CACHE_MAX) {
+        const oldest = cache.keys().next().value as string;
+        cache.delete(oldest); cachedAt.delete(oldest);
+      }
       failedAt.delete(key);
       return tile;
     } catch (err) {
@@ -141,5 +163,11 @@ export function loadTile(ref: TileRef): Promise<CloudTile> {
 
 /** Test hook: forget everything. */
 export function resetCloudGridCache() {
-  cache.clear(); inFlight.clear(); failedAt.clear(); queue.length = 0; active = 0; requestCount = 0;
+  cache.clear(); cachedAt.clear(); inFlight.clear(); failedAt.clear(); queue.length = 0; active = 0; requestCount = 0;
+}
+
+/** Last instant (ms) covered by ALL of the given tiles; null when there are none. */
+export function tilesHorizon(tiles: CloudTile[]): number | null {
+  if (tiles.length === 0) return null;
+  return Math.min(...tiles.map((t) => t.startMs + (t.hours - 1) * HOUR_MS));
 }

@@ -24,6 +24,15 @@ describe('cloudForecastAxis', () => {
   });
 });
 
+describe('cloudHorizon', () => {
+  it('uses the loaded tiles\' real end when it is earlier than the 7-day assumption', () => {
+    const assumed = cloudHorizon(NOW);
+    expect(cloudHorizon(NOW, assumed - 24 * H)).toBe(assumed - 24 * H);
+    expect(cloudHorizon(NOW, assumed + H)).toBe(assumed);
+    expect(cloudHorizon(NOW, null)).toBe(assumed);
+  });
+});
+
 describe('playbackFrames', () => {
   it('returns the grid instants of the trip days only', () => {
     const grid = { kind: 'range' as const, start: new Date(2026, 9, 23).getTime(), end: new Date(2026, 9, 28).getTime(), stepMs: 3 * H };

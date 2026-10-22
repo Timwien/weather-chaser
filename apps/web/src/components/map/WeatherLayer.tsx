@@ -37,6 +37,8 @@ export function WeatherLayer() {
   const setPlaying = useWeatherLayerStore((s) => s.setPlaying);
   const setTimeMs = useWeatherLayerStore((s) => s.setTimeMs);
   const setCloudStatus = useWeatherLayerStore((s) => s.setCloudStatus);
+  const setCloudHorizon = useWeatherLayerStore((s) => s.setCloudHorizon);
+  const playSeq = useWeatherLayerStore((s) => s.playSeq);
   const scheme = useThemeStore((s) => s.resolved);
   const [overlay, setOverlay] = useState<WmsOverlay | null>(null);
   const [cloud, setCloud] = useState<CloudOverlay | null>(null);
@@ -80,13 +82,13 @@ export function WeatherLayer() {
     let cancelled = false;
     void import('./CloudOverlay.ts').then(({ CloudOverlay: Impl }) => {
       if (cancelled) return;
-      co = new Impl(map.getMap(), setCloudStatus);
+      co = new Impl(map.getMap(), setCloudStatus, setCloudHorizon);
       // dev-only handle for the performance check (lastRenderMs)
       if (import.meta.env.DEV) (window as unknown as { __wxCloud?: CloudOverlay }).__wxCloud = co;
       setCloud(co);
     });
     return () => { cancelled = true; co?.destroy(); setCloud(null); };
-  }, [map, type, setCloudStatus]);
+  }, [map, type, setCloudStatus, setCloudHorizon]);
   useEffect(() => { cloud?.setScheme(scheme === 'dark' ? 'dark' : 'light'); }, [cloud, scheme]);
   // Clouds do not depend on the DWD capabilities: until the rain time axis is known
   // (slow GetCapabilities / probing), show the clouds for the chosen or default instant.
@@ -125,9 +127,12 @@ export function WeatherLayer() {
         const frame = resolveFrame('radar', frames[i], axes);
         if (!frame) break;
         const started = Date.now();
+        const before = useWeatherLayerStore.getState().timeMs;
         await overlay.show(frame, LAYER_OPACITY.radar);
-        // The frame is on the map even if pause/hidden-tab hit meanwhile → keep the label in sync.
-        if (useWeatherLayerStore.getState().layer === 'radar') setTimeMs(frames[i]);
+        // The frame is on the map even if pause/hidden-tab hit meanwhile → keep the label in sync,
+        // but not when the user picked another time in the meantime (slider/chip).
+        const st = useWeatherLayerStore.getState();
+        if (st.layer === 'radar' && (!cancelled || st.timeMs === before)) setTimeMs(frames[i]);
         if (cancelled) break;
         const dwell = i === frames.length - 1 ? LATEST_DWELL_MS : 0;
         await sleep(Math.max(0, FRAME_MS - (Date.now() - started)) + dwell);
@@ -156,9 +161,12 @@ export function WeatherLayer() {
       while (!cancelled) {
         const started = Date.now();
         const frame = resolveFrame('forecast', frames[i], axes);
+        const before = useWeatherLayerStore.getState().timeMs;
         if (frame) await overlay.show(frame, opacity); else overlay.hide();
-        // The frame is on the map even if pause hit meanwhile → keep the label in sync.
-        if (useWeatherLayerStore.getState().layer === 'forecast') setTimeMs(frames[i]);
+        // The frame is on the map even if pause hit meanwhile → keep the label in sync,
+        // but not when the user picked another time in the meantime (slider/chip).
+        const st = useWeatherLayerStore.getState();
+        if (st.layer === 'forecast' && (!cancelled || st.timeMs === before)) setTimeMs(frames[i]);
         if (cancelled) break;
         const next = (i + 1) % frames.length;
         const nextFrame = resolveFrame('forecast', frames[next], axes);
@@ -171,7 +179,7 @@ export function WeatherLayer() {
       cancelled = true;
       document.removeEventListener('visibilitychange', onVis);
     };
-  }, [playing, overlay, type, tl.axes, setPlaying, setTimeMs]);
+  }, [playing, overlay, type, tl.axes, playSeq, setPlaying, setTimeMs]);
 
   return null;
 }

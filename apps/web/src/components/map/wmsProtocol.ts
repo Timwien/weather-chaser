@@ -28,7 +28,7 @@ export function clearRadarMask(px: Uint8ClampedArray): void {
 }
 
 /** Pale blue replacing DWD's grey lightest rain class (kept in sync with the legend). */
-export const DRIZZLE_RGBA = [150, 200, 240, 170] as const;
+export const DRIZZLE_RGBA = [150, 200, 240, 80] as const; // faint: 0.1 mm/3 h barely matters for trips
 
 /**
  * DWD's LAWA precipitation scale draws its lightest class (0.1 mm and up) in

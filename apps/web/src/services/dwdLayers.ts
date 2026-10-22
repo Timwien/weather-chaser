@@ -27,7 +27,7 @@ export const LAYERS_FOR_TYPE: Record<WeatherLayerType, string[]> = {
 };
 
 /** Opacity of the rain rasters. The satellite veil carries its alpha in the pixels (full layer opacity). */
-export const RAIN_OPACITY = 0.7;
+export const RAIN_OPACITY = 0.6; // 0.7 hid the clouds and the map on rainy days
 export const SAT_OPACITY = 1;
 
 /** layer name → axis (the forecast part has two entries) */

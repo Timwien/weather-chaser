@@ -93,7 +93,7 @@ describe('GET /api/cloudgrid', () => {
     vi.stubGlobal('fetch', fetchMock);
     const res = await get('step=1&lat0=40&lng0=0');
     expect(res.status).toBe(200);
-    expect(res.headers.get('Cache-Control')).toBe('public, s-maxage=3600, stale-while-revalidate=1800');
+    expect(res.headers.get('Cache-Control')).toBe('public, s-maxage=10800, stale-while-revalidate=3600');
     const body = await res.json() as { hours: number; values: string };
     expect(Buffer.from(body.values, 'base64').length).toBe(64 * body.hours);
     expect(fetchMock).toHaveBeenCalledTimes(1);

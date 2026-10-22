@@ -15,7 +15,8 @@ import './WeatherControls.css';
 const MOBILE_CONTROLS_BOTTOM = 164;
 
 const RADAR_COLORS = ['#33ffff', '#1acc9a', '#019934', '#4db31b', '#99cc01', '#cce601', '#ffff01', '#ffc401', '#ff8901', '#ff4501', '#fe0000', '#e5004c', '#cc0098', '#6600cb', '#0000fe'];
-const FORECAST_COLORS = ['#c0c0c0', '#fefec0', '#fefe5b', '#cff200', '#a0d625', '#36c969', '#00d7d7', '#00a6dd', '#0000fe', '#9730c2', '#d926c7', '#fe0000', '#a00000', '#606060'];
+// First class recoloured from DWD grey, see recolorDrizzle() in wmsProtocol.ts.
+const FORECAST_COLORS = ['#96c8f0', '#fefec0', '#fefe5b', '#cff200', '#a0d625', '#36c969', '#00d7d7', '#00a6dd', '#0000fe', '#9730c2', '#d926c7', '#fe0000', '#a00000', '#606060'];
 
 interface Props {
   /** Pixels of the viewport covered by the mobile bottom sheet (0 on desktop). */

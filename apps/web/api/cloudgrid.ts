@@ -26,8 +26,9 @@ export default {
     if (!payload) return jsonResponse({ error: 'unexpected_upstream_response' }, 502, { 'Cache-Control': 'no-store' });
 
     return jsonResponse(payload, 200, {
-      // Cache ONLY successes
-      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=1800',
+      // Cache ONLY successes. 3 h: cloud forecasts update every few hours and every
+      // tile costs 64 Open-Meteo calls, so sharing it longer across users matters.
+      'Cache-Control': 'public, s-maxage=10800, stale-while-revalidate=3600',
     });
   },
 };

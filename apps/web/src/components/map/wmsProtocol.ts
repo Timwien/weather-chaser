@@ -24,7 +24,29 @@ export function clearRadarMask(px: Uint8ClampedArray): void {
   }
 }
 
-async function stripRadarMask(data: ArrayBuffer): Promise<ArrayBuffer> {
+/** Pale blue replacing DWD's grey lightest rain class (kept in sync with the legend). */
+export const DRIZZLE_RGBA = [150, 200, 240, 170] as const;
+
+/**
+ * DWD's LAWA precipitation scale draws its lightest class (0.1 mm and up) in
+ * neutral grey (192,192,192) — on the map, especially over the cloud overlay
+ * and in dark mode, that reads as cloud, not rain. Recolour it pale blue.
+ */
+export function recolorDrizzle(px: Uint8ClampedArray): void {
+  for (let i = 0; i < px.length; i += 4) {
+    if (px[i] === 192 && px[i + 1] === 192 && px[i + 2] === 192 && px[i + 3] > 0) {
+      px[i] = DRIZZLE_RGBA[0];
+      px[i + 1] = DRIZZLE_RGBA[1];
+      px[i + 2] = DRIZZLE_RGBA[2];
+      px[i + 3] = DRIZZLE_RGBA[3];
+    }
+  }
+}
+
+async function transformPixels(
+  data: ArrayBuffer,
+  transform: (px: Uint8ClampedArray) => void,
+): Promise<ArrayBuffer> {
   if (typeof OffscreenCanvas === 'undefined' || typeof createImageBitmap === 'undefined') return data;
   try {
     const bitmap = await createImageBitmap(new Blob([data], { type: 'image/png' }));
@@ -34,11 +56,11 @@ async function stripRadarMask(data: ArrayBuffer): Promise<ArrayBuffer> {
     ctx.drawImage(bitmap, 0, 0);
     bitmap.close();
     const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    clearRadarMask(img.data);
+    transform(img.data);
     ctx.putImageData(img, 0, 0);
     return await (await canvas.convertToBlob({ type: 'image/png' })).arrayBuffer();
   } catch {
-    return data; // unmodified tile is still correct, just with DWD's mask
+    return data; // unmodified tile is still correct, just in DWD's styling
   }
 }
 
@@ -61,8 +83,12 @@ export function registerWmsProtocol(): Promise<void> {
         const type = res.headers.get('content-type') ?? '';
         if (!res.ok || !type.startsWith('image/')) return { data: EMPTY_PNG.slice(0) };
         const data = await res.arrayBuffer();
-        const isRadar = url.includes(`layers=${LAYER_NAMES.radar}&`);
-        return { data: isRadar ? await stripRadarMask(data) : data };
+        const isLayer = (name: string) => url.includes(`layers=${name}&`);
+        if (isLayer(LAYER_NAMES.radar)) return { data: await transformPixels(data, clearRadarMask) };
+        if (isLayer(LAYER_NAMES.forecastEu) || isLayer(LAYER_NAMES.forecastGlobal)) {
+          return { data: await transformPixels(data, recolorDrizzle) };
+        }
+        return { data };
       } catch (e) {
         if (abortController.signal.aborted) throw e; // cancelled tile — MapLibre ignores this
         return { data: EMPTY_PNG.slice(0) };

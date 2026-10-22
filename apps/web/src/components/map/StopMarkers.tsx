@@ -1,6 +1,7 @@
 import { Marker, Popup } from '@vis.gl/react-maplibre';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRouteVan } from '../../hooks/useRouteVan.ts';
 import type { Route } from '@weatherchaser/core';
 
 interface StopMarkersProps {
@@ -16,6 +17,7 @@ function scoreColor(value: number): string {
 
 export function StopMarkers({ route, selectedStopIndex, onStopClick }: StopMarkersProps) {
   const { t } = useTranslation('common');
+  const activeStopIndex = useRouteVan()?.pos.focusStopIndex ?? null; // stop the camper is at / heading to
   const [popupIndex, setPopupIndex] = useState<number | null>(null);
 
   let cumulativeDay = 1;
@@ -27,6 +29,7 @@ export function StopMarkers({ route, selectedStopIndex, onStopClick }: StopMarke
         cumulativeDay += stop.nights;
         const color = scoreColor(stop.score.composite);
         const isSelected = selectedStopIndex === idx;
+        const isActive = activeStopIndex === idx;
 
         return (
           <Marker
@@ -40,13 +43,15 @@ export function StopMarkers({ route, selectedStopIndex, onStopClick }: StopMarke
             }}
           >
             <div
+              data-stop-marker={idx}
+              data-active={isActive ? '' : undefined}
               style={{
                 width: isSelected ? '36px' : '32px',
                 height: isSelected ? '36px' : '32px',
                 borderRadius: '50%',
                 background: color,
                 border: isSelected ? '3px solid white' : '2px solid white',
-                boxShadow: 'var(--shadow-md)',
+                boxShadow: isActive ? '0 0 0 4px var(--color-accent), var(--shadow-md)' : 'var(--shadow-md)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -54,7 +59,7 @@ export function StopMarkers({ route, selectedStopIndex, onStopClick }: StopMarke
                 fontWeight: 700,
                 fontSize: '13px',
                 cursor: 'pointer',
-                transition: 'width 0.15s, height 0.15s',
+                transition: 'width 0.15s, height 0.15s, box-shadow 0.2s',
                 userSelect: 'none',
                 position: 'relative',
                 zIndex: 2,

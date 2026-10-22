@@ -14,6 +14,8 @@ import { ShareBar } from '../share/ShareBar.tsx';
 import { InlineSignInPrompt } from '../auth/InlineSignInPrompt.tsx';
 import { ErrorMessage } from '../common/ErrorMessage.tsx';
 import { BeachIcon, HikingIcon, SightseeingIcon } from '../finder/FinderIcons.tsx';
+import { useRouteVan } from '../../hooks/useRouteVan.ts';
+import { useWeatherLayerStore } from '../../stores/weatherLayerStore.ts';
 import { WeatherTimelineButton } from '../common/WeatherTimelineButton.tsx';
 import './ItineraryPanel.css';
 
@@ -66,6 +68,9 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect, onExpandSheet,
   const { route, error, mode, reset, tripConfig, weatherPrefs, setWeatherPrefs, lastRoutePrefs } = useAppStore();
   const { user, pendingAction, setPendingAction } = useAuthStore();
   const isMobile = useIsMobile();
+  const van = useRouteVan();
+  const activeIdx = van?.pos.focusStopIndex ?? null;
+  const focusStop = useWeatherLayerStore((st) => st.focusStop);
   const stopRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -76,6 +81,11 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect, onExpandSheet,
   if (selectedStopIndex !== null && stopRefs.current[selectedStopIndex]) {
     stopRefs.current[selectedStopIndex]!.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
+
+  // The list follows the camper while it travels
+  useEffect(() => {
+    if (activeIdx !== null) stopRefs.current[activeIdx]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [activeIdx]);
 
   // Auto-complete pending save_route action after sign-in
   useEffect(() => {
@@ -247,7 +257,9 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect, onExpandSheet,
                 stop={stop}
                 stopNumber={stopDay}
                 isSelected={selectedStopIndex === idx}
-                onClick={() => onStopSelect(idx)}
+                onClick={() => { onStopSelect(idx); focusStop(idx); }}
+                isActive={activeIdx === idx}
+                onWeatherHere={() => { onStopSelect(idx); focusStop(idx, true); onShowTimeline?.(); }}
                 index={idx}
               />
               {idx < route.stops.length - 1 && stop.distanceToNextKm !== undefined && (

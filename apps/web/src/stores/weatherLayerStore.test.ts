@@ -36,3 +36,40 @@ describe('parseStoredLayer', () => {
     expect([parseStoredLayer('off'), parseStoredLayer(null), parseStoredLayer('x')]).toEqual(['off', 'off', 'off']);
   });
 });
+
+describe('route actions', () => {
+  beforeEach(() => useWeatherLayerStore.setState({
+    layer: 'off', timeMs: null, playing: true, routePlay: false, stopFocus: null, routePlayReq: null, playSeq: 0,
+  }));
+
+  it('focusStop is ignored while the layer is off unless forced', () => {
+    useWeatherLayerStore.getState().focusStop(1);
+    expect(useWeatherLayerStore.getState().stopFocus).toBeNull();
+    useWeatherLayerStore.getState().focusStop(1, true);
+    const s = useWeatherLayerStore.getState();
+    expect([s.layer, s.stopFocus?.idx, s.playing]).toEqual(['weather', 1, false]);
+  });
+
+  it('focusStop on the same stop twice yields a new request each time and pauses playback', () => {
+    useWeatherLayerStore.setState({ layer: 'weather' });
+    useWeatherLayerStore.getState().focusStop(2);
+    const a = useWeatherLayerStore.getState().stopFocus!.seq;
+    useWeatherLayerStore.getState().focusStop(2);
+    expect(useWeatherLayerStore.getState().stopFocus!.seq).toBe(a + 1);
+  });
+
+  it('requestRoutePlay enables the layer; beginRoutePlay starts the scheduled playback; setLayer ends it', () => {
+    const st = useWeatherLayerStore.getState();
+    st.requestRoutePlay();
+    expect(useWeatherLayerStore.getState().layer).toBe('weather');
+    expect(useWeatherLayerStore.getState().routePlayReq?.seq).toBe(1);
+    st.beginRoutePlay(5000);
+    const s = useWeatherLayerStore.getState();
+    expect([s.routePlay, s.timeMs, s.playing, s.playSeq]).toEqual([true, 5000, true, 1]);
+    st.openTimeline(1);
+    expect(useWeatherLayerStore.getState().routePlay).toBe(false);
+    st.beginRoutePlay(5000);
+    st.setLayer('off');
+    expect(useWeatherLayerStore.getState().routePlay).toBe(false);
+  });
+});

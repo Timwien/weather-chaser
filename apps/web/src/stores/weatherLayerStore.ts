@@ -37,6 +37,12 @@ interface WeatherLayerState {
   cloudStatus: 'loading' | 'ready' | 'error';
   /** Last instant the loaded cloud tiles actually cover (null = unknown, assume the 7-day default). */
   cloudHorizonMs: number | null;
+  /** "Play route" mode: the playback range is the trip schedule (once, no loop) instead of the day loop. */
+  routePlay: boolean;
+  /** One-shot request to centre the map on a stop and show the weather of its stay (seq makes repeats distinct). */
+  stopFocus: { idx: number; seq: number } | null;
+  /** One-shot request: fit the whole route, then start the route playback. */
+  routePlayReq: { seq: number } | null;
   /** Bumped by openTimeline so a running playback restarts at the new time. */
   playSeq: number;
   /** Capabilities per UI layer type (stable object identities — safe as selectors). */
@@ -51,6 +57,12 @@ interface WeatherLayerState {
   setPlaying: (p: boolean) => void;
   setCloudStatus: (s: 'loading' | 'ready' | 'error') => void;
   setCloudHorizon: (t: number | null) => void;
+  /** Centre on a stop + jump to its stay's weather. Without `force` only when the weather layer is on. */
+  focusStop: (idx: number, force?: boolean) => void;
+  /** "Play route": enables the layer and asks the map controller to fit the route and start playing. */
+  requestRoutePlay: () => void;
+  /** Starts the scheduled route playback at `timeMs` (called by the map controller once the view is stable). */
+  beginRoutePlay: (timeMs: number) => void;
   /** Switches to the unified layer at `timeMs` and starts the playback. */
   openTimeline: (timeMs: number | null) => void;
   /** Fetch (cached 10 min in the service) the time axes for a layer type. */
@@ -65,6 +77,9 @@ export const useWeatherLayerStore = create<WeatherLayerState>((set, get) => ({
   playback: { phase: 'idle', ready: 0, total: 0 },
   cloudStatus: 'loading',
   cloudHorizonMs: null,
+  routePlay: false,
+  stopFocus: null,
+  routePlayReq: null,
   playSeq: 0,
   axes: {},
   status: { weather: 'idle' },
@@ -73,7 +88,7 @@ export const useWeatherLayerStore = create<WeatherLayerState>((set, get) => ({
     writeStored(l);
     // cloud state belongs to the overlay that is about to be (re)created → drop stale error/horizon now
     set({
-      layer: l, timeMs: null, shownMs: null, playing: false, playback: { phase: 'idle', ready: 0, total: 0 },
+      layer: l, routePlay: false, timeMs: null, shownMs: null, playing: false, playback: { phase: 'idle', ready: 0, total: 0 },
       cloudStatus: 'loading', cloudHorizonMs: null,
     });
   },
@@ -85,7 +100,19 @@ export const useWeatherLayerStore = create<WeatherLayerState>((set, get) => ({
   setCloudHorizon: (cloudHorizonMs) => set({ cloudHorizonMs }),
   openTimeline: (t) => {
     writeStored('weather');
-    set((s) => ({ layer: 'weather', timeMs: t, playing: true, playSeq: s.playSeq + 1 }));
+    set((s) => ({ layer: 'weather', routePlay: false, timeMs: t, playing: true, playSeq: s.playSeq + 1 }));
+  },
+  focusStop: (idx, force = false) => {
+    if (!force && get().layer === 'off') return;
+    if (get().layer === 'off') { writeStored('weather'); set({ layer: 'weather', timeMs: null, shownMs: null, routePlay: false }); }
+    set((s) => ({ playing: false, stopFocus: { idx, seq: (s.stopFocus?.seq ?? 0) + 1 } }));
+  },
+  requestRoutePlay: () => {
+    if (get().layer === 'off') { writeStored('weather'); set({ layer: 'weather', timeMs: null, shownMs: null }); }
+    set((s) => ({ playing: false, routePlayReq: { seq: (s.routePlayReq?.seq ?? 0) + 1 } }));
+  },
+  beginRoutePlay: (t) => {
+    set((s) => ({ routePlay: true, timeMs: t, playing: true, playSeq: s.playSeq + 1 }));
   },
   ensureAxes: async (type, force = false) => {
     const st = get().status[type];

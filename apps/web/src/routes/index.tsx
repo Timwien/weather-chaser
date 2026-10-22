@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createRoute } from '@tanstack/react-router';
 import { Route as rootRoute } from './__root.tsx';
+import { useWeatherLayerStore } from '../stores/weatherLayerStore.ts';
 import { useAppStore } from '../stores/appStore.ts';
 import { useIsMobile } from '../hooks/useIsMobile.ts';
 import { useResultsHistory } from '../hooks/useResultsHistory.ts';
@@ -72,7 +73,8 @@ function IndexPage() {
 
   function handleStopSelectFromPanel(idx: number) {
     setSelectedStopIndex(idx);
-    if (isMobile) setSheetSnap(2);
+    // weather layer on: keep the map visible (half) so the stop and the weather there can be seen
+    if (isMobile) setSheetSnap(useWeatherLayerStore.getState().layer === 'off' ? 2 : 1);
   }
 
   function handleFinderSelectFromPanel(idx: number) {

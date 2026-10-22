@@ -14,6 +14,9 @@ import { WeatherLayer } from './WeatherLayer.tsx';
 import { WeatherTimeBar } from './WeatherTimeBar.tsx';
 import { RouteLayer } from './RouteLayer.tsx';
 import { StopMarkers } from './StopMarkers.tsx';
+import { RouteVan } from './RouteVan.tsx';
+import { RouteWeatherController } from './RouteWeatherController.tsx';
+import { useWeatherLayerStore } from '../../stores/weatherLayerStore.ts';
 import { FinderMarkers } from './FinderMarkers.tsx';
 import type { FinderResultData } from '../finder/FinderResultRow.tsx';
 import { usePanelInset } from '../../hooks/usePanelInset.ts';
@@ -104,7 +107,9 @@ function FitRouteOnSelection({
     if (!map || !route || route.stops.length === 0) return;
     const bp = sheetBottomPadding ?? 0;
     const isNewRoute = prevRouteRef.current !== route;
-    const isNewSelection = selectedStopIndex !== null && prevIndexRef.current !== selectedStopIndex;
+    // With the weather layer on, a stop selection flies to the stop (RouteWeatherController) instead of re-fitting the route
+    const weatherOn = useWeatherLayerStore.getState().layer !== 'off';
+    const isNewSelection = !weatherOn && selectedStopIndex !== null && prevIndexRef.current !== selectedStopIndex;
     // Sheet snap changed (peek↔half↔full) — refit so the route stays in the visible area
     const isNewPadding = prevBpRef.current !== null && prevBpRef.current !== bp;
     if (!isNewRoute && !isNewSelection && !isNewPadding) return;
@@ -363,6 +368,7 @@ export function MapContainer({
   sheetBottomPadding,
 }: MapContainerProps) {
   const { route, mode } = useAppStore();
+  const focusStop = useWeatherLayerStore((st) => st.focusStop);
   const { i18n } = useTranslation();
   const resolvedTheme = useThemeStore((s) => s.resolved);
   // Read the current language inside the (stable) map event handlers.
@@ -396,6 +402,7 @@ export function MapContainer({
         {/* Always-present: map-positioning helpers */}
         <FitRouteOnSelection selectedStopIndex={selectedStopIndex} sheetBottomPadding={sheetBottomPadding} />
         <FlyToFinderRank1 finderResults={finderResults} sheetBottomPadding={sheetBottomPadding} />
+        <RouteWeatherController sheetBottomPadding={sheetBottomPadding} />
         <FlyToCity target={flyToCity} sheetBottomPadding={sheetBottomPadding} />
         <TapToAddLocation />
         <MapLanguage />
@@ -422,8 +429,9 @@ export function MapContainer({
             <StopMarkers
               route={route}
               selectedStopIndex={selectedStopIndex}
-              onStopClick={onStopClick}
+              onStopClick={(i) => { onStopClick(i); focusStop(i); }}
             />
+            <RouteVan />
           </>
         )}
 

@@ -1,0 +1,11 @@
+/* Camper marker: above the route line and stop markers, never intercepts clicks */
+.route-van {
+  display: block;
+  width: 44px;
+  height: 30px;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+}
+.route-van-svg { display: block; }
+/* popups stay above the camper */
+.maplibregl-popup { z-index: 6; }

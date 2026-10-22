@@ -8,6 +8,10 @@ interface StopCardProps {
   stopNumber: number;
   isSelected: boolean;
   onClick: () => void;
+  /** The camper is at / heading to this stop (weather layer on) */
+  isActive?: boolean;
+  /** "Weather here": switch on the weather layer and jump to this stop's stay */
+  onWeatherHere?: () => void;
   /** Position in the list — drives the entrance animation stagger */
   index?: number;
 }
@@ -45,7 +49,7 @@ function ScoreRing({ value }: { value: number }) {
   );
 }
 
-export function StopCard({ stop, stopNumber, isSelected, onClick, index = 0 }: StopCardProps) {
+export function StopCard({ stop, stopNumber, isSelected, onClick, isActive = false, onWeatherHere, index = 0 }: StopCardProps) {
   const { t, i18n } = useTranslation('common');
   const { town, arrivalDate, nights, score, weatherAvg } = stop;
 
@@ -58,7 +62,9 @@ export function StopCard({ stop, stopNumber, isSelected, onClick, index = 0 }: S
   return (
     <div
       onClick={onClick}
-      className={`stop-card wc-fade-up${isSelected ? ' stop-card--selected' : ''}`}
+      className={`stop-card wc-fade-up${isSelected ? ' stop-card--selected' : ''}${isActive ? ' stop-card--active' : ''}`}
+      data-stop-card={stopNumber}
+      data-active={isActive ? '' : undefined}
       style={{ animationDelay: `${Math.min(index, 8) * 55}ms` }}
     >
       <div className="stop-card-day">
@@ -71,6 +77,15 @@ export function StopCard({ stop, stopNumber, isSelected, onClick, index = 0 }: S
           {dateStr} &middot; {t('itinerary.nights_count', { count: nights })}
         </div>
         <ScoreBar score={score} weatherAvg={weatherAvg} showComposite={false} />
+        {onWeatherHere && (
+          <button
+            type="button"
+            className="stop-card-weather"
+            onClick={(e) => { e.stopPropagation(); onWeatherHere(); }}
+          >
+            {t('itinerary.weather_here')}
+          </button>
+        )}
       </div>
 
       <div className="stop-card-score">

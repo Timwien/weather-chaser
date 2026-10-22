@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useWeatherLayerStore, type WeatherLayerChoice } from '../../stores/weatherLayerStore.ts';
 import './WeatherControls.css';
 
-const OPTIONS: WeatherLayerChoice[] = ['off', 'radar', 'forecast', 'clouds'];
+const OPTIONS: WeatherLayerChoice[] = ['off', 'weather'];
 
 /** "Wetterebenen" toggle + layer picker popover, sits among the floating map controls. */
 export function WeatherControls() {

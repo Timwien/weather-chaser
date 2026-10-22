@@ -115,6 +115,39 @@
 }
 .wx-legend-btn { padding: 0 var(--space-3); }
 
+.wx-slider-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+.wx-slider-wrap .wx-slider { width: 100%; }
+/* "now" marker on the track; 8 px = half the thumb width so it lines up with the thumb centre */
+.wx-now-tick {
+  position: absolute;
+  left: calc(8px + (100% - 16px) * var(--wx-now, 0));
+  top: 50%;
+  width: 2px;
+  height: 18px;
+  margin: -9px 0 0 -1px;
+  background: var(--color-text);
+  border-radius: 1px;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.wx-now-tick span {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  line-height: 1;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
 .wx-slider {
   flex: 1;
   min-width: 0;
@@ -127,7 +160,7 @@
 
 .wx-time {
   flex: none;
-  min-width: 56px;
+  min-width: 62px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -136,6 +169,9 @@
   color: var(--color-text-secondary);
 }
 .wx-time strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: var(--font-size-sm);
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
@@ -247,3 +283,37 @@
   touch-action: manipulation;
 }
 .wx-timeline-btn:hover { background: var(--color-primary-mid); }
+
+/* loading indicator (scrubbing / buffering the animation) */
+.wx-spinner {
+  flex: none;
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: wx-spin 0.8s linear infinite;
+}
+@keyframes wx-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .wx-spinner { animation-duration: 2.4s; } }
+.wx-note--busy {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+}
+
+/* observed / forecast badge */
+.wx-badge {
+  display: inline-block;
+  margin-right: var(--space-2);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+.wx-badge--obs { color: var(--color-primary); border-color: var(--color-primary-mid); background: var(--color-primary-light); }

@@ -35,6 +35,7 @@ export class CloudOverlay {
   private destroyed = false;
   private coordsKey = '';
   private status: CloudStatus = 'loading';
+  private visible = true;
   /** Wall time of the last draw (ms) — read by the perf check. */
   lastRenderMs = 0;
 
@@ -49,6 +50,22 @@ export class CloudOverlay {
   setScheme(scheme: 'light' | 'dark') {
     this.lut = buildColorLut(scheme);
     this.schedule();
+  }
+
+  /**
+   * Observed (past) frames show the satellite veil instead; the overlay then keeps loading
+   * its tiles but is not painted, so the first forecast frame is instant.
+   */
+  setVisible(visible: boolean) {
+    if (visible === this.visible) return;
+    this.visible = visible;
+    this.applyVisibility();
+  }
+
+  private applyVisibility() {
+    try {
+      if (this.map.getLayer(LYR)) this.map.setPaintProperty(LYR, 'raster-opacity', this.visible ? 1 : 0);
+    } catch { /* style mid-swap */ }
   }
 
   /** `glideMs` > 0 tweens from the current time (used while playing). */
@@ -83,7 +100,7 @@ export class CloudOverlay {
     try {
       const layers = this.map.getStyle().layers;
       // below the DWD rain rasters (they sit below the first label layer)
-      return layers.find((l) => l.id.startsWith('dwd-wx-lyr'))?.id ?? layers.find((l) => l.type === 'symbol')?.id;
+      return layers.find((l) => l.id.startsWith('dwd-wx-'))?.id ?? layers.find((l) => l.type === 'symbol')?.id;
     } catch {
       return undefined;
     }
@@ -124,10 +141,11 @@ export class CloudOverlay {
       }
       if (!this.map.getLayer(LYR)) {
         this.map.addLayer(
-          { id: LYR, type: 'raster', source: SRC, paint: { 'raster-fade-duration': 0, 'raster-resampling': 'linear', 'raster-opacity': 1 } },
+          { id: LYR, type: 'raster', source: SRC, paint: { 'raster-fade-duration': 0, 'raster-resampling': 'linear', 'raster-opacity': this.visible ? 1 : 0 } },
           this.beforeId(),
         );
       }
+      this.applyVisibility();
       return src;
     } catch {
       return null; // style not ready — styledata retries

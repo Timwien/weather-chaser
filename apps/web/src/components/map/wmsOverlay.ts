@@ -1,9 +1,9 @@
 import type { Map as MaplibreMap } from 'maplibre-gl';
-import { DWD_ATTRIBUTION, tileUrl, type WmsFrame } from '../../services/dwdLayers.ts';
+import { DWD_ATTRIBUTION, tileUrl, WMS_MAX_ZOOM, WMS_TILE_SIZE, type WmsFrame } from '../../services/dwdLayers.ts';
 import { registerWmsProtocol } from './wmsProtocol.ts';
 
-const PREFIX = 'dwd-wx';
-const LOAD_TIMEOUT_MS = 3000;
+/** Upper bound for one raster buffer to load; cold DWD radar tiles take 0.3-0.5 s each, so a full frame can need several seconds. */
+const LOAD_TIMEOUT_MS = 12000;
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -27,17 +27,23 @@ export class WmsOverlay {
   private heldLoaded = false;
   private retries = 0;
 
-  constructor(private map: MaplibreMap) {
+  /**
+   * `prefix` names this channel's sources/layers (must start with "dwd-wx-"); `abovePrefixes`
+   * are the channels stacked on top of it, so a re-added slot keeps its place in the stack.
+   */
+  constructor(private map: MaplibreMap, private prefix = 'dwd-wx-rain', private abovePrefixes: string[] = []) {
     void registerWmsProtocol();
   }
 
-  private src(i: number) { return `${PREFIX}-src-${i}`; }
-  private lyr(i: number) { return `${PREFIX}-lyr-${i}`; }
+  private src(i: number) { return `${this.prefix}-src-${i}`; }
+  private lyr(i: number) { return `${this.prefix}-lyr-${i}`; }
 
-  /** Insert below the base style's labels so place names stay readable on top. */
+  /** Insert below the channels above us, else below the base style's labels so place names stay readable. */
   private beforeId(): string | undefined {
     try {
-      return this.map.getStyle().layers.find((l) => l.type === 'symbol')?.id;
+      const layers = this.map.getStyle().layers;
+      return layers.find((l) => this.abovePrefixes.some((p) => l.id.startsWith(p)))?.id
+        ?? layers.find((l) => l.type === 'symbol')?.id;
     } catch {
       return undefined;
     }
@@ -59,8 +65,8 @@ export class WmsOverlay {
         this.map.addSource(this.src(i), {
           type: 'raster',
           tiles: [tileUrl(frame)],
-          tileSize: 256,
-          maxzoom: 10,
+          tileSize: WMS_TILE_SIZE,
+          maxzoom: WMS_MAX_ZOOM,
           attribution: DWD_ATTRIBUTION,
         });
         this.map.addLayer(
@@ -163,6 +169,7 @@ export class WmsOverlay {
   /** Hides the raster (time outside the layer's range); the next show() brings it back. */
   hide() {
     this.token++;
+    this.spec = null; // a style swap must not bring the hidden frame back
     this.lastKey = '';
     this.held = false;
     try {

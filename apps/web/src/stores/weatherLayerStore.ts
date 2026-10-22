@@ -58,7 +58,8 @@ export const useWeatherLayerStore = create<WeatherLayerState>((set, get) => ({
 
   setLayer: (l) => {
     writeStored(l);
-    set({ layer: l, timeMs: null, playing: false });
+    // cloud state belongs to the overlay that is about to be (re)created → drop stale error/horizon now
+    set({ layer: l, timeMs: null, playing: false, cloudStatus: 'loading', cloudHorizonMs: null });
   },
   setTimeMs: (t) => set({ timeMs: t }),
   setPlaying: (p) => set({ playing: p }),

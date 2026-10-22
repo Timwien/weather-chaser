@@ -1,6 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useWeatherLayerStore } from './weatherLayerStore.ts';
 
+describe('setLayer', () => {
+  it('resets a stale cloud error and horizon so switching the layer on shows no unavailable note', () => {
+    useWeatherLayerStore.setState({ cloudStatus: 'error', cloudHorizonMs: 123 });
+    useWeatherLayerStore.getState().setLayer('forecast');
+    const s = useWeatherLayerStore.getState();
+    expect([s.cloudStatus, s.cloudHorizonMs]).toEqual(['loading', null]);
+  });
+});
+
 describe('openTimeline', () => {
   beforeEach(() => useWeatherLayerStore.setState({ layer: 'off', timeMs: null, playing: false, playSeq: 0 }));
 

@@ -421,6 +421,7 @@
     "src_observed": "Clouds: satellite (Meteosat) · Rain: radar over Germany, model elsewhere",
     "src_forecast": "Clouds: Open-Meteo · Rain: DWD forecast",
     "loading_animation": "Loading animation {{ready}}/{{total}}",
+    "frames_incomplete": "Some frames are still incomplete – the animation keeps playing",
     "loading_frame": "Loading …",
     "now_marker": "now",
     "shown_none": "–",

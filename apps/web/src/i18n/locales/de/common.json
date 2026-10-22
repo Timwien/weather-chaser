@@ -421,6 +421,7 @@
     "src_observed": "Wolken: Satellit (Meteosat) · Regen: Radar über Deutschland, sonst Modell",
     "src_forecast": "Wolken: Open-Meteo · Regen: DWD-Vorhersage",
     "loading_animation": "Lade Animation {{ready}}/{{total}}",
+    "frames_incomplete": "Einige Bilder sind noch unvollständig – die Animation läuft trotzdem weiter",
     "loading_frame": "Lädt …",
     "now_marker": "jetzt",
     "shown_none": "–",

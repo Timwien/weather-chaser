@@ -45,6 +45,9 @@ export class CloudOverlay {
     this.canvas.height = 2;
     map.on('moveend', this.schedule);
     map.on('styledata', this.ensure);
+    // Fetch the tiles right away, before anyone sets a time: the playback waits for this status,
+    // and an overlay that attaches after the playback started must not wait for a time that never comes.
+    this.schedule();
   }
 
   setScheme(scheme: 'light' | 'dark') {
@@ -162,11 +165,8 @@ export class CloudOverlay {
   };
 
   private draw() {
-    if (this.destroyed || !this.ctx || this.timeMs === null) return;
+    if (this.destroyed) return;
     const t0 = performance.now();
-    const container = this.map.getContainer();
-    const width = Math.max(8, Math.min(640, Math.round(container.clientWidth * (1 + 2 * MARGIN) * SCALE)));
-    const height = Math.max(8, Math.min(420, Math.round(container.clientHeight * (1 + 2 * MARGIN) * SCALE)));
     const view = this.viewBounds();
     const zoom = this.map.getZoom();
     const wanted = tilesForBounds(this.viewBounds(FETCH_MARGIN), zoom);
@@ -183,9 +183,16 @@ export class CloudOverlay {
       const hit = getCachedTile(ref);
       if (hit) have.push(hit);
     }
-    if (missing === 0 && wanted.tiles.length > 0) this.setStatus('ready');
-    if (missing === 0) this.onHorizon?.(tilesHorizon(have));
-    else if (missing > 0 && this.status !== 'error') this.setStatus('loading');
+    // nothing to fetch (view outside the served lattice) counts as ready — else the playback would wait forever
+    if (missing === 0) {
+      this.setStatus('ready');
+      this.onHorizon?.(tilesHorizon(have));
+    } else if (this.status !== 'error') this.setStatus('loading');
+    if (this.timeMs === null || !this.ctx) return; // tiles are on their way; painting waits for the first time
+
+    const container = this.map.getContainer();
+    const width = Math.max(8, Math.min(640, Math.round(container.clientWidth * (1 + 2 * MARGIN) * SCALE)));
+    const height = Math.max(8, Math.min(420, Math.round(container.clientHeight * (1 + 2 * MARGIN) * SCALE)));
 
     if (this.canvas.width !== width || this.canvas.height !== height || !this.image || !this.pixels) {
       this.canvas.width = width;

@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 import { loadAxes, type LayerAxes, type WeatherLayerType } from '../services/dwdLayers.ts';
+import type { PlaybackState } from '../services/playbackEngine.ts';
 
 export type WeatherLayerChoice = 'off' | WeatherLayerType;
 export type AxesStatus = 'idle' | 'loading' | 'ready' | 'error';
 
 const STORAGE_KEY = 'wc-weather-layer';
+export const IDLE_PLAYBACK: PlaybackState = { phase: 'idle', ready: 0, total: 0, incomplete: 0 };
 
 /** Persisted choice; the former "radar" / "forecast" / "clouds" options migrate to the unified layer. */
 export function parseStoredLayer(v: string | null): WeatherLayerChoice {
@@ -31,8 +33,8 @@ interface WeatherLayerState {
   /** Instant of the picture that is actually on the map — the time label shows this, never `timeMs`. */
   shownMs: number | null;
   playing: boolean;
-  /** Buffered playback: phase + frames cached (for the "Lade Animation 7/24" indicator). */
-  playback: { phase: 'idle' | 'buffering' | 'playing'; ready: number; total: number };
+  /** Buffered playback: phase + frames cached (for the "Lade Animation 7/24" indicator) + frames played incomplete. */
+  playback: PlaybackState;
   /** State of the cloud-forecast tiles (layer 'forecast' only). */
   cloudStatus: 'loading' | 'ready' | 'error';
   /** Last instant the loaded cloud tiles actually cover (null = unknown, assume the 7-day default). */
@@ -78,7 +80,7 @@ export const useWeatherLayerStore = create<WeatherLayerState>((set, get) => ({
   timeMs: null,
   shownMs: null,
   playing: false,
-  playback: { phase: 'idle', ready: 0, total: 0 },
+  playback: IDLE_PLAYBACK,
   cloudStatus: 'loading',
   cloudHorizonMs: null,
   routePlay: false,
@@ -92,7 +94,7 @@ export const useWeatherLayerStore = create<WeatherLayerState>((set, get) => ({
     writeStored(l);
     // cloud state belongs to the overlay that is about to be (re)created → drop stale error/horizon now
     set({
-      layer: l, routePlay: false, timeMs: null, shownMs: null, playing: false, playback: { phase: 'idle', ready: 0, total: 0 },
+      layer: l, routePlay: false, timeMs: null, shownMs: null, playing: false, playback: IDLE_PLAYBACK,
       cloudStatus: 'loading', cloudHorizonMs: null,
     });
   },

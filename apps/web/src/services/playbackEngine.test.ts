@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { bufferTarget, PlaybackEngine, type PlaybackState } from './playbackEngine.ts';
+import { adaptiveTarget, bufferTarget, PlaybackEngine, STALL_MS, type PlaybackState } from './playbackEngine.ts';
 
 /** Deterministic harness: manual clock + timers, frames become ready on demand. */
-function harness(total: number, opts: { showMs?: number; loop?: boolean } = {}) {
+function harness(total: number, opts: { showMs?: number; loop?: boolean; isReady?: (i: number, ready: Set<number>) => boolean } = {}) {
   let ended = 0;
   let t = 0;
   const timers: Array<{ at: number; fn: () => void }> = [];
@@ -12,7 +12,7 @@ function harness(total: number, opts: { showMs?: number; loop?: boolean } = {}) 
   const intervals: number[] = [];
   const engine = new PlaybackEngine({
     count: () => total,
-    isReady: (i) => ready.has(i),
+    isReady: (i) => (opts.isReady ? opts.isReady(i, ready) : ready.has(i)),
     pump: () => {},
     loop: opts.loop,
     onEnd: () => { ended++; },
@@ -41,6 +41,11 @@ describe('bufferTarget', () => {
   it('needs all frames for short loops, 6 ahead for long ones', () => {
     expect(bufferTarget(12)).toBe(11);
     expect(bufferTarget(24)).toBe(6);
+  });
+  it('doubles per underrun, capped at all other frames', () => {
+    expect(adaptiveTarget(40, 0)).toBe(6);
+    expect(adaptiveTarget(40, 1)).toBe(12);
+    expect(adaptiveTarget(40, 3)).toBe(39);
   });
 });
 
@@ -89,6 +94,10 @@ describe('PlaybackEngine', () => {
     expect(h.label.length).toBe(shownBefore); // clock stopped
     for (let i = 7; i <= 12; i++) h.ready.add(i);
     h.engine.notify();
+    // after an underrun the engine wants twice as many frames ahead (6 → 12)
+    expect(h.states.at(-1)?.phase).toBe('buffering');
+    for (let i = 13; i <= 18; i++) h.ready.add(i);
+    h.engine.notify();
     expect(h.states.at(-1)?.phase).toBe('playing');
     await h.advance(1200);
     expect(h.label.slice(shownBefore)).toEqual([7, 8]);
@@ -132,6 +141,64 @@ describe('PlaybackEngine without loop (play route)', () => {
     await h.advance(600 * 10);
     expect(h.label).toEqual([1, 2, 3, 4]);
     expect(h.states.at(-1)?.phase).toBe('idle');
+    expect(h.ended()).toBe(1);
+  });
+
+  it('a readiness dependency that arrives after play() (lazy cloud overlay) starts the playback on notify', async () => {
+    let cloudReady = false; // the cloud overlay attaches later and only then loads its tiles
+    const h = harness(24, { isReady: (i, ready) => ready.has(i) && cloudReady });
+    for (let i = 0; i < 24; i++) h.ready.add(i); // all rain tiles are cached
+    h.engine.play(0, true);
+    expect(h.states.at(-1)).toMatchObject({ phase: 'buffering', ready: 0 });
+    await h.advance(3000);
+    expect(h.label).toEqual([]);
+    cloudReady = true;
+    h.engine.notify();
+    expect(h.states.at(-1)?.phase).toBe('playing');
+    await h.advance(10);
+    await h.advance(600 * 3);
+    expect(h.label).toEqual([0, 1, 2, 3]);
+    expect(h.states.at(-1)?.incomplete).toBe(0);
+  });
+
+  it('watchdog: frames that never become ready are played incomplete after STALL_MS instead of hanging', async () => {
+    const h = harness(24); // nothing ever gets ready (e.g. a dependency that never answers)
+    h.engine.play(0, true);
+    await h.advance(STALL_MS - 100);
+    expect(h.states.at(-1)?.phase).toBe('buffering');
+    expect(h.label).toEqual([]);
+    await h.advance(200);
+    expect(h.states.at(-1)).toMatchObject({ phase: 'playing', incomplete: 24 });
+    await h.advance(600 * 3);
+    expect(h.label).toEqual([0, 1, 2, 3]);
+    // a released frame that loads later no longer counts as incomplete
+    h.ready.add(5);
+    h.engine.notify();
+    expect(h.states.at(-1)?.incomplete).toBe(23);
+  });
+
+  it('watchdog re-arms per buffering phase and is cancelled by pause() and by reaching the buffer in time', async () => {
+    const h = harness(24);
+    h.engine.play(0);
+    await h.advance(STALL_MS / 2);
+    for (let i = 1; i <= 6; i++) h.ready.add(i);
+    h.engine.notify(); // buffer filled in time → playing, nothing released
+    expect(h.states.at(-1)).toMatchObject({ phase: 'playing', incomplete: 0 });
+    await h.advance(600 * 7); // runs dry after frame 6 → buffering again
+    expect(h.states.at(-1)?.phase).toBe('buffering');
+    h.engine.pause();
+    await h.advance(STALL_MS * 2);
+    expect(h.states.at(-1)).toMatchObject({ phase: 'idle', incomplete: 0 });
+  });
+
+  it('play once (route): frames after the last one are not required ahead', async () => {
+    const h = harness(20, { loop: false });
+    for (let i = 14; i < 20; i++) h.ready.add(i); // frames 0..13 are not cached (evicted / never needed again)
+    h.engine.play(16);
+    // 6 ahead of 16 would wrap to 0..2 — a single run never shows those
+    expect(h.states.at(-1)?.phase).toBe('playing');
+    await h.advance(4000);
+    expect(h.label).toEqual([17, 18, 19]);
     expect(h.ended()).toBe(1);
   });
 });

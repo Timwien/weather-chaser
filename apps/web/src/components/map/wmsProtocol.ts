@@ -55,7 +55,9 @@ async function transformPixels(
   try {
     const bitmap = await createImageBitmap(new Blob([data], { type }));
     const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-    const ctx = canvas.getContext('2d');
+    // CPU-backed: the pixels are read back once per tile; a GPU canvas makes getImageData a slow
+    // readback (profiled: ~110 ms per 512 px tile on the main thread, the bulk of the route-play stalls)
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return data;
     ctx.drawImage(bitmap, 0, 0);
     bitmap.close();
@@ -86,10 +88,20 @@ const inflight = new Map<string, Inflight>();
 let fetchCount = 0;
 export const wmsFetchCount = () => fetchCount;
 
+/**
+ * A DWD request that hangs (seen: 36 s) must not hold a frame back until the playback watchdog
+ * fires — after this it counts as a gap (short TTL, retried later), like any other failure.
+ */
+const TILE_TIMEOUT_MS = 10_000;
+
 async function fetchProcessed(url: string, key: string, signal: AbortSignal): Promise<ArrayBuffer> {
   fetchCount++;
+  const ctrl = new AbortController();
+  const onAbort = () => ctrl.abort();
+  if (signal.aborted) ctrl.abort(); else signal.addEventListener('abort', onAbort, { once: true });
+  const timer = setTimeout(() => ctrl.abort(), TILE_TIMEOUT_MS);
   try {
-    const res = await fetch(url, { signal });
+    const res = await fetch(url, { signal: ctrl.signal });
     const type = res.headers.get('content-type') ?? '';
     if (!res.ok || !type.startsWith('image/')) {
       // 200 + ServiceException = gap in the series; 4xx is deterministic too; 5xx/429 may heal
@@ -113,6 +125,9 @@ async function fetchProcessed(url: string, key: string, signal: AbortSignal): Pr
     if (signal.aborted) throw e;
     tileCache.set(key, EMPTY_PNG.slice(0), GAP_TTL_MS);
     return EMPTY_PNG.slice(0);
+  } finally {
+    clearTimeout(timer);
+    signal.removeEventListener('abort', onAbort);
   }
 }
 

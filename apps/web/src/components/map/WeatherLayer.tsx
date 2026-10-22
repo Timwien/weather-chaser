@@ -3,7 +3,7 @@ import { useMap } from '@vis.gl/react-maplibre';
 import type { Map as MaplibreMap } from 'maplibre-gl';
 import { useAppStore } from '../../stores/appStore.ts';
 import { useThemeStore } from '../../stores/themeStore.ts';
-import { useWeatherLayerStore } from '../../stores/weatherLayerStore.ts';
+import { IDLE_PLAYBACK, useWeatherLayerStore } from '../../stores/weatherLayerStore.ts';
 import { dayKeysForChips, playbackRange, useWeatherTimeline } from '../../hooks/useWeatherTimeline.ts';
 import { composeFrame, frameTileUrls, type ComposedFrame } from '../../services/weatherFrames.ts';
 import { FramePreloader } from '../../services/framePreloader.ts';
@@ -102,10 +102,12 @@ export function WeatherLayer() {
     if (!map || !type) { setCloud(null); return; }
     let co: CloudOverlay | null = null;
     let cancelled = false;
-    void import('./CloudOverlay.ts').then(({ CloudOverlay: Impl }) => {
+    import('./CloudOverlay.ts').then(({ CloudOverlay: Impl }) => {
       if (cancelled) return;
       co = new Impl(map.getMap(), setCloudStatus, setCloudHorizon);
       setCloud(co);
+    }, () => {
+      if (!cancelled) setCloudStatus('error'); // chunk failed to load: rain only — the playback must not wait for clouds
     });
     return () => { cancelled = true; co?.destroy(); setCloud(null); };
   }, [map, type, setCloudStatus, setCloudHorizon]);
@@ -149,9 +151,11 @@ export function WeatherLayer() {
     return () => { clearTimeout(id); reqSeq.current++; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [comp, composedKey, playing]);
-  // Clouds may attach after the first frame was shown (lazy chunk) → bring them in line once.
+  // Clouds may attach after the first frame was shown or after the playback started (lazy chunk) →
+  // bring them in line once. While playing, `composed` is the frame on screen (the engine moves the
+  // slider with every swap), so this also holds for a running playback.
   useEffect(() => {
-    if (cloud && composed && !playing) applyCloud(composed, 0);
+    if (cloud && composed) applyCloud(composed, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cloud]);
 
@@ -216,7 +220,7 @@ export function WeatherLayer() {
         void comp.show(specs[(i + 1) % specs.length], true);
       },
       onState: (s) => {
-        const key = `${s.phase}|${s.ready}|${s.total}`;
+        const key = `${s.phase}|${s.ready}|${s.total}|${s.incomplete}`;
         if (key === lastReported) return;
         lastReported = key;
         setPlayback(s);
@@ -243,7 +247,7 @@ export function WeatherLayer() {
       unsubCloud();
       document.removeEventListener('visibilitychange', onVis);
       native.off('moveend', onMoveEnd);
-      setPlayback({ phase: 'idle', ready: 0, total: 0 });
+      setPlayback(IDLE_PLAYBACK);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing, comp, map, playSeq, scheme, hasTimeline]);

@@ -113,3 +113,24 @@ describe('EMPTY_PNG', () => {
     expect(Array.from(raw)).toEqual([0, 0, 0, 0, 0]); // filter byte + R,G,B,A = 0
   });
 });
+
+describe('loadWmsTile with a hanging request', () => {
+  afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); tileCache.clear(); });
+  it('gives up after the tile timeout and serves a transparent gap instead of waiting forever', async () => {
+    vi.useFakeTimers();
+    const u = `https://maps.dwd.de/geoserver/dwd/wms?service=WMS&layers=Niederschlagsradar&styles=&bbox=${bboxOfTile(6, 41, 20).join(',')}&time=2026-10-22T10%3A00%3A00.000Z`;
+    let fetchSignal: AbortSignal | undefined;
+    vi.stubGlobal('fetch', vi.fn((_u: string, init?: RequestInit) => {
+      fetchSignal = init?.signal ?? undefined;
+      return new Promise<Response>((_, rej) => init?.signal?.addEventListener('abort', () => rej(new DOMException('x', 'AbortError'))));
+    }));
+    let tile: ArrayBuffer | null = null;
+    void loadWmsTile(u).then((t) => { tile = t; });
+    await vi.advanceTimersByTimeAsync(9_000);
+    expect(tile).toBeNull();
+    await vi.advanceTimersByTimeAsync(1_500);
+    expect(fetchSignal?.aborted).toBe(true);
+    expect(new Uint8Array(tile!)).toEqual(new Uint8Array(EMPTY_PNG));
+    expect(hasWmsTile(u)).toBe(true); // cached as a short-lived gap → the preloader counts the frame as settled
+  });
+});

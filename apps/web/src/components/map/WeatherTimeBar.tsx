@@ -232,6 +232,9 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
           {t('weather.loading_animation', { ready: playback.ready, total: playback.total })}
         </div>
       )}
+      {!compact && playing && playback.incomplete > 0 && (
+        <div className="wx-note wx-note--warn" role="status" data-wx-incomplete="">{t('weather.frames_incomplete')}</div>
+      )}
       {!compact && !buffering && (
         <div className="wx-note">
           <span className={`wx-badge wx-badge--${isObserved ? 'obs' : 'fc'}`}>{t(isObserved ? 'weather.observed' : 'weather.forecast')}</span>

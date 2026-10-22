@@ -4,6 +4,12 @@ import { registerWmsProtocol } from './wmsProtocol.ts';
 
 /** Upper bound for one raster buffer to load; cold DWD radar tiles take 0.3-0.5 s each, so a full frame can need several seconds. */
 const LOAD_TIMEOUT_MS = 12000;
+/**
+ * `sourcedata` alone is not enough: when the last tiles still loading are dropped (camera moved
+ * on, e.g. a stop click's flyTo), MapLibre may fire no further data event, so `isSourceLoaded`
+ * is never seen true and the wait ran into the 12 s timeout (spinner, label stuck). Poll as well.
+ */
+const LOADED_POLL_MS = 100;
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -89,10 +95,14 @@ export class WmsOverlay {
   private waitLoaded(i: number): Promise<void> {
     return new Promise((resolve) => {
       const id = this.src(i);
+      let finished = false;
       const done = () => {
+        if (finished) return;
+        finished = true;
         this.map.off('sourcedata', onData);
         this.map.off('error', onErr);
         clearTimeout(timer);
+        clearInterval(poll);
         resolve();
       };
       const onData = (e: { sourceId?: string; isSourceLoaded?: boolean }) => {
@@ -100,6 +110,11 @@ export class WmsOverlay {
       };
       const onErr = (e: { sourceId?: string }) => { if (e.sourceId === id) done(); };
       const timer = setTimeout(done, LOAD_TIMEOUT_MS);
+      const poll = setInterval(() => {
+        try {
+          if (this.destroyed || !this.map.getSource(id) || this.map.isSourceLoaded(id)) done();
+        } catch { done(); } // style swapped meanwhile — ensure() re-adds the slot
+      }, LOADED_POLL_MS);
       this.map.on('sourcedata', onData);
       this.map.on('error', onErr);
     });

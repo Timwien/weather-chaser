@@ -82,8 +82,9 @@ export function WeatherLayer() {
         if (!frame) break;
         const started = Date.now();
         await overlay.show(frame, LAYER_OPACITY.radar);
+        // The frame is on the map even if pause/hidden-tab hit meanwhile → keep the label in sync.
+        if (useWeatherLayerStore.getState().layer === 'radar') setTimeMs(frames[i]);
         if (cancelled) break;
-        setTimeMs(frames[i]);
         const dwell = i === frames.length - 1 ? LATEST_DWELL_MS : 0;
         await sleep(Math.max(0, FRAME_MS - (Date.now() - started)) + dwell);
       }

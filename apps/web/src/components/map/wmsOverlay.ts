@@ -20,6 +20,9 @@ export class WmsOverlay {
   private pending: Promise<void> = Promise.resolve();
   private spec: { frame: WmsFrame; opacity: number } | null = null;
   private destroyed = false;
+  /** First/any addSlot failed (style not ready) — the next styledata event retries. */
+  private needsRetry = false;
+  private retries = 0;
 
   constructor(private map: MaplibreMap) {
     void registerWmsProtocol();
@@ -103,7 +106,10 @@ export class WmsOverlay {
     const slot = this.front === 0 ? 1 : 0;
 
     this.pending = (async () => {
-      if (!(await this.addSlot(slot, frame))) return;
+      if (!(await this.addSlot(slot, frame))) {
+        if (mine === this.token && !this.destroyed) { this.lastKey = ''; this.needsRetry = true; }
+        return;
+      }
       await this.waitLoaded(slot);
       if (mine !== this.token || this.destroyed) return; // superseded by a newer frame
       try {
@@ -114,7 +120,13 @@ export class WmsOverlay {
         }
         const old = this.front;
         this.front = slot;
-        if (old >= 0) setTimeout(() => { if (!this.destroyed && this.front !== old) this.clearSlot(old); }, 250);
+        // Only if no newer show() started meanwhile — it may be reusing this very slot.
+        const swapToken = this.token;
+        if (old >= 0) {
+          setTimeout(() => {
+            if (!this.destroyed && this.token === swapToken && this.front !== old) this.clearSlot(old);
+          }, 250);
+        }
       } catch { /* style swapped meanwhile — ensure() re-adds */ }
     })();
     return this.pending;
@@ -122,13 +134,23 @@ export class WmsOverlay {
 
   /** After a base-style swap (theme) the raster sources are gone — add them again. */
   ensure() {
-    if (this.destroyed || !this.spec || this.front < 0) return;
+    if (this.destroyed || !this.spec) return;
+    if (this.needsRetry) {
+      // styledata also fires for our own addLayer → bounded, one retry per event
+      if (this.retries++ >= 6) { this.needsRetry = false; return; }
+      this.needsRetry = false;
+      const { frame, opacity } = this.spec;
+      void this.show(frame, opacity);
+      return;
+    }
+    if (this.front < 0) return;
     try {
       if (this.map.getLayer(this.lyr(this.front))) return;
     } catch { return; }
     const { frame, opacity } = this.spec;
     this.lastKey = '';
     this.front = -1;
+    this.retries = 0;
     void this.show(frame, opacity);
   }
 

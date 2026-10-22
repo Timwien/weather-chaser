@@ -14,6 +14,13 @@ import type { OptimizerWorkerInput, OptimizerWorkerOutput, SearchAreaSpec } from
 
 let worker: Worker | null = null;
 
+/** [west, south, east, north] box of ± radiusKm around a point. */
+function radiusBbox(lat: number, lng: number, radiusKm: number): [number, number, number, number] {
+  const dLat = radiusKm / 111;
+  const dLng = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
+  return [lng - dLng, lat - dLat, lng + dLng, lat + dLat];
+}
+
 function terminate() {
   worker?.terminate();
   worker = null;
@@ -58,13 +65,13 @@ export function runOptimizer(): void {
         specs.push({ type: 'pinned', lat: area.lat, lng: area.lng, name: area.name });
       } else if (singlePlace && isLocatedPlace(area)) {
         // Single place: use radius slider to define the search area, not the raw Nominatim bbox
-        const lat = area.lat;
-        const lng = area.lng;
-        const dLat = searchRadiusKm / 111;
-        const dLng = searchRadiusKm / (111 * Math.cos((lat * Math.PI) / 180));
-        specs.push({ type: 'place', bbox: [lng - dLng, lat - dLat, lng + dLng, lat + dLat] });
+        specs.push({ type: 'place', bbox: radiusBbox(area.lat, area.lng, searchRadiusKm) });
       } else if (area.bbox) {
         specs.push({ type: 'place', bbox: area.bbox });
+      } else if (isLocatedPlace(area)) {
+        // Map-tap or dragged pins carry no Nominatim bbox — fall back to the radius
+        // around the point instead of silently dropping the place from the search.
+        specs.push({ type: 'place', bbox: radiusBbox(area.lat, area.lng, searchRadiusKm) });
       }
     } else if (isPolygonArea(area)) {
       specs.push({ type: 'polygon', polygon: area.polygon as [number, number][] });

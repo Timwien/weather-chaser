@@ -23,8 +23,14 @@ dieses Dokument ist die operative Kurzliste.
       dann Branch nach `main` mergen → Vercel deployt Production.
       Rückweg: in Vercel „Instant Rollback" auf das vorherige Deployment.
 - [ ] **Rate-Limit in Vercel** (Firewall → Rate Limiting) für
-      `/api/proxy/weather` und `/api/places`, z. B. 60 Anfragen/Minute je IP.
-      Wichtig, sobald ein bezahlter `OPEN_METEO_API_KEY` gesetzt ist.
+      `/api/proxy/weather`, `/api/cloudgrid` und `/api/places`, z. B. 60
+      Anfragen/Minute je IP. Wichtig, sobald ein bezahlter `OPEN_METEO_API_KEY`
+      gesetzt ist: Jede Wolken-Kachel kostet 64 Open-Meteo-Calls; ein Skript, das
+      alle 1.025 gültigen Kacheln abruft, kostet ~65.600 Calls je 3 h (CDN-Cache).
+- [ ] **`OPEN_METEO_API_KEY` vor dem öffentlichen Launch setzen.** Der Gratis-Tarif
+      ist nur nicht-kommerziell (10.000 Calls/Tag, 600/Minute); Wetterverlauf
+      (Wolken, ~380–640 Calls je ungecachter Ansicht) und die normale Suche teilen
+      sich dieses Kontingent.
 - [ ] DB-Migrationen im Supabase SQL-Editor, falls noch nicht geschehen:
       `docs/feedback-2026-07/migration-search-history.sql` („Letzte Suchen")
       und `docs/analytics-2026-07/migration-feedback.sql` (Feedback-Tabelle).

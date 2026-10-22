@@ -407,8 +407,8 @@
     "toggle": "Weather layers",
     "layer_off": "Off",
     "layer_radar": "Rain radar",
-    "layer_forecast": "Rain forecast",
-    "layer_clouds": "Clouds",
+    "layer_forecast": "Clouds & rain",
+    "layer_clouds": "Clouds (satellite)",
     "unavailable": "Weather layer currently unavailable",
     "loading": "Loading weather layer …",
     "now": "now",
@@ -429,6 +429,16 @@
     "legend_range_radar": "0.1 to over 150 mm/h",
     "radar_coverage_note": "Radar covers Germany and its border regions only.",
     "legend_range_3h": "0.1 to over 160 mm/3 h",
-    "legend_range_6h": "Precipitation in mm/6 h"
+    "legend_range_6h": "Precipitation in mm/6 h",
+    "forecast_combo_3h": "Clouds: cover at the selected time · Rain: amount over the 3 hours before",
+    "forecast_combo_6h": "Clouds: cover at the selected time · Rain: amount over the 6 hours before",
+    "rain_until": "Rain forecast only until {{until}}, clouds continue.",
+    "clouds_unavailable": "Cloud forecast currently unavailable",
+    "legend_clouds": "Clouds",
+    "legend_rain": "Rain",
+    "legend_clouds_none": "clear",
+    "legend_clouds_full": "overcast",
+    "timeline": "Weather timeline",
+    "timeline_title": "Play clouds and rain over your trip days on the map"
   }
 }

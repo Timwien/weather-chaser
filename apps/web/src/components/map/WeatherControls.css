@@ -210,3 +210,40 @@
     padding: var(--space-2);
   }
 }
+
+/* cloud legend: same colour and alpha ramp as the map overlay (CLOUD_COLORS in utils/cloudRender.ts) */
+.wx-legend-title {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+.wx-legend-title:first-child { margin-top: 0; }
+.wx-legend-strip--clouds {
+  --wx-cloud: 122, 142, 163;
+  background:
+    linear-gradient(to right, rgba(var(--wx-cloud), 0) 15%, rgba(var(--wx-cloud), 0.55) 100%),
+    var(--color-surface-raised);
+}
+[data-theme="dark"] .wx-legend-strip--clouds { --wx-cloud: 230, 236, 245; }
+
+/* "Wetterverlauf" button in the result panels */
+.wx-timeline-btn {
+  flex: none;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  padding: 0 var(--space-4);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-primary-mid);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.wx-timeline-btn:hover { background: var(--color-primary-mid); }

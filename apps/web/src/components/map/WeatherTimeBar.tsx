@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWeatherLayerStore } from '../../stores/weatherLayerStore.ts';
-import { dayKeysForChips, forecastAxis, useWeatherTimeline } from '../../hooks/useWeatherTimeline.ts';
+import { cloudForecastAxis, dayKeysForChips, forecastAxis, useWeatherTimeline } from '../../hooks/useWeatherTimeline.ts';
 import { useAppStore } from '../../stores/appStore.ts';
 import { usePanelInset } from '../../hooks/usePanelInset.ts';
 import { LAYER_NAMES } from '../../services/dwdLayers.ts';
@@ -29,6 +29,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
   const setTimeMs = useWeatherLayerStore((s) => s.setTimeMs);
   const playing = useWeatherLayerStore((s) => s.playing);
   const setPlaying = useWeatherLayerStore((s) => s.setPlaying);
+  const cloudStatus = useWeatherLayerStore((s) => s.cloudStatus);
   const startDate = useAppStore((s) => s.tripConfig.startDate);
   const endDate = useAppStore((s) => s.tripConfig.endDate);
   const inset = usePanelInset();
@@ -72,10 +73,12 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
   let chips: React.ReactNode = null;
   let slider: React.ReactNode;
   let beyondNote: string | null = null;
+  let rainNote: string | null = null;
 
   if (type === 'forecast') {
-    const grid = forecastAxis(axes)!;
+    const grid = cloudForecastAxis(axes, tl.now)!; // rain grid + clouds-only tail (Open-Meteo, 7 days)
     const end = axisEnd(grid);
+    const rainEnd = axisEnd(forecastAxis(axes)!);
     const days = dayKeysForChips(startDate, endDate, tl.now);
     const dayOf = localDayKey(time);
     const inRange = (k: string) => timesOnLocalDay(grid, k).length > 0;
@@ -87,6 +90,8 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
         until: formatDateTime(end, lang),
       });
     }
+    const rainShort = days.some((k) => localDayBounds(k)[1] > rainEnd + 3 * 3_600_000 && localDayBounds(k)[0] <= end);
+    if (rainShort) rainNote = t('weather.rain_until', { until: formatDateTime(rainEnd, lang) });
     chips = compact ? null : (
       <div className="wx-chips" role="group" aria-label={t('weather.day')}>
         {days.map((k) => {
@@ -100,6 +105,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
               aria-disabled={!ok}
               onClick={() => {
                 if (!ok) return;
+                setPlaying(false);
                 const [from] = localDayBounds(k);
                 setTimeMs(snapToAxis(grid, from + 12 * 3_600_000));
               }}
@@ -123,7 +129,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
         value={idx}
         aria-label={t('weather.time_slider')}
         aria-valuetext={timeLabel}
-        onChange={(e) => setTimeMs(dayTimes[Number(e.target.value)])}
+        onChange={(e) => { setPlaying(false); setTimeMs(dayTimes[Number(e.target.value)]); }}
       />
     );
   } else {
@@ -150,7 +156,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
     <div className="wx-bar" style={style} role="group" aria-label={t('weather.toggle')}>
       {chips}
       <div className="wx-row">
-        {type === 'radar' && (
+        {(type === 'radar' || type === 'forecast') && (
           <button
             type="button"
             className="wx-play"
@@ -191,10 +197,26 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
       </div>
       {!compact && type === 'radar' && <div className="wx-note">{t('weather.radar_coverage_note')}</div>}
       {!compact && type === 'clouds' && <div className="wx-note">{t('weather.clouds_note')}</div>}
-      {!compact && type === 'forecast' && <div className="wx-note">{t(legendLayer === LAYER_NAMES.forecastEu ? 'weather.forecast_note_3h' : 'weather.forecast_note_6h')}</div>}
+      {!compact && type === 'forecast' && <div className="wx-note">{t(legendLayer === LAYER_NAMES.forecastEu ? 'weather.forecast_combo_3h' : 'weather.forecast_combo_6h')}</div>}
+      {!compact && rainNote && <div className="wx-note wx-note--warn" role="status">{rainNote}</div>}
+      {!compact && type === 'forecast' && cloudStatus === 'error' && (
+        <div className="wx-note wx-note--warn" role="status">{t('weather.clouds_unavailable')}</div>
+      )}
       {!compact && beyondNote && <div className="wx-note wx-note--warn" role="status">{beyondNote}</div>}
       {hasLegend && !compact && legendOpen && (
         <div className="wx-legend" role="img" aria-label={t('weather.legend_alt')}>
+          {type === 'forecast' && (
+            <>
+              <div className="wx-legend-title">{t('weather.legend_clouds')}</div>
+              <div className="wx-legend-strip wx-legend-strip--clouds" />
+              <div className="wx-legend-labels">
+                <span>{t('weather.legend_clouds_none')}</span>
+                <span>0 – 100 %</span>
+                <span>{t('weather.legend_clouds_full')}</span>
+              </div>
+              <div className="wx-legend-title">{t('weather.legend_rain')}</div>
+            </>
+          )}
           <div className="wx-legend-strip">
             {(type === 'radar' ? RADAR_COLORS : FORECAST_COLORS).map((c) => (
               <span key={c} style={{ background: c }} />

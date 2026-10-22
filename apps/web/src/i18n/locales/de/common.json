@@ -407,8 +407,8 @@
     "toggle": "Wetterebenen",
     "layer_off": "Aus",
     "layer_radar": "Regenradar",
-    "layer_forecast": "Regen-Vorhersage",
-    "layer_clouds": "Wolken",
+    "layer_forecast": "Wolken & Regen",
+    "layer_clouds": "Wolken (Satellit)",
     "unavailable": "Wetterebene derzeit nicht verfügbar",
     "loading": "Wetterebene lädt …",
     "now": "jetzt",
@@ -429,6 +429,16 @@
     "legend_range_radar": "0,1 bis über 150 mm/h",
     "radar_coverage_note": "Radar misst nur über Deutschland und den Grenzregionen.",
     "legend_range_3h": "0,1 bis über 160 mm/3 h",
-    "legend_range_6h": "Niederschlag in mm/6 h"
+    "legend_range_6h": "Niederschlag in mm/6 h",
+    "forecast_combo_3h": "Wolken: Bedeckung zur gewählten Uhrzeit · Regen: Menge der 3 Stunden davor",
+    "forecast_combo_6h": "Wolken: Bedeckung zur gewählten Uhrzeit · Regen: Menge der 6 Stunden davor",
+    "rain_until": "Regen-Vorhersage nur bis {{until}}, Wolken gehen weiter.",
+    "clouds_unavailable": "Wolken-Vorhersage derzeit nicht verfügbar",
+    "legend_clouds": "Wolken",
+    "legend_rain": "Regen",
+    "legend_clouds_none": "klar",
+    "legend_clouds_full": "bedeckt",
+    "timeline": "Wetterverlauf",
+    "timeline_title": "Wolken und Regen über die Reisetage auf der Karte abspielen"
   }
 }

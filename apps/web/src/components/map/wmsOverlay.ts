@@ -22,7 +22,7 @@ export class WmsOverlay {
   private destroyed = false;
 
   constructor(private map: MaplibreMap) {
-    registerWmsProtocol();
+    void registerWmsProtocol();
   }
 
   private src(i: number) { return `${PREFIX}-src-${i}`; }
@@ -45,6 +45,7 @@ export class WmsOverlay {
   }
 
   private async addSlot(i: number, frame: WmsFrame): Promise<boolean> {
+    await registerWmsProtocol(); // tiles use the custom protocol — must exist first
     for (let attempt = 0; attempt < 8; attempt++) {
       if (this.destroyed) return false;
       try {

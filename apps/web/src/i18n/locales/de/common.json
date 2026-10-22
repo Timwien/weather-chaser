@@ -427,6 +427,7 @@
     "legend_light": "leicht",
     "legend_heavy": "stark",
     "legend_range_radar": "0,1 bis über 150 mm/h",
+    "radar_coverage_note": "Radar misst nur über Deutschland und den Grenzregionen.",
     "legend_range_3h": "0,1 bis über 160 mm/3 h",
     "legend_range_6h": "Niederschlag in mm/6 h"
   }

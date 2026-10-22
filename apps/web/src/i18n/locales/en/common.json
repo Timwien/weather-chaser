@@ -427,6 +427,7 @@
     "legend_light": "light",
     "legend_heavy": "heavy",
     "legend_range_radar": "0.1 to over 150 mm/h",
+    "radar_coverage_note": "Radar covers Germany and its border regions only.",
     "legend_range_3h": "0.1 to over 160 mm/3 h",
     "legend_range_6h": "Precipitation in mm/6 h"
   }

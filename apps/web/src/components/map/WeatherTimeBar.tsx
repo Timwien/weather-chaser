@@ -189,6 +189,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
           </button>
         )}
       </div>
+      {!compact && type === 'radar' && <div className="wx-note">{t('weather.radar_coverage_note')}</div>}
       {!compact && type === 'clouds' && <div className="wx-note">{t('weather.clouds_note')}</div>}
       {!compact && type === 'forecast' && <div className="wx-note">{t(legendLayer === LAYER_NAMES.forecastEu ? 'weather.forecast_note_3h' : 'weather.forecast_note_6h')}</div>}
       {!compact && beyondNote && <div className="wx-note wx-note--warn" role="status">{beyondNote}</div>}

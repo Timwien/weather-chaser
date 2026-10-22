@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { bufferTarget, PlaybackEngine, type PlaybackState } from './playbackEngine.ts';
 
 /** Deterministic harness: manual clock + timers, frames become ready on demand. */
-function harness(total: number, opts: { showMs?: number } = {}) {
+function harness(total: number, opts: { showMs?: number; loop?: boolean } = {}) {
+  let ended = 0;
   let t = 0;
   const timers: Array<{ at: number; fn: () => void }> = [];
   const ready = new Set<number>();
@@ -13,6 +14,8 @@ function harness(total: number, opts: { showMs?: number } = {}) {
     count: () => total,
     isReady: (i) => ready.has(i),
     pump: () => {},
+    loop: opts.loop,
+    onEnd: () => { ended++; },
     show: async (i) => { if (opts.showMs) t += opts.showMs; label.push(i); },
     onState: (s) => states.push(s),
     onInterval: (ms) => intervals.push(ms),
@@ -31,7 +34,7 @@ function harness(total: number, opts: { showMs?: number } = {}) {
     }
     t = end;
   };
-  return { engine, ready, label, states, intervals, advance, now: () => t };
+  return { engine, ready, label, states, intervals, advance, now: () => t, ended: () => ended };
 }
 
 describe('bufferTarget', () => {
@@ -118,5 +121,17 @@ describe('PlaybackEngine', () => {
     expect(h.label).toEqual([1]);
     await h.advance(600);
     expect(h.label).toEqual([1, 2]);
+  });
+});
+
+describe('PlaybackEngine without loop (play route)', () => {
+  it('stops on the last frame, goes idle and reports the end once', async () => {
+    const h = harness(5, { loop: false });
+    for (let i = 0; i < 5; i++) h.ready.add(i);
+    h.engine.play(0);
+    await h.advance(600 * 10);
+    expect(h.label).toEqual([1, 2, 3, 4]);
+    expect(h.states.at(-1)?.phase).toBe('idle');
+    expect(h.ended()).toBe(1);
   });
 });

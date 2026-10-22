@@ -447,5 +447,12 @@
     "legend_clouds_full": "bedeckt",
     "timeline": "Wetterverlauf",
     "timeline_title": "Wolken und Regen über die Reisetage auf der Karte abspielen"
+  },
+  "route": {
+    "play": "Route abspielen",
+    "play_title": "Die ganze Reise abspielen: Der Camper fährt die Route ab, das Wetter wechselt mit",
+    "night_at": "Nacht {{night}} in {{town}}",
+    "at": "In {{town}}",
+    "driving_to": "Unterwegs nach {{town}}"
   }
 }

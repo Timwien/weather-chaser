@@ -17,6 +17,7 @@ import { BeachIcon, HikingIcon, SightseeingIcon } from '../finder/FinderIcons.ts
 import { useRouteVan } from '../../hooks/useRouteVan.ts';
 import { useWeatherLayerStore } from '../../stores/weatherLayerStore.ts';
 import { WeatherTimelineButton } from '../common/WeatherTimelineButton.tsx';
+import { RoutePlayButton } from '../common/RoutePlayButton.tsx';
 import './ItineraryPanel.css';
 
 const REWEIGHT_PRESETS: WeatherPreset[] = ['beach', 'hiking', 'sightseeing'];
@@ -180,7 +181,10 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect, onExpandSheet,
       </div>
 
       <SummaryBar route={route} />
-      <WeatherTimelineButton onShown={onShowTimeline} />
+      <div className="itinerary-wx-actions">
+        <RoutePlayButton onShown={onShowTimeline} />
+        <WeatherTimelineButton onShown={onShowTimeline} />
+      </div>
 
       {/* Post-hoc re-weighting: pick a different weather profile and recompute
           the route on explicit confirmation (recomputing takes time, so a mere

@@ -447,5 +447,12 @@
     "legend_clouds_full": "overcast",
     "timeline": "Weather timeline",
     "timeline_title": "Play clouds and rain over your trip days on the map"
+  },
+  "route": {
+    "play": "Play route",
+    "play_title": "Play the whole trip: the camper drives the route while the weather changes",
+    "night_at": "Night {{night}} in {{town}}",
+    "at": "In {{town}}",
+    "driving_to": "Driving to {{town}}"
   }
 }

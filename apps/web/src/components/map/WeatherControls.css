@@ -317,3 +317,9 @@
   border: 1px solid var(--color-border);
 }
 .wx-badge--obs { color: var(--color-primary); border-color: var(--color-primary-mid); background: var(--color-primary-light); }
+
+/* where the camper is at the shown instant */
+.wx-route-caption {
+  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+}

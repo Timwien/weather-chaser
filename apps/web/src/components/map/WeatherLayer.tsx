@@ -8,6 +8,8 @@ import { dayKeysForChips, playbackRange, useWeatherTimeline } from '../../hooks/
 import { composeFrame, frameTileUrls, type ComposedFrame } from '../../services/weatherFrames.ts';
 import { FramePreloader } from '../../services/framePreloader.ts';
 import { CADENCE_MS, PlaybackEngine } from '../../services/playbackEngine.ts';
+import { scheduleForRoute } from '../../hooks/useRouteVan.ts';
+import { routePlayFrames } from '../../utils/routeSchedule.ts';
 import { tilesForViewport, wmsTileKey, wmsTileZoom } from '../../services/wmsTileCache.ts';
 import { FrameCompositor } from './frameCompositor.ts';
 import { hasWmsTile, hasWmsTileKey, loadWmsTile } from './wmsProtocol.ts';
@@ -162,10 +164,17 @@ export function WeatherLayer() {
     if (!timeline || !axes || time === null) return;
     const native = map.getMap();
     const { startDate, endDate } = useAppStore.getState().tripConfig;
-    const range = playbackRange(timeline, time, dayKeysForChips(startDate, endDate, tlRef.current.now));
+    // "Play route": once through the trip schedule (trip start → end) instead of looping the trip days
+    const app = useAppStore.getState();
+    const sch = useWeatherLayerStore.getState().routePlay && app.mode === 'results' ? scheduleForRoute(app.route) : null;
+    const range = sch
+      ? routePlayFrames(timeline.frames, sch)
+      : playbackRange(timeline, time, dayKeysForChips(startDate, endDate, tlRef.current.now));
     if (range.length < 2) { setPlaying(false); return; }
     const specs = range.map((t) => composeFrame(t, timeline.nowMs, axes, scheme));
-    const startIdx = Math.max(0, range.findIndex((t) => t >= time));
+    const found = range.findIndex((t) => t >= time);
+    // route playback restarts from the beginning when the trip start was requested or the end was reached
+    const startIdx = sch && (found < 0 || found >= range.length - 1 || time <= sch.startMs + 1.5 * 3_600_000) ? 0 : Math.max(0, found);
     const store = useWeatherLayerStore;
     const dbg = debug();
     if (dbg) { dbg.intervals = []; dbg.tileMisses = 0; }
@@ -193,6 +202,8 @@ export function WeatherLayer() {
     let lastReported = '';
     engine = new PlaybackEngine({
       count: () => range.length,
+      loop: !sch,
+      onEnd: () => setPlaying(false), // route played to the end: stay on the last frame, camper at the last stop
       isReady: (i) => preloader.isReady(i) && cloudOk(specs[i]),
       pump: () => { void preloader.pump(orderFrom(engine.index)); },
       show: async (i) => {

@@ -6,6 +6,9 @@ import { CADENCE_MS } from '../../services/playbackEngine.ts';
 import { positionAt } from '../../utils/routeSchedule.ts';
 import './RouteVan.css';
 
+/** Vertical lift (px) while the camper stands at a stop. */
+const VAN_PARKED_LIFT_PX = 24;
+
 /** Small campervan (faces right); white outline keeps it readable on light and dark maps. */
 function VanIcon() {
   return (
@@ -48,7 +51,8 @@ export function RouteVan() {
         data-shown={van.shownMs}
         data-stop={pos.stopIndex ?? ''}
         data-heading={pos.heading}
-        style={{ transform: pos.heading < 0 ? 'scaleX(-1)' : undefined }}
+        // parked: lift the camper just above the stop marker so the (highlighted) marker stays visible
+        style={{ transform: `translateY(${pos.stopIndex !== null ? -VAN_PARKED_LIFT_PX : 0}px)${pos.heading < 0 ? ' scaleX(-1)' : ''}` }}
       >
         <VanIcon />
       </div>

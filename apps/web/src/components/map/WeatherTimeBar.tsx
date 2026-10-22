@@ -6,6 +6,8 @@ import {
   dayKeysForChips, forecastAxis, useWeatherTimeline,
 } from '../../hooks/useWeatherTimeline.ts';
 import { useAppStore } from '../../stores/appStore.ts';
+import { useRouteVan } from '../../hooks/useRouteVan.ts';
+import { captionAt } from '../../utils/routeSchedule.ts';
 import { usePanelInset } from '../../hooks/usePanelInset.ts';
 import { LAYER_NAMES } from '../../services/dwdLayers.ts';
 import { axisEnd, localDayBounds, localDayKey } from '../../utils/wmsTime.ts';
@@ -16,6 +18,19 @@ import './WeatherControls.css';
 // locally so labels follow the UI language and stay legible on small screens.
 /** Bottom edge (px) of the floating control column on phones (search pill + draw + weather button). */
 const MOBILE_CONTROLS_BOTTOM = 164;
+
+/** Room (px) the full bar needs at phone width (chips + slider row + notes; one more line with the route caption). */
+const barNeed = (routeResults: boolean) => (routeResults ? 214 : 190);
+
+/**
+ * Height (px) the time bar covers above the sheet on a phone — lets the map fit the route into the
+ * strip that stays visible. 0 when there is no room at all (the bar hides itself).
+ */
+export function phoneBarReserve(viewportH: number, sheetPx: number, routeResults: boolean): number {
+  const free = viewportH - sheetPx - 8 - MOBILE_CONTROLS_BOTTOM;
+  if (free < 64) return 0;
+  return free < barNeed(routeResults) ? 64 : 205;
+}
 
 const RADAR_COLORS = ['#33ffff', '#1acc9a', '#019934', '#4db31b', '#99cc01', '#cce601', '#ffff01', '#ffc401', '#ff8901', '#ff4501', '#fe0000', '#e5004c', '#cc0098', '#6600cb', '#0000fe'];
 // First class recoloured from DWD grey, see recolorDrizzle() in wmsProtocol.ts.
@@ -41,6 +56,9 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
   const startDate = useAppStore((s) => s.tripConfig.startDate);
   const endDate = useAppStore((s) => s.tripConfig.endDate);
   const inset = usePanelInset();
+  const van = useRouteVan();
+  const route = useAppStore((s) => s.route);
+  const mode = useAppStore((s) => s.mode);
   const [legendOpen, setLegendOpen] = useState(false);
   const lang = i18n.language;
   // Phone with the bottom sheet raised: the free strip between the floating controls and
@@ -73,7 +91,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
     return <div className="wx-bar wx-bar--note" style={style} role="status">{t('weather.loading')}</div>;
   }
 
-  const need = 190; // full bar (chips + slider row + two source/coverage notes) at phone width
+  const need = barNeed(van !== null || (mode === 'results' && route !== null)); // full bar (chips + slider row + two source/coverage notes) at phone width
   const compact = phone && free < need;
   if (compact && free < 64) return null; // no room at all (e.g. sheet fully open)
 
@@ -144,6 +162,13 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
     : isObserved ? t('weather.ago', { hours: hoursAgo })
     : formatWeekday(localDayKey(label), lang);
 
+  // "Nacht 1 in Colmar" / "Unterwegs nach Colmar": where the camper is at the shown instant (route results only)
+  const cap = van && label !== null ? captionAt(van.schedule, label) : null;
+  const capTown = cap ? route?.stops[cap.stopIndex]?.town.name ?? '' : '';
+  const routeCaption = cap
+    ? t(cap.kind === 'to' ? 'route.driving_to' : cap.kind === 'night' ? 'route.night_at' : 'route.at', { town: capTown, night: cap.night })
+    : null;
+
   // legend follows the rain product on screen (radar over model in the past)
   const rainLayer = composed.radar?.layer ?? composed.model?.layer ?? LAYER_NAMES.forecastEu;
   const rangeKey = rainLayer === LAYER_NAMES.radar ? 'weather.legend_range_radar'
@@ -200,6 +225,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
           </button>
         )}
       </div>
+      {!compact && routeCaption && <div className="wx-note wx-route-caption" data-route-caption="">{routeCaption}</div>}
       {!compact && buffering && (
         <div className="wx-note wx-note--busy" role="status">
           <span className="wx-spinner" aria-hidden="true" />

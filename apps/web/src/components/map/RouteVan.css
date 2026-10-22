@@ -4,6 +4,7 @@
   width: 44px;
   height: 30px;
   pointer-events: none;
+  transition: transform 0.25s ease;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
 }
 .route-van-svg { display: block; }

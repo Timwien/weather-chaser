@@ -26,6 +26,9 @@ export interface PlaybackDeps {
   pump: () => void;
   onState: (s: PlaybackState) => void;
   cadenceMs?: number;
+  /** false = play once: after the last frame the engine goes idle and calls onEnd (default: loop). */
+  loop?: boolean;
+  onEnd?: () => void;
   /** extra pause on the last frame before the loop restarts */
   dwellMs?: number;
   now?: () => number;
@@ -153,6 +156,14 @@ export class PlaybackEngine {
   private async tick() {
     if (this.phase !== 'playing') return;
     const n = this.d.count();
+    if (this.d.loop === false && this.cur >= n - 1) {
+      this.stopTimer();
+      this.gen++;
+      this.phase = 'idle';
+      this.emit();
+      this.d.onEnd?.();
+      return;
+    }
     const next = (this.cur + 1) % n;
     if (!this.d.isReady(next)) {
       // underrun: stop the clock, show the spinner, resume when enough is cached again

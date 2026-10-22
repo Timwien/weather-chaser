@@ -5,11 +5,15 @@ import { useWeatherLayerStore } from '../../stores/weatherLayerStore.ts';
 import { useRouteSchedule } from '../../hooks/useRouteVan.ts';
 import { usePanelInset } from '../../hooks/usePanelInset.ts';
 import { getSheetHeights } from '../mobile/MobileBottomSheet.tsx';
+import { phoneBarReserve } from './WeatherTimeBar.tsx';
 import { stayFocusMs } from '../../utils/routeSchedule.ts';
 
-/** Room the floating weather time bar takes at the bottom of the visible map (px, desktop / phone). */
-const BAR_RESERVE_DESKTOP = 150;
-const BAR_RESERVE_PHONE = 150;
+/** Desktop: room the floating weather time bar takes at the bottom of the map (bar + its offset). */
+const BAR_RESERVE_DESKTOP = 230;
+/** Phone: floating controls (weather toggle) in the top-right corner of the visible strip. */
+const TOP_RESERVE_PHONE = 130;
+/** Half a stop marker + gap, so markers at the edge of the fitted area do not touch the bar. */
+const MARKER_MARGIN = 18;
 
 /**
  * Map-side half of the route/weather coupling: reacts to the one-shot requests in the weather store
@@ -50,8 +54,11 @@ export function RouteWeatherController({ sheetBottomPadding = 0 }: { sheetBottom
     const native = map.getMap();
     const lngs = route.stops.map((s) => s.town.lng);
     const lats = route.stops.map((s) => s.town.lat);
-    const reserve = inset > 0 ? BAR_RESERVE_DESKTOP : BAR_RESERVE_PHONE;
+    const phone = inset === 0 && sheetBottomPadding > 0;
+    const reserve = phone ? phoneBarReserve(window.innerHeight, sheetBottomPadding, true) + 8 + MARKER_MARGIN : BAR_RESERVE_DESKTOP;
     // stable view for the whole playback → the frames can be preloaded for exactly this viewport
+    // very short strip above the sheet (small phones): give the route at least ~50 px instead of the full top reserve
+    const top = phone ? Math.max(56, Math.min(TOP_RESERVE_PHONE, window.innerHeight - sheetBottomPadding - reserve - 50)) : 70;
     native.setPadding({ top: 0, right: 0, bottom: 0, left: 0 });
     let started = false;
     const start = () => {
@@ -65,7 +72,7 @@ export function RouteWeatherController({ sheetBottomPadding = 0 }: { sheetBottom
     native.once('moveend', start);
     native.fitBounds(
       [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
-      { padding: { top: 70, right: 60, left: 60 + inset, bottom: sheetBottomPadding + reserve }, maxZoom: 9, duration: 700 },
+      { padding: { top: top, right: 60, left: 60 + inset, bottom: sheetBottomPadding + reserve }, maxZoom: 9, duration: 700 },
     );
   }, [map, playReq, schedule, inset, sheetBottomPadding, beginRoutePlay]);
 

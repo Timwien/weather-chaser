@@ -273,3 +273,10 @@
 }
 
 /* Mobile overrides for .itinerary-panel inside .mobile-sheet-content are in global.css */
+
+/* "Route abspielen" + "Wetterverlauf" side by side (wrap on narrow panels) */
+.itinerary-wx-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

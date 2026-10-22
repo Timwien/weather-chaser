@@ -151,6 +151,7 @@ function IndexPage() {
                   selectedStopIndex={selectedStopIndex}
                   onStopSelect={handleStopSelectFromPanel}
                   onExpandSheet={() => setSheetSnap(2)}
+                  onShowTimeline={() => setSheetSnap(1)}
                 />
               )}
               {showFinderPanel && (
@@ -159,6 +160,7 @@ function IndexPage() {
                   onResultSelect={handleFinderSelectFromPanel}
                   onBack={() => reset()}
                   onResultsComputed={setComputedFinderResults}
+                  onShowTimeline={() => setSheetSnap(1)}
                 />
               )}
             </div>

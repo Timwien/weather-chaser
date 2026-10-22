@@ -14,6 +14,7 @@ import { ShareBar } from '../share/ShareBar.tsx';
 import { InlineSignInPrompt } from '../auth/InlineSignInPrompt.tsx';
 import { ErrorMessage } from '../common/ErrorMessage.tsx';
 import { BeachIcon, HikingIcon, SightseeingIcon } from '../finder/FinderIcons.tsx';
+import { WeatherTimelineButton } from '../common/WeatherTimelineButton.tsx';
 import './ItineraryPanel.css';
 
 const REWEIGHT_PRESETS: WeatherPreset[] = ['beach', 'hiking', 'sightseeing'];
@@ -29,6 +30,8 @@ interface ItineraryPanelProps {
   onStopSelect: (index: number) => void;
   /** Mobile: open the bottom sheet fully (the share bar is below the fold at half height). */
   onExpandSheet?: () => void;
+  /** After "Wetterverlauf" switched the map layer (mobile: sheet to half). */
+  onShowTimeline?: () => void;
 }
 
 function BackArrowIcon() {
@@ -58,7 +61,7 @@ function SaveIcon() {
   );
 }
 
-export function ItineraryPanel({ selectedStopIndex, onStopSelect, onExpandSheet }: ItineraryPanelProps) {
+export function ItineraryPanel({ selectedStopIndex, onStopSelect, onExpandSheet, onShowTimeline }: ItineraryPanelProps) {
   const { t } = useTranslation('common');
   const { route, error, mode, reset, tripConfig, weatherPrefs, setWeatherPrefs, lastRoutePrefs } = useAppStore();
   const { user, pendingAction, setPendingAction } = useAuthStore();
@@ -167,6 +170,7 @@ export function ItineraryPanel({ selectedStopIndex, onStopSelect, onExpandSheet 
       </div>
 
       <SummaryBar route={route} />
+      <WeatherTimelineButton onShown={onShowTimeline} />
 
       {/* Post-hoc re-weighting: pick a different weather profile and recompute
           the route on explicit confirmation (recomputing takes time, so a mere

@@ -17,6 +17,7 @@ import type { Favorite } from '../../types/database.ts';
 import { ScoreIcon, SunIcon, TempIcon, RainIcon, WindIcon } from './FinderIcons.tsx';
 import { haversineKm } from '../../utils/geo.ts';
 import { capture } from '../../lib/analytics.ts';
+import { WeatherTimelineButton } from '../common/WeatherTimelineButton.tsx';
 import './WeatherFinderPanel.css';
 
 // Parse hour from ISO timestamp without new Date() to avoid timezone bugs.
@@ -49,6 +50,8 @@ interface WeatherFinderPanelProps {
   onResultSelect: (index: number) => void;
   onBack: () => void;
   onResultsComputed: (results: FinderResultData[]) => void;
+  /** After "Wetterverlauf" switched the map layer (mobile: sheet to half). */
+  onShowTimeline?: () => void;
 }
 
 const SPARSE_RESULTS = 5;
@@ -69,7 +72,7 @@ const SORT_ICONS = {
   wind:          WindIcon,
 } as const;
 
-export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack, onResultsComputed }: WeatherFinderPanelProps) {
+export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack, onResultsComputed, onShowTimeline }: WeatherFinderPanelProps) {
   const { t } = useTranslation('common');
   const { finderTowns, finderHourlyCache, finderConfig, finderError, tripConfig, weatherPrefs, searchAreas, searchRadiusKm, setFinderConfig } = useAppStore();
   const { user } = useAuthStore();
@@ -261,6 +264,13 @@ export function WeatherFinderPanel({ selectedFinderIndex, onResultSelect, onBack
         <h2 className="finder-panel-title">{t('finder.results_title', 'Beste Orte')}</h2>
         <InfoTip text={t('info.score')} />
       </div>
+
+      {finderResults.length > 0 && (
+        <WeatherTimelineButton
+          day={finderConfig.selectedDay === 'all' ? null : finderConfig.selectedDay}
+          onShown={onShowTimeline}
+        />
+      )}
 
       {/* Sort buttons */}
       <div

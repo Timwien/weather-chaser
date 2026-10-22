@@ -194,3 +194,15 @@ ganzen Route mit fahrendem Camper.
 | F2 | Eine Ebene „Wolken & Regen" von −24 h bis +7 Tage. Vergangenheit: Meteosat-Satellit (DWD), per Helligkeit in denselben Wolkenschleier umgerechnet, + DWD-Radar (Deutschland) über ICON-EU-Modellniederschlag (Rest Europas). Zukunft: Open-Meteo-Wolken + DWD-Regenvorhersage. „Jetzt"-Marke, Kennzeichnung Beobachtet/Vorhersage. Auswahl im Menü: Aus / Wolken & Regen. |
 | F3 | Routenansicht: Fahrplan aus der Route (Ankunft/Abfahrt je Stopp, Fahrtzeit aus Distanz), Klick auf Stopp (Liste/Karte) setzt Wetterzeit auf den Aufenthalt und zentriert die Karte; beim Verschieben des Reglers zeigt ein Camper-Symbol die Position zur gewählten Zeit. |
 | F4 | „Route abspielen": Zeit läuft vom Start bis zum Ende, Camper fährt die Route ab und steht über Nacht an den Stopps, Wetter synchron, aktueller Stopp hervorgehoben; Karte zeigt die ganze Route (stabiler Ausschnitt → vorladbar). |
+
+**Stand F1 + F2 (22.10.2026, Branch finish-2026-10):** umgesetzt und im Browser gemessen. Eine Ebene „Wolken & Regen“
+(−24 h … +7 Tage, Regler mit „jetzt“-Marke, Beobachtet/Vorhersage), Wiedergabe erst nach Pufferung mit Ladeanzeige
+„Lade Animation 7/24“. Wichtige Befunde zu den Quellen:
+- DWD-Zeitachsen lügen: ICON-EU (`TOTPREC01H/03H`) nennt ~33 h Vergangenheit, hält aber nur den neuesten Modelllauf
+  (22.10.: Daten erst ab 15:00). Außerhalb Deutschlands gibt es Regen daher nur für die letzten Stunden; der Radar
+  (Deutschland) reicht 3 Tage zurück. Die Achse wird deshalb per Probe-Abruf auf die nutzbaren Zeitpunkte gekürzt.
+- Satellit (Meteosat) liegt nur im 3-h-Raster vor; die Stundenschritte der Vergangenheit zeigen den letzten Satellitenframe ≤ t.
+- Kacheln werden mit 512 px angefragt (ein Viertel der Anfragen); kalte Radar-Kacheln brauchen 0,3–0,5 s pro Stück,
+  eine 24-Frame-Vergangenheitsschleife = ~350 Radar-Kacheln → dafür ist die Pufferanzeige da.
+- F3/F4 können die Wiedergabe-Engine (`services/playbackEngine.ts`) mit eigener Frame-Liste wiederverwenden; die
+  angezeigte Zeit steht als `shownMs` im Wetter-Store.

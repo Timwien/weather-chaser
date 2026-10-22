@@ -90,6 +90,14 @@
   touch-action: manipulation;
 }
 
+.place-marker--draggable { cursor: grab; }
+.place-marker--dragging {
+  cursor: grabbing;
+  transform: translateY(-6px) scale(1.1);
+  filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.35));
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
 .place-marker-remove {
   flex: 1;
   min-height: 40px;

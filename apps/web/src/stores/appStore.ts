@@ -142,6 +142,8 @@ interface AppState {
   addSearchArea: (area: SearchAreaItem) => void;
   /** Remove an area by id */
   removeSearchArea: (id: string) => void;
+  /** Patch a place (pin drag: new coordinates, then the reverse-geocoded name). No-op for unknown ids. */
+  updatePlaceArea: (id: string, patch: Partial<Pick<PlaceArea, 'lat' | 'lng' | 'name' | 'fullName'>>) => void;
   /** Clear all search areas */
   clearSearchAreas: () => void;
   /** Set radius (applies when exactly one place is in searchAreas) */
@@ -211,6 +213,15 @@ export const useAppStore = create<AppState>((set) => ({
     })),
   removeSearchArea: (id) =>
     set((state) => ({ searchAreas: state.searchAreas.filter((a) => a.id !== id) })),
+  updatePlaceArea: (id, patch) =>
+    set((state) => ({
+      searchAreas: state.searchAreas.map((a) => {
+        if (a.id !== id || !isPlaceArea(a)) return a;
+        // A moved pin is the new centre — the old Nominatim bbox no longer describes it.
+        const moved = patch.lat !== undefined || patch.lng !== undefined;
+        return { ...a, ...patch, ...(moved ? { bbox: undefined } : {}) };
+      }),
+    })),
   clearSearchAreas: () => set({ searchAreas: [] }),
   setSearchRadiusKm: (km) => set({ searchRadiusKm: km }),
   setSearchGranularity: (g) => set({ searchGranularity: g }),

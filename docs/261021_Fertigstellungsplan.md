@@ -176,3 +176,21 @@ Recherche Datenquellen (22.10.2026):
 | D1 | Kartenebenen-Schalter (Aus / Regenradar live / Regen-Vorhersage / Wolken Satellit) als WMS-Rasterquelle in MapLibre, Deckkraft, Legende, Quellenvermerk; mobil und Desktop. |
 | D2 | Zeitwahl: Radar „jetzt" + Animation der letzten 2 h; Vorhersage an die Reisetage gekoppelt (Tag + 3-h-Schritt), verfügbarer Zeitraum aus GetCapabilities des Layers; außerhalb → Hinweis. |
 | D3 | Pins (Orte der Suche) am Desktop per Drag & Drop verschieben; Name per Reverse-Geocoding aktualisieren; nur außerhalb von Lade-/Ergebniszustand. |
+
+---
+
+## Welle F — Flüssiger Wetterverlauf, Vergangenheit + Zukunft, Route im Zeitverlauf (22.10.2026)
+
+Auftrag Tim: (1) Animationen erst laden, dann flüssig abspielen statt
+„stockend" weiterzuspringen; (2) Regen + Wolken der vergangenen Stunden
+(Beobachtung) und die Vorhersage in EINER Ansicht, der Regler wechselt an
+„jetzt" automatisch; (3) in der Routenansicht Wetter zur Zeit, zu der man am
+jeweiligen Ort ist; Klick auf einen Stopp springt dorthin; (4) Animation der
+ganzen Route mit fahrendem Camper.
+
+| # | Maßnahme |
+|---|---|
+| F1 | Gepufferte Wiedergabe: Frames (Regen-Kacheln des sichtbaren Ausschnitts) vorladen, Ladeanzeige mit Fortschritt, Abspielen erst bei ausreichendem Puffer; bei Unterlauf pausieren und puffern statt die Zeit ohne Bild weiterlaufen zu lassen. Zeitlabel zeigt immer den angezeigten Frame. |
+| F2 | Eine Ebene „Wolken & Regen" von −24 h bis +7 Tage. Vergangenheit: Meteosat-Satellit (DWD), per Helligkeit in denselben Wolkenschleier umgerechnet, + DWD-Radar (Deutschland) über ICON-EU-Modellniederschlag (Rest Europas). Zukunft: Open-Meteo-Wolken + DWD-Regenvorhersage. „Jetzt"-Marke, Kennzeichnung Beobachtet/Vorhersage. Auswahl im Menü: Aus / Wolken & Regen. |
+| F3 | Routenansicht: Fahrplan aus der Route (Ankunft/Abfahrt je Stopp, Fahrtzeit aus Distanz), Klick auf Stopp (Liste/Karte) setzt Wetterzeit auf den Aufenthalt und zentriert die Karte; beim Verschieben des Reglers zeigt ein Camper-Symbol die Position zur gewählten Zeit. |
+| F4 | „Route abspielen": Zeit läuft vom Start bis zum Ende, Camper fährt die Route ab und steht über Nacht an den Stopps, Wetter synchron, aktueller Stopp hervorgehoben; Karte zeigt die ganze Route (stabiler Ausschnitt → vorladbar). |

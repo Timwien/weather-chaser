@@ -163,7 +163,12 @@ export class PlaybackEngine {
       return;
     }
     const gen = this.gen;
-    await this.d.show(next);
+    try {
+      await this.d.show(next);
+    } catch {
+      if (gen === this.gen) { this.phase = 'buffering'; this.d.pump(); this.emit(); this.check(); }
+      return;
+    }
     if (gen !== this.gen) return; // paused / restarted meanwhile
     const wrapped = next === 0;
     this.cur = next;

@@ -88,6 +88,21 @@ describe('GET /api/cloudgrid', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it.each([
+    'lat0=48&lng0=0&step=1',
+    'step=1&lat0=048.0000&lng0=000',
+    'step=1&lat0=%34%38&lng0=0',
+    'step=1&&&lat0=48&lng0=0&',
+    'step=1&lat0=48&lng0=-0',
+  ])('rejects the cache-busting variant %s without calling upstream', async (qs) => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const res = await get(qs);
+    expect(res.status).toBe(400);
+    expect(res.headers.get('Cache-Control')).toBe('no-store');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('makes a single upstream call and caches the success', async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify(upstream(168, () => 42)), { status: 200 }));
     vi.stubGlobal('fetch', fetchMock);

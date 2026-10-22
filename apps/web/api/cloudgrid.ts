@@ -5,15 +5,19 @@
 // API key cannot be used as an open relay. See api/_lib/cloudgrid.ts for the
 // lattice convention.
 
-import { buildPayload, parseCloudGridQuery, upstreamParams } from './_lib/cloudgrid.js';
+import { buildPayload, canonicalSearch, parseCloudGridQuery, upstreamParams } from './_lib/cloudgrid.js';
 import { badRequest, fetchOpenMeteo, jsonResponse } from './_lib/openMeteo.js';
 
 export default {
   async fetch(request: Request): Promise<Response> {
     if (request.method !== 'GET') return jsonResponse({ error: 'Method not allowed' }, 405);
 
-    const parsed = parseCloudGridQuery(new URL(request.url).searchParams);
+    const url = new URL(request.url);
+    const parsed = parseCloudGridQuery(url.searchParams);
     if (!parsed.ok) return badRequest(parsed.error);
+    if (url.search !== canonicalSearch(parsed.query)) {
+      return badRequest(`non-canonical query, use ${canonicalSearch(parsed.query)}`);
+    }
 
     // One upstream call: 64 locations in a single request.
     const result = await fetchOpenMeteo(upstreamParams(parsed.query));

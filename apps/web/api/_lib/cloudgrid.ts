@@ -51,6 +51,16 @@ export function parseCloudGridQuery(params: URLSearchParams): ParseResult {
   return { ok: true, query: { step, lat0, lng0 } };
 }
 
+/**
+ * The one accepted spelling of a tile URL's query. The CDN keys on the raw
+ * query string, so equivalent spellings (`048.0`, `%34%38`, `-0`, extra `&`,
+ * other order) would each miss the cache and cost 64 paid Open-Meteo calls.
+ * Must match what src/services/cloudGrid.ts sends.
+ */
+export function canonicalSearch({ step, lat0, lng0 }: CloudGridQuery): string {
+  return `?step=${step}&lat0=${lat0 + 0}&lng0=${lng0 + 0}`; // + 0 turns -0 into 0
+}
+
 /** The 64 lattice points in row-major order (row = latitude index, col = longitude index). */
 export function latticePoints({ step, lat0, lng0 }: CloudGridQuery): { lat: number[]; lng: number[] } {
   const lat: number[] = [];

@@ -150,3 +150,29 @@ Nicht verifiziert: Laufzeit der Vercel-Funktionen in der echten Vercel-Umgebung
 auf Vercel erfolgreich, Funktion `/api/places` unter reinem Node 20 korrekt.
 
 Offene Punkte für Tim: `docs/OPEN-ITEMS.md` §0.
+
+---
+
+## Welle D — Wetterebenen auf der Karte + Pins verschieben (22.10.2026)
+
+Auftrag Tim: Pins am Desktop per Drag & Drop verschieben; Wolken- und
+Regenradar-ähnliche Ansicht, möglichst kostenlos.
+
+Recherche Datenquellen (22.10.2026):
+- RainViewer: seit 01.01.2026 nur private/edukative Nutzung, Zoom ≤ 7,
+  keine Vorhersage → für eine App mit Bezahlmodell ungeeignet.
+- Open-Meteo Weather-Map-Layer: technisch passend, aber GPL-2.0 und laut
+  Hersteller „nicht produktionsreif" → nicht jetzt.
+- OpenWeatherMap-Kacheln: gratis nur nicht-kommerziell.
+- **DWD GeoServer WMS (maps.dwd.de), CC BY 4.0, CORS offen → gewählt:**
+  `Niederschlagsradar` (Radar DE, 5 min, ~+2 h), `Icon-eu_reg00625_fd_sl_TOTPREC03H`
+  (Niederschlag Europa, 3 h, ~+6 Tage), `Icon_reg025_fd_sl_TOTPREC06H`
+  (global, bis ~+7 Tage), `Satellite_meteosat_1km_euat_rgb_day_hrv_and_night_ir108_3h`
+  (Wolken Satellit Europa, 3 h, letzte ~33 h). Quellenvermerk
+  „Deutscher Wetterdienst (CC BY 4.0)".
+
+| # | Maßnahme |
+|---|---|
+| D1 | Kartenebenen-Schalter (Aus / Regenradar live / Regen-Vorhersage / Wolken Satellit) als WMS-Rasterquelle in MapLibre, Deckkraft, Legende, Quellenvermerk; mobil und Desktop. |
+| D2 | Zeitwahl: Radar „jetzt" + Animation der letzten 2 h; Vorhersage an die Reisetage gekoppelt (Tag + 3-h-Schritt), verfügbarer Zeitraum aus GetCapabilities des Layers; außerhalb → Hinweis. |
+| D3 | Pins (Orte der Suche) am Desktop per Drag & Drop verschieben; Name per Reverse-Geocoding aktualisieren; nur außerhalb von Lade-/Ergebniszustand. |

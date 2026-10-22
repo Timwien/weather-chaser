@@ -144,7 +144,8 @@ export class PlaybackEngine {
     const n = this.d.count();
     if (this.showFirst && !this.ok(this.cur)) return false;
     if (n <= 12) {
-      for (let i = 0; i < n; i++) if (!this.ok(i)) return false;
+      // a single run never shows the frames before its start point again
+      for (let i = this.d.loop === false ? this.cur : 0; i < n; i++) if (!this.ok(i)) return false;
       return true;
     }
     const need = adaptiveTarget(n, this.underruns);

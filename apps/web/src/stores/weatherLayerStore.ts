@@ -91,6 +91,9 @@ export const useWeatherLayerStore = create<WeatherLayerState>((set, get) => ({
   status: { weather: 'idle' },
 
   setLayer: (l) => {
+    // re-picking the active layer keeps its overlay — resetting cloudStatus to 'loading' then would
+    // never be answered (the overlay only reports changes) and every forecast frame would wait
+    if (l === get().layer) return;
     writeStored(l);
     // cloud state belongs to the overlay that is about to be (re)created → drop stale error/horizon now
     set({

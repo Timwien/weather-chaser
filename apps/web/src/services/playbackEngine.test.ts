@@ -34,7 +34,7 @@ function harness(total: number, opts: { showMs?: number; loop?: boolean; isReady
     }
     t = end;
   };
-  return { engine, ready, label, states, intervals, advance, now: () => t, ended: () => ended };
+  return { engine, ready, label, states, intervals, advance, now: () => t, ended: () => ended, pendingTimers: () => timers.length };
 }
 
 describe('bufferTarget', () => {
@@ -177,7 +177,7 @@ describe('PlaybackEngine without loop (play route)', () => {
     expect(h.states.at(-1)?.incomplete).toBe(23);
   });
 
-  it('watchdog re-arms per buffering phase and is cancelled by pause() and by reaching the buffer in time', async () => {
+  it('watchdog is cancelled by reaching the buffer in time and re-armed by an underrun', async () => {
     const h = harness(24);
     h.engine.play(0);
     await h.advance(STALL_MS / 2);
@@ -185,10 +185,30 @@ describe('PlaybackEngine without loop (play route)', () => {
     h.engine.notify(); // buffer filled in time → playing, nothing released
     expect(h.states.at(-1)).toMatchObject({ phase: 'playing', incomplete: 0 });
     await h.advance(600 * 7); // runs dry after frame 6 → buffering again
-    expect(h.states.at(-1)?.phase).toBe('buffering');
+    expect(h.states.at(-1)).toMatchObject({ phase: 'buffering', incomplete: 0 });
+    // the underrun armed a fresh watchdog: it releases the missing frames instead of buffering forever
+    await h.advance(STALL_MS + 100);
+    expect(h.states.at(-1)?.phase).toBe('playing');
+    expect(h.states.at(-1)!.incomplete).toBeGreaterThan(0);
+    await h.advance(700);
+    expect(h.label.length).toBeGreaterThan(6);
+  });
+
+  it('pause() cancels a pending watchdog: no timer is left behind', async () => {
+    const h = harness(24);
+    h.engine.play(0);
+    expect(h.pendingTimers()).toBe(1); // the watchdog of the first buffering phase
     h.engine.pause();
+    expect(h.pendingTimers()).toBe(0);
     await h.advance(STALL_MS * 2);
     expect(h.states.at(-1)).toMatchObject({ phase: 'idle', incomplete: 0 });
+  });
+
+  it('play once with a short range (≤ 12 frames): frames before the start point are not required', () => {
+    const h = harness(10, { loop: false });
+    for (let i = 5; i < 10; i++) h.ready.add(i);
+    h.engine.play(5);
+    expect(h.states.at(-1)).toMatchObject({ phase: 'playing', incomplete: 0 });
   });
 
   it('play once (route): frames after the last one are not required ahead', async () => {

@@ -8,6 +8,13 @@ describe('setLayer', () => {
     const s = useWeatherLayerStore.getState();
     expect([s.cloudStatus, s.cloudHorizonMs]).toEqual(['loading', null]);
   });
+
+  it('re-picking the active layer changes nothing (its cloud overlay stays, so its ready status must too)', () => {
+    useWeatherLayerStore.setState({ layer: 'weather', cloudStatus: 'ready', playing: true, timeMs: 42 });
+    useWeatherLayerStore.getState().setLayer('weather');
+    const s = useWeatherLayerStore.getState();
+    expect([s.cloudStatus, s.playing, s.timeMs]).toEqual(['ready', true, 42]);
+  });
 });
 
 describe('openTimeline', () => {

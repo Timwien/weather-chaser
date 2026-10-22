@@ -344,7 +344,7 @@
     "privacy_analytics_h": "Usage analytics & error logs (PostHog, EU)",
     "privacy_analytics_b": "We use PostHog (PostHog EU, servers in Frankfurt) to understand how the app is used and to capture errors automatically. Analytics runs without cookies and without persistent identifiers on your device; IP addresses are not stored. We collect usage events (e.g. \"search started\"), technical error reports and masked session recordings (form inputs are never transmitted). If you are signed in, a pseudonymous user ID is used — never your email address. Legal basis: legitimate interest in improving the app (Art. 6(1)(f) GDPR).",
     "privacy_apis_h": "Weather and map services",
-    "privacy_apis_b": "For its core features the app calls external services: Open-Meteo (weather forecasts), OpenStreetMap Nominatim (place search), OSRM (route calculation) and CARTO (map tiles). Place data comes from GeoNames (geonames.org, licence CC BY 4.0) and is served by our own server; only the search area is transmitted. Your entered search coordinates and your IP address are transmitted to the respective service as technically required. No account data is shared with these services.",
+    "privacy_apis_b": "For its core features the app calls external services: Open-Meteo (weather forecasts), OpenStreetMap Nominatim (place search), OSRM (route calculation) and CARTO (map tiles). If you switch on a weather layer on the map (rain radar, rain forecast or clouds), your browser loads the map images and time information directly from the servers of the German Weather Service (maps.dwd.de); your IP address is visible to the DWD in the process. Place data comes from GeoNames (geonames.org, licence CC BY 4.0) and is served by our own server; only the search area is transmitted. Your entered search coordinates and your IP address are transmitted to the respective service as technically required. No account data is shared with these services.",
     "privacy_storage_h": "Local storage",
     "privacy_storage_b": "The app stores preferences (language, theme, hint flags, the feedback-prompt counter) in your browser's localStorage. This data never leaves your device and is not used for tracking.",
     "privacy_rights_h": "Your rights",
@@ -372,7 +372,7 @@
     "imprint_dispute_h": "Consumer dispute resolution",
     "imprint_dispute_b": "I am neither willing nor obliged to take part in dispute resolution proceedings before a consumer arbitration board.",
     "imprint_sources_h": "Data sources",
-    "imprint_sources_b": "Weather data: Open-Meteo (CC BY 4.0). Place data: GeoNames (CC BY 4.0). Map data: © OpenStreetMap contributors, map style: CARTO. Place search: Nominatim (OpenStreetMap)."
+    "imprint_sources_b": "Weather data: Open-Meteo (CC BY 4.0). Place data: GeoNames (CC BY 4.0). Map data: © OpenStreetMap contributors, map style: CARTO. Place search: Nominatim (OpenStreetMap). Weather layers on the map (rain radar, rain forecast, clouds): Deutscher Wetterdienst (CC BY 4.0), tiles are loaded directly from the DWD."
   },
   "info": {
     "max_stay": "Caps how many nights the route stays in one place. Lower = more stops and variety, higher = fewer moves.",

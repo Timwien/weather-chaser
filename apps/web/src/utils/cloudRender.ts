@@ -3,18 +3,12 @@
 // No DOM access, so it is unit-testable and cheap to benchmark.
 
 import { GRID_N, type Bounds, type CloudTile, type Step } from '../services/cloudGrid.ts';
+import { ALPHA_MAX, ALPHA_MIN_COVER, CLOUD_COLORS } from './cloudColors.ts';
 
 const HOUR = 3_600_000;
 const MISSING = -1;
 
-export interface ColorScheme { r: number; g: number; b: number }
-/** Light basemap: soft blue-grey; dark basemap: soft white. */
-export const CLOUD_COLORS: Record<'light' | 'dark', ColorScheme> = {
-  light: { r: 0x7a, g: 0x8e, b: 0xa3 },
-  dark: { r: 0xe6, g: 0xec, b: 0xf5 },
-};
-export const ALPHA_MIN_COVER = 15; // % below which clouds are invisible
-export const ALPHA_MAX = 0.55; // at 100 %
+export { CLOUD_COLORS, ALPHA_MIN_COVER, ALPHA_MAX, type ColorScheme } from './cloudColors.ts';
 
 /** Alpha 0..1 for a cloud cover in %: 0 below 15 %, linear to 0.55 at 100 %. */
 export function cloudAlpha(cover: number): number {

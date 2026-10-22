@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWeatherLayerStore } from '../../stores/weatherLayerStore.ts';
 import { dayKeysForChips, forecastAxis, useWeatherTimeline } from '../../hooks/useWeatherTimeline.ts';
@@ -11,6 +11,9 @@ import './WeatherControls.css';
 
 // Colour classes of the DWD precipitation legends (sampled from GetLegendGraphic) — drawn
 // locally so labels follow the UI language and stay legible on small screens.
+/** Bottom edge (px) of the floating control column on phones (search pill + draw + weather button). */
+const MOBILE_CONTROLS_BOTTOM = 164;
+
 const RADAR_COLORS = ['#33ffff', '#1acc9a', '#019934', '#4db31b', '#99cc01', '#cce601', '#ffff01', '#ffc401', '#ff8901', '#ff4501', '#fe0000', '#e5004c', '#cc0098', '#6600cb', '#0000fe'];
 const FORECAST_COLORS = ['#c0c0c0', '#fefec0', '#fefe5b', '#cff200', '#a0d625', '#36c969', '#00d7d7', '#00a6dd', '#0000fe', '#9730c2', '#d926c7', '#fe0000', '#a00000', '#606060'];
 
@@ -31,6 +34,14 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
   const inset = usePanelInset();
   const [legendOpen, setLegendOpen] = useState(false);
   const lang = i18n.language;
+  // Phone with the bottom sheet raised: the free strip between the floating controls and
+  // the sheet can be shorter than the full bar → fall back to a single-row variant.
+  const [viewportH, setViewportH] = useState(() => window.innerHeight);
+  useEffect(() => {
+    const onResize = () => setViewportH(window.innerHeight);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   const { type, status, axes, frames, time, frame } = tl;
   if (!type) return null;
@@ -48,6 +59,11 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
   if (!axes || time === null || frames.length === 0) {
     return <div className="wx-bar wx-bar--note" style={style} role="status">{t('weather.loading')}</div>;
   }
+
+  const free = viewportH - sheetBottomPadding - 8 - MOBILE_CONTROLS_BOTTOM;
+  const need = (type === 'forecast' ? 150 : type === 'clouds' ? 95 : 70) + (legendOpen ? 44 : 0);
+  const compact = inset === 0 && sheetBottomPadding > 0 && free < need;
+  if (compact && free < 64) return null; // no room at all (e.g. sheet fully open)
 
   const isLatest = type !== 'forecast' && time === frames[frames.length - 1];
   const timeLabel = formatDateTime(time, lang);
@@ -71,7 +87,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
         until: formatDateTime(end, lang),
       });
     }
-    chips = (
+    chips = compact ? null : (
       <div className="wx-chips" role="group" aria-label={t('weather.day')}>
         {days.map((k) => {
           const ok = inRange(k);
@@ -94,7 +110,8 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
         })}
       </div>
     );
-    const dayTimes = timesOnLocalDay(grid, dayOf);
+    // compact: the slider spans the whole forecast instead of one day (chips are hidden)
+    const dayTimes = compact ? frames : timesOnLocalDay(grid, dayOf);
     const idx = Math.max(0, dayTimes.indexOf(time));
     slider = (
       <input
@@ -161,7 +178,7 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
             </>
           )}
         </div>
-        {hasLegend && (
+        {hasLegend && !compact && (
           <button
             type="button"
             className="wx-legend-btn"
@@ -172,10 +189,10 @@ export function WeatherTimeBar({ sheetBottomPadding = 0 }: Props) {
           </button>
         )}
       </div>
-      {type === 'clouds' && <div className="wx-note">{t('weather.clouds_note')}</div>}
-      {type === 'forecast' && <div className="wx-note">{t(legendLayer === LAYER_NAMES.forecastEu ? 'weather.forecast_note_3h' : 'weather.forecast_note_6h')}</div>}
-      {beyondNote && <div className="wx-note wx-note--warn" role="status">{beyondNote}</div>}
-      {hasLegend && legendOpen && (
+      {!compact && type === 'clouds' && <div className="wx-note">{t('weather.clouds_note')}</div>}
+      {!compact && type === 'forecast' && <div className="wx-note">{t(legendLayer === LAYER_NAMES.forecastEu ? 'weather.forecast_note_3h' : 'weather.forecast_note_6h')}</div>}
+      {!compact && beyondNote && <div className="wx-note wx-note--warn" role="status">{beyondNote}</div>}
+      {hasLegend && !compact && legendOpen && (
         <div className="wx-legend" role="img" aria-label={t('weather.legend_alt')}>
           <div className="wx-legend-strip">
             {(type === 'radar' ? RADAR_COLORS : FORECAST_COLORS).map((c) => (

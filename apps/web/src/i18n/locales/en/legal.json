@@ -1,0 +1,230 @@
+{
+  "common": {
+    "back_to_app": "Back to app",
+    "updated": "Last updated: October 2026",
+    "toc": "Contents"
+  },
+  "ui": {
+    "signup_notice": "By registering you accept the <tos>Terms of Use</tos>. Privacy information: <privacy>Privacy Policy</privacy>.",
+    "feedback_notice": "How I process your feedback and how long I keep it is explained in the <privacy>Privacy Policy</privacy>."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "intro": "This page explains which personal data is processed when you use the WeatherChaser web app, for what purpose, on which legal basis, for how long, and what rights you have. This is an English translation for your convenience. Only the German version is legally binding.",
+    "summary": {
+      "h": "The essentials in brief",
+      "b": "- You can use WeatherChaser without an account. You only need one to save routes, searches and favourites.\n- Usage statistics and session recording (PostHog, servers in Frankfurt) run **only with your consent**. Without consent nothing is loaded or sent for this. You can withdraw consent at any time under “Privacy settings”.\n- Your account and saved content are stored with Supabase in Frankfurt; the app itself runs on Vercel in Frankfurt.\n- My server fetches weather and place data without passing on your IP address. Your browser loads the base map (CARTO) and the weather layers (German Weather Service) directly; these providers see your IP address.\n- There are no ads, no cookies and no selling of data.\n- You can delete your account yourself at any time."
+    },
+    "sections": [
+      {
+        "id": "verantwortlicher",
+        "h": "1. Controller",
+        "b": "The controller responsible for data processing in WeatherChaser is:\n\nTim Wienböker\nBahnhofstraße 10B\n85737 Ismaning\nGermany\nEmail: [wienboeker.consulting@gmail.com](mailto:wienboeker.consulting@gmail.com)\n\nI have not appointed a data protection officer because there is no legal obligation to do so. For any privacy question or to exercise your rights, simply write to the email address above."
+      },
+      {
+        "id": "grundlagen",
+        "h": "2. Legal bases at a glance",
+        "b": "I only process personal data where one of the following legal bases of the General Data Protection Regulation (GDPR) applies. Each processing activity below states which one.\n\n- **Consent** (Art. 6(1)(a) GDPR): only for usage statistics, session recording and error reports.\n- **Contract** (Art. 6(1)(b) GDPR): for everything needed so you can use the app under the [Terms of Use](/tos), e.g. account, saving and weather queries.\n- **Legitimate interest** (Art. 6(1)(f) GDPR): for secure operation (server logs), for the map and weather layers loaded directly by your browser, and for feedback. The specific interest is stated in each case.\n\nStoring information in your browser or reading it from there is additionally governed by § 25 of the German Telecommunications Digital Services Data Protection Act (TDDDG): usage statistics require your consent (§ 25(1) TDDDG); everything else is strictly necessary for the app to work the way you want (§ 25(2) no. 2 TDDDG)."
+      },
+      {
+        "id": "hosting",
+        "h": "3. Accessing the app and server logs (Vercel)",
+        "b": "The app and its server functions (weather, place search, feedback, account deletion) run on Vercel in the Frankfurt am Main region. With every request Vercel processes technically necessary data and briefly stores it in logs (server logs).\n\n**Data:** IP address, date and time, requested address including query parameters (e.g. the coordinates of a weather query), status code, browser and operating system (user agent), processing region.\n\n**Purpose:** delivering the app, finding errors, detecting abuse and attacks.\n\n**Legal basis:** Art. 6(1)(f) GDPR. My legitimate interest is secure and stable operation of the app.\n\n**Retention:** Vercel deletes the logs automatically according to its log retention, typically after a few days (according to Vercel currently between one hour and three days, depending on the plan). I do not forward the logs to other services.\n\n**Recipient:** Vercel Inc., USA, as processor under a contract pursuant to Art. 28 GDPR. For the transfer to the USA see section 14. [Vercel privacy policy](https://vercel.com/legal/privacy-policy)\n\nFonts and all other parts of the app are served by my own hosting. No fonts are loaded from Google or other third parties."
+      },
+      {
+        "id": "konto",
+        "h": "4. User account (Supabase)",
+        "b": "An account is optional. You can register with an email address and password or sign in with Google or Apple (see section 5).\n\n**Data:** email address, password (stored only as a hash, never in plain text), time of registration, confirmation and last sign-in, an internal user ID, technical session data (sign-in token). When signing in with Google or Apple, additionally the identifier at that provider and the details it transmits (email address, possibly name and profile picture address).\n\n**Purpose:** providing your account, signing you in, linking your content to your account.\n\n**Legal basis:** Art. 6(1)(b) GDPR (user agreement).\n\n**Retention:** until you delete your account (see section 13). Registrations whose email address was never confirmed are deleted after three months at the latest.\n\n**Recipient:** Supabase as processor (contracting party and operator: Supabase Pte. Ltd., Singapore, and Supabase Inc., USA). The database is located in a data centre in Frankfurt am Main (AWS region eu-central-1). Supabase may access data from third countries for support and operations; see section 14. [Supabase privacy policy](https://supabase.com/privacy)\n\n**Requirement to provide data:** For an account I need an email address and a password, or a sign-in via Google or Apple. Without these you cannot create an account, but you can keep using the app without one."
+      },
+      {
+        "id": "google-apple",
+        "h": "5. Sign-in with Google or Apple",
+        "b": "If you choose “Sign in with Google” or “Sign in with Apple”, the app redirects you to Google or Apple. There you sign in and decide which details are shared. I then receive, via Supabase, an identifier, your email address (with Apple, if you wish, an anonymous relay address) and possibly your name.\n\n**Legal basis:** Art. 6(1)(b) GDPR.\n\n**Providers:** Google and Apple are themselves responsible for the sign-in process on their side. In the EU these are Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland ([privacy policy](https://policies.google.com/privacy)), and Apple Distribution International Ltd., Hollyhill Industrial Estate, Hollyhill, Cork, Ireland ([privacy policy](https://www.apple.com/legal/privacy/en-ww/)). Data may be transferred to their parent companies in the USA; see section 14."
+      },
+      {
+        "id": "emails",
+        "h": "6. Emails about your account",
+        "b": "I only send emails that are needed for your account: confirmation of your registration and, if you request it, a link to reset your password. I do not send newsletters or advertising.\n\n**Data:** email address, content of the email (confirmation or reset link), time of sending.\n\n**Legal basis:** Art. 6(1)(b) GDPR.\n\n**Recipient:** The emails are sent by the email delivery provider of the hosting provider Supabase, acting as processor. It deletes delivery logs according to its retention periods."
+      },
+      {
+        "id": "inhalte",
+        "h": "7. Saved routes, searches, favourites and search history",
+        "b": "When you are signed in, the app stores what you save: routes (places, coordinates, travel dates, settings and weightings), searches, favourites and your search history (places and periods searched). This may allow conclusions about your travel plans. Only you can access it through your account; the database only allows access to your own entries.\n\n**Purpose:** making your content available to you on all devices.\n\n**Legal basis:** Art. 6(1)(b) GDPR.\n\n**Retention:** until you delete the entry or your account. The app automatically trims the search history to the most recent entries.\n\n**Recipient:** Supabase (see section 4)."
+      },
+      {
+        "id": "wetter-orte",
+        "h": "8. Weather, place search and place data via my server",
+        "b": "For weather forecasts, the cloud forecast on the map and the place search, your browser sends the request to my server on Vercel. The server then queries the providers:\n\n- **Weather data:** Open-Meteo ([open-meteo.com](https://open-meteo.com/)) receives coordinates and period.\n- **Place search:** Nominatim, a service of the OpenStreetMap Foundation, St John’s Innovation Centre, Cowley Road, Cambridge, CB4 0WS, United Kingdom, receives your search term or the coordinates ([privacy policy](https://osmfoundation.org/wiki/Privacy_Policy)).\n- **Place data:** The places used for the weather search (GeoNames) are stored on my server; no data is sent to third parties for this.\n\nMy server does not pass on your IP address or your account data; the providers only see my server’s request.\n\n**Purpose:** the core features of the app (weather, place search, weather search).\n\n**Legal basis:** Art. 6(1)(b) GDPR.\n\n**Retention:** My server does not store the requests; only the server logs from section 3 apply."
+      },
+      {
+        "id": "karte",
+        "h": "9. Base map (CARTO) and weather layers (German Weather Service)",
+        "b": "Your browser loads two services directly, without going through my server. These providers see your IP address, the requested map area, the time and details about your browser.\n\n- **Base map:** The map style and map tiles come from CARTO (CartoDB Inc., 307 Fifth Avenue, Floor 9, New York, NY 10016, USA; [privacy notice](https://carto.com/privacy)). The map data comes from OpenStreetMap. CARTO delivers the tiles via a worldwide delivery network; processing in the USA cannot be ruled out (see section 14).\n- **Weather layers:** Only if you switch on a weather layer (e.g. rain radar or satellite), your browser loads map images and time information from the German Weather Service (Deutscher Wetterdienst), Frankfurter Straße 135, 63067 Offenbach am Main, Germany ([privacy notice](https://www.dwd.de/EN/service/dataprotection/dataprotection_node.html)).\n\n**Purpose:** displaying the map and the weather layers.\n\n**Legal basis:** Art. 6(1)(f) GDPR. My legitimate interest: the map is a core feature of the app. Map tiles are needed in large numbers, and fetched directly from the provider they load quickly and reliably.\n\n**Retention:** I do not store anything in this process. How long CARTO and the German Weather Service keep access data is stated in their privacy notices."
+      },
+      {
+        "id": "analyse",
+        "h": "10. Usage statistics, session recording and error reports (PostHog) – only with consent",
+        "b": "On your first visit the app asks whether you consent to usage statistics and session recording. “Accept” and “Decline” are equal options. As long as you have not consented, the PostHog code is not loaded and no data is sent to PostHog. What you did before consenting is not sent afterwards either.\n\n**What is collected with your consent:**\n\n- **Usage events:** pages viewed, clicks on controls and events such as “search started”, “route saved”, language or theme changes.\n- **Session recording:** the course of your session (page layout, clicks, scrolling, mouse movements). All inputs and all texts are masked, i.e. not transmitted in readable form.\n- **Error reports:** If an error occurs in the app, only the error type, the affected area of the app and a short checksum are sent, not the wording of the error message.\n- **Technical details:** browser, operating system, screen size, language, referring page and the approximate location derived from the IP address (country, region, city). I have the IP address itself discarded and not stored.\n- **Identifier:** PostHog assigns a random identifier for each page load that is kept in memory only. PostHog sets no cookies and stores nothing in your browser while collecting (exception: the withdrawal flag, see section 12). If you are signed in, the session is linked to your internal user ID, never to your email address.\n\n**Purpose:** understanding which features are used, finding usability problems and errors, and improving the app.\n\n**Legal basis:** your consent under Art. 6(1)(a) GDPR and § 25(1) TDDDG.\n\n**Withdrawal:** You can withdraw your consent at any time with effect for the future, under “Privacy settings” at the bottom of the search area or in the account menu under “Settings”. Collection stops immediately. Withdrawal does not affect the lawfulness of processing before the withdrawal.\n\n**Retention:** PostHog deletes session recordings after 30 days at the most and event data after 12 months at the most. If you delete your account, I automatically request PostHog to delete the data linked to your user ID.\n\n**Recipient:** PostHog Inc., USA, as processor; the data is stored in PostHog’s EU cloud in Frankfurt am Main. Access from the USA cannot be ruled out; see section 14. [PostHog privacy policy](https://posthog.com/privacy)"
+      },
+      {
+        "id": "feedback",
+        "h": "11. Feedback",
+        "b": "Using the feedback form you can rate the app and send me a message, with or without an account.\n\n**Data:** your rating (1 to 5), your message (optional, up to 2,000 characters) and a few details about the context: where you opened the form, which app mode was active, language, window size and whether you use a mobile device. If you are signed in, I store the feedback together with your user ID. To prevent abuse the server briefly counts submissions per IP address in memory; the IP address is not stored. Please do not include sensitive information in the message.\n\n**Purpose:** evaluating feedback and improving the app.\n\n**Legal basis:** Art. 6(1)(f) GDPR. My legitimate interest is to identify problems and develop the app according to its users’ wishes.\n\n**Retention:** as long as I need the feedback to improve the app, 24 months at the most. If you delete your account, your feedback is deleted as well.\n\n**Recipient:** Supabase (see section 4)."
+      },
+      {
+        "id": "browser-speicher",
+        "h": "12. Storage in your browser",
+        "b": "WeatherChaser sets no cookies. In your browser’s local storage (localStorage, sessionStorage) the app only keeps what is needed for the features you want:\n\n- **Sign-in session** (`sb-…-auth-token`): keeps you signed in; only after signing in, removed when you sign out.\n- **Your privacy decision** (`wc_consent_analytics`): whether you agreed to usage statistics, with time and version, so the app does not ask you again on every visit.\n- **Your settings:** language (`i18nextLng`), light or dark theme (`wc-theme`) and the last selected weather layer (`wc-weather-layer`).\n- **Hints:** whether the hint for the first route has been shown (`wc_first_route_hint_shown`) and when the app asks once for feedback (`wc_search_success_count`, `wc_feedback_prompt_shown`).\n- **Your withdrawal** (`__ph_opt_in_out_…`): if you withdrew consent after usage statistics had been running, PostHog remembers this so that nothing more is collected.\n- **After an update** (`wc_chunk_reload`, sessionStorage): prevents repeated reloading; deleted when you close the tab.\n\nThese entries stay on your device; only the sign-in token is sent along with requests to Supabase.\n\n**Legal basis:** § 25(2) no. 2 TDDDG (strictly necessary for the service you requested) and Art. 6(1)(b) GDPR.\n\n**Retention:** until you delete the entries in your browser settings (sessionStorage: until you close the tab)."
+      },
+      {
+        "id": "kontoloeschung",
+        "h": "13. Account deletion",
+        "b": "You can delete your account yourself at any time: in the account menu under “Settings” → “Delete account”. This deletes:\n\n- your account (email address, password hash, link to Google or Apple),\n- your saved routes, searches and favourites as well as your search history,\n- your feedback entries.\n\nIn addition, I request PostHog to delete the analytics data linked to your user ID.\n\nWhat remains afterwards: entries in the server logs until their retention period expires (section 3) and data in Supabase backups until these are overwritten in the regular backup cycle. Analytics data collected without sign-in cannot be attributed to a person by me; it is deleted according to the periods in section 10."
+      },
+      {
+        "id": "empfaenger-drittland",
+        "h": "14. Recipients and transfers to third countries",
+        "b": "I only share personal data with the parties named in this policy. I have concluded contracts under Art. 28 GDPR with all processors (Vercel, Supabase including email delivery, PostHog); they may only process the data on my instructions.\n\nSome providers are based in the USA or other countries outside the EU. For these transfers:\n\n- **Vercel (USA):** According to Vercel, it is certified under the EU-US Data Privacy Framework; the transfer is based on the European Commission’s adequacy decision (Art. 45 GDPR). In addition, the European Commission’s standard contractual clauses apply (Art. 46(2)(c) GDPR).\n- **Supabase (Singapore and USA):** The data is stored in Frankfurt. For access from Singapore and the USA (support, operations) the European Commission’s standard contractual clauses apply.\n- **PostHog (USA):** The data is stored in Frankfurt. For possible access from the USA the European Commission’s standard contractual clauses apply; PostHog also states that it is certified under the EU-US Data Privacy Framework.\n- **Google and Apple (USA):** Google LLC and Apple Inc. are certified under the EU-US Data Privacy Framework (Art. 45 GDPR).\n- **CARTO (USA):** There is no data processing agreement with CARTO; CARTO processes the access data under its own responsibility to deliver the map tiles.\n- **OpenStreetMap Foundation (United Kingdom):** An adequacy decision of the European Commission applies to the United Kingdom. Your IP address does not reach the Foundation anyway (section 8).\n\nThe list of certified companies is available at [dataprivacyframework.gov](https://www.dataprivacyframework.gov/list), the standard contractual clauses from the [European Commission](https://eur-lex.europa.eu/eli/dec_impl/2021/914/oj)."
+      },
+      {
+        "id": "zahlungen",
+        "h": "15. Paid features",
+        "b": "In the current beta there are no paid features and no payment data is processed. Before I introduce paid features, I will add the payment processing to this privacy policy."
+      },
+      {
+        "id": "rechte",
+        "h": "16. Your rights",
+        "b": "You have the following rights regarding your personal data:\n\n- **Access** to the data I process about you (Art. 15 GDPR),\n- **Rectification** of inaccurate data (Art. 16 GDPR),\n- **Erasure** (Art. 17 GDPR); you can also delete your account yourself (section 13),\n- **Restriction of processing** (Art. 18 GDPR),\n- **Data portability** (Art. 20 GDPR): on request I send you your saved content in a common machine-readable format,\n- **Objection** to processing based on legitimate interests (Art. 21 GDPR, see below),\n- **Withdrawal** of consent at any time with effect for the future (Art. 7(3) GDPR), for usage statistics directly under “Privacy settings”.\n\nTo do so, write to [wienboeker.consulting@gmail.com](mailto:wienboeker.consulting@gmail.com). So that I do not disclose data to unauthorised persons, I may ask you to send the request from your account’s email address."
+      },
+      {
+        "id": "widerspruch",
+        "box": "highlight",
+        "h": "17. Your right to object (Art. 21 GDPR)",
+        "b": "**Where I process your data on the basis of legitimate interests (Art. 6(1)(f) GDPR), you have the right to object to this processing at any time on grounds relating to your particular situation.**\n\nThis concerns the server logs (section 3), loading the base map and weather layers (section 9) and feedback (section 11). After an objection I will no longer process the data concerned unless I can demonstrate compelling legitimate grounds for the processing which override your interests, rights and freedoms, or the processing serves the establishment, exercise or defence of legal claims.\n\nNo particular form is required; the easiest way is an email to [wienboeker.consulting@gmail.com](mailto:wienboeker.consulting@gmail.com). I do not carry out direct marketing."
+      },
+      {
+        "id": "beschwerde",
+        "h": "18. Complaint to a supervisory authority",
+        "b": "You have the right to lodge a complaint with a data protection supervisory authority (Art. 77 GDPR), in particular in the EU member state where you live or work. The authority competent for me is:\n\nBayerisches Landesamt für Datenschutzaufsicht (BayLDA, Bavarian Data Protection Authority)\nPromenade 18, 91522 Ansbach, Germany\nPostal address: Postfach 1349, 91504 Ansbach, Germany\nPhone: +49 981 180093-0\n[www.lda.bayern.de](https://www.lda.bayern.de/) · [Online complaint](https://www.lda.bayern.de/de/beschwerde.html)"
+      },
+      {
+        "id": "weitere-hinweise",
+        "h": "19. Further information",
+        "b": "**No automated decisions:** I do not make decisions based solely on automated processing that produce legal effects concerning you or similarly significantly affect you (Art. 22 GDPR). The app’s weather scores and route suggestions are calculations for you, not decisions about you. There is no profiling for advertising purposes.\n\n**Children and teenagers:** WeatherChaser is not directed at children under 16. If you are younger than 16, please only create an account and consent to usage statistics with your parents’ permission.\n\n**Security:** All connections are encrypted via HTTPS. Only I and the processors named above have access to the data, to the extent needed for their task."
+      },
+      {
+        "id": "aenderungen",
+        "h": "20. Changes to this privacy policy",
+        "b": "If the app or the law changes, I will update this privacy policy. The version published here applies. If the purposes of a processing activity that requires your consent change, I will ask you again.\n\nLast updated: October 2026"
+      }
+    ]
+  },
+  "tos": {
+    "title": "Terms of Use (beta)",
+    "intro": "These terms of use apply to the WeatherChaser web app during the free beta phase. This is an English translation for your convenience. Only the German version is legally binding.",
+    "sections": [
+      {
+        "id": "anbieter",
+        "h": "1. Provider and scope",
+        "b": "WeatherChaser is provided by:\n\nTim Wienböker\nBahnhofstraße 10B\n85737 Ismaning\nGermany\nEmail: [wienboeker.consulting@gmail.com](mailto:wienboeker.consulting@gmail.com)\n\nThese terms apply to any use of the app, with or without an account. How I process your data is explained in the [Privacy Policy](/privacy)."
+      },
+      {
+        "id": "leistung",
+        "h": "2. What WeatherChaser offers",
+        "b": "WeatherChaser helps you plan trips around the weather: find places with good weather, put together routes with weather scores and view forecasts and weather layers on the map. With a free account you can save routes, searches and favourites.\n\nWeather, map and place data come from third parties (including Open-Meteo, the German Weather Service, OpenStreetMap, GeoNames and CARTO). Sources and licences are listed in the [Legal notice](/impressum)."
+      },
+      {
+        "id": "beta",
+        "h": "3. Free beta",
+        "b": "- Use is free of charge during the beta. No payments are requested and no payment data is collected.\n- The app is under development. Features may change, be temporarily unavailable, restricted or discontinued. There is no entitlement to specific features or to constant availability.\n- The beta may end. I will announce this in the app and, if you have an account, by email at least four weeks in advance.\n- There may be paid features later. They only apply if you explicitly order them. Your free account will never silently become a paid one."
+      },
+      {
+        "id": "konto",
+        "h": "4. Account",
+        "b": "You can use the app without an account. By registering (email address and password, or sign-in via Google or Apple) a free user agreement under these terms is concluded between you and me.\n\n- You must be at least 16 years old or have your parents’ permission.\n- Your details must be correct, and the email address must be yours.\n- Keep your credentials secret. If you notice misuse of your account, please let me know."
+      },
+      {
+        "id": "regeln",
+        "h": "5. What is not allowed",
+        "b": "Please use WeatherChaser fairly. In particular, it is not allowed to:\n\n- query the app or its interfaces automatically on a large scale (e.g. by script or scraping) or systematically copy and reuse data from it,\n- circumvent technical limits and protective measures or attack the app’s security,\n- use the app in a way that impairs its operation or other users,\n- send unlawful, offensive or infringing content via the feedback form."
+      },
+      {
+        "id": "vorhersagen",
+        "h": "6. Forecasts without guarantee",
+        "b": "Weather forecasts are based on model calculations and are inherently uncertain, especially several days ahead. The app’s weather scores, place suggestions and routes are estimates derived from them; distances and driving times are rough approximations, not navigation.\n\nI strive for correct and up-to-date data but cannot guarantee that forecasts, scores, place and map data are correct, complete or current. I am not responsible for third-party data."
+      },
+      {
+        "id": "sicherheit",
+        "box": "highlight",
+        "h": "7. Your safety comes first",
+        "b": "**WeatherChaser does not replace official weather warnings or your own checks on site.**\n\n- Before and during your trip, check the official severe weather warnings, in Germany for example from the German Weather Service ([dwd.de](https://www.dwd.de/) or the WarnWetter app).\n- Check road conditions, traffic, closures and whether your vehicle is suitable for the route and the weather.\n- Check on site whether parking, sleeping in your vehicle, camping or passing through is permitted (e.g. camper, parking and driving bans or low-emission zones).\n- Do not operate the app while driving.\n\nYou make decisions about your safety yourself."
+      },
+      {
+        "id": "haftung",
+        "h": "8. Liability",
+        "b": "- I am liable without limitation for intent and gross negligence, for injury to life, body or health, under the German Product Liability Act and to the extent I have given a guarantee.\n- In the case of a slightly negligent breach of an essential contractual obligation, I am only liable for the damage that was foreseeable and typical for this type of contract at the time the contract was concluded. Essential contractual obligations are those whose fulfilment makes the proper performance of the contract possible in the first place and on whose compliance you may regularly rely.\n- Otherwise, my liability for slight negligence is excluded.\n- These rules also apply to persons for whose fault I am responsible."
+      },
+      {
+        "id": "inhalte",
+        "h": "9. Your content and feedback",
+        "b": "What you save in the app (e.g. routes) and what you send me as feedback remains yours. You grant me a simple, free right to it to the extent I need it to operate the app, i.e. to store the content, display it to you and evaluate your feedback to improve the app. If I implement a suggestion from your feedback, you are not entitled to any remuneration for it.\n\nThe right to saved content ends when you delete it or your account."
+      },
+      {
+        "id": "kuendigung",
+        "h": "10. Termination and account deletion",
+        "b": "- You can end the user agreement at any time without notice by deleting your account in the account menu under “Settings” → “Delete account” or by writing to me at [wienboeker.consulting@gmail.com](mailto:wienboeker.consulting@gmail.com).\n- I can terminate the free user agreement with four weeks’ notice, for example when the beta ends.\n- In the case of serious or repeated breaches of these terms, I may block your account or terminate without notice. Where reasonable, I will warn you first.\n\nWhat happens to your data on deletion is explained in the [Privacy Policy](/privacy)."
+      },
+      {
+        "id": "aenderungen",
+        "h": "11. Changes to these terms",
+        "b": "New users are bound by the version published at registration. If you already have an account, changed terms only apply to you if you agree to them. I will inform you in advance in the app or by email about what changes. If you do not agree, the previous terms continue to apply; I may then terminate the agreement under section 10.\n\nChanges to the app’s features during the beta are governed by section 3."
+      },
+      {
+        "id": "recht",
+        "h": "12. Applicable law",
+        "b": "German law applies. If you are a consumer with your habitual residence in another country, you retain the protection of the mandatory consumer protection provisions of that country."
+      },
+      {
+        "id": "streitbeilegung",
+        "h": "13. Consumer dispute resolution",
+        "b": "I am neither willing nor obliged to take part in dispute resolution proceedings before a consumer arbitration board."
+      },
+      {
+        "id": "schluss",
+        "h": "14. Contact and final provisions",
+        "b": "Please send questions and comments about these terms to [wienboeker.consulting@gmail.com](mailto:wienboeker.consulting@gmail.com).\n\nIf any provision of these terms is invalid, the remaining provisions remain valid; the statutory provision takes the place of the invalid one.\n\nLast updated: October 2026"
+      }
+    ]
+  },
+  "imprint": {
+    "title": "Legal notice",
+    "intro": "Information pursuant to § 5 of the German Digital Services Act (DDG). This is an English translation for your convenience. Only the German version is legally binding.",
+    "sections": [
+      {
+        "id": "anbieter",
+        "h": "Provider",
+        "b": "Tim Wienböker\nBahnhofstraße 10B\n85737 Ismaning\nGermany"
+      },
+      {
+        "id": "kontakt",
+        "h": "Contact",
+        "b": "Email: [wienboeker.consulting@gmail.com](mailto:wienboeker.consulting@gmail.com)\n\nYou can also reach me via the feedback form in the app."
+      },
+      {
+        "id": "verantwortlich",
+        "h": "Responsible for content under § 18(2) MStV",
+        "b": "Tim Wienböker, address as above."
+      },
+      {
+        "id": "streitbeilegung",
+        "h": "Consumer dispute resolution",
+        "b": "I am neither willing nor obliged to take part in dispute resolution proceedings before a consumer arbitration board."
+      },
+      {
+        "id": "quellen",
+        "h": "Data sources and licences",
+        "b": "- **Weather data and cloud forecast:** [Open-Meteo](https://open-meteo.com/), licence [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n- **Weather layers on the map** (rain radar, precipitation, satellite): [Deutscher Wetterdienst](https://www.dwd.de/) (German Weather Service), licence [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); the map images are loaded directly from the DWD.\n- **Place data:** [GeoNames](https://www.geonames.org/), licence [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n- **Map data and place search:** © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), licence [ODbL](https://opendatacommons.org/licenses/odbl/); place search via Nominatim\n- **Map style:** © [CARTO](https://carto.com/attributions)\n\nThe data is processed for the app, for example combined into weather scores or cropped to map areas."
+      }
+    ]
+  }
+}

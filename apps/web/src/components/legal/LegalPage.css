@@ -45,11 +45,12 @@
   line-height: var(--leading-base);
   color: var(--color-text-secondary);
   margin-bottom: var(--space-6);
-  white-space: pre-line;
 }
 
 .legal-section {
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-8);
+  /* TOC jumps land with a little air above the heading */
+  scroll-margin-top: var(--space-4);
 }
 
 .legal-section-heading {
@@ -62,5 +63,102 @@
   font-size: var(--font-size-base);
   line-height: var(--leading-base);
   color: var(--color-text-secondary);
-  white-space: pre-line;
+  overflow-wrap: anywhere; /* long URLs / e-mail addresses on 390 px */
+}
+
+.legal-paragraph {
+  margin: 0 0 var(--space-3);
+}
+
+.legal-paragraph:last-child,
+.legal-list:last-child {
+  margin-bottom: 0;
+}
+
+.legal-list {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-5);
+  list-style: disc;
+}
+
+.legal-list li {
+  margin-bottom: var(--space-1);
+}
+
+.legal-section-body strong,
+.legal-intro strong {
+  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+}
+
+.legal-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.875em;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-sm);
+  padding: 0 4px;
+}
+
+.legal-link {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.legal-link:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Boxes: summary at the top, highlighted sections (Art. 21 GDPR objection) */
+.legal-box {
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-8);
+}
+
+.legal-box--summary {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.legal-box--highlight {
+  background: var(--color-primary-light);
+  border: 2px solid var(--color-primary);
+}
+
+.legal-box--highlight .legal-section-heading {
+  color: var(--color-text);
+}
+
+.legal-box--highlight .legal-section-body {
+  color: var(--color-text);
+}
+
+.legal-box-heading {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-2);
+}
+
+.legal-toc {
+  margin-bottom: var(--space-8);
+}
+
+.legal-toc-heading {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-2);
+}
+
+.legal-toc-list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none; /* headings carry their own numbers */
+  font-size: var(--font-size-sm);
+  line-height: var(--leading-base);
+  color: var(--color-text-secondary);
+}
+
+.legal-toc-list li {
+  margin-bottom: var(--space-1);
 }

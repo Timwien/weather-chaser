@@ -24,4 +24,28 @@ const syncHtmlLang = (lng: string) => {
 i18n.on('languageChanged', syncHtmlLang);
 syncHtmlLang(i18n.language);
 
+let legalLoad: Promise<void> | null = null;
+
+/**
+ * The `legal` namespace (privacy policy, terms, imprint + the short legal notes
+ * at sign-up and feedback; German is binding) is ~20 kB gzip and rarely needed,
+ * so it is loaded on demand instead of being bundled with `common`.
+ * Resolves once both languages are registered; a failed load can be retried.
+ */
+export function loadLegalNamespace(): Promise<void> {
+  legalLoad ??= Promise.all([
+    import('./locales/de/legal.json'),
+    import('./locales/en/legal.json'),
+  ])
+    .then(([deLegal, enLegal]) => {
+      i18n.addResourceBundle('de', 'legal', deLegal.default, true, true);
+      i18n.addResourceBundle('en', 'legal', enLegal.default, true, true);
+    })
+    .catch((e: unknown) => {
+      legalLoad = null;
+      throw e;
+    });
+  return legalLoad;
+}
+
 export default i18n;

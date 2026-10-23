@@ -8,7 +8,7 @@
    Neutrals  — teal-tinted for cohesion
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Sora:wght@400..800&display=swap');
+/* Fonts are self-hosted via @fontsource (imported in main.tsx) — no Google Fonts request. */
 
 :root {
   color-scheme: light;
@@ -83,8 +83,8 @@
   --space-10: 40px;
 
   /* ── Typography ───────────────────────────────────────── */
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-display: 'Sora', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans Variable', system-ui, -apple-system, sans-serif;
+  --font-display: 'Sora Variable', 'Plus Jakarta Sans Variable', system-ui, sans-serif;
   --font-size-xs:   11px;
   --font-size-sm:   13px;
   --font-size-base: 15px;

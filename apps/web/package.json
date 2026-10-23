@@ -11,6 +11,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
+    "@fontsource-variable/sora": "^5.3.0",
     "@supabase/supabase-js": "^2.98.0",
     "@tanstack/react-router": "^1.0.0",
     "@vis.gl/react-maplibre": "^8.1.0",

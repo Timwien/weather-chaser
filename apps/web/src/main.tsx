@@ -1,5 +1,8 @@
 import { StrictMode, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
+import '@fontsource-variable/plus-jakarta-sans/wght.css';
+import '@fontsource-variable/plus-jakarta-sans/wght-italic.css';
+import '@fontsource-variable/sora/wght.css';
 import './i18n/index.ts';
 import './styles/global.css';
 import { App } from './app.tsx';

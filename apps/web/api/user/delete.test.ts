@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 const calls: string[] = [];
 let feedbackError: { message: string } | null = null;
+let deleteUserError: { message: string } | null = null;
 
 vi.mock('@supabase/supabase-js', () => ({
   createClient: (_url: string, key: string) => ({
@@ -10,7 +11,7 @@ vi.mock('@supabase/supabase-js', () => ({
       admin: {
         deleteUser: async (id: string) => {
           calls.push(`auth.deleteUser:${id}`);
-          return { error: null };
+          return { error: deleteUserError };
         },
       },
     },
@@ -36,6 +37,7 @@ describe('DELETE /api/user/delete', () => {
   beforeEach(() => {
     calls.length = 0;
     feedbackError = null;
+    deleteUserError = null;
     fetchMock.mockClear();
     vi.stubGlobal('fetch', fetchMock);
     vi.stubEnv('SUPABASE_URL', 'http://sb');
@@ -65,6 +67,15 @@ describe('DELETE /api/user/delete', () => {
     expect(await res.text()).not.toContain('boom');
   });
 
+  it('returns a generic error when the auth user cannot be deleted (no raw message)', async () => {
+    deleteUserError = { message: 'Database error deleting user: secret detail' };
+    const res = await handler.fetch(req());
+    expect(res.status).toBe(500);
+    const body = await res.text();
+    expect(body).not.toContain('secret detail');
+    expect(JSON.parse(body)).toEqual({ error: 'Could not delete account' });
+  });
+
   it('does not call PostHog without the env vars', async () => {
     await handler.fetch(req());
     expect(fetchMock).not.toHaveBeenCalled();
@@ -78,7 +89,11 @@ describe('DELETE /api/user/delete', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe('https://eu.posthog.com/api/projects/123/persons/bulk_delete/');
-    expect(JSON.parse(init.body as string)).toEqual({ distinct_ids: ['user-1'], delete_events: true });
+    expect(JSON.parse(init.body as string)).toEqual({
+      distinct_ids: ['user-1'],
+      delete_events: true,
+      delete_recordings: true,
+    });
     expect(await res.text()).not.toContain('phx_secret');
   });
 

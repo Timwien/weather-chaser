@@ -5,25 +5,13 @@
 // RLS cannot express either for anonymous callers.
 
 import { adminClient, authenticateRequest, json } from './stripe/_shared.js';
+import { createRateLimiter } from './_lib/rateLimit.js';
 
 const MAX_BODY_BYTES = 10_240;
 const MAX_MESSAGE_CHARS = 2000;
 
-// Naive per-IP rate limit: 5 submissions / 10 min. Module-level state is
-// per-serverless-instance only — a soft beta guard, not a hard boundary
-// (documented risk; upgrade to Turnstile/KV if abused).
-const RATE_WINDOW_MS = 10 * 60 * 1000;
-const RATE_MAX = 5;
-const hits = new Map<string, number[]>();
-
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const list = (hits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
-  if (list.length >= RATE_MAX) return true;
-  list.push(now);
-  hits.set(ip, list);
-  return false;
-}
+// Soft per-IP guard: 5 submissions / 10 min (see _lib/rateLimit.ts).
+const rateLimited = createRateLimiter({ windowMs: 10 * 60 * 1000, max: 5 });
 
 /** Whitelist-copy the client context — never store the raw client object. */
 function sanitizeContext(raw: unknown): Record<string, unknown> | null {

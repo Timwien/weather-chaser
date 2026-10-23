@@ -4,8 +4,10 @@
 //
 // Erasure scope: (1) feedback rows of the user (their FK is `on delete set null`,
 // which would otherwise keep the free-text message), (2) the auth user (cascades
-// to saved routes etc.), (3) best effort: the PostHog person incl. events, only
-// when POSTHOG_PERSONAL_API_KEY + POSTHOG_PROJECT_ID are configured.
+// to saved routes etc.), (3) best effort: the PostHog person incl. events and
+// session recordings, only when POSTHOG_PERSONAL_API_KEY + POSTHOG_PROJECT_ID are
+// configured. Field names per https://posthog.com/docs/api/persons (bulk_delete:
+// distinct_ids, delete_events, delete_recordings).
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -22,7 +24,7 @@ async function deletePostHogPerson(userId: string): Promise<void> {
       {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ distinct_ids: [userId], delete_events: true }),
+        body: JSON.stringify({ distinct_ids: [userId], delete_events: true, delete_recordings: true }),
         signal: AbortSignal.timeout(POSTHOG_TIMEOUT_MS),
       },
     );
@@ -76,7 +78,8 @@ export default {
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id);
     if (deleteError) {
       console.error('[user/delete] Error:', deleteError.message);
-      return new Response(JSON.stringify({ error: deleteError.message }), {
+      // Generic message only — the raw Supabase error stays in the server log.
+      return new Response(JSON.stringify({ error: 'Could not delete account' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });

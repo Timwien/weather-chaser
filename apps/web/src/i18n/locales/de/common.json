@@ -421,7 +421,7 @@
   },
   "consent": {
     "title": "Nutzungsstatistik erlauben?",
-    "text": "Mit deiner Einwilligung erfasst WeatherChaser über PostHog (EU-Server) pseudonyme Nutzungsstatistiken und Sitzungsaufzeichnungen, in denen alle Eingaben und Texte unkenntlich gemacht sind, um die App zu verbessern. Ohne Einwilligung wird nichts übertragen. Du kannst die Entscheidung jederzeit in den Datenschutz-Einstellungen ändern.",
+    "text": "Mit deiner Einwilligung erfasst WeatherChaser über PostHog (EU-Server) pseudonyme Nutzungsstatistiken, Fehlerberichte und Sitzungsaufzeichnungen, in denen alle Eingaben und Texte unkenntlich gemacht sind, um die App zu verbessern. Ohne Einwilligung wird nichts übertragen. Du kannst die Entscheidung jederzeit in den Datenschutz-Einstellungen ändern.",
     "privacy_link": "Datenschutzerklärung",
     "accept": "Akzeptieren",
     "decline": "Ablehnen",

@@ -10,7 +10,13 @@
 // - `persistence: 'memory'`: no cookies/localStorage written by PostHog while
 //   capturing. Guests get a fresh distinct_id per pageload.
 // - Session replay masks all inputs AND all text.
-// - Withdrawing consent calls `opt_out_capturing()` + `reset()` immediately.
+// - Withdrawing consent: stop the recording, `reset()` FIRST, `opt_out_capturing()`
+//   LAST. reset() runs consent.reset(), which deletes the `__ph_opt_in_out_` flag —
+//   called after the opt-out it silently re-enabled capture (posthog-js 1.398).
+// - Granting consent on a fresh page load calls `opt_in_capturing()` after init,
+//   so a stale opt-out flag from an earlier withdrawal cannot keep it disabled.
+// - No console logs, network timing or exception autocapture: those can carry
+//   URLs, search terms and place names. Errors go only through captureError().
 // - Every wrapper is a silent no-op when VITE_POSTHOG_KEY is absent (local dev
 //   default) or init failed — product code must never depend on analytics.
 
@@ -45,7 +51,7 @@ export function enableAnalytics(userId?: string | null): void {
     // Re-opt-in after a withdrawal in the same pageview.
     try {
       ph.set_config({ advanced_disable_feature_flags: false });
-      ph.opt_in_capturing();
+      ph.opt_in_capturing({ captureEventName: false });
       ph.startSessionRecording();
       if (userId) ph.identify(userId);
     } catch { /* noop */ }
@@ -78,6 +84,10 @@ export function enableAnalytics(userId?: string | null): void {
         capture_pageview: 'history_change',
         session_recording: { maskAllInputs: true, maskTextSelector: '*' },
         mask_all_text: true,
+        // Explicitly off (they could carry URLs, search terms or place names):
+        enable_recording_console_log: false,
+        capture_exceptions: false,
+        capture_performance: { network_timing: false, web_vitals: false },
         loaded: (p) => {
           if (import.meta.env.DEV) {
             p.debug();
@@ -87,6 +97,10 @@ export function enableAnalytics(userId?: string | null): void {
         },
       });
       ph = posthog;
+      // A withdrawal on an earlier visit left `__ph_opt_in_out_` = 0 in
+      // localStorage; init() would honour it and capture nothing. The user has
+      // just (re-)consented, so that flag is outdated → opt in explicitly.
+      try { posthog.opt_in_capturing({ captureEventName: false }); } catch { /* noop */ }
       for (const fn of queue.splice(0)) {
         try { fn(posthog); } catch { /* noop */ }
       }
@@ -104,13 +118,15 @@ export function disableAnalytics(): void {
   granted = false;
   queue.length = 0;
   if (!ph) return;
+  try { ph.stopSessionRecording(); } catch { /* noop */ }
   try {
-    ph.stopSessionRecording();
-    ph.opt_out_capturing();
     // reset() would otherwise re-fetch feature flags (one more request after withdrawal).
     ph.set_config({ advanced_disable_feature_flags: true });
+    // ORDER MATTERS: reset() deletes the opt-out flag (consent.reset()), so it
+    // must run BEFORE opt_out_capturing(), never after it.
     ph.reset();
   } catch { /* noop */ }
+  try { ph.opt_out_capturing(); } catch { /* noop */ }
 }
 
 /** Track a product event. Silent no-op without consent. */

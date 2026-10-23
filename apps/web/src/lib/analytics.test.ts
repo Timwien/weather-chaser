@@ -1,13 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+// Mock with a minimal model of posthog-js 1.398 consent: reset() runs
+// consent.reset(), which DELETES the stored opt-out flag (→ capturing again).
+let optedOut = false;
 const ph = {
   init: vi.fn(),
   capture: vi.fn(),
   identify: vi.fn(),
-  reset: vi.fn(),
+  reset: vi.fn(() => { optedOut = false; }),
   set_config: vi.fn(),
-  opt_out_capturing: vi.fn(),
-  opt_in_capturing: vi.fn(),
+  opt_out_capturing: vi.fn(() => { optedOut = true; }),
+  opt_in_capturing: vi.fn(() => { optedOut = false; }),
+  is_capturing: vi.fn(() => !optedOut),
   startSessionRecording: vi.fn(),
   stopSessionRecording: vi.fn(),
 };
@@ -26,6 +30,7 @@ describe('analytics consent gating', () => {
   beforeEach(async () => {
     vi.resetModules();
     posthogImported = false;
+    optedOut = false;
     Object.values(ph).forEach((f) => f.mockClear());
     vi.stubEnv('VITE_POSTHOG_KEY', 'phc_test');
     a = await import('./analytics.ts');
@@ -51,6 +56,12 @@ describe('analytics consent gating', () => {
     const cfg = ph.init.mock.calls[0][1];
     expect(cfg).toMatchObject({ persistence: 'memory', mask_all_text: true });
     expect(cfg.session_recording.maskAllInputs).toBe(true);
+    // console logs, network timing and exception autocapture stay off
+    expect(cfg).toMatchObject({
+      enable_recording_console_log: false,
+      capture_exceptions: false,
+      capture_performance: { network_timing: false },
+    });
     expect(ph.identify).toHaveBeenCalledWith('u1');
     a.capture('evt', { a: 1 });
     expect(ph.capture).toHaveBeenCalledWith('evt', { a: 1 });
@@ -64,6 +75,36 @@ describe('analytics consent gating', () => {
     expect(ph.reset).toHaveBeenCalled();
     a.capture('after');
     expect(ph.capture).not.toHaveBeenCalledWith('after', undefined);
+  });
+
+  it('withdrawal: recording stopped, reset() BEFORE opt_out_capturing(), not capturing afterwards', async () => {
+    a.enableAnalytics();
+    await until(() => expect(ph.init).toHaveBeenCalled());
+    a.disableAnalytics();
+    const order = (f: { mock: { invocationCallOrder: number[] } }) => f.mock.invocationCallOrder.at(-1)!;
+    expect(ph.stopSessionRecording).toHaveBeenCalled();
+    expect(order(ph.stopSessionRecording)).toBeLessThan(order(ph.opt_out_capturing));
+    expect(order(ph.reset)).toBeLessThan(order(ph.opt_out_capturing));
+    expect(ph.is_capturing()).toBe(false);
+  });
+
+  it('opts in explicitly after init (a stale opt-out flag from an earlier visit must not win)', async () => {
+    optedOut = true; // as if `__ph_opt_in_out_` = 0 was left in localStorage
+    a.enableAnalytics();
+    await until(() => expect(ph.init).toHaveBeenCalled());
+    expect(ph.opt_in_capturing).toHaveBeenCalledWith({ captureEventName: false });
+    expect(ph.init.mock.invocationCallOrder[0]).toBeLessThan(ph.opt_in_capturing.mock.invocationCallOrder[0]);
+    expect(ph.is_capturing()).toBe(true);
+  });
+
+  it('re-consent in the same page view opts in again without an extra $opt_in event', async () => {
+    a.enableAnalytics();
+    await until(() => expect(ph.init).toHaveBeenCalled());
+    a.disableAnalytics();
+    ph.opt_in_capturing.mockClear();
+    a.enableAnalytics();
+    expect(ph.opt_in_capturing).toHaveBeenCalledWith({ captureEventName: false });
+    expect(ph.is_capturing()).toBe(true);
   });
 
   it('withdrawal while the chunk loads never initialises PostHog', async () => {

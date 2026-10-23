@@ -456,5 +456,15 @@
     "at": "In {{town}}",
     "driving_to": "Driving to {{town}}",
     "beyond_horizon": "The weather forecast does not reach your trip yet (available until {{until}})."
+  },
+  "consent": {
+    "title": "Anonymous usage statistics?",
+    "text": "With your consent, WeatherChaser collects anonymous usage statistics and session recordings in which inputs and text are masked, to improve the app. Without consent nothing is transmitted. You can change your choice at any time in the privacy settings.",
+    "privacy_link": "Privacy policy",
+    "accept": "Accept",
+    "decline": "Decline",
+    "settings_title": "Privacy settings",
+    "settings_hint": "Usage statistics and session recordings: review or change your choice.",
+    "footer_link": "Privacy settings"
   }
 }

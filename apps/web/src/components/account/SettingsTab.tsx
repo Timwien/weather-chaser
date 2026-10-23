@@ -5,6 +5,7 @@ import { useThemeStore } from '../../stores/themeStore.ts';
 import { useSubscriptionStore } from '../../stores/subscriptionStore.ts';
 import { PREMIUM_FREE_BETA } from '../../lib/premiumBeta.ts';
 import { capture } from '../../lib/analytics.ts';
+import { useConsentStore } from '../../lib/consent.ts';
 
 interface SettingsTabProps {
   onClose: () => void;
@@ -165,6 +166,22 @@ export function SettingsTab({ onClose }: SettingsTabProps) {
             {t('account.settings_imprint_link')}
           </a>
         </div>
+      </section>
+
+      <div className="settings-tab-divider" />
+
+      {/* Analytics consent — reopens the banner so the choice can be changed/withdrawn */}
+      <section className="settings-tab-section">
+        <h3 className="settings-tab-section-title">{t('consent.settings_title')}</h3>
+        <p className="settings-tab-guest-note">{t('consent.settings_hint')}</p>
+        <button
+          type="button"
+          className="settings-tab-link"
+          onClick={() => { useConsentStore.getState().openBanner(); onClose(); }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
+        >
+          {t('consent.settings_title')}
+        </button>
       </section>
 
       <div className="settings-tab-divider" />

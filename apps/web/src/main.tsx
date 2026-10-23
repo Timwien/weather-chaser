@@ -9,7 +9,7 @@ import { App } from './app.tsx';
 import { AppErrorBoundary } from './components/common/AppErrorBoundary.tsx';
 import { useAuthStore } from './stores/authStore.ts';
 import { initTheme } from './stores/themeStore.ts';
-import { initAnalytics } from './lib/analytics.ts';
+import { initConsent } from './lib/consent.ts';
 import { registerGlobalErrorHandlers } from './lib/logger.ts';
 
 // After a deploy, lazy chunks of the old build are gone and the SPA rewrite
@@ -32,7 +32,7 @@ window.addEventListener('vite:preloadError', (event) => {
 function Root() {
   useEffect(() => {
     // Both idempotent (guarded against StrictMode double-mount); no cleanup.
-    initAnalytics();
+    initConsent(); // loads analytics only if the user already opted in
     registerGlobalErrorHandlers();
     const unsubAuth = useAuthStore.getState().initialize();
     const cleanupTheme = initTheme();

@@ -10,6 +10,7 @@ import { RouteConfigStep } from './RouteConfigStep.tsx';
 import { WeatherFinderStep } from './WeatherFinderStep.tsx';
 import { saveSearch, buildSearchConfigFromStore } from '../../services/savedSearch.ts';
 import { capture } from '../../lib/analytics.ts';
+import { useConsentStore } from '../../lib/consent.ts';
 import { useFeedbackStore } from '../../stores/feedbackStore.ts';
 import { supabaseConfigured } from '../../lib/supabase.ts';
 import './EntryPanel.css';
@@ -300,6 +301,15 @@ export function EntryPanel() {
             <path d="M21 12a9 9 0 1 1-2.64-6.36" />
             <path d="M21 3v6h-6" />
           </svg>
+        </button>
+
+        {/* Reopens the analytics consent banner (change/withdraw the choice) */}
+        <button
+          type="button"
+          className="entry-panel-privacy-link"
+          onClick={() => useConsentStore.getState().openBanner()}
+        >
+          {t('consent.footer_link')}
         </button>
       </div>
 

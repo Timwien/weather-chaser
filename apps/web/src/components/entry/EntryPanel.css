@@ -1423,6 +1423,26 @@
   justify-self: end;
 }
 
+/* Privacy settings: small text link on its own row under the icon row */
+.entry-panel-privacy-link {
+  grid-column: 1 / -1;
+  justify-self: center;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.entry-panel-privacy-link:hover {
+  color: var(--color-accent);
+}
+
 /* Feedback: icon + visible label, centered between account and reload */
 .entry-panel-feedback-btn {
   gap: 6px;

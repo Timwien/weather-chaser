@@ -456,5 +456,15 @@
     "at": "In {{town}}",
     "driving_to": "Unterwegs nach {{town}}",
     "beyond_horizon": "Wettervorhersage reicht noch nicht bis zu deiner Reise (verfügbar bis {{until}})."
+  },
+  "consent": {
+    "title": "Anonyme Nutzungsstatistik?",
+    "text": "Mit deiner Einwilligung erfasst WeatherChaser anonyme Nutzungsstatistiken und Sitzungsaufzeichnungen, in denen Eingaben und Texte maskiert sind, um die App zu verbessern. Ohne Einwilligung wird nichts übertragen. Du kannst die Entscheidung jederzeit in den Datenschutz-Einstellungen ändern.",
+    "privacy_link": "Datenschutzerklärung",
+    "accept": "Akzeptieren",
+    "decline": "Ablehnen",
+    "settings_title": "Datenschutz-Einstellungen",
+    "settings_hint": "Nutzungsstatistik und Sitzungsaufzeichnung: Entscheidung ansehen oder ändern.",
+    "footer_link": "Datenschutz-Einstellungen"
   }
 }

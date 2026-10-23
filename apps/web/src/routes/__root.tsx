@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { createRootRoute, Outlet } from '@tanstack/react-router';
+import { ConsentBanner } from '../components/consent/ConsentBanner.tsx';
 import { useFeedbackStore } from '../stores/feedbackStore.ts';
 
 // Only fetched the first time the modal is opened (named export → default for React.lazy).
@@ -12,6 +13,7 @@ function RootLayout() {
   return (
     <>
       <Outlet />
+      <ConsentBanner />
       {/* Mounted at the root so it can be opened from anywhere (proactive
           prompt, entry footer). */}
       {modalOpen && (

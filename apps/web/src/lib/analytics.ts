@@ -1,27 +1,33 @@
 // PostHog EU wrapper — the ONLY module that imports posthog-js.
 //
 // Privacy posture (see docs/analytics-2026-07/SETUP-POSTHOG.md):
+// - OPT-IN ONLY: posthog-js is not even downloaded until `enableAnalytics()` is
+//   called, which happens exclusively after the user accepted the consent
+//   banner (lib/consent.ts). Before that, every wrapper is a silent no-op and
+//   calls are DROPPED (never queued for later), so nothing the user did before
+//   consenting is ever sent.
 // - EU cloud (Frankfurt) host.
-// - `persistence: 'memory'`: nothing written to cookies/localStorage → no
-//   consent banner needed. (`cookieless_mode: 'always'` would also work but
-//   disables session replay, so memory persistence is the deliberate choice.
-//   Trade-off: guests get a fresh distinct_id per pageload.)
-// - Inputs masked in session replay.
+// - `persistence: 'memory'`: no cookies/localStorage written by PostHog while
+//   capturing. Guests get a fresh distinct_id per pageload.
+// - Session replay masks all inputs AND all text.
+// - Withdrawing consent calls `opt_out_capturing()` + `reset()` immediately.
 // - Every wrapper is a silent no-op when VITE_POSTHOG_KEY is absent (local dev
 //   default) or init failed — product code must never depend on analytics.
-// - posthog-js is loaded with a dynamic import (own chunk, only fetched when a
-//   key is set). Calls made before it has loaded are queued and replayed.
 
 import type { PostHog } from 'posthog-js';
 
 let ph: PostHog | null = null;
 let started = false;
-// Calls made while posthog-js is still loading (capped so a failed load can't grow it).
+/** True only between an explicit opt-in and a withdrawal. */
+let granted = false;
+// Calls made while posthog-js is still loading, AFTER consent (capped so a
+// failed load can't grow it). Dropped on withdrawal.
 const queue: Array<(p: PostHog) => void> = [];
 const MAX_QUEUE = 100;
 
 /** Run against PostHog now, or queue until it has loaded. Never throws. */
 function run(fn: (p: PostHog) => void): void {
+  if (!granted) return; // no consent → drop, never queue
   if (ph) {
     try { fn(ph); } catch { /* never let analytics break the app */ }
   } else if (started && queue.length < MAX_QUEUE) {
@@ -29,24 +35,49 @@ function run(fn: (p: PostHog) => void): void {
   }
 }
 
-export function initAnalytics(): void {
-  // StrictMode double-mount guard + no-op without a key.
-  if (started) return;
+/**
+ * Start analytics. Call ONLY after the user opted in. Idempotent. If a user id
+ * is passed (already signed in), the session is identified once PostHog is up.
+ */
+export function enableAnalytics(userId?: string | null): void {
+  granted = true;
+  if (ph) {
+    // Re-opt-in after a withdrawal in the same pageview.
+    try {
+      ph.set_config({ advanced_disable_feature_flags: false });
+      ph.opt_in_capturing();
+      ph.startSessionRecording();
+      if (userId) ph.identify(userId);
+    } catch { /* noop */ }
+    return;
+  }
+  if (started) {
+    if (userId) run((p) => p.identify(userId));
+    return;
+  }
   const key = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
   if (!key) return;
   started = true;
+  if (userId) queue.push((p) => p.identify(userId));
 
   const host = (import.meta.env.VITE_POSTHOG_HOST as string | undefined) ?? 'https://eu.i.posthog.com';
 
   import('posthog-js')
     .then(({ default: posthog }) => {
+      // Consent withdrawn while the chunk was loading → never initialise.
+      if (!granted) {
+        started = false;
+        queue.length = 0;
+        return;
+      }
       posthog.init(key, {
         api_host: host,
         persistence: 'memory',
         person_profiles: 'identified_only',
         autocapture: true,
         capture_pageview: 'history_change',
-        session_recording: { maskAllInputs: true },
+        session_recording: { maskAllInputs: true, maskTextSelector: '*' },
+        mask_all_text: true,
         loaded: (p) => {
           if (import.meta.env.DEV) {
             p.debug();
@@ -64,20 +95,42 @@ export function initAnalytics(): void {
       // Chunk blocked/offline: stay a no-op.
       started = false;
       queue.length = 0;
-      console.error('[analytics] init failed:', e);
+      console.error('[analytics] init failed:', e instanceof Error ? e.name : 'unknown');
     });
 }
 
-/** Track a product event. Silent no-op when analytics is not initialized. */
+/** Withdraw / refuse: stop capturing immediately, forget identity, drop queue. */
+export function disableAnalytics(): void {
+  granted = false;
+  queue.length = 0;
+  if (!ph) return;
+  try {
+    ph.stopSessionRecording();
+    ph.opt_out_capturing();
+    // reset() would otherwise re-fetch feature flags (one more request after withdrawal).
+    ph.set_config({ advanced_disable_feature_flags: true });
+    ph.reset();
+  } catch { /* noop */ }
+}
+
+/** Track a product event. Silent no-op without consent. */
 export function capture(event: string, props?: Record<string, unknown>): void {
   run((p) => p.capture(event, props));
 }
 
-/** Report an exception to PostHog error tracking. */
-export function captureException(error: unknown, context?: Record<string, unknown>): void {
+/**
+ * Report an error to PostHog error tracking. Only the error type, our own scope
+ * tag and a short hash are sent — never the message or stack, which may contain
+ * place names or URLs.
+ */
+export function captureError(report: { name: string; scope: string; hash: string }): void {
   run((p) => {
-    const err = error instanceof Error ? error : new Error(String(error));
-    p.captureException(err, context);
+    p.capture('$exception', {
+      $exception_list: [
+        { type: report.name, value: `hash:${report.hash}`, mechanism: { handled: true, synthetic: true } },
+      ],
+      scope: report.scope,
+    });
   });
 }
 

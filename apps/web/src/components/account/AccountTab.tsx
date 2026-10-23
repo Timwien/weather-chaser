@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.ts';
+import { LegalNotice } from '../legal/LegalNotice.tsx';
 
 export function AccountTab() {
   const { t } = useTranslation();
@@ -173,6 +174,8 @@ export function AccountTab() {
           {t('account.apple_btn')}
         </button>
       </div>
+
+      <LegalNotice variant="signup" />
     </div>
   );
 }

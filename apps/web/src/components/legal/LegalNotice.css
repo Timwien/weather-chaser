@@ -1,0 +1,16 @@
+.legal-notice {
+  font-size: var(--font-size-xs);
+  line-height: 1.45;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.legal-notice-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.legal-notice-link:hover {
+  color: var(--color-primary);
+}

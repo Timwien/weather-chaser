@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { submitFeedback } from '../../services/feedback.ts';
 import type { FeedbackSource } from '../../stores/feedbackStore.ts';
+import { LegalNotice } from '../legal/LegalNotice.tsx';
 import './FeedbackForm.css';
 
 const RATINGS = [
@@ -109,6 +110,8 @@ export function FeedbackForm({ source, onSubmitted }: FeedbackFormProps) {
       >
         {state === 'submitting' ? t('feedback.submitting') : t('feedback.submit')}
       </button>
+
+      <LegalNotice variant="feedback" />
     </div>
   );
 }

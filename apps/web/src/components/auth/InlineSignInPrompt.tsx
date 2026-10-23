@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.ts';
+import { LegalNotice } from '../legal/LegalNotice.tsx';
 import './InlineSignInPrompt.css';
 
 interface InlineSignInPromptProps {
@@ -186,6 +187,8 @@ export function InlineSignInPrompt({ onClose }: InlineSignInPromptProps) {
 
       {error && <p className="inline-sign-in-error">{error}</p>}
       {successMsg && <p className="inline-sign-in-success">{successMsg}</p>}
+
+      <LegalNotice variant="signup" />
     </div>
   );
 }

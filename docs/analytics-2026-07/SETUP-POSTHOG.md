@@ -20,6 +20,23 @@ Vercel → Projekt *weather-chaser* → **Settings → Environment Variables**:
 | `VITE_POSTHOG_KEY` | `phc_...` (aus Schritt 1) | **nur Production** |
 | `VITE_POSTHOG_HOST` | `https://eu.i.posthog.com` | **nur Production** |
 
+**Nur serverseitig (Kontolöschung, DSGVO Art. 17), ohne `VITE_`-Präfix:**
+
+| Name | Wert | Environment |
+|---|---|---|
+| `POSTHOG_PERSONAL_API_KEY` | Personal API Key (PostHog → Account → Personal API keys), Scope `person:write` | Production |
+| `POSTHOG_PROJECT_ID` | numerische Projekt-ID (PostHog → Project settings) | Production |
+
+Sind beide gesetzt, löscht `/api/user/delete` beim Löschen eines Kontos auch die
+PostHog-Person (`distinct_id` = Nutzer-ID, inkl. Events) über
+`https://eu.posthog.com`. Fehlen sie oder schlägt der Aufruf fehl, wird das Konto
+trotzdem gelöscht (Fehler wird ohne Details geloggt). Die Feedback-Zeilen des
+Nutzers werden immer vorher gelöscht.
+
+**Einwilligung:** PostHog wird erst nach „Akzeptieren" im Consent-Banner geladen
+(`wc_consent_analytics` in localStorage). Ohne Einwilligung gibt es keinen
+Request an PostHog. Session Replay maskiert Eingaben **und** Texte.
+
 Preview/Development bewusst leer lassen → dortige Builds senden nichts und
 halten die Prod-Daten sauber. Danach einmal re-deployen (Env wird zur
 Build-Zeit eingebettet).

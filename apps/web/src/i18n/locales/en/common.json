@@ -458,8 +458,8 @@
     "beyond_horizon": "The weather forecast does not reach your trip yet (available until {{until}})."
   },
   "consent": {
-    "title": "Anonymous usage statistics?",
-    "text": "With your consent, WeatherChaser collects anonymous usage statistics and session recordings in which inputs and text are masked, to improve the app. Without consent nothing is transmitted. You can change your choice at any time in the privacy settings.",
+    "title": "Allow usage statistics?",
+    "text": "With your consent, WeatherChaser uses PostHog (EU servers) to collect pseudonymous usage statistics and session recordings in which all inputs and text are masked, to improve the app. Without consent nothing is transmitted. You can change your choice at any time in the privacy settings.",
     "privacy_link": "Privacy policy",
     "accept": "Accept",
     "decline": "Decline",

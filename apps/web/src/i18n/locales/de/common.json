@@ -332,7 +332,10 @@
     "sheet_summary_empty": "Tippen um zu suchen"
   },
   "legal": {
-    "back_to_app": "Zur App"
+    "back_to_app": "Zur App",
+    "footer_imprint": "Impressum",
+    "footer_privacy": "Datenschutz",
+    "footer_nav": "Rechtliches"
   },
   "info": {
     "max_stay": "Begrenzt, wie viele Nächte die Route an einem Ort bleibt. Kleiner = mehr Stopps und Abwechslung, größer = weniger Ortswechsel.",

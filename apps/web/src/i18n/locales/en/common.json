@@ -332,7 +332,10 @@
     "sheet_summary_empty": "Tap to search"
   },
   "legal": {
-    "back_to_app": "Back to app"
+    "back_to_app": "Back to app",
+    "footer_imprint": "Imprint",
+    "footer_privacy": "Privacy",
+    "footer_nav": "Legal"
   },
   "info": {
     "max_stay": "Caps how many nights the route stays in one place. Lower = more stops and variety, higher = fewer moves.",

@@ -303,14 +303,23 @@ export function EntryPanel() {
           </svg>
         </button>
 
-        {/* Reopens the analytics consent banner (change/withdraw the choice) */}
-        <button
-          type="button"
-          className="entry-panel-privacy-link"
-          onClick={() => useConsentStore.getState().openBanner()}
-        >
-          {t('consent.footer_link')}
-        </button>
+        {/* Legal row: imprint + privacy policy (new tab, so the planning state
+            survives) and the consent banner (change/withdraw the choice) */}
+        <nav className="entry-panel-legal-links" aria-label={t('legal.footer_nav')}>
+          <a href="/impressum" target="_blank" rel="noopener noreferrer" className="entry-panel-privacy-link">
+            {t('legal.footer_imprint')}
+          </a>
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="entry-panel-privacy-link">
+            {t('legal.footer_privacy')}
+          </a>
+          <button
+            type="button"
+            className="entry-panel-privacy-link"
+            onClick={() => useConsentStore.getState().openBanner()}
+          >
+            {t('consent.footer_link')}
+          </button>
+        </nav>
       </div>
 
       {/* Account modal */}

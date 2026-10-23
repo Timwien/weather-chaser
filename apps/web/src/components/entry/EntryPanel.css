@@ -1424,9 +1424,19 @@
 }
 
 /* Privacy settings: small text link on its own row under the icon row */
-.entry-panel-privacy-link {
+/* One compact row of small legal links under the footer buttons */
+.entry-panel-legal-links {
   grid-column: 1 / -1;
-  justify-self: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  column-gap: var(--space-1);
+}
+
+.entry-panel-privacy-link {
+  display: inline-flex;
+  align-items: center;
   min-height: var(--touch-target);
   padding: 0 var(--space-3);
   background: none;

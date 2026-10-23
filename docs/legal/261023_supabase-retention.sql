@@ -108,9 +108,9 @@ select cron.schedule(
 -- „feedback“) als CSV exportieren.
 --
 -- STICHTAG: Führe die Datei erst NACH dem Deployment des Branches aus und
--- setze das Datum unten auf den Tag NACH dem Deployment. Durch das Datum
--- bleibt neues Gast-Feedback verschont, auch wenn du die Datei später noch
--- einmal ausführst.
+-- setze das Datum unten auf den Tag des Deployments (gelöscht wird nur, was
+-- VOR diesem Tag entstanden ist). Durch das Datum bleibt neues Gast-Feedback
+-- verschont, auch wenn du die Datei später noch einmal ausführst.
 -- -----------------------------------------------------------------------------
 delete from public.feedback
 where user_id is null

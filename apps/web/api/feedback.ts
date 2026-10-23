@@ -80,7 +80,10 @@ export default {
       if (error) throw error;
       return json({ ok: true });
     } catch (err) {
-      console.error('[feedback] insert failed:', err);
+      // Code only: a Postgres error's details can contain the failing row,
+      // i.e. the user's free-text message.
+      const code = (err as { code?: unknown } | null)?.code;
+      console.error('[feedback] insert failed:', typeof code === 'string' ? code : 'unknown');
       return json({ error: 'insert_failed' }, 500);
     }
   },

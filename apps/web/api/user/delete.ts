@@ -17,7 +17,11 @@ const POSTHOG_TIMEOUT_MS = 5000;
 async function deletePostHogPerson(userId: string): Promise<void> {
   const apiKey = process.env.POSTHOG_PERSONAL_API_KEY;
   const projectId = process.env.POSTHOG_PROJECT_ID;
-  if (!apiKey || !projectId) return;
+  if (!apiKey || !projectId) {
+    // Visible in the Vercel log, so a missing setup doesn't go unnoticed.
+    console.error('[user/delete] PostHog person deletion skipped: POSTHOG_PERSONAL_API_KEY / POSTHOG_PROJECT_ID not set');
+    return;
+  }
   try {
     const res = await fetch(
       `https://eu.posthog.com/api/projects/${encodeURIComponent(projectId)}/persons/bulk_delete/`,

@@ -22,7 +22,8 @@ offen sind, stimmt der Text nicht. Reihenfolge = Wichtigkeit. Keine Rechtsberatu
       Stack-Traces senden. Im Code ist sie zusätzlich aus (`capture_exceptions: false`).
 - [ ] **Replay: Konsolen-Logs und Netzwerk-Aufzeichnung AUS** (Session replay →
       Settings: „Capture console logs“ und „Capture network requests“). Im Code
-      ebenfalls aus; der Server-Schalter ist die zweite Sicherung.
+      sind Konsolen-Logs, Netzwerk-Zeiten sowie Header und Inhalte von Anfragen
+      ebenfalls aus; der Dashboard-Schalter ist die zweite Sicherung.
 - [ ] **Umgebungsvariablen in Vercel setzen** (Settings → Environment Variables,
       Production): `POSTHOG_PERSONAL_API_KEY` (Personal API Key mit Scope
       `person:write`) und `POSTHOG_PROJECT_ID`. Ohne beide löscht die
@@ -41,7 +42,7 @@ offen sind, stimmt der Text nicht. Reihenfolge = Wichtigkeit. Keine Rechtsberatu
       werden nicht gelöscht: unbestätigte Registrierungen nach 3 Monaten (§ 4),
       Feedback nach 24 Monaten (§ 11), Suchverlauf nach 12 Monaten (§ 7).
       Teil 3 der Datei (einmaliges Löschen von Feedback ohne Nutzer-ID) erst nach
-      dem Deployment ausführen und das Datum dort anpassen.
+      dem Deployment ausführen und dort das Datum des Deployments eintragen.
 - [ ] Nach einigen Tagen kontrollieren, ob die Jobs gelaufen sind (Abfrage steht
       in der SQL-Datei).
 

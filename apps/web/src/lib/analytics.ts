@@ -86,7 +86,9 @@ export function enableAnalytics(userId?: string | null): void {
         person_profiles: 'identified_only',
         autocapture: true,
         capture_pageview: 'history_change',
-        session_recording: { maskAllInputs: true, maskTextSelector: '*' },
+        // recordHeaders/recordBody false: an explicit client `false` beats the
+        // dashboard, so replays never contain API request/response payloads.
+        session_recording: { maskAllInputs: true, maskTextSelector: '*', recordHeaders: false, recordBody: false },
         mask_all_text: true,
         request_batching: false,
         // Explicitly off (they could carry URLs, search terms or place names):

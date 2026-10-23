@@ -56,6 +56,7 @@ describe('analytics consent gating', () => {
     const cfg = ph.init.mock.calls[0][1];
     expect(cfg).toMatchObject({ persistence: 'memory', mask_all_text: true });
     expect(cfg.session_recording.maskAllInputs).toBe(true);
+    expect(cfg.session_recording).toMatchObject({ recordHeaders: false, recordBody: false });
     // console logs, network timing and exception autocapture stay off
     expect(cfg).toMatchObject({
       request_batching: false, // nothing left in a queue that could flush after a withdrawal

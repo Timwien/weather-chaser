@@ -7,9 +7,16 @@ import { useAppStore } from './appStore.ts';
 
 export type FeedbackSource = 'prompt' | 'entry_footer' | 'account_tab';
 
-// localStorage keys follow the existing wc_* idiom (wc_first_route_hint_shown).
-const COUNT_KEY = 'wc_search_success_count';
-const SHOWN_KEY = 'wc_feedback_prompt_shown';
+// Privacy (§ 25 TDDDG): the prompt counter serves the operator's interest, not
+// a feature the user asked for — so it is NOT strictly necessary and must not
+// touch device storage. It lives in memory only: the prompt shows at most once
+// per page session, after the 2nd successful search of that session.
+//
+// Older builds kept these keys in localStorage; remove them once on load.
+const LEGACY_KEYS = ['wc_search_success_count', 'wc_feedback_prompt_shown'] as const;
+try {
+  for (const k of LEGACY_KEYS) localStorage.removeItem(k);
+} catch { /* storage unavailable — nothing to clean up */ }
 
 // Ask after the user has seen the app work twice — they can judge it by then.
 const PROMPT_AFTER_SUCCESSES = 2;
@@ -18,25 +25,15 @@ const PROMPT_AFTER_SUCCESSES = 2;
 // 2nd success and shown the next time the user returns to the entry form.
 const PROMPT_DELAY_MS = 600;
 
-function readCount(): number {
-  try {
-    return parseInt(localStorage.getItem(COUNT_KEY) ?? '0', 10) || 0;
-  } catch { return 0; }
-}
-
-function promptAlreadyShown(): boolean {
-  try {
-    return localStorage.getItem(SHOWN_KEY) === '1';
-  } catch { return true; } // storage unavailable → never prompt
-}
-
+let successCount = 0;
+let promptShown = false;
 let promptArmed = false;
 
 interface FeedbackState {
   modalOpen: boolean;
   modalSource: FeedbackSource;
 
-  /** Called from both search 'complete' handlers. Arms the prompt once ever (shown on the next return to the entry form). */
+  /** Called from both search 'complete' handlers. Arms the prompt once per page session (shown on the next return to the entry form). */
   recordSearchSuccess: () => void;
   openModal: (source: FeedbackSource) => void;
   closeModal: () => void;
@@ -47,13 +44,9 @@ export const useFeedbackStore = create<FeedbackState>((set) => ({
   modalSource: 'prompt',
 
   recordSearchSuccess: () => {
-    try {
-      const count = readCount() + 1;
-      localStorage.setItem(COUNT_KEY, String(count));
-      // Armed per session; marked shown only when it actually opens, so a user
-      // who closes the tab on the results still gets asked on a later visit.
-      if (count >= PROMPT_AFTER_SUCCESSES && !promptAlreadyShown()) promptArmed = true;
-    } catch { /* storage unavailable — skip silently */ }
+    successCount += 1;
+    // Marked shown only when it actually opens.
+    if (successCount >= PROMPT_AFTER_SUCCESSES && !promptShown) promptArmed = true;
   },
 
   openModal: (source) => set({ modalOpen: true, modalSource: source }),
@@ -66,8 +59,8 @@ useAppStore.subscribe((state, prev) => {
   if (!promptArmed || state.mode !== 'idle' || prev.mode === 'idle') return;
   promptArmed = false;
   setTimeout(() => {
-    // Once ever, even if the user just closes it.
-    try { localStorage.setItem(SHOWN_KEY, '1'); } catch { return; }
+    // Once per page session, even if the user just closes it.
+    promptShown = true;
     useFeedbackStore.setState({ modalOpen: true, modalSource: 'prompt' });
     capture('feedback_prompt_shown');
   }, PROMPT_DELAY_MS);
@@ -75,3 +68,10 @@ useAppStore.subscribe((state, prev) => {
 
 /** Test hook: whether a proactive prompt is waiting for the entry form. */
 export const isPromptArmed = (): boolean => promptArmed;
+
+/** Test hook: start a fresh page session (in-memory counters only). */
+export function __resetFeedbackPromptForTests(): void {
+  successCount = 0;
+  promptShown = false;
+  promptArmed = false;
+}

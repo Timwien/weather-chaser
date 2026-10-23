@@ -58,6 +58,7 @@ describe('analytics consent gating', () => {
     expect(cfg.session_recording.maskAllInputs).toBe(true);
     // console logs, network timing and exception autocapture stay off
     expect(cfg).toMatchObject({
+      request_batching: false, // nothing left in a queue that could flush after a withdrawal
       enable_recording_console_log: false,
       capture_exceptions: false,
       capture_performance: { network_timing: false },
@@ -77,14 +78,18 @@ describe('analytics consent gating', () => {
     expect(ph.capture).not.toHaveBeenCalledWith('after', undefined);
   });
 
-  it('withdrawal: recording stopped, reset() BEFORE opt_out_capturing(), not capturing afterwards', async () => {
+  it('withdrawal: opted out while the recording stops, reset() BEFORE the last opt_out_capturing(), not capturing afterwards', async () => {
     a.enableAnalytics();
     await until(() => expect(ph.init).toHaveBeenCalled());
+    let capturingWhenStopped: boolean | null = null;
+    ph.stopSessionRecording.mockImplementationOnce(() => { capturingWhenStopped = ph.is_capturing(); });
     a.disableAnalytics();
-    const order = (f: { mock: { invocationCallOrder: number[] } }) => f.mock.invocationCallOrder.at(-1)!;
+    const first = (f: { mock: { invocationCallOrder: number[] } }) => f.mock.invocationCallOrder[0];
+    const last = (f: { mock: { invocationCallOrder: number[] } }) => f.mock.invocationCallOrder.at(-1)!;
     expect(ph.stopSessionRecording).toHaveBeenCalled();
-    expect(order(ph.stopSessionRecording)).toBeLessThan(order(ph.opt_out_capturing));
-    expect(order(ph.reset)).toBeLessThan(order(ph.opt_out_capturing));
+    expect(capturingWhenStopped).toBe(false); // the recorder's final flush is dropped
+    expect(first(ph.opt_out_capturing)).toBeLessThan(first(ph.stopSessionRecording));
+    expect(last(ph.reset)).toBeLessThan(last(ph.opt_out_capturing));
     expect(ph.is_capturing()).toBe(false);
   });
 

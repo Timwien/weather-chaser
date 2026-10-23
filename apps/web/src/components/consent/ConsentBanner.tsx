@@ -16,8 +16,11 @@ export function ConsentBanner() {
   if (!open) return null;
 
   return (
+    // `ph-no-capture`: PostHog never records clicks on the consent decision
+    // itself (and blocks the banner in replays) — the "Decline" click must not
+    // become the last tracked event.
     <section
-      className="consent-banner"
+      className="consent-banner ph-no-capture"
       role="region"
       aria-labelledby="consent-title"
       aria-describedby="consent-text"

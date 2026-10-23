@@ -10,9 +10,13 @@
 // - `persistence: 'memory'`: no cookies/localStorage written by PostHog while
 //   capturing. Guests get a fresh distinct_id per pageload.
 // - Session replay masks all inputs AND all text.
-// - Withdrawing consent: stop the recording, `reset()` FIRST, `opt_out_capturing()`
-//   LAST. reset() runs consent.reset(), which deletes the `__ph_opt_in_out_` flag —
-//   called after the opt-out it silently re-enabled capture (posthog-js 1.398).
+// - Withdrawing consent: opt out, stop the recording (its final buffer flush is
+//   then dropped), `reset()`, and `opt_out_capturing()` again LAST. reset() runs
+//   consent.reset(), which deletes the `__ph_opt_in_out_` flag — called after the
+//   opt-out it silently re-enabled capture (posthog-js 1.398).
+// - `request_batching: false`: events go out when captured. posthog-js does not
+//   check consent when it flushes its batch queue, so with batching the last
+//   ~3 s of (consented) events left the browser AFTER a withdrawal.
 // - Granting consent on a fresh page load calls `opt_in_capturing()` after init,
 //   so a stale opt-out flag from an earlier withdrawal cannot keep it disabled.
 // - No console logs, network timing or exception autocapture: those can carry
@@ -84,6 +88,7 @@ export function enableAnalytics(userId?: string | null): void {
         capture_pageview: 'history_change',
         session_recording: { maskAllInputs: true, maskTextSelector: '*' },
         mask_all_text: true,
+        request_batching: false,
         // Explicitly off (they could carry URLs, search terms or place names):
         enable_recording_console_log: false,
         capture_exceptions: false,
@@ -118,6 +123,8 @@ export function disableAnalytics(): void {
   granted = false;
   queue.length = 0;
   if (!ph) return;
+  // Opt out first so the recorder's final buffer flush on stop is dropped.
+  try { ph.opt_out_capturing(); } catch { /* noop */ }
   try { ph.stopSessionRecording(); } catch { /* noop */ }
   try {
     // reset() would otherwise re-fetch feature flags (one more request after withdrawal).

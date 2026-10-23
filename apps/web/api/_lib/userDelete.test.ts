@@ -26,7 +26,7 @@ vi.mock('@supabase/supabase-js', () => ({
   }),
 }));
 
-const handler = (await import('./delete.ts')).default;
+const handler = (await import('../user/delete.ts')).default;
 
 const req = () =>
   new Request('http://x/api/user/delete', { method: 'DELETE', headers: { authorization: 'Bearer tok' } });

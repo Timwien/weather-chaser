@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Designansätze WeatherChaser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Public+Sans:wght@400;600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('wc-design-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<style>
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:64px}
+:root{
+  color-scheme:light;
+  --d-bg:#f5f4f0;--d-surface:#ffffff;--d-text:#1a1c1e;--d-muted:#575d63;--d-rule:#d9d7cf;--d-accent:#0a6873;--d-note:#ecebe4;
+  /* A · Wetterkarte */
+  --A-paper:#f4f3ee;--A-paper2:#eae8e0;--A-ink:#151d26;--A-ink2:#4d5762;--A-rule:#cdcabf;--A-rain:#1f4fc4;--A-rainwash:rgba(31,79,196,.12);
+  --A-land:#f4f3ee;--A-contour:#d6d3c8;--A-road:#bbb6a8;--A-road2:#d9d5ca;--A-water:#8ea6c3;--A-wlabel:#55708f;--A-border:#a19c8e;--A-town:#151d26;--A-label:#29323c;--A-halo:#f4f3ee;
+  /* B · Ruhig & nativ */
+  --B-surf:#ffffff;--B-mat:rgba(250,250,252,.95);--B-lab:#1c1c1e;--B-lab2:#636368;--B-lab3:#8e8e93;--B-sep:rgba(60,60,67,.17);--B-fill:rgba(120,120,128,.14);--B-acc:#0a7581;--B-accon:#ffffff;--B-rain:rgba(52,120,212,.30);--B-rain2:rgba(40,96,196,.42);--B-cloud:rgba(120,130,145,.14);
+  --B-land:#eceee8;--B-contour:#dfe2d9;--B-road:#ffffff;--B-road2:#f8f8f5;--B-water:#a3cbe6;--B-wlabel:#467ea6;--B-border:#b5b5b5;--B-town:#7b7b80;--B-label:#3a3a3c;--B-halo:rgba(255,255,255,.92);
+  /* C · Reisejournal */
+  --C-paper:#f3ecdf;--C-paper2:#eae0cc;--C-ink:#2b2119;--C-ink2:#655546;--C-rule:#d4c5a9;--C-stamp:#a33c29;--C-rain:#4d6c8c;
+  --C-land:#efe6d3;--C-contour:#dccdb0;--C-road:#c8b38e;--C-road2:#ddd0b6;--C-water:#7f9db8;--C-wlabel:#4d6c8c;--C-border:#b09d7e;--C-town:#2b2119;--C-label:#3b2f25;--C-halo:#efe6d3;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --d-bg:#121416;--d-surface:#1b1e21;--d-text:#e8e8e4;--d-muted:#a3a8ad;--d-rule:#2e3236;--d-accent:#62c6d1;--d-note:#1e2226;
+  --A-paper:#0f151c;--A-paper2:#16202a;--A-ink:#e9e7e0;--A-ink2:#a5aeb8;--A-rule:#2f3a46;--A-rain:#86a8ff;--A-rainwash:rgba(134,168,255,.15);
+  --A-land:#0f151c;--A-contour:#223040;--A-road:#3c4958;--A-road2:#26313e;--A-water:#45638a;--A-wlabel:#8ea6c3;--A-border:#4c5866;--A-town:#e9e7e0;--A-label:#c9ced4;--A-halo:#0f151c;
+  --B-surf:#1c1c1e;--B-mat:rgba(32,32,35,.93);--B-lab:#f2f2f7;--B-lab2:#a1a1a6;--B-lab3:#7c7c80;--B-sep:rgba(84,84,88,.55);--B-fill:rgba(118,118,128,.26);--B-acc:#4cc6d3;--B-accon:#00262c;--B-rain:rgba(80,150,240,.30);--B-rain2:rgba(90,160,255,.45);--B-cloud:rgba(170,180,195,.14);
+  --B-land:#1f2124;--B-contour:#292c30;--B-road:#3b3e43;--B-road2:#2f3236;--B-water:#22405b;--B-wlabel:#6e9dc3;--B-border:#56595e;--B-town:#8e8e93;--B-label:#d1d1d6;--B-halo:rgba(0,0,0,.72);
+  --C-paper:#1d1915;--C-paper2:#26201a;--C-ink:#efe5d3;--C-ink2:#bba98f;--C-rule:#40362b;--C-stamp:#e3846c;--C-rain:#93b3d1;
+  --C-land:#211c17;--C-contour:#342c23;--C-road:#4c4033;--C-road2:#342c23;--C-water:#3f5a73;--C-wlabel:#93b3d1;--C-border:#5a4d3d;--C-town:#efe5d3;--C-label:#d8ccb6;--C-halo:#211c17;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --d-bg:#121416;--d-surface:#1b1e21;--d-text:#e8e8e4;--d-muted:#a3a8ad;--d-rule:#2e3236;--d-accent:#62c6d1;--d-note:#1e2226;
+  --A-paper:#0f151c;--A-paper2:#16202a;--A-ink:#e9e7e0;--A-ink2:#a5aeb8;--A-rule:#2f3a46;--A-rain:#86a8ff;--A-rainwash:rgba(134,168,255,.15);
+  --A-land:#0f151c;--A-contour:#223040;--A-road:#3c4958;--A-road2:#26313e;--A-water:#45638a;--A-wlabel:#8ea6c3;--A-border:#4c5866;--A-town:#e9e7e0;--A-label:#c9ced4;--A-halo:#0f151c;
+  --B-surf:#1c1c1e;--B-mat:rgba(32,32,35,.93);--B-lab:#f2f2f7;--B-lab2:#a1a1a6;--B-lab3:#7c7c80;--B-sep:rgba(84,84,88,.55);--B-fill:rgba(118,118,128,.26);--B-acc:#4cc6d3;--B-accon:#00262c;--B-rain:rgba(80,150,240,.30);--B-rain2:rgba(90,160,255,.45);--B-cloud:rgba(170,180,195,.14);
+  --B-land:#1f2124;--B-contour:#292c30;--B-road:#3b3e43;--B-road2:#2f3236;--B-water:#22405b;--B-wlabel:#6e9dc3;--B-border:#56595e;--B-town:#8e8e93;--B-label:#d1d1d6;--B-halo:rgba(0,0,0,.72);
+  --C-paper:#1d1915;--C-paper2:#26201a;--C-ink:#efe5d3;--C-ink2:#bba98f;--C-rule:#40362b;--C-stamp:#e3846c;--C-rain:#93b3d1;
+  --C-land:#211c17;--C-contour:#342c23;--C-road:#4c4033;--C-road2:#342c23;--C-water:#3f5a73;--C-wlabel:#93b3d1;--C-border:#5a4d3d;--C-town:#efe5d3;--C-label:#d8ccb6;--C-halo:#211c17;
+}
+
+body{margin:0;background:var(--d-bg);color:var(--d-text);font:400 16px/1.55 "Public Sans",system-ui,sans-serif}
+a{color:var(--d-accent);text-underline-offset:2px}
+.wrap{max-width:1200px;margin:0 auto;padding:0 16px}
+.doc-top{position:sticky;top:0;z-index:50;background:var(--d-bg);border-bottom:1px solid var(--d-rule)}
+.doc-top .wrap{display:flex;align-items:center;gap:6px 18px;min-height:52px;flex-wrap:wrap;padding-top:6px;padding-bottom:6px}
+.doc-top .brand{font-weight:700;font-size:15px}
+.toc{display:flex;gap:2px 14px;flex-wrap:wrap;font-size:14px}
+.toc a{text-decoration:none;color:var(--d-muted)}
+.toc a:hover{color:var(--d-text)}
+.theme-btn{display:none;margin-left:auto;font:600 13px/1 "Public Sans",sans-serif;border:1px solid var(--d-rule);background:var(--d-surface);color:var(--d-text);padding:8px 10px;border-radius:6px;cursor:pointer}
+.js .theme-btn{display:inline-block}
+@media (max-width:700px){.doc-top{position:static}}
+h1{font-size:clamp(30px,4.4vw,44px);line-height:1.08;letter-spacing:-.015em;margin:56px 0 14px;max-width:20ch;text-wrap:balance}
+.lede{font-size:18px;max-width:60ch}
+.meta{font-size:14px;color:var(--d-muted)}
+h2{font-size:clamp(23px,3vw,30px);line-height:1.15;margin:80px 0 14px;padding-top:18px;border-top:2px solid var(--d-text);text-wrap:balance}
+h2 .n{color:var(--d-muted);font-weight:400;margin-right:.35em}
+h3{font-size:19px;line-height:1.3;margin:40px 0 8px}
+h4{font-size:15px;margin:24px 0 6px}
+p,li{max-width:68ch}
+ul.tight li{margin:4px 0}
+.thesis{font-size:19px;line-height:1.45;max-width:56ch;margin:4px 0 18px}
+.note{background:var(--d-note);padding:12px 16px;border-radius:6px;font-size:15px;max-width:72ch}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0 48px}
+.spec{display:grid;grid-template-columns:150px 1fr;gap:10px 24px;margin:16px 0;max-width:900px}
+.spec dt{font-weight:600;font-size:15px}
+.spec dd{margin:0}
+@media (max-width:640px){.spec{grid-template-columns:1fr;gap:2px}.spec dd{margin-bottom:12px}}
+.frames{display:flex;flex-wrap:wrap;gap:40px 36px;margin:28px 0 8px;align-items:flex-start}
+figure{margin:0}
+figcaption{font-size:14px;color:var(--d-muted);margin-top:14px;max-width:404px}
+figcaption b{color:var(--d-text)}
+.ann{font-size:14.5px;margin:10px 0 0;padding-left:0;list-style:none;max-width:404px;counter-reset:a}
+.ann li{display:grid;grid-template-columns:26px 1fr;gap:0 6px;margin:6px 0}
+.ann li::before{counter-increment:a;content:counter(a);display:block;width:20px;height:20px;background:#c2361f;color:#fff;font:700 12px/20px "Public Sans",sans-serif;text-align:center;border-radius:3px;margin-top:2px}
+table.cmp{border-collapse:collapse;width:100%;font-size:15px;margin:16px 0}
+table.cmp th,table.cmp td{text-align:left;vertical-align:top;padding:10px 12px 10px 0;border-bottom:1px solid var(--d-rule)}
+table.cmp thead th{border-bottom:2px solid var(--d-text);font-size:14px}
+table.cmp tbody th{font-weight:600;width:130px}
+.scroll{overflow-x:auto}
+@media (max-width:700px){table.cmp{min-width:640px}}
+.sw{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 4px}
+.sw span{width:92px;font:400 11.5px/1.3 "IBM Plex Mono",ui-monospace,monospace;color:var(--d-muted)}
+.sw i{display:block;height:36px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(128,128,128,.35);margin-bottom:4px}
+.swl{font-size:13px;font-weight:600;margin:14px 0 0}
+.specimen{border-top:1px solid var(--d-rule);border-bottom:1px solid var(--d-rule);padding:14px 0;margin:12px 0;display:grid;gap:6px}
+.dirhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.dirhead .tag{font-size:14px;color:var(--d-muted)}
+.foot{margin:96px 0 48px;padding-top:16px;border-top:1px solid var(--d-rule);font-size:14px;color:var(--d-muted)}
+.shots-list code,code{font:13px "IBM Plex Mono",ui-monospace,monospace}
+
+/* ───────── Phone and desktop frames ───────── */
+.ph{--dock:124px;width:390px;height:844px;position:relative;overflow:hidden;border-radius:50px;isolation:isolate;margin:7px;
+  box-shadow:0 0 0 7px #16181a,0 0 0 8px #3a3d40,0 30px 50px -26px rgba(0,0,0,.5)}
+@media (max-width:440px){.ph{zoom:.84}}
+@media (max-width:374px){.ph{zoom:.76}}
+.ph .map,.dk .map{position:absolute;inset:0;z-index:0}
+.map svg{display:block;width:100%;height:100%}
+.ph .sb{position:absolute;z-index:6;top:0;left:0;right:0;height:50px;display:flex;justify-content:space-between;align-items:center;padding:12px 28px 0 40px;font:600 16px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.ph .sb svg{display:block}
+.ph .hi{position:absolute;z-index:9;bottom:8px;left:50%;width:134px;height:5px;margin-left:-67px;border-radius:3px}
+.ph .sum{position:absolute;z-index:4;top:54px;left:12px;right:12px}
+.ph .stack{position:absolute;z-index:4;right:12px;top:118px;display:flex;flex-direction:column}
+.ph .sheet{position:absolute;z-index:3;left:0;right:0;bottom:var(--dock);height:var(--sh,240px);overflow:hidden}
+.ph .dock{position:absolute;z-index:4;left:0;right:0;bottom:0;height:var(--dock);padding:10px 16px 34px;display:flex;gap:12px}
+.ph button,.dk button{font:inherit;color:inherit;cursor:default;-webkit-tap-highlight-color:transparent}
+.dk{width:1440px;height:900px;position:relative;overflow:hidden;border-radius:10px;zoom:.8;box-shadow:0 0 0 1px rgba(0,0,0,.22),0 24px 44px -26px rgba(0,0,0,.5);isolation:isolate}
+@media (max-width:1215px){.dk{zoom:.6}}
+@media (max-width:900px){.dk{zoom:.45}}
+@media (max-width:700px){.dk{zoom:.34}}
+@media (max-width:520px){.dk{zoom:.24}}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:block}
+
+/* ───────── W · Wireframes (shared mobile structure) ───────── */
+.W{--m-land:#ebebe7;--m-contour:#dcdcd5;--m-road:#ffffff;--m-road2:#f5f5f1;--m-water:#c4ced6;--m-wlabel:#8193a3;--m-border:#b0b0aa;--m-town:#8a8a86;--m-label:#6f6f6c;--m-halo:#ebebe7;--m-fs:11px;--m-cw:1px;--m-rw:3px;--m-ww:3px;
+  font-family:"Public Sans",system-ui,sans-serif;color:#2b2b2b}
+.W .sb{color:#2b2b2b}.W .hi{background:#2b2b2b}
+.W .box{background:#fff;border:1.5px dashed #9b9b96}
+.W .sum{border-radius:10px;height:48px;display:flex;align-items:center;gap:10px;padding:0 14px;font-size:15px;font-weight:600;background:#fff;border:1.5px dashed #9b9b96}
+.W .sum small{display:block;font-size:12.5px;font-weight:400;color:#666}
+.W .stack{background:#fff;border:1.5px dashed #9b9b96;border-radius:9px}
+.W .stack span{width:42px;height:42px;display:grid;place-items:center;color:#444}
+.W .stack span+span{border-top:1px solid #ddd}
+.W .sheet{background:#fff;border-radius:14px 14px 0 0;border:1.5px dashed #9b9b96;border-bottom:0}
+.W .grab{width:36px;height:5px;border-radius:3px;background:#c4c4c0;margin:7px auto 8px}
+.W .dock{background:#f7f7f4;border-top:1.5px solid #bdbdb8;align-items:center}
+.W .play{width:44px;height:44px;border-radius:50%;border:1.5px solid #444;display:grid;place-items:center;flex:none}
+.W .tl{flex:1;min-width:0}
+.W .ro{display:flex;justify-content:space-between;font-size:12.5px;color:#555;margin-bottom:6px}
+.W .ro b{color:#222}
+.W .trk{height:4px;background:#d6d6d1;border-radius:2px;position:relative}
+.W .trk .f{position:absolute;left:0;top:0;bottom:0;background:#555;border-radius:2px}
+.W .trk .th{position:absolute;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:#fff;border:1.5px solid #444}
+.W .trk .st{position:absolute;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:2px;background:#222}
+.W .days{display:grid;font-size:11.5px;color:#666;margin-top:9px}
+.W .row{display:flex;align-items:center;gap:12px;padding:9px 16px;border-top:1px solid #ececea;font-size:15px}
+.W .row b{font-weight:600}
+.W .row small{display:block;font-size:12.5px;color:#666}
+.W .row .sc{width:34px;text-align:right;font-weight:700;font-size:18px;font-variant-numeric:tabular-nums}
+.W .hdr{display:flex;justify-content:space-between;align-items:baseline;padding:0 16px 8px;font-size:17px;font-weight:700}
+.W .hdr span{font-size:14px;font-weight:500;color:#555}
+.W .pin{position:absolute;z-index:12;width:22px;height:22px;background:#c2361f;color:#fff;font:700 12px/22px "Public Sans",sans-serif;text-align:center;border-radius:3px;box-shadow:0 0 0 2px #fff}
+.W .opt{padding:10px 16px;border-top:1px solid #ececea;font-size:15px;display:flex;justify-content:space-between;gap:12px}
+.W .opt span{color:#555}
+.W .seg{display:flex;border:1.5px solid #555;border-radius:8px;overflow:hidden;font-size:13.5px;margin:4px 16px 10px}
+.W .seg span{flex:1;text-align:center;padding:7px 0}
+.W .seg span+span{border-left:1px solid #aaa}
+.W .seg .on{background:#2b2b2b;color:#fff;font-weight:600}
+.W .lbl{padding:14px 16px 2px;font-size:13px;font-weight:700;color:#444}
+.W .cta{flex:1;height:50px;border-radius:12px;background:#2b2b2b;color:#fff;display:grid;place-items:center;font-weight:600;font-size:16px}
+.W .choice{padding:12px 16px;border-top:1px solid #ececea}
+.W .choice b{font-size:16px}
+.W .choice small{display:block;font-size:13px;color:#666;margin-top:2px}
+.detents{display:flex;gap:18px;flex-wrap:wrap;margin:20px 0}
+.detents figure{width:132px}
+.dt{width:132px;height:270px;border-radius:18px;background:#ebebe7;position:relative;overflow:hidden;box-shadow:0 0 0 1px #c9c9c4}
+.dt .b{position:absolute;left:0;right:0;background:#fff;border-top:1.5px dashed #8d8d88;border-radius:10px 10px 0 0}
+.dt .f{position:absolute;left:0;right:0;bottom:0;height:40px;background:#3a3a38;color:#fff;font:600 10px/40px "Public Sans",sans-serif;text-align:center}
+.dt .s{position:absolute;top:14px;left:8px;right:8px;height:16px;border-radius:4px;background:#fff;border:1px dashed #8d8d88}
+.detents figcaption{font-size:13px;margin-top:8px}
+
+/* ───────── A · Wetterkarte ───────── */
+.A{--m-land:var(--A-land);--m-contour:var(--A-contour);--m-road:var(--A-road);--m-road2:var(--A-road2);--m-water:var(--A-water);--m-wlabel:var(--A-wlabel);--m-border:var(--A-border);--m-town:var(--A-town);--m-label:var(--A-label);--m-halo:var(--A-halo);--m-fs:11px;--m-cw:.8px;--m-rw:1.6px;--m-ww:2.4px;
+  font-family:"IBM Plex Sans Condensed","Arial Narrow",sans-serif;color:var(--A-ink)}
+.A .mono,.A .ax text,.A .t td{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.A .sb{color:var(--A-ink)}.A .hi{background:var(--A-ink)}
+.A .sum{background:var(--A-paper);border:1px solid var(--A-ink);border-radius:3px;height:44px;display:flex;align-items:center;padding:0 12px;gap:8px;font-size:15.5px;font-weight:500;white-space:nowrap}
+.A .sum .ed{margin-left:auto;color:var(--A-ink2);font-size:13px;font-weight:400;text-decoration:underline;text-underline-offset:3px}
+.A .stack{border:1px solid var(--A-ink);border-radius:3px;background:var(--A-paper)}
+.A .stack button{width:44px;height:44px;border:0;background:none;display:grid;place-items:center;padding:0}
+.A .stack button+button{border-top:1px solid var(--A-rule)}
+.A .stack .ico{stroke-width:1.3}
+.A .sheet{background:var(--A-paper);border-top:1px solid var(--A-ink)}
+.A .grab{width:32px;height:3px;background:var(--A-ink2);margin:7px auto 4px}
+.A .shd{display:flex;align-items:baseline;justify-content:space-between;padding:4px 16px 6px}
+.A .shd b{font-size:16.5px;font-weight:600}
+.A .shd span{font:400 11.5px "IBM Plex Mono",monospace;color:var(--A-ink2)}
+.A .t{width:calc(100% - 32px);margin:0 16px;border-collapse:collapse}
+.A .t th{font:400 10.5px/1.25 "IBM Plex Mono",monospace;color:var(--A-ink2);text-align:right;padding:4px 0 6px 4px;border-bottom:1px solid var(--A-ink);vertical-align:bottom;white-space:nowrap}
+.A .t th.on{color:var(--A-ink);font-weight:500}
+.A .t th.l,.A .t td.l{text-align:left}
+.A .t td{padding:9px 0 9px 4px;border-bottom:1px solid var(--A-rule);text-align:right;font-size:13.5px;white-space:nowrap}
+.A .t td.l{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:15.5px;font-weight:500;padding-left:6px}
+.A .t td.s{font-weight:500}
+.A .t td.r{color:var(--A-rain)}
+.A .t .rk{width:14px;color:var(--A-ink2);text-align:left;padding-left:0}
+.A .t tr.sel td{background:var(--A-paper2)}
+.A .t tr.sel td.rk{box-shadow:inset 2px 0 0 var(--A-ink);padding-left:5px}
+.A .more{padding:9px 16px;color:var(--A-ink2);font-size:14px}
+.A .dock{background:var(--A-paper);border-top:1px solid var(--A-ink);align-items:flex-start}
+.A .play{width:44px;height:44px;border:1px solid var(--A-ink);border-radius:3px;background:var(--A-paper);display:grid;place-items:center;flex:none;margin-top:11px;padding:0}
+.A .play svg{fill:var(--A-ink)}
+.A .tl{flex:1;min-width:0}
+.A .ro{display:flex;justify-content:space-between;font:400 11.5px/1.2 "IBM Plex Mono",monospace;color:var(--A-ink2);margin:1px 0 4px}
+.A .ro b{color:var(--A-ink);font-weight:500}
+.A .ax{display:block;width:100%;height:48px;overflow:visible}
+.A .ax text{font-size:10px;fill:var(--A-ink2)}
+.A .ax .base{stroke:var(--A-ink);stroke-width:1}
+.A .ax .tick{stroke:var(--A-ink2);stroke-width:.8}
+.A .ax .day{stroke:var(--A-ink);stroke-width:1}
+.A .ax .past{fill:var(--A-ink);opacity:.07}
+.A .ax .rb{fill:var(--A-rain)}
+.A .ax .ph-l{stroke:var(--A-ink);stroke-width:1.6}
+.A .ax .ph-h{fill:var(--A-ink)}
+.A .ax .now{stroke:var(--A-ink2);stroke-dasharray:2 2}
+.A .ax .stp{fill:var(--A-paper);stroke:var(--A-ink);stroke-width:1}
+.A .stop{padding:2px 16px 0}
+.A .stop .k{display:flex;justify-content:space-between;font:400 11.5px "IBM Plex Mono",monospace;color:var(--A-ink2)}
+.A .stop .nm{font-size:21px;font-weight:600;line-height:1.2;margin:2px 0 6px}
+.A .read{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--A-rule)}
+.A .read div{padding:5px 0 0;font:500 16px/1.2 "IBM Plex Mono",monospace}
+.A .read div+div{padding-left:8px;border-left:1px solid var(--A-rule)}
+.A .read small{display:block;font:400 10px/1.3 "IBM Plex Mono",monospace;color:var(--A-ink2)}
+.A .read .r{color:var(--A-rain)}
+.A.dk .panel{position:absolute;z-index:3;left:0;top:0;bottom:0;width:420px;background:var(--A-paper);border-right:1px solid var(--A-ink);padding:20px 0 0}
+.A.dk .sum{position:static;margin:0 20px 16px}
+.A.dk .t{width:calc(100% - 40px);margin:0 20px}
+.A.dk .t td.l{font-size:16px}
+.A.dk .shd{padding:0 20px 8px}
+.A.dk .ske td{color:transparent}
+.A.dk .ske td span{display:inline-block;height:7px;background:var(--A-rule);vertical-align:middle}
+.A.dk .dock{position:absolute;z-index:4;left:420px;right:0;bottom:0;height:86px;padding:10px 24px 12px;display:flex;gap:14px}
+.A.dk .stack{position:absolute;right:20px;top:20px;z-index:4}
+
+/* ───────── B · Ruhig & nativ ───────── */
+.B{--m-land:var(--B-land);--m-contour:var(--B-contour);--m-road:var(--B-road);--m-road2:var(--B-road2);--m-water:var(--B-water);--m-wlabel:var(--B-wlabel);--m-border:var(--B-border);--m-town:var(--B-town);--m-label:var(--B-label);--m-halo:var(--B-halo);--m-fs:11px;--m-cw:1px;--m-rw:3.2px;--m-ww:3.4px;
+  --dock:112px;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--B-lab);font-variant-numeric:tabular-nums}
+.B .sb{color:var(--B-lab)}.B .hi{background:var(--B-lab)}
+.B .mat{background:var(--B-mat);-webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7)}
+.B .sum{border-radius:12px;padding:8px 12px 8px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 0 0 .5px var(--B-sep),0 8px 20px -10px rgba(0,0,0,.35)}
+.B .sum .t1{font-size:16px;font-weight:600;line-height:1.25;letter-spacing:-.01em}
+.B .sum .t2{font-size:13px;color:var(--B-lab2);line-height:1.3}
+.B .sum .ch{margin-left:auto;color:var(--B-lab3)}
+.B .stack{border-radius:10px;overflow:hidden;box-shadow:0 0 0 .5px var(--B-sep),0 8px 20px -10px rgba(0,0,0,.35)}
+.B .stack button{width:44px;height:44px;border:0;background:none;display:grid;place-items:center;color:var(--B-acc);padding:0}
+.B .stack button+button{border-top:.5px solid var(--B-sep)}
+.B .sheet{border-radius:16px 16px 0 0;box-shadow:0 -.5px 0 var(--B-sep),0 -10px 30px -16px rgba(0,0,0,.35)}
+.B .grab{width:36px;height:5px;border-radius:3px;background:var(--B-lab3);opacity:.45;margin:6px auto 8px}
+.B .hdr{display:flex;align-items:baseline;justify-content:space-between;padding:0 16px}
+.B .hdr .h{font-size:22px;font-weight:700;letter-spacing:-.015em}
+.B .hdr .sort{font-size:15px;color:var(--B-acc);display:flex;align-items:center;gap:3px}
+.B .hsub{font-size:13px;color:var(--B-lab2);padding:1px 16px 6px}
+.B .list{margin:0;padding:0;list-style:none}
+.B .row{display:flex;align-items:center;gap:12px;padding:10px 16px;position:relative}
+.B .row+.row::before{content:"";position:absolute;top:0;left:72px;right:0;border-top:.5px solid var(--B-sep)}
+.B .row .sc{width:44px;flex:none;font-size:23px;font-weight:600;text-align:right;letter-spacing:-.02em}
+.B .row.top .sc{color:var(--B-acc)}
+.B .row .nm{font-size:17px;line-height:1.25;letter-spacing:-.01em}
+.B .row .sub{font-size:13px;color:var(--B-lab2);margin-top:2px;white-space:nowrap}
+.B .row .ch{margin-left:auto;color:var(--B-lab3)}
+.B .dock{border-top:.5px solid var(--B-sep);align-items:center;padding:6px 16px 34px}
+.B .play{width:44px;height:44px;border-radius:50%;background:var(--B-fill);border:0;display:grid;place-items:center;flex:none;padding:0}
+.B .play svg{fill:var(--B-lab)}
+.B .tl{flex:1;min-width:0}
+.B .ro{display:flex;justify-content:space-between;font-size:13px;margin-bottom:9px}
+.B .ro b{font-weight:600}
+.B .ro span{color:var(--B-lab2)}
+.B .trk{position:relative;height:4px;border-radius:2px;background:var(--B-fill)}
+.B .trk .f{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:var(--B-acc)}
+.B .trk .th{position:absolute;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:#fff;box-shadow:0 .5px 4px rgba(0,0,0,.14),0 3px 8px rgba(0,0,0,.2)}
+.B .trk .now{position:absolute;top:-5px;bottom:-5px;width:2px;margin-left:-1px;border-radius:1px;background:var(--B-lab3)}
+.B .trk .st{position:absolute;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--B-surf);box-shadow:0 0 0 2px var(--B-acc)}
+.B .days{display:grid;grid-template-columns:repeat(3,1fr);font-size:12px;color:var(--B-lab2);margin-top:10px}
+.B .stop{padding:0 16px}
+.B .stop .k{font-size:13px;color:var(--B-lab2)}
+.B .stop .nm{font-size:22px;font-weight:700;letter-spacing:-.015em;line-height:1.2;margin-top:1px}
+.B .cells{display:grid;grid-template-columns:repeat(5,1fr);margin-top:10px}
+.B .cells div{font-size:17px;font-weight:600;line-height:1.2}
+.B .cells small{display:block;font-size:12px;font-weight:400;color:var(--B-lab2);margin-top:1px}
+.B.dk .panel{position:absolute;z-index:3;left:16px;top:16px;bottom:16px;width:400px;border-radius:14px;box-shadow:0 0 0 .5px var(--B-sep),0 16px 40px -18px rgba(0,0,0,.4);padding:14px 0 0;overflow:hidden}
+.B.dk .sum{position:static;margin:0 14px 14px;box-shadow:none;background:var(--B-fill)}
+.B.dk .dock{display:flex;gap:14px;align-items:center;position:absolute;z-index:4;left:440px;right:84px;bottom:16px;height:auto;border-radius:14px;border:0;padding:10px 18px 12px;box-shadow:0 0 0 .5px var(--B-sep),0 16px 40px -18px rgba(0,0,0,.4)}
+.B.dk .stack{position:absolute;right:16px;top:16px;z-index:4}
+.B.dk .ske .nm,.B.dk .ske .sc{color:transparent}
+.B.dk .ske i{display:block;height:9px;border-radius:5px;background:var(--B-fill)}
+
+/* ───────── C · Reisejournal ───────── */
+.C{--m-land:var(--C-land);--m-contour:var(--C-contour);--m-road:var(--C-road);--m-road2:var(--C-road2);--m-water:var(--C-water);--m-wlabel:var(--C-wlabel);--m-border:var(--C-border);--m-town:var(--C-town);--m-label:var(--C-label);--m-halo:var(--C-halo);--m-fs:11.5px;--m-cw:.9px;--m-rw:1.8px;--m-ww:2.6px;
+  --dock:118px;font-family:"Source Sans 3",system-ui,sans-serif;color:var(--C-ink);font-variant-numeric:lining-nums tabular-nums}
+.C .serif{font-family:"Newsreader",Georgia,serif}
+.C .sb{color:var(--C-ink)}.C .hi{background:var(--C-ink)}
+.C .paper{background-color:var(--C-paper);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .2 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.C .sum{border-radius:4px;padding:7px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 0 0 1px var(--C-rule),0 6px 16px -8px rgba(60,40,20,.45)}
+.C .sum .t1{font-family:"Newsreader",Georgia,serif;font-size:18.5px;font-style:italic;line-height:1.2}
+.C .sum .t2{font-size:13px;color:var(--C-ink2);line-height:1.3}
+.C .sum .ed{margin-left:auto;font-size:13px;color:var(--C-stamp);font-weight:600}
+.C .stack{gap:8px}
+.C .stack button{width:44px;height:44px;border:0;border-radius:4px;background:var(--C-paper);display:grid;place-items:center;padding:0;color:var(--C-ink);box-shadow:0 0 0 1px var(--C-rule),0 4px 10px -6px rgba(60,40,20,.45)}
+.C .sheet{border-radius:6px 6px 0 0;box-shadow:0 -1px 0 var(--C-rule),0 -10px 24px -14px rgba(60,40,20,.5)}
+.C .grab{width:34px;height:4px;border-radius:2px;background:var(--C-rule);margin:8px auto 6px}
+.C .h{font-family:"Newsreader",Georgia,serif;font-size:23px;font-weight:500;padding:0 18px;line-height:1.2;letter-spacing:-.005em}
+.C .hsub{padding:2px 18px 8px;font-size:13.5px;color:var(--C-ink2);border-bottom:3px double var(--C-rule)}
+.C .e{display:grid;grid-template-columns:28px 1fr auto;column-gap:8px;padding:9px 18px 9px;border-bottom:1px solid var(--C-rule);align-items:baseline}
+.C .e .no{font-family:"Newsreader",Georgia,serif;font-style:italic;font-size:25px;color:var(--C-stamp);line-height:1;grid-row:span 2}
+.C .e .nm{font-family:"Newsreader",Georgia,serif;font-size:19.5px;font-weight:500;line-height:1.2}
+.C .e .pt{font-family:"Newsreader",Georgia,serif;font-size:20px;text-align:right;line-height:1.1}
+.C .e .pt small{font-family:"Source Sans 3",sans-serif;font-size:11.5px;color:var(--C-ink2);margin-left:3px}
+.C .e .d{grid-column:2 / 4;font-size:13.5px;color:var(--C-ink2);margin-top:1px}
+.C .dock{background:var(--C-paper2);border-top:3px double var(--C-rule);align-items:center;padding:8px 16px 34px}
+.C .play{width:44px;height:44px;border-radius:50%;background:var(--C-ink);border:0;display:grid;place-items:center;flex:none;padding:0}
+.C .play svg{fill:var(--C-paper)}
+.C .tl{flex:1;min-width:0}
+.C .ro{display:flex;justify-content:space-between;font-size:12.5px;color:var(--C-ink2);margin-bottom:2px}
+.C .ro b{color:var(--C-ink);font-weight:600}
+.C .days{display:grid;grid-template-columns:repeat(3,1fr);font-family:"Newsreader",Georgia,serif;font-style:italic;font-size:14.5px;line-height:1.3}
+.C .days .on{color:var(--C-stamp)}
+.C .rul{display:block;width:100%;height:16px;overflow:visible}
+.C .rul .base{stroke:var(--C-ink);stroke-width:1}
+.C .rul .tick{stroke:var(--C-ink2);stroke-width:.8}
+.C .rul .day{stroke:var(--C-ink);stroke-width:1}
+.C .rul .ndl{stroke:var(--C-stamp);stroke-width:2}
+.C .rul .ndh{fill:var(--C-stamp)}
+.C .rul .now{stroke:var(--C-ink2);stroke-dasharray:2 2}
+.C .rul .stp{fill:var(--C-stamp)}
+.C .stop{padding:0 18px}
+.C .stop .k{font-size:13.5px;color:var(--C-ink2)}
+.C .stop .k em{font-family:"Newsreader",Georgia,serif;font-size:17px;color:var(--C-stamp);margin-right:4px}
+.C .stop .nm{font-family:"Newsreader",Georgia,serif;font-size:26px;font-weight:500;line-height:1.15;margin:1px 0 4px}
+.C .stop .d{font-size:14px;color:var(--C-ink2);line-height:1.45}
+.C.dk .panel{position:absolute;z-index:3;left:0;top:0;bottom:0;width:440px;box-shadow:1px 0 0 var(--C-rule),12px 0 30px -18px rgba(60,40,20,.5);padding:22px 0 0}
+.C.dk .sum{position:static;margin:0 18px 18px;box-shadow:0 0 0 1px var(--C-rule)}
+.C.dk .dock{position:absolute;z-index:4;left:440px;right:0;bottom:0;height:92px;padding:10px 28px 12px;display:flex;gap:16px;align-items:center}
+.C.dk .stack{position:absolute;right:20px;top:20px;z-index:4}
+.C.dk .ske .nm,.C.dk .ske .pt,.C.dk .ske .no{color:transparent}
+.C.dk .ske i{display:block;height:8px;background:var(--C-rule);margin-top:6px}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+</style>
+</head>
+<body>
+
+<!-- Shared map geometry: Upper Rhine between Sélestat, Freiburg and Basel. Colours come from CSS variables of the frame that uses it. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+<defs>
+  <filter id="bblur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="16"/></filter>
+  <filter id="bsh" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="1" stdDeviation="1.6" flood-color="#000" flood-opacity=".28"/></filter>
+  <filter id="cwash" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="26"/></filter>
+  <g id="van"><rect x="-9" y="-6" width="18" height="10" rx="2"/><path d="M3 -6v4h6M-6 -3.5h5"/><circle cx="-4.5" cy="5" r="2.1"/><circle cx="4.5" cy="5" r="2.1"/></g>
+
+  <g id="geo">
+    <rect x="-640" y="-100" width="1800" height="1100" style="fill:var(--m-land)"/>
+    <g style="fill:none;stroke:var(--m-contour);stroke-width:var(--m-cw)">
+<path d="M468 350C470 353 470 358 470 361C470 365 468 369 467 372C465 375 463 378 461 381C459 383 456 386 454 387C451 388 448 388 445 389C442 390 440 390 437 391C435 392 433 394 430 394C427 395 424 395 422 394C419 393 417 391 415 389C413 387 411 385 408 384C406 383 402 383 399 381C396 379 392 377 391 374C389 370 389 365 390 361C391 357 393 353 395 350C396 347 397 344 398 341C399 338 399 335 400 332C401 329 402 326 403 324C405 321 406 318 408 315C409 312 411 308 413 306C415 304 418 302 421 301C424 300 427 302 430 302C433 303 435 304 438 305C441 305 444 305 447 306C450 307 453 309 454 312C456 315 456 320 457 324C457 327 456 331 457 334C458 337 460 338 462 341C464 344 467 347 468 350Z"/>
+<path d="M511 344C509 351 505 357 502 364C500 371 500 377 498 383C496 390 496 398 492 403C489 408 483 412 478 414C472 416 466 414 461 416C456 417 453 419 448 423C444 426 439 433 434 437C429 440 422 443 416 443C410 443 404 440 399 437C394 434 388 429 385 423C381 418 377 411 376 404C374 396 375 388 374 381C374 374 375 368 374 362C373 355 369 350 367 344C365 338 362 330 362 323C362 316 365 309 368 304C371 298 376 294 380 289C383 283 385 276 388 270C391 264 394 254 398 250C403 245 410 243 416 243C422 244 429 249 434 253C439 256 444 261 448 264C453 267 457 269 461 271C466 274 470 276 474 279C479 282 483 285 488 289C493 292 500 296 504 301C508 306 513 313 514 321C515 328 513 337 511 344Z"/>
+<path d="M551 338C547 349 542 359 538 369C535 378 532 387 528 396C524 405 520 413 516 421C512 430 508 437 503 447C499 458 496 471 490 481C484 492 476 505 467 509C459 513 447 511 438 506C429 502 421 488 414 480C406 473 401 467 393 462C386 457 377 457 370 452C363 447 356 439 352 430C347 421 347 408 345 398C343 387 342 378 339 368C336 358 330 349 327 338C323 327 320 314 320 302C320 290 323 277 326 266C330 255 335 244 341 235C347 226 355 218 364 214C372 210 384 211 393 212C401 213 410 219 417 218C425 217 430 212 438 207C446 203 455 191 463 189C472 187 483 188 490 193C498 198 504 210 510 218C516 227 520 235 527 244C533 252 542 258 547 268C552 278 557 290 557 302C558 313 554 327 551 338Z"/>
+<path d="M571 332C575 346 587 362 592 379C596 396 601 418 598 435C596 451 584 465 575 477C566 488 553 495 543 504C532 513 523 524 512 531C502 538 490 546 478 548C466 550 453 545 442 542C431 538 420 531 410 526C399 520 389 517 379 510C370 503 361 494 352 485C344 476 338 464 329 455C320 445 309 438 298 427C287 415 271 403 264 387C258 372 255 349 259 332C263 315 278 298 288 284C297 270 310 262 317 250C324 238 326 225 331 212C336 198 340 182 348 171C356 161 367 154 377 148C387 141 398 139 409 133C420 128 430 120 442 116C454 112 467 109 479 111C491 113 503 120 515 126C526 133 537 142 547 152C557 163 568 174 573 189C578 204 580 225 579 242C578 259 570 278 569 293C567 308 567 318 571 332Z"/>
+<path d="M661 326C664 348 665 372 661 394C657 415 647 435 638 454C629 472 619 489 610 506C600 524 592 545 580 558C568 571 551 582 536 583C520 585 501 572 486 567C471 562 460 552 446 555C432 558 420 574 404 583C387 591 365 607 348 606C331 605 313 592 301 577C289 562 282 536 274 515C267 494 261 473 256 452C252 431 248 410 247 389C247 368 251 346 253 326C256 306 260 288 263 268C266 249 266 228 270 209C275 190 282 170 291 155C300 140 314 131 325 117C337 104 347 92 359 75C370 59 380 31 395 18C410 4 429 -11 446 -8C463 -6 481 16 494 33C508 51 515 81 525 98C536 115 544 126 555 136C567 147 582 152 593 164C605 176 615 191 624 208C633 224 639 244 645 263C651 283 659 304 661 326Z"/>
+<path d="M746 320C747 349 737 383 724 407C710 431 682 447 665 464C648 481 632 492 620 509C608 526 602 548 591 567C581 586 570 608 556 625C542 643 525 658 508 673C490 687 470 704 450 710C430 716 406 718 386 709C367 700 349 676 334 656C319 636 309 610 295 591C281 572 264 560 251 541C237 522 220 502 214 478C209 454 213 421 216 394C219 368 233 344 234 320C235 296 229 276 224 248C219 221 205 186 204 155C203 124 208 89 220 64C231 40 253 23 272 10C291 -4 313 -12 333 -17C354 -23 374 -25 394 -23C413 -20 432 -9 450 -3C468 3 482 11 500 14C518 17 537 10 556 13C575 17 598 20 614 33C630 47 641 74 651 97C661 119 665 145 676 169C686 192 703 210 715 236C727 261 745 291 746 320Z"/>
+<path d="M-37 300C-37 304 -34 308 -33 313C-31 318 -30 324 -30 329C-31 333 -33 338 -36 341C-38 344 -41 346 -44 349C-47 352 -49 354 -52 356C-55 358 -58 360 -61 361C-64 361 -67 360 -70 359C-73 358 -76 356 -78 355C-81 354 -84 353 -86 351C-89 349 -91 346 -93 343C-95 341 -96 337 -99 334C-101 331 -103 329 -106 326C-109 323 -113 320 -115 315C-117 311 -118 305 -117 300C-117 295 -113 290 -111 286C-108 282 -105 280 -102 277C-100 273 -100 270 -98 266C-97 263 -96 258 -94 255C-92 252 -89 250 -87 248C-84 246 -81 245 -79 244C-76 242 -73 240 -70 239C-67 238 -64 237 -61 238C-57 239 -54 241 -52 243C-49 244 -46 247 -43 249C-41 252 -38 255 -36 259C-34 263 -34 269 -34 274C-34 279 -37 284 -37 289C-38 293 -38 296 -37 300Z"/>
+<path d="M22 305C23 314 24 325 22 334C21 343 17 352 14 360C10 368 6 376 2 383C-3 389 -7 397 -12 402C-18 406 -25 408 -32 408C-38 409 -45 403 -51 403C-57 403 -61 403 -67 406C-73 410 -79 420 -86 423C-93 427 -103 432 -109 430C-116 427 -122 418 -127 411C-131 403 -133 391 -136 382C-138 373 -141 366 -144 357C-146 349 -149 340 -150 332C-150 323 -149 314 -148 305C-147 296 -145 289 -143 280C-142 272 -141 264 -139 256C-137 248 -135 240 -131 233C-128 226 -123 221 -118 214C-114 207 -110 200 -106 192C-101 185 -95 173 -89 169C-83 165 -74 163 -67 166C-60 170 -54 182 -48 189C-43 197 -40 208 -36 213C-31 219 -26 220 -21 223C-15 226 -8 228 -3 233C2 238 6 245 10 253C13 261 14 270 16 278C18 287 21 296 22 305Z"/>
+<path d="M85 310C81 324 67 338 59 348C50 359 40 365 35 375C30 386 31 397 28 411C26 424 26 443 21 456C16 468 7 478 -2 486C-11 493 -22 495 -33 499C-43 502 -53 506 -64 507C-75 508 -86 508 -96 503C-106 499 -116 490 -124 481C-133 473 -140 463 -147 453C-154 443 -162 434 -167 423C-173 412 -176 398 -178 385C-179 372 -176 358 -177 345C-178 333 -180 323 -185 310C-189 297 -200 282 -204 266C-208 250 -212 229 -209 215C-205 200 -193 188 -183 180C-173 172 -158 171 -148 166C-137 162 -129 157 -119 152C-110 147 -102 140 -93 138C-83 135 -73 136 -64 137C-55 138 -46 141 -36 143C-27 145 -17 144 -7 148C3 151 13 156 21 164C30 171 36 182 44 192C51 203 58 213 65 225C73 236 83 249 86 263C89 277 90 296 85 310Z"/>
+<path d="M119 315C120 333 118 350 117 368C116 387 116 406 112 425C109 443 104 464 96 480C88 495 75 508 63 520C52 532 39 543 26 553C13 564 -0 578 -15 582C-29 586 -47 586 -61 577C-75 569 -88 546 -99 532C-110 518 -115 502 -127 495C-138 488 -152 494 -168 491C-183 489 -205 490 -219 480C-232 471 -244 453 -251 435C-257 417 -257 394 -259 374C-261 354 -262 335 -261 315C-260 295 -259 275 -254 257C-249 239 -239 223 -230 208C-221 193 -211 181 -201 168C-192 155 -184 140 -174 129C-163 118 -151 108 -139 103C-126 97 -112 99 -99 95C-86 90 -75 86 -61 77C-47 69 -31 50 -14 45C2 39 24 36 38 45C52 54 62 80 69 100C76 121 75 149 78 169C82 188 86 202 92 218C97 234 107 247 111 263C116 279 118 297 119 315Z"/>
+
+    </g>
+    <g style="fill:none;stroke:var(--m-road2);stroke-width:1.3;stroke-linecap:round">
+      <path d="M342 284C300 276 250 262 202 261"/><path d="M87 233C130 240 170 252 202 261"/>
+      <path d="M342 284C390 300 440 322 498 334C540 342 580 348 640 352"/><path d="M264 323C272 334 276 340 280 345"/>
+      <path d="M243 496C232 506 220 516 207 524"/><path d="M77 418C40 406 0 396 -48 384C-90 374 -140 366 -220 360"/>
+      <path d="M9 328C30 360 55 395 77 418"/><path d="M342 211C344 240 343 262 342 284"/><path d="M264 323C250 345 238 365 228 384"/>
+    </g>
+    <g style="fill:none;stroke:var(--m-road);stroke-width:var(--m-rw);stroke-linecap:round">
+      <path d="M226 900C228 700 232 600 236 520C238 460 236 420 240 384C246 340 280 320 300 300C312 288 314 260 316 220C318 180 318 150 320 132C322 90 326 40 330 -20"/>
+      <path d="M-60 600C10 520 60 460 77 418C92 380 96 300 97 233C100 190 118 160 140 132C160 100 176 50 186 -20"/>
+      <path d="M77 418C110 410 150 396 191 388C205 386 222 385 240 384"/>
+    </g>
+    <path d="M-260 560C-60 540 60 530 150 528C180 526 200 524 207 524C260 520 320 516 420 520C500 524 560 530 680 540" style="fill:none;stroke:var(--m-border);stroke-width:1.1;stroke-dasharray:6 4"/>
+    <g style="fill:none;stroke:var(--m-water);stroke-linecap:round">
+      <path d="M206 920C204 760 212 640 205 540C200 470 186 430 180 384C175 340 186 300 190 261C195 220 210 170 222 132C232 90 238 40 244 -20" style="stroke-width:var(--m-ww)"/>
+      <path d="M50 540C64 470 72 440 77 418C82 360 82 300 85 233C88 180 110 150 132 132C150 110 162 60 168 -20" style="stroke-width:1.3"/>
+      <path d="M440 304C390 293 356 287 342 284C318 280 300 262 280 246C262 232 246 220 228 196C222 180 220 160 222 140" style="stroke-width:1.3"/>
+    </g>
+    <text x="168" y="336" transform="rotate(-84 168 336)" style="fill:var(--m-wlabel);font-style:italic;font-size:11.5px;letter-spacing:.14em">Rhein</text>
+    <g style="fill:var(--m-town)">
+      <circle cx="134" cy="132" r="2.4"/><circle cx="321" cy="132" r="2.4"/><circle cx="342" cy="211" r="2.4"/><circle cx="87" cy="233" r="2.8"/>
+      <circle cx="202" cy="261" r="2.4"/><circle cx="342" cy="284" r="3.4"/><circle cx="264" cy="323" r="2.4"/><circle cx="280" cy="345" r="2.4"/>
+      <circle cx="228" cy="384" r="2.4"/><circle cx="191" cy="384" r="2.4"/><circle cx="77" cy="418" r="3.4"/><circle cx="9" cy="328" r="2.4"/>
+      <circle cx="243" cy="496" r="2.4"/><circle cx="207" cy="524" r="3.4"/><circle cx="498" cy="334" r="2.4"/><circle cx="-48" cy="384" r="2.4"/>
+    </g>
+    <g style="fill:var(--m-label);font-size:var(--m-fs);paint-order:stroke;stroke:var(--m-halo);stroke-width:3px;stroke-linejoin:round">
+      <text x="146" y="136">Sélestat</text><text x="309" y="136" text-anchor="end">Ettenheim</text><text x="330" y="215" text-anchor="end">Emmendingen</text>
+      <text x="99" y="237">Colmar</text><text x="190" y="265" text-anchor="end">Breisach</text>
+      <text x="342" y="305" text-anchor="middle" style="font-weight:600;font-size:12.5px">Freiburg</text>
+      <text x="276" y="327">Bad Krozingen</text><text x="292" y="349">Staufen</text><text x="240" y="388">Müllheim</text>
+      <text x="179" y="388" text-anchor="end">Neuenburg am Rhein</text>
+      <text x="86" y="436" style="font-weight:600;font-size:12.5px">Mulhouse</text><text x="21" y="332">Guebwiller</text>
+      <text x="255" y="500">Lörrach</text><text x="219" y="529" style="font-weight:600;font-size:12.5px">Basel</text>
+      <text x="510" y="338">Titisee</text><text x="-36" y="388">Thann</text>
+    </g>
+  </g>
+
+  <!-- rain shapes: south-west front for the finder state, east cell for the route state -->
+  <path id="rf-o" d="M291 412C287 420 278 426 272 433C267 440 265 447 258 454C252 461 244 469 232 473C220 478 201 480 186 480C170 480 153 476 139 475C125 474 115 472 102 473C88 473 73 477 57 477C41 477 20 478 4 475C-12 472 -27 466 -39 460C-51 454 -61 446 -68 438C-75 430 -82 421 -82 412C-81 403 -74 393 -63 387C-51 380 -28 375 -10 372C7 369 27 371 40 369C54 367 60 364 70 360C80 356 87 348 99 344C112 339 128 334 144 333C159 332 177 335 192 337C208 340 223 344 237 348C251 353 267 358 277 364C288 371 297 379 299 387C302 395 296 404 291 412Z"/>
+  <path id="rf-i" d="M183 424C179 427 176 429 175 432C173 434 174 437 173 440C171 443 169 446 166 449C162 452 157 454 151 457C146 460 139 463 131 465C123 467 113 469 104 469C95 469 84 467 77 465C70 462 66 456 63 452C60 449 61 444 59 441C58 438 55 436 52 433C50 430 45 427 44 424C43 421 44 417 46 414C48 412 53 409 57 406C61 404 64 401 69 398C73 396 78 392 84 390C90 388 98 387 106 386C114 386 122 387 130 387C138 388 145 388 154 389C162 390 172 390 179 392C187 394 195 397 198 401C201 404 199 410 196 414C194 417 186 421 183 424Z"/>
+  <path id="cl-f" d="M413 400C418 417 405 439 392 455C378 470 352 483 331 495C311 507 290 518 268 526C246 535 222 543 198 546C174 549 147 546 124 544C100 542 80 536 59 534C37 532 16 533 -7 531C-30 528 -59 528 -79 520C-99 513 -118 499 -128 486C-138 473 -136 456 -140 442C-144 427 -147 415 -154 400C-160 385 -177 369 -181 351C-184 334 -186 311 -175 295C-164 279 -137 265 -113 256C-88 247 -54 245 -27 243C1 241 28 241 53 243C78 245 103 249 124 256C144 263 160 276 175 286C190 295 196 306 212 313C229 320 249 321 274 327C298 334 338 339 361 351C384 363 408 383 413 400Z"/>
+  <path id="rr-o" d="M656 282C651 295 636 307 626 317C616 327 604 334 595 343C586 352 581 362 571 370C562 377 550 386 537 389C525 393 509 392 495 391C481 390 469 386 456 384C444 382 431 382 419 379C406 376 392 373 381 367C371 361 363 351 355 343C347 334 343 324 335 314C328 304 317 294 310 282C303 270 293 253 294 240C295 227 304 211 317 202C330 193 354 190 371 188C388 185 407 189 421 190C436 190 446 190 458 189C470 189 481 188 492 188C504 189 515 191 527 193C539 195 551 197 565 200C580 203 599 205 614 212C628 219 647 229 654 241C661 252 661 269 656 282Z"/>
+  <path id="rr-i" d="M580 276C578 282 574 287 570 292C567 297 564 301 560 305C555 309 549 312 543 314C538 316 531 316 525 317C519 319 515 319 509 322C503 324 497 330 489 333C481 336 470 341 461 341C452 341 442 337 436 332C430 328 427 319 425 313C423 306 423 299 424 293C424 287 424 281 427 276C429 271 432 266 436 262C440 258 446 255 450 251C454 248 456 245 460 241C463 236 465 230 469 225C474 220 481 215 488 213C495 211 504 212 512 214C519 215 525 220 532 223C538 226 545 228 551 231C558 234 566 237 572 241C577 245 581 252 583 257C584 263 582 270 580 276Z"/>
+  <path id="rt-a" d="M342 284C322 290 304 298 296 306C284 318 272 333 262 348"/>
+  <path id="rt-b" d="M262 348C254 360 246 372 240 384C226 386 206 387 191 387C150 396 112 410 77 418"/>
+
+  <!-- W · wireframe overlays -->
+  <g id="W-aov"><use href="#cl-f" style="fill:rgba(80,90,105,.10)"/><use href="#rf-o" style="fill:rgba(70,100,140,.16)"/><use href="#rr-o" style="fill:rgba(70,100,140,.14)"/></g>
+  <g id="W-fov">
+    <use href="#rf-o" style="fill:rgba(70,100,140,.16)"/><use href="#rf-i" style="fill:rgba(70,100,140,.16)"/>
+    <g style="fill:#777"><circle cx="202" cy="261" r="4"/><circle cx="264" cy="323" r="4"/><circle cx="280" cy="345" r="4"/><circle cx="342" cy="211" r="4"/><circle cx="87" cy="233" r="4"/><circle cx="77" cy="418" r="4"/><circle cx="134" cy="132" r="4"/></g>
+    <rect x="337" y="279" width="10" height="10" style="fill:#2b2b2b"/>
+    <g style="font:700 11px 'Public Sans',sans-serif;text-anchor:middle">
+      <circle cx="321" cy="132" r="10" style="fill:#2b2b2b"/><text x="321" y="136" style="fill:#fff">1</text>
+      <circle cx="191" cy="384" r="10" style="fill:#2b2b2b"/><text x="191" y="388" style="fill:#fff">2</text>
+      <circle cx="228" cy="384" r="10" style="fill:#2b2b2b"/><text x="228" y="388" style="fill:#fff">3</text>
+    </g>
+  </g>
+  <g id="W-rov">
+    <use href="#rr-o" style="fill:rgba(70,100,140,.16)"/><use href="#rr-i" style="fill:rgba(70,100,140,.16)"/>
+    <use href="#rt-a" style="fill:none;stroke:#2b2b2b;stroke-width:4;stroke-linecap:round"/>
+    <use href="#rt-b" style="fill:none;stroke:#2b2b2b;stroke-width:3;stroke-dasharray:6 5;stroke-linecap:round"/>
+    <g style="font:700 11px 'Public Sans',sans-serif;text-anchor:middle">
+      <rect x="333" y="275" width="18" height="18" rx="2" style="fill:#2b2b2b"/><text x="342" y="288" style="fill:#fff">1</text>
+      <rect x="182" y="378" width="18" height="18" rx="2" style="fill:#2b2b2b"/><text x="191" y="391" style="fill:#fff">2</text>
+      <rect x="68" y="409" width="18" height="18" rx="2" style="fill:#2b2b2b"/><text x="77" y="422" style="fill:#fff">3</text>
+    </g>
+    <g transform="translate(262 348)"><circle r="15" style="fill:#fff;stroke:#2b2b2b;stroke-width:1.5"/><use href="#van" style="fill:#fff;stroke:#2b2b2b;stroke-width:1.4"/></g>
+  </g>
+
+  <!-- A · Wetterkarte overlays -->
+  <g id="A-fov">
+    <circle cx="342" cy="284" r="215" style="fill:none;stroke:var(--A-ink2);stroke-width:1;stroke-dasharray:3 4"/>
+    <text x="135" y="276" style="font:400 10px 'IBM Plex Mono',monospace;fill:var(--A-ink2)">40 km</text>
+    <use href="#rf-o" style="fill:var(--A-rainwash);stroke:var(--A-rain);stroke-width:1.1"/>
+    <use href="#rf-i" style="fill:var(--A-rainwash);stroke:var(--A-rain);stroke-width:1.1"/>
+    <g style="font:400 9.5px 'IBM Plex Mono',monospace;fill:var(--A-rain);paint-order:stroke;stroke:var(--A-paper);stroke-width:3px">
+      <text x="284" y="428">2 mm</text><text x="200" y="440">5 mm</text>
+    </g>
+    <rect x="338" y="280" width="8" height="8" style="fill:var(--A-ink)"/>
+    <g style="fill:var(--A-paper);stroke:var(--A-ink2);stroke-width:1.1">
+      <circle cx="202" cy="261" r="4.5"/><circle cx="264" cy="323" r="4.5"/><circle cx="280" cy="345" r="4.5"/><circle cx="342" cy="211" r="4.5"/><circle cx="87" cy="233" r="4.5"/><circle cx="77" cy="418" r="4.5"/><circle cx="134" cy="132" r="4.5"/>
+    </g>
+    <g style="stroke:var(--A-ink);stroke-width:1.2">
+      <circle cx="321" cy="132" r="7.5" style="fill:var(--A-paper);stroke-width:2"/><path d="M321 132L321 124.5A7.5 7.5 0 0 1 325.4 138.1Z" style="fill:var(--A-ink);stroke:none"/>
+      <circle cx="191" cy="384" r="7.5" style="fill:var(--A-paper)"/><path d="M191 384L191 376.5A7.5 7.5 0 1 1 184.5 387.8Z" style="fill:var(--A-ink);stroke:none"/>
+      <circle cx="228" cy="384" r="7.5" style="fill:var(--A-paper)"/><path d="M228 384L228 376.5A7.5 7.5 0 1 1 221.5 387.8Z" style="fill:var(--A-ink);stroke:none"/>
+    </g>
+    <g style="font:500 11.5px 'IBM Plex Mono',monospace;fill:var(--A-ink);text-anchor:middle;paint-order:stroke;stroke:var(--A-paper);stroke-width:3px">
+      <text x="321" y="119">58</text><text x="191" y="371">45</text><text x="228" y="371">43</text>
+    </g>
+  </g>
+  <g id="A-rov">
+    <use href="#rr-o" style="fill:var(--A-rainwash);stroke:var(--A-rain);stroke-width:1.1"/>
+    <use href="#rr-i" style="fill:var(--A-rainwash);stroke:var(--A-rain);stroke-width:1.1"/>
+    <g style="font:400 9.5px 'IBM Plex Mono',monospace;fill:var(--A-rain);paint-order:stroke;stroke:var(--A-paper);stroke-width:3px">
+      <text x="340" y="250">2 mm</text><text x="408" y="302" text-anchor="end">5 mm</text>
+    </g>
+    <path d="M330 430C350 438 368 441 386 442" style="fill:none;stroke:var(--A-rain);stroke-width:1.4"/><path d="M380 437L388 442L380 447" style="fill:none;stroke:var(--A-rain);stroke-width:1.4"/>
+    <text x="358" y="462" text-anchor="middle" style="font:400 9.5px 'IBM Plex Mono',monospace;fill:var(--A-rain)">zieht nach Osten</text>
+    <use href="#rt-b" style="fill:none;stroke:var(--A-ink2);stroke-width:1.6;stroke-dasharray:5 4"/>
+    <use href="#rt-a" style="fill:none;stroke:var(--A-ink);stroke-width:2.2"/>
+    <use href="#rt-a" style="fill:none;stroke:var(--A-ink);stroke-width:8;stroke-dasharray:1.2 8"/>
+    <g style="font:600 11px 'IBM Plex Mono',monospace;text-anchor:middle">
+      <rect x="333" y="275" width="18" height="18" rx="2" style="fill:var(--A-ink)"/><text x="342" y="288" style="fill:var(--A-paper)">1</text>
+      <rect x="182" y="378" width="18" height="18" rx="2" style="fill:var(--A-ink)"/><text x="191" y="391" style="fill:var(--A-paper)">2</text>
+      <rect x="68" y="409" width="18" height="18" rx="2" style="fill:var(--A-ink)"/><text x="77" y="422" style="fill:var(--A-paper)">3</text>
+    </g>
+    <g transform="translate(262 348)"><circle r="15" style="fill:var(--A-paper);stroke:var(--A-ink);stroke-width:1.2"/><use href="#van" style="fill:var(--A-paper);stroke:var(--A-ink);stroke-width:1.3"/></g>
+  </g>
+
+  <!-- B · Ruhig & nativ overlays -->
+  <g id="B-fov">
+    <use href="#cl-f" style="fill:var(--B-cloud)" filter="url(#bblur)"/>
+    <use href="#rf-o" style="fill:var(--B-rain)" filter="url(#bblur)"/>
+    <use href="#rf-i" style="fill:var(--B-rain2)" filter="url(#bblur)"/>
+    <g filter="url(#bsh)" style="fill:var(--B-surf)">
+      <circle cx="202" cy="261" r="5"/><circle cx="264" cy="323" r="5"/><circle cx="280" cy="345" r="5"/><circle cx="342" cy="211" r="5"/><circle cx="87" cy="233" r="5"/><circle cx="77" cy="418" r="5"/><circle cx="134" cy="132" r="5"/>
+    </g>
+    <circle cx="342" cy="284" r="6.5" style="fill:var(--B-lab);stroke:var(--B-surf);stroke-width:2.5"/>
+    <g style="font:600 11.5px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;text-anchor:middle">
+      <circle cx="321" cy="132" r="13" filter="url(#bsh)" style="fill:var(--B-acc)"/><text x="321" y="136" style="fill:var(--B-accon)">58</text>
+      <circle cx="191" cy="384" r="13" filter="url(#bsh)" style="fill:var(--B-surf)"/><text x="191" y="388" style="fill:var(--B-lab)">45</text>
+      <circle cx="228" cy="384" r="13" filter="url(#bsh)" style="fill:var(--B-surf)"/><text x="228" y="388" style="fill:var(--B-lab)">43</text>
+    </g>
+  </g>
+  <g id="B-rov">
+    <use href="#rr-o" style="fill:var(--B-rain)" filter="url(#bblur)"/>
+    <use href="#rr-i" style="fill:var(--B-rain2)" filter="url(#bblur)"/>
+    <use href="#rt-a" style="fill:none;stroke:var(--B-surf);stroke-width:10;stroke-linecap:round"/>
+    <use href="#rt-b" style="fill:none;stroke:var(--B-surf);stroke-width:10;stroke-linecap:round"/>
+    <use href="#rt-a" style="fill:none;stroke:var(--B-lab3);stroke-width:5.5;stroke-linecap:round"/>
+    <use href="#rt-b" style="fill:none;stroke:var(--B-acc);stroke-width:5.5;stroke-linecap:round"/>
+    <g style="font:700 12px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;text-anchor:middle">
+      <circle cx="342" cy="284" r="11" filter="url(#bsh)" style="fill:var(--B-surf)"/><text x="342" y="288" style="fill:var(--B-lab2)">1</text>
+      <circle cx="191" cy="387" r="11" filter="url(#bsh)" style="fill:var(--B-surf)"/><text x="191" y="391" style="fill:var(--B-acc)">2</text>
+      <circle cx="77" cy="418" r="11" filter="url(#bsh)" style="fill:var(--B-surf)"/><text x="77" y="422" style="fill:var(--B-acc)">3</text>
+    </g>
+    <g transform="translate(262 348)">
+      <circle r="26" style="fill:var(--B-acc);opacity:.16"/><circle r="16.5" filter="url(#bsh)" style="fill:#fff"/><circle r="13.5" style="fill:var(--B-acc)"/>
+      <use href="#van" transform="scale(.82)" style="fill:none;stroke:var(--B-accon);stroke-width:1.8"/>
+    </g>
+  </g>
+
+  <!-- C · Reisejournal overlays -->
+  <g id="C-fov">
+    <use href="#rf-o" style="fill:var(--C-rain);opacity:.2" filter="url(#cwash)"/>
+    <use href="#rf-i" style="fill:var(--C-rain);opacity:.22" filter="url(#cwash)"/>
+    <path d="M342 277L349 284L342 291L335 284Z" style="fill:var(--C-ink)"/>
+    <g style="fill:none;stroke:var(--C-ink2);stroke-width:1.1">
+      <circle cx="202" cy="261" r="3.6"/><circle cx="264" cy="323" r="3.6"/><circle cx="280" cy="345" r="3.6"/><circle cx="342" cy="211" r="3.6"/><circle cx="87" cy="233" r="3.6"/><circle cx="77" cy="418" r="3.6"/><circle cx="134" cy="132" r="3.6"/>
+    </g>
+    <g style="fill:var(--C-stamp)"><circle cx="321" cy="132" r="4.5"/><circle cx="191" cy="384" r="4.5"/><circle cx="228" cy="384" r="4.5"/></g>
+    <g style="font:italic 500 21px 'Newsreader',Georgia,serif;fill:var(--C-stamp);text-anchor:middle;paint-order:stroke;stroke:var(--C-land);stroke-width:3px">
+      <text x="331" y="139" style="text-anchor:start">1</text><text x="191" y="373">2</text><text x="228" y="373">3</text>
+    </g>
+  </g>
+  <g id="C-rov">
+    <use href="#rr-o" style="fill:var(--C-rain);opacity:.2" filter="url(#cwash)"/>
+    <use href="#rr-i" style="fill:var(--C-rain);opacity:.22" filter="url(#cwash)"/>
+    <use href="#rt-a" style="fill:none;stroke:var(--C-stamp);stroke-width:3;stroke-linecap:round"/>
+    <use href="#rt-b" style="fill:none;stroke:var(--C-stamp);stroke-width:3;stroke-dasharray:1 7;stroke-linecap:round"/>
+    <g style="font:italic 500 14px 'Newsreader',Georgia,serif;text-anchor:middle">
+      <circle cx="342" cy="284" r="10.5" style="fill:var(--C-stamp)"/><text x="342" y="289" style="fill:var(--C-paper)">1</text>
+      <circle cx="191" cy="387" r="10.5" style="fill:var(--C-stamp)"/><text x="191" y="392" style="fill:var(--C-paper)">2</text>
+      <circle cx="77" cy="418" r="10.5" style="fill:var(--C-stamp)"/><text x="77" y="423" style="fill:var(--C-paper)">3</text>
+    </g>
+    <g transform="translate(262 348)"><ellipse cx="1" cy="9" rx="13" ry="3" style="fill:var(--C-ink);opacity:.18"/><use href="#van" transform="scale(1.15)" style="fill:var(--C-paper);stroke:var(--C-ink);stroke-width:1.3"/></g>
+  </g>
+
+  <!-- small reusable bits -->
+  <symbol id="sbar" viewBox="0 0 68 12"><g fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="10" y="3" width="3" height="9" rx=".7"/><rect x="15" y="0" width="3" height="12" rx=".7"/></g><path d="M27 4.5a8 8 0 0 1 11 0M29.3 7a4.6 4.6 0 0 1 6.4 0" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/><circle cx="32.5" cy="10" r="1.3" fill="currentColor"/><rect x="43.5" y=".5" width="21" height="11" rx="3" fill="none" stroke="currentColor" opacity=".45"/><rect x="45.5" y="2.5" width="15" height="7" rx="1.5" fill="currentColor"/><rect x="65.5" y="4" width="1.6" height="4" rx=".7" fill="currentColor" opacity=".45"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 4 3 9l9 5 9-5-9-5Z"/><path d="m3 14 9 5 9-5"/></symbol>
+  <symbol id="i-loc" viewBox="0 0 24 24"><path d="M20 4 4 11l7 2 2 7 7-16Z"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m10 7 5 5-5 5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 4.8v14.4L19.5 12z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="3.8" height="14" rx="1"/><rect x="13.7" y="5" width="3.8" height="14" rx="1"/></symbol>
+</defs>
+</svg>
+
+<header class="doc-top">
+  <div class="wrap">
+    <span class="brand">WeatherChaser · Designansätze</span>
+    <nav class="toc" aria-label="Inhalt">
+      <a href="#befund">1 Befund</a><a href="#mobil">2 Mobile Kartenansicht</a><a href="#richtung-a">A Wetterkarte</a><a href="#richtung-b">B Ruhig &amp; nativ</a><a href="#richtung-c">C Reisejournal</a><a href="#vergleich">4 Vergleich</a>
+    </nav>
+    <button class="theme-btn" type="button" id="themeBtn" aria-live="polite">Darstellung: System</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Drei Designrichtungen für WeatherChaser</h1>
+  <p class="lede">Ein Vorschlag, kein Code. Zuerst ein gemeinsamer Umbau der mobilen Kartenansicht, der in jeder Richtung gilt. Danach drei Stile mit klar verschiedenem Charakter, jeweils als echtes HTML-Mockup in Telefongröße (390 × 844) und als verkleinerte Desktop-Ansicht.</p>
+  <p class="meta">Stand 24.10.2026 · Grundlage: Screenshots der Live-App (Testläufe vom 22.10.), <code>apps/web/src/styles/tokens.css</code> · Wetterwerte in den Mockups sind Beispielwerte aus diesen Testläufen bzw. als Platzhalter markiert, keine Prognose.</p>
+
+  <!-- ───────────── 1 ───────────── -->
+  <h2 id="befund"><span class="n">1</span>Was heute nach „KI-Design“ aussieht</h2>
+  <p>Kein einzelnes Element ist falsch. Der Eindruck entsteht, weil viele Standard-Entscheidungen zusammenkommen, die man in jede andere App kopieren könnte. Das habe ich in den Screenshots gefunden:</p>
+  <ul class="tight">
+    <li><b>Verlaufs-Pillen in Türkis und Orange für fast jede Aktion.</b> „Route speichern“ (Verlauf), „Score“-Sortierung (oranger Verlauf), „Wolken &amp; Regen“ (türkise Pille). <i>Warum es stört:</i> Wenn jede Aktion gleich laut ist, gibt es keine Hauptaktion.</li>
+    <li><b>Weiße Glaskarten, die über der Karte schweben, und Karten in Karten.</b> Die Zeitleiste schwebt als Karte mitten über der Route; im Blatt stecken eine Kennzahlen-Karte und eine Wetterprofil-Karte. <i>Warum:</i> Tiefe ohne echte Ebenen. Die Landkarte, also das eigentliche Produkt, wird zugedeckt.</li>
+    <li><b>Ring-Abzeichen, die die Zahl wiederholen.</b> „60“ im Ring plus „SCORE“ darunter bei jedem Stopp; auf der Karte farbige Kreise mit orangem Ring. <i>Warum:</i> Schmuck ohne zusätzliche Information.</li>
+    <li><b>Etiketten, Überzeilen in Großbuchstaben, Chips.</b> „WETTERPROFIL“, „SCORE“, der „Vorhersage“-Chip, „IN DER BETA KOSTENLOS“ und eine dauerhaft sichtbare Quellenzeile („Wolken: Open-Meteo · Regen: DWD-Vorhersage“). <i>Warum:</i> Nebeninformationen bekommen dieselbe Bühne wie die Ergebnisse.</li>
+    <li><b>Alles gleich rund.</b> Knöpfe, Tage, Chips und Sortierung sind Pillen, Karten haben 16–24 px Radius. <i>Warum:</i> Ohne Formunterschiede kann das Auge Steuerung, Inhalt und Zustand nicht auseinanderhalten.</li>
+    <li><b>Sora als Überschrift, Türkis als Textfarbe.</b> „Deine Route“ und „Beste Orte“ in türkiser Sora. <i>Warum:</i> Sora ist eine häufige Standardwahl generierter Oberflächen, und farbige Überschriften konkurrieren mit der Farbe für Aktionen.</li>
+    <li><b>Bunte Icon-Zahl-Paare, dazu englische Dezimalpunkte.</b> Sonne, Thermometer, Tropfen und Wind in Grün und Orange; in der deutschen Oberfläche steht „3.5h“ und „5.8mm“ statt „3,5 h“ und „5,8 mm“. <i>Warum:</i> Lärm statt Lesbarkeit. Der Punkt ist außerdem ein echter Fehler, egal welcher Stil gewählt wird.</li>
+  </ul>
+  <h3>Das mobile Problem</h3>
+  <p>Auf dem 390-px-Screenshot der abgespielten Route schwebt die Zeitleiste zwischen etwa 215 und 410 px Höhe: mitten im Bildschirm, außerhalb der Daumenzone, und genau über der Route. Darunter beginnt bei etwa 425 px das Blatt mit Kennzahlen, zwei Knöpfen, drei Profil-Pillen und „Route speichern“. Ich zähle 17 Bedienelemente auf einem Bildschirm, aber nur rund 200 px freie Karte. Das ist der Kern von „der Bildschirm ist voller Optionen“.</p>
+
+  <!-- ───────────── 2 ───────────── -->
+  <h2 id="mobil"><span class="n">2</span>Mobile Kartenansicht: der gemeinsame Umbau</h2>
+  <p>Dieser Teil gilt für alle drei Richtungen. Er ändert die Anordnung, nicht den Stil. Man könnte ihn auch mit dem heutigen Look umsetzen und hätte das Mobile-Problem trotzdem gelöst.</p>
+  <div class="grid2">
+    <div>
+      <h3>Sechs Regeln</h3>
+      <ol class="tight">
+        <li><b>Die Karte ist der Bildschirm.</b> Alles andere ist eine dünne Schicht darüber.</li>
+        <li><b>Eine Kopfzeile statt vieler Knöpfe:</b> „Sa 24.–Mo 26. Okt · Freiburg · Sightseeing“. Antippen öffnet die Einstellungen.</li>
+        <li><b>Die Zeitleiste liegt unten in der Daumenzone,</b> direkt über dem Home-Indikator: Abspielen, Schieber, Tagesmarken.</li>
+        <li><b>Ein Blatt mit festem Fuß.</b> Der Fuß ist die Zeitleiste, der Körper ist die Liste (Orte oder Tagesplan). Ziehen ändert nur den Körper.</li>
+        <li><b>Alle Einstellungen an einem Ort:</b> Suche (Ort, Zeitraum, Profil, Umkreis) und Kartenebene (Wolken &amp; Regen, Legende, Quellen) im selben Blatt. Seltenes ist eingeklappt.</li>
+        <li><b>Nur zwei Kartenknöpfe:</b> Ebene ein/aus und Mein Standort. „Gebiet zeichnen“ wandert in die Ortswahl, der Kompass erscheint nur bei gedrehter Karte.</li>
+      </ol>
+    </div>
+    <div>
+      <h3>Wie Zeitleiste und Blatt zusammenleben</h3>
+      <ul class="tight">
+        <li><b>Drei Höhen (Detents):</b> Peek zeigt eine Zeile (bester Ort bzw. aktueller Stopp), Halb drei bis vier Zeilen, Voll die ganze Liste bis unter die Kopfzeile. Der Fuß bleibt in allen drei Höhen sichtbar.</li>
+        <li><b>Einstellungen:</b> Das Blatt geht auf Voll, der Fuß wird zum Hauptknopf („Wetter vergleichen“ bzw. „Route berechnen“). Nach dem Anwenden geht das Blatt auf Halb, und der Fuß ist wieder die Zeitleiste.</li>
+        <li><b>Gesten ohne Konflikt:</b> Das Blatt reagiert nur auf senkrechtes Ziehen (Griff und Kopf), die Zeitleiste nur auf waagrechtes.</li>
+        <li><b>Ein Abspielknopf:</b> Im Orte-Modus läuft das Wetter (Radar, dann Vorhersage). Im Routen-Modus fährt zusätzlich der Camper mit. „Route abspielen“ und „Wetterverlauf“ werden ein Knopf.</li>
+        <li><b>Ort antippen:</b> Die Karte zentriert ihn, und die Zeitleiste zeigt seine Regenmenge pro drei Stunden.</li>
+        <li><b>Quellenangabe</b> bleibt Pflicht (CC BY): kleines ⓘ unten links auf der Karte, ausführlich im Einstellungsblatt.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="detents" role="img" aria-label="Schema der drei Blatthöhen und des Einstellungszustands">
+    <figure><div class="dt"><div class="s"></div><div class="b" style="bottom:40px;height:46px"></div><div class="f">Zeitleiste</div></div><figcaption><b>Peek</b> · Karte fast frei</figcaption></figure>
+    <figure><div class="dt"><div class="s"></div><div class="b" style="bottom:40px;height:112px"></div><div class="f">Zeitleiste</div></div><figcaption><b>Halb</b> · Liste + Karte</figcaption></figure>
+    <figure><div class="dt"><div class="s"></div><div class="b" style="bottom:40px;top:36px"></div><div class="f">Zeitleiste</div></div><figcaption><b>Voll</b> · ganze Liste</figcaption></figure>
+    <figure><div class="dt"><div class="b" style="bottom:40px;top:10px"></div><div class="f" style="background:#c2361f">Hauptknopf</div></div><figcaption><b>Einstellungen</b> · Fuß wird Knopf</figcaption></figure>
+  </div>
+
+  <h3>Die vier Zustände als Drahtmodell</h3>
+  <p>Graue Schemata mit echten Texten. Die roten Nummern verweisen auf die Liste unter jedem Bild.</p>
+  <div class="frames">
+    <!-- (a) Start -->
+    <figure>
+      <div class="ph W" style="--sh:198px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#W-aov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum"><svg class="ico"><use href="#i-search"/></svg><div>Ort suchen oder Gebiet zeichnen</div></div>
+        <div class="stack"><span><svg class="ico"><use href="#i-layers"/></svg></span><span><svg class="ico"><use href="#i-loc"/></svg></span></div>
+        <div class="sheet"><div class="grab"></div>
+          <div class="hdr">Was hast du vor?</div>
+          <div class="choice"><b>Bestes Wetter finden</b><small>Orte rund um einen Ort oder in einem Gebiet vergleichen</small></div>
+          <div class="choice"><b>Beste Route planen</b><small>Mehrtägige Route, die dem guten Wetter folgt</small></div>
+        </div>
+        <div class="dock"><div class="play"><svg width="18" height="18" style="fill:#2b2b2b"><use href="#i-play"/></svg></div>
+          <div class="tl"><div class="ro"><b>Jetzt · Sa 24. Okt, 10:00</b><span>Radar</span></div><div class="trk"><div class="f" style="width:4%"></div><div class="th" style="left:4%"></div></div>
+          <div class="days" style="grid-template-columns:repeat(5,1fr)"><span>Sa</span><span>So</span><span>Mo</span><span>Di</span><span>Mi</span></div></div></div>
+        <div class="hi"></div>
+        <span class="pin" style="top:46px;left:4px">1</span><span class="pin" style="top:112px;right:2px">2</span><span class="pin" style="top:572px;left:4px">3</span><span class="pin" style="bottom:96px;left:4px">4</span>
+      </div>
+      <figcaption><b>a · Start</b></figcaption>
+      <ol class="ann">
+        <li>Am Start ist die Kopfzeile ein Suchfeld. „Gebiet zeichnen“ steckt hier mit drin.</li>
+        <li>Nur zwei Kartenknöpfe: Ebene ein/aus, Mein Standort.</li>
+        <li>Das Blatt bietet genau zwei Einstiege. Beide öffnen die Einstellungen (d).</li>
+        <li>Die Zeitleiste ist von Anfang an da: Man kann das aktuelle Wetter abspielen, bevor man sucht.</li>
+      </ol>
+    </figure>
+
+    <!-- (b) Finder -->
+    <figure>
+      <div class="ph W" style="--sh:262px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#W-fov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum"><div>Sa 24.–Mo 26. Okt · Freiburg · Sightseeing</div></div>
+        <div class="stack"><span><svg class="ico"><use href="#i-layers"/></svg></span><span><svg class="ico"><use href="#i-loc"/></svg></span></div>
+        <div class="sheet"><div class="grab"></div>
+          <div class="hdr">10 Orte <span>Score ▾</span></div>
+          <div class="row"><span class="sc">58</span><div><b>Ettenheim</b><small>6,4 h Sonne · 10° · 0,7 mm · 17 km/h</small></div></div>
+          <div class="row"><span class="sc">45</span><div><b>Neuenburg am Rhein</b><small>3,5 h Sonne · 11° · 5,8 mm · 15 km/h</small></div></div>
+          <div class="row"><span class="sc">43</span><div><b>Müllheim</b><small>3,3 h Sonne · 11° · 6,1 mm · 17 km/h</small></div></div>
+        </div>
+        <div class="dock"><div class="play"><svg width="18" height="18" style="fill:#2b2b2b"><use href="#i-play"/></svg></div>
+          <div class="tl"><div class="ro"><b>So 25. Okt, 16:00</b><span>Vorhersage</span></div><div class="trk"><div class="f" style="width:56%"></div><div class="th" style="left:56%"></div></div>
+          <div class="days" style="grid-template-columns:repeat(3,1fr)"><span>Sa 24.</span><span>So 25.</span><span>Mo 26.</span></div></div></div>
+        <div class="hi"></div>
+        <span class="pin" style="top:46px;left:4px">1</span><span class="pin" style="top:448px;right:6px">2</span><span class="pin" style="top:484px;left:4px">3</span><span class="pin" style="bottom:96px;left:4px">4</span>
+      </div>
+      <figcaption><b>b · Ergebnisse „Bestes Wetter“</b></figcaption>
+      <ol class="ann">
+        <li>Zusammenfassung statt Formular. Antippen öffnet (d).</li>
+        <li>Sortieren über ein Menü statt fünf Pillen (Score, Sonne, Temp, Regen, Wind).</li>
+        <li>Liste in Höhe „Halb“. Ein Wert je Spalte, deutsche Schreibweise.</li>
+        <li>Zeitleiste als fester Fuß in der Daumenzone. Die Karte zeigt Wolken und Regen zum gewählten Zeitpunkt.</li>
+      </ol>
+    </figure>
+
+    <!-- (c) Route -->
+    <figure>
+      <div class="ph W" style="--sh:124px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#W-rov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum"><div>Route · Sa 24.–Mo 26. Okt · ab Freiburg</div></div>
+        <div class="stack"><span><svg class="ico"><use href="#i-layers"/></svg></span><span><svg class="ico"><use href="#i-loc"/></svg></span></div>
+        <div class="sheet"><div class="grab"></div>
+          <div class="row" style="border-top:0;padding-top:0"><span class="sc">51</span><div><b>Tag 2 · Neuenburg am Rhein</b><small>So 25. Okt · 3,2 h Sonne · 15° · 2,2 mm</small></div></div>
+          <div class="row"><small style="margin:0">Hochziehen: Tagesplan mit 3 Stopps · 63 km</small></div>
+        </div>
+        <div class="dock"><div class="play"><svg width="18" height="18" style="fill:#2b2b2b"><use href="#i-pause"/></svg></div>
+          <div class="tl"><div class="ro"><b>So 25. Okt, 10:20</b><span>unterwegs nach Neuenburg</span></div><div class="trk"><div class="f" style="width:48%"></div><div class="st" style="left:14%"></div><div class="st" style="left:50%"></div><div class="st" style="left:83%"></div><div class="th" style="left:48%"></div></div>
+          <div class="days" style="grid-template-columns:repeat(3,1fr)"><span>Sa 24.</span><span>So 25.</span><span>Mo 26.</span></div></div></div>
+        <div class="hi"></div>
+        <span class="pin" style="top:296px;left:150px">1</span><span class="pin" style="top:590px;left:4px">2</span><span class="pin" style="bottom:96px;left:4px">3</span><span class="pin" style="bottom:52px;right:10px">4</span>
+      </div>
+      <figcaption><b>c · Route abspielen</b></figcaption>
+      <ol class="ann">
+        <li>Der Camper fährt die Route ab, die Karte folgt ihm. Gefahrenes ist durchgezogen, der Rest gestrichelt.</li>
+        <li>Peek zeigt nur den aktuellen Stopp. Hochziehen zeigt den Tagesplan.</li>
+        <li>Ein Knopf für Zeit und Camper. „Route abspielen“ und „Wetterverlauf“ sind zusammengelegt.</li>
+        <li>Stopps als Marken auf der Zeitleiste: Antippen springt zum Stopp.</li>
+      </ol>
+    </figure>
+
+    <!-- (d) Settings -->
+    <figure>
+      <div class="ph W">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/></g></svg></div>
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,.28);z-index:2"></div>
+        <div class="sb" style="color:#fff"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sheet" style="top:56px;height:auto"><div class="grab"></div>
+          <div class="hdr">Suche anpassen <span>Fertig</span></div>
+          <div class="seg"><span class="on">Bestes Wetter</span><span>Route</span></div>
+          <div class="opt">Ort oder Gebiet <span>Freiburg im Breisgau ›</span></div>
+          <div class="opt">Zeitraum <span>Sa 24.–Mo 26. Okt ›</span></div>
+          <div class="lbl">Wetterprofil</div>
+          <div class="seg"><span>Strand</span><span>Wandern</span><span class="on">Sightseeing</span><span>Eigenes</span></div>
+          <div class="opt">Weitere Optionen <span>Umkreis 40 km, Tageszeit ›</span></div>
+          <div class="lbl">Kartenebene</div>
+          <div class="opt">Wolken &amp; Regen <span>an ●</span></div>
+          <div class="opt">Legende und Quellen <span>›</span></div>
+        </div>
+        <div class="dock" style="background:#fff;border-top:1px solid #e3e3df;z-index:5"><div class="cta">Wetter vergleichen</div></div>
+        <div class="hi"></div>
+        <span class="pin" style="top:120px;right:6px">1</span><span class="pin" style="top:349px;left:4px">2</span><span class="pin" style="top:430px;left:4px">3</span><span class="pin" style="bottom:96px;left:4px">4</span>
+      </div>
+      <figcaption><b>d · Einstellungen im selben Blatt</b></figcaption>
+      <ol class="ann">
+        <li>Modus, Ort, Zeitraum und Profil in einem Blatt, von oben nach unten in der Reihenfolge der Entscheidung.</li>
+        <li>Seltenes ist eingeklappt (Umkreis, Tageszeit, eigene Gewichte).</li>
+        <li>Die Kartenebene wird hier eingestellt statt in einem schwebenden Popover. Legende und Quellen liegen eine Ebene tiefer.</li>
+        <li>Der Hauptknopf sitzt dort, wo sonst die Zeitleiste ist, also in der Daumenzone.</li>
+      </ol>
+    </figure>
+  </div>
+
+  <!-- ───────────── 3A ───────────── -->
+  <h2 id="richtung-a"><span class="n">3 A</span>Wetterkarte</h2>
+  <p class="thesis">Die App sieht aus wie eine gedruckte Wetterkarte: Tinte auf Papier, dünne Linien und Zahlen, denen man glaubt.</p>
+  <dl class="spec">
+    <dt>Warum es passt</dt><dd>WeatherChaser verkauft eine Abwägung mit Zahlen. Eine synoptische Karte ist das Urbild davon: Stationskreise, Isolinien, Zeitachse. Die Form kommt aus dem Fach, nicht aus einer Vorlage.</dd>
+    <dt>Schriften</dt><dd>IBM Plex Sans Condensed für Text und Ortsnamen (schmal, damit lange Namen wie „Neuenburg am Rhein“ in Tabellen passen), IBM Plex Mono für jede Zahl. Flüsse kursiv, wie in der Kartografie üblich.</dd>
+    <dt>Form &amp; Material</dt><dd>Radius 0–3 px, 1-px-Linien in Tinte, keine Schatten. Das Blatt ist durch eine Tintenlinie oben abgesetzt, nicht durch Glas. Tiefe gibt es nicht. Es ist bewusst eine flache Karte.</dd>
+    <dt>Zahlen &amp; Icons</dt><dd>Ergebnisse als Tabelle mit Spaltenköpfen samt Einheit. Antippen eines Spaltenkopfs sortiert, die Sortier-Pillen entfallen. Regen ist die einzige Signalfarbe (Kobaltblau), Score ist Tinte. Auf der Karte stehen Stationskreise: Die Füllung zeigt die Stunden ohne Sonne, die Zahl darüber den Score. Linien-Icons mit 1,3 px.</dd>
+    <dt>Bewegung</dt><dd>Ruhig und mechanisch: Blatt 240 ms ease-out, die Zeitachse läuft linear, Radarbilder blenden in 120 ms über. Keine Federn. Bei reduzierter Bewegung springt der Camper von Stopp zu Stopp.</dd>
+  </dl>
+  <div class="specimen A" style="padding-left:2px">
+    <div style="font-size:24px;font-weight:600">Neuenburg am Rhein</div>
+    <div class="mono" style="font-size:15px">Score 45 · 3,5 h · 11 °C · <span style="color:var(--A-rain)">5,8 mm</span> · 15 km/h</div>
+    <div style="font-size:15px;color:var(--A-ink2)">Sa 24.–Mo 26. Okt · Freiburg · Sightseeing</div>
+  </div>
+  <p class="swl">Hell</p>
+  <div class="sw"><span><i style="background:#f4f3ee"></i>Papier #f4f3ee</span><span><i style="background:#eae8e0"></i>Papier 2 #eae8e0</span><span><i style="background:#151d26"></i>Tinte #151d26</span><span><i style="background:#4d5762"></i>Tinte 2 #4d5762</span><span><i style="background:#cdcabf"></i>Linie #cdcabf</span><span><i style="background:#1f4fc4"></i>Regen #1f4fc4</span></div>
+  <p class="swl">Dunkel</p>
+  <div class="sw"><span><i style="background:#0f151c"></i>Papier #0f151c</span><span><i style="background:#16202a"></i>Papier 2 #16202a</span><span><i style="background:#e9e7e0"></i>Tinte #e9e7e0</span><span><i style="background:#a5aeb8"></i>Tinte 2 #a5aeb8</span><span><i style="background:#2f3a46"></i>Linie #2f3a46</span><span><i style="background:#86a8ff"></i>Regen #86a8ff</span></div>
+
+  <div class="frames">
+    <figure>
+      <div class="ph A" style="--sh:264px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#A-fov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum"><span>Sa 24.–Mo 26. Okt · Freiburg · Sightseeing</span><span class="ed">ändern</span></div>
+        <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+        <div class="sheet"><div class="grab"></div>
+          <div class="shd"><b>10 Orte</b><span>Spaltenkopf tippen = sortieren</span></div>
+          <table class="t">
+            <thead><tr><th class="rk"></th><th class="l">Ort</th><th class="on">Score ▾</th><th>Sonne<br>h</th><th>Temp<br>°C</th><th>Regen<br>mm</th><th>Wind<br>km/h</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td class="rk">1</td><td class="l">Ettenheim</td><td class="s">58</td><td>6,4</td><td>10</td><td class="r">0,7</td><td>17</td></tr>
+              <tr><td class="rk">2</td><td class="l">Neuenburg am Rhein</td><td class="s">45</td><td>3,5</td><td>11</td><td class="r">5,8</td><td>15</td></tr>
+              <tr><td class="rk">3</td><td class="l">Müllheim</td><td class="s">43</td><td>3,3</td><td>11</td><td class="r">6,1</td><td>17</td></tr>
+            </tbody>
+          </table>
+          <div class="more">7 weitere Orte</div>
+        </div>
+        <div class="dock"><button class="play" aria-label="Abspielen"><svg width="16" height="16"><use href="#i-play"/></svg></button>
+          <div class="tl"><div class="ro"><b>So 25. Okt 16:00</b><span>Vorhersage · Ettenheim</span></div>
+            <svg class="ax" viewBox="0 0 300 48" aria-hidden="true">
+              <rect class="past" x="0" y="0" width="42" height="30"/>
+              <g class="rb"><rect x="208" y="27" width="8" height="3"/><rect x="220" y="25" width="8" height="5"/><rect x="232" y="28" width="8" height="2"/></g>
+              <path class="tick" d="M12.5 30v4M25.0 30v4M37.5 30v4M50.0 30v4M62.5 30v4M75.0 30v4M87.5 30v4M112.5 30v4M125.0 30v4M137.5 30v4M150.0 30v4M162.5 30v4M175.0 30v4M187.5 30v4M212.5 30v4M225.0 30v4M237.5 30v4M250.0 30v4M262.5 30v4M275.0 30v4M287.5 30v4"/><path class="day" d="M0 4V38M100 4V38M200 4V38M300 4V38"/><line class="base" x1="0" y1="30" x2="300" y2="30"/>
+              <line class="now" x1="42" y1="0" x2="42" y2="30"/><text x="45" y="9">jetzt</text>
+              <line class="ph-l" x1="167" y1="2" x2="167" y2="36"/><path class="ph-h" d="M162 0h10l-5 6z"/>
+              <text x="3" y="46">Sa 24</text><text x="103" y="46">So 25</text><text x="203" y="46">Mo 26</text>
+            </svg></div></div>
+        <div class="hi"></div>
+      </div>
+      <figcaption><b>A · b Ergebnisse.</b> Tabelle statt Kärtchen. Die Zeitachse zeigt unter dem Schieber die Regenmenge des gewählten Orts (blaue Balken), links grau die Vergangenheit (Radar).</figcaption>
+    </figure>
+    <figure>
+      <div class="ph A" style="--sh:120px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#A-rov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum"><span>Route · Sa 24.–Mo 26. Okt · ab Freiburg</span><span class="ed">ändern</span></div>
+        <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+        <div class="sheet"><div class="grab"></div>
+          <div class="stop"><div class="k"><span>Tag 2 · So 25. Okt · 1 Nacht</span><span>3 Stopps · 63 km</span></div>
+            <div class="nm">Neuenburg am Rhein</div>
+            <div class="read"><div>51<small>Score</small></div><div>3,2<small>Sonne h</small></div><div>15<small>Temp °C</small></div><div class="r">2,2<small>Regen mm</small></div><div>20<small>Wind km/h</small></div></div>
+          </div></div>
+        <div class="dock"><button class="play" aria-label="Pause"><svg width="16" height="16"><use href="#i-pause"/></svg></button>
+          <div class="tl"><div class="ro"><b>So 25. Okt 10:20</b><span>unterwegs nach Neuenburg</span></div>
+            <svg class="ax" viewBox="0 0 300 48" aria-hidden="true">
+              <rect class="past" x="0" y="0" width="42" height="30"/>
+              <g class="rb"><rect x="161" y="24" width="8" height="6"/><rect x="173" y="21" width="8" height="9"/><rect x="185" y="26" width="8" height="4"/></g>
+              <path class="tick" d="M12.5 30v4M25.0 30v4M37.5 30v4M50.0 30v4M62.5 30v4M75.0 30v4M87.5 30v4M112.5 30v4M125.0 30v4M137.5 30v4M150.0 30v4M162.5 30v4M175.0 30v4M187.5 30v4M212.5 30v4M225.0 30v4M237.5 30v4M250.0 30v4M262.5 30v4M275.0 30v4M287.5 30v4"/><path class="day" d="M0 4V38M100 4V38M200 4V38M300 4V38"/><line class="base" x1="0" y1="30" x2="300" y2="30"/>
+              <line class="now" x1="42" y1="0" x2="42" y2="30"/>
+              <rect class="stp" x="38" y="11" width="9" height="9" rx="1"/><rect class="stp" x="146" y="11" width="9" height="9" rx="1"/><rect class="stp" x="245" y="11" width="9" height="9" rx="1"/>
+              <line class="ph-l" x1="143" y1="2" x2="143" y2="36"/><path class="ph-h" d="M138 0h10l-5 6z"/>
+              <text x="3" y="46">Sa 24</text><text x="103" y="46">So 25</text><text x="203" y="46">Mo 26</text>
+            </svg></div></div>
+        <div class="hi"></div>
+      </div>
+      <figcaption><b>A · c Route abspielen.</b> Gefahrene Strecke als Gleislinie, der Rest gestrichelt. Regen als Isolinien mit Zugrichtung. Stopps sind Quadrate auf Karte und Zeitachse.</figcaption>
+    </figure>
+  </div>
+  <figure>
+    <div class="dk A">
+      <div class="map"><svg viewBox="-480 -10 1100 687.5" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#geo"/><use href="#A-fov"/></svg></div>
+      <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+      <div class="panel">
+        <div class="sum"><span>Sa 24.–Mo 26. Okt · Freiburg · Sightseeing</span><span class="ed">ändern</span></div>
+        <div class="shd"><b>10 Orte</b><span>Spaltenkopf tippen = sortieren</span></div>
+        <table class="t">
+          <thead><tr><th class="rk"></th><th class="l">Ort</th><th class="on">Score ▾</th><th>Sonne<br>h</th><th>Temp<br>°C</th><th>Regen<br>mm</th><th>Wind<br>km/h</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td class="rk">1</td><td class="l">Ettenheim</td><td class="s">58</td><td>6,4</td><td>10</td><td class="r">0,7</td><td>17</td></tr>
+            <tr><td class="rk">2</td><td class="l">Neuenburg am Rhein</td><td class="s">45</td><td>3,5</td><td>11</td><td class="r">5,8</td><td>15</td></tr>
+            <tr><td class="rk">3</td><td class="l">Müllheim</td><td class="s">43</td><td>3,3</td><td>11</td><td class="r">6,1</td><td>17</td></tr>
+            <tr class="ske"><td class="rk">4</td><td class="l"><span style="width:110px"></span></td><td><span style="width:16px"></span></td><td><span style="width:20px"></span></td><td><span style="width:14px"></span></td><td><span style="width:20px"></span></td><td><span style="width:14px"></span></td></tr>
+            <tr class="ske"><td class="rk">5</td><td class="l"><span style="width:80px"></span></td><td><span style="width:16px"></span></td><td><span style="width:20px"></span></td><td><span style="width:14px"></span></td><td><span style="width:20px"></span></td><td><span style="width:14px"></span></td></tr>
+            <tr class="ske"><td class="rk">6</td><td class="l"><span style="width:96px"></span></td><td><span style="width:16px"></span></td><td><span style="width:20px"></span></td><td><span style="width:14px"></span></td><td><span style="width:20px"></span></td><td><span style="width:14px"></span></td></tr>
+          </tbody>
+        </table>
+        <div class="more">Zeilen 4–10: Platzhalter</div>
+      </div>
+      <div class="dock"><button class="play" aria-label="Abspielen"><svg width="16" height="16"><use href="#i-play"/></svg></button>
+        <div class="tl"><div class="ro"><b>So 25. Okt 16:00</b><span>Vorhersage · Ettenheim · Wolken: Open-Meteo, Regen: DWD</span></div>
+          <svg class="ax" viewBox="0 0 960 48" aria-hidden="true" preserveAspectRatio="none" style="height:48px">
+            <rect class="past" x="0" y="0" width="133" height="30"/>
+            <g class="rb"><rect x="676" y="27" width="20" height="3"/><rect x="714" y="25" width="20" height="5"/><rect x="752" y="28" width="20" height="2"/></g>
+            <path class="tick" d="M40 30v4M80 30v4M120 30v4M160 30v4M200 30v4M240 30v4M280 30v4M360 30v4M400 30v4M440 30v4M480 30v4M520 30v4M560 30v4M600 30v4M680 30v4M720 30v4M760 30v4M800 30v4M840 30v4M880 30v4M920 30v4"/><path class="day" d="M0 4V38M320 4V38M640 4V38M960 4V38"/><line class="base" x1="0" y1="30" x2="960" y2="30"/>
+            <line class="now" x1="133" y1="0" x2="133" y2="30"/><text x="137" y="9">jetzt</text>
+            <line class="ph-l" x1="533" y1="2" x2="533" y2="36"/><path class="ph-h" d="M528 0h10l-5 6z"/>
+            <text x="4" y="46">Sa 24</text><text x="324" y="46">So 25</text><text x="644" y="46">Mo 26</text>
+          </svg></div></div>
+    </div>
+    <figcaption><b>A · Desktop, Ergebnisse</b> (1440 × 900, verkleinert). Die Tafel ist fest links wie der Rand einer gedruckten Karte; die Zeitachse läuft unter der ganzen Karte.</figcaption>
+  </figure>
+
+  <!-- ───────────── 3B ───────────── -->
+  <h2 id="richtung-b"><span class="n">3 B</span>Ruhig &amp; nativ</h2>
+  <p class="thesis">Fühlt sich an wie eine App, die schon auf dem iPhone war: Karte, Blatt, eine Akzentfarbe, sonst nichts.</p>
+  <dl class="spec">
+    <dt>Warum es passt</dt><dd>Reisende benutzen WeatherChaser unterwegs mit einer Hand, oft neben Apple- oder Google-Karten. Wenn sich Blatt, Schieber und Knöpfe genauso verhalten, muss niemand etwas lernen. Die Marke steckt in Inhalt und Akzentfarbe, nicht in Schmuck.</dd>
+    <dt>Schriften</dt><dd>Systemschrift (SF Pro auf Apple-Geräten, Roboto bzw. Segoe sonst), keine Webfont-Ladezeit. Zahlen mit Tabellenziffern. Hierarchie nur über Größe und Gewicht: 22/700 Titel, 17/400 Zeile, 13/400 Details.</dd>
+    <dt>Form &amp; Material</dt><dd>Glas nur dort, wo wirklich etwas über der Karte liegt: Kopfzeile, Kartenknöpfe, Blatt. Radien gestaffelt nach Größe: Blatt 16, Kopfzeile 12, Knopfgruppe 10. Ein einziger weicher Schatten pro schwebender Ebene.</dd>
+    <dt>Zahlen &amp; Icons</dt><dd>Score als große Zahl links (Rang 1 in Akzentfarbe), Details als ein ruhiger Satz mit Einheiten. Keine Icon-Zahl-Paare. Icons in SF-Symbols-Logik, 1,5 px, nur in Knöpfen.</dd>
+    <dt>Bewegung</dt><dd>Federn wie bei iOS: Blatt mit Dämpfung 0,8 und rund 0,3 s, Einrasten nach Wurfrichtung, weicher Widerstand an den Rändern. Der Schieber folgt dem Finger 1:1. Druck-Feedback 100 ms (Skalierung auf 0,97).</dd>
+  </dl>
+  <div class="specimen B" style="padding-left:2px">
+    <div style="font-size:22px;font-weight:700;letter-spacing:-.015em">Neuenburg am Rhein</div>
+    <div style="font-size:17px"><b style="font-weight:600">45</b> · 3,5 h Sonne · 11° · 5,8 mm · 15 km/h</div>
+    <div style="font-size:13px;color:var(--B-lab2)">Sa 24.–Mo 26. Okt · Sightseeing</div>
+  </div>
+  <p class="swl">Hell</p>
+  <div class="sw"><span><i style="background:#ffffff"></i>Fläche #ffffff</span><span><i style="background:#eceee8"></i>Karte #eceee8</span><span><i style="background:#1c1c1e"></i>Text #1c1c1e</span><span><i style="background:#636368"></i>Text 2 #636368</span><span><i style="background:#0a7581"></i>Akzent #0a7581</span><span><i style="background:rgba(52,120,212,.45)"></i>Regen (Karte)</span></div>
+  <p class="swl">Dunkel</p>
+  <div class="sw"><span><i style="background:#1c1c1e"></i>Fläche #1c1c1e</span><span><i style="background:#1f2124"></i>Karte #1f2124</span><span><i style="background:#f2f2f7"></i>Text #f2f2f7</span><span><i style="background:#a1a1a6"></i>Text 2 #a1a1a6</span><span><i style="background:#4cc6d3"></i>Akzent #4cc6d3</span><span><i style="background:rgba(90,160,255,.45)"></i>Regen (Karte)</span></div>
+
+  <div class="frames">
+    <figure>
+      <div class="ph B" style="--sh:266px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#B-fov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum mat"><div><div class="t1">Freiburg im Breisgau</div><div class="t2">Sa 24.–Mo 26. Okt · Sightseeing</div></div><svg class="ico ch"><use href="#i-down"/></svg></div>
+        <div class="stack mat"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+        <div class="sheet mat"><div class="grab"></div>
+          <div class="hdr"><span class="h">10 Orte</span><span class="sort">Score <svg class="ico" style="width:16px;height:16px"><use href="#i-down"/></svg></span></div>
+          <div class="hsub">Score 0–100, höher ist besser</div>
+          <ul class="list">
+            <li class="row top"><span class="sc">58</span><div><div class="nm">Ettenheim</div><div class="sub">6,4 h Sonne · 10° · 0,7 mm · 17 km/h</div></div><svg class="ico ch" style="width:16px;height:16px"><use href="#i-right"/></svg></li>
+            <li class="row"><span class="sc">45</span><div><div class="nm">Neuenburg am Rhein</div><div class="sub">3,5 h Sonne · 11° · 5,8 mm · 15 km/h</div></div><svg class="ico ch" style="width:16px;height:16px"><use href="#i-right"/></svg></li>
+            <li class="row"><span class="sc">43</span><div><div class="nm">Müllheim</div><div class="sub">3,3 h Sonne · 11° · 6,1 mm · 17 km/h</div></div><svg class="ico ch" style="width:16px;height:16px"><use href="#i-right"/></svg></li>
+          </ul></div>
+        <div class="dock mat"><button class="play" aria-label="Abspielen"><svg width="20" height="20"><use href="#i-play"/></svg></button>
+          <div class="tl"><div class="ro"><b>So 25. Okt, 16:00</b><span>Vorhersage</span></div>
+            <div class="trk"><div class="f" style="width:56%"></div><div class="now" style="left:14%"></div><div class="th" style="left:56%"></div></div>
+            <div class="days"><span>Sa 24.</span><span>So 25.</span><span>Mo 26.</span></div></div></div>
+        <div class="hi"></div>
+      </div>
+      <figcaption><b>B · b Ergebnisse.</b> Eine echte Liste mit eingerückten Trennlinien. Die Zeitleiste ist der feste Fuß aus demselben Material wie das Blatt.</figcaption>
+    </figure>
+    <figure>
+      <div class="ph B" style="--sh:128px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#B-rov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum mat"><div><div class="t1">Route ab Freiburg im Breisgau</div><div class="t2">Sa 24.–Mo 26. Okt · 3 Stopps · 63 km</div></div><svg class="ico ch"><use href="#i-down"/></svg></div>
+        <div class="stack mat"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+        <div class="sheet mat"><div class="grab"></div>
+          <div class="stop"><div class="k">Tag 2 · So 25. Okt · 1 Nacht</div><div class="nm">Neuenburg am Rhein</div>
+            <div class="cells"><div>51<small>Score</small></div><div>3,2 h<small>Sonne</small></div><div>15°<small>Temp.</small></div><div>2,2 mm<small>Regen</small></div><div>20 km/h<small>Wind</small></div></div></div></div>
+        <div class="dock mat"><button class="play" aria-label="Pause"><svg width="20" height="20"><use href="#i-pause"/></svg></button>
+          <div class="tl"><div class="ro"><b>So 25. Okt, 10:20</b><span>unterwegs nach Neuenburg</span></div>
+            <div class="trk"><div class="f" style="width:48%"></div><div class="st" style="left:14%"></div><div class="st" style="left:50%"></div><div class="st" style="left:83%"></div><div class="th" style="left:48%"></div></div>
+            <div class="days"><span>Sa 24.</span><span>So 25.</span><span>Mo 26.</span></div></div></div>
+        <div class="hi"></div>
+      </div>
+      <figcaption><b>B · c Route abspielen.</b> Der Camper als Standort-Punkt. Die gefahrene Strecke wird grau wie bei der Navigation, Stopps sind Punkte auf dem Schieber.</figcaption>
+    </figure>
+  </div>
+  <figure>
+    <div class="dk B">
+      <div class="map"><svg viewBox="-480 -10 1100 687.5" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#geo"/><use href="#B-fov"/></svg></div>
+      <div class="stack mat"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+      <div class="panel mat">
+        <div class="sum"><div><div class="t1">Freiburg im Breisgau</div><div class="t2">Sa 24.–Mo 26. Okt · Sightseeing</div></div><svg class="ico ch"><use href="#i-down"/></svg></div>
+        <div class="hdr"><span class="h">10 Orte</span><span class="sort">Score <svg class="ico" style="width:16px;height:16px"><use href="#i-down"/></svg></span></div>
+        <div class="hsub">Score 0–100, höher ist besser</div>
+        <ul class="list">
+          <li class="row top"><span class="sc">58</span><div><div class="nm">Ettenheim</div><div class="sub">6,4 h Sonne · 10° · 0,7 mm · 17 km/h</div></div><svg class="ico ch" style="width:16px;height:16px"><use href="#i-right"/></svg></li>
+          <li class="row"><span class="sc">45</span><div><div class="nm">Neuenburg am Rhein</div><div class="sub">3,5 h Sonne · 11° · 5,8 mm · 15 km/h</div></div><svg class="ico ch" style="width:16px;height:16px"><use href="#i-right"/></svg></li>
+          <li class="row"><span class="sc">43</span><div><div class="nm">Müllheim</div><div class="sub">3,3 h Sonne · 11° · 6,1 mm · 17 km/h</div></div><svg class="ico ch" style="width:16px;height:16px"><use href="#i-right"/></svg></li>
+          <li class="row ske"><span class="sc">00</span><div style="flex:1"><i style="width:130px"></i><i style="width:210px;margin-top:8px"></i></div></li>
+          <li class="row ske"><span class="sc">00</span><div style="flex:1"><i style="width:96px"></i><i style="width:200px;margin-top:8px"></i></div></li>
+          <li class="row ske"><span class="sc">00</span><div style="flex:1"><i style="width:150px"></i><i style="width:205px;margin-top:8px"></i></div></li>
+        </ul>
+        <div class="hsub" style="padding-top:10px">Zeilen 4–10: Platzhalter</div>
+      </div>
+      <div class="dock mat"><button class="play" aria-label="Abspielen"><svg width="20" height="20"><use href="#i-play"/></svg></button>
+        <div class="tl"><div class="ro"><b>So 25. Okt, 16:00</b><span>Vorhersage</span></div>
+          <div class="trk"><div class="f" style="width:56%"></div><div class="now" style="left:14%"></div><div class="th" style="left:56%"></div></div>
+          <div class="days"><span>Sa 24.</span><span>So 25.</span><span>Mo 26.</span></div></div></div>
+    </div>
+    <figcaption><b>B · Desktop, Ergebnisse</b> (1440 × 900, verkleinert). Seitenleiste und Zeitleiste schweben als zwei Blätter über der Karte, wie in Karten auf dem Mac.</figcaption>
+  </figure>
+
+  <!-- ───────────── 3C ───────────── -->
+  <h2 id="richtung-c"><span class="n">3 C</span>Reisejournal</h2>
+  <p class="thesis">Die Reise liest sich wie ein gedruckter Reiseführer: Tag für Tag, warmes Papier, Tinte und eine rote Routenlinie, gut lesbar auch in der Sonne.</p>
+  <dl class="spec">
+    <dt>Warum es passt</dt><dd>Wer mit dem Camper fährt, plant in Tagen und Orten, nicht in Datenpunkten. Der Tagesplan als Reiseführer-Seite macht die Route zu etwas, das man gern teilt und wieder öffnet. Das ist der Moment, in dem WeatherChaser persönlich wird.</dd>
+    <dt>Schriften</dt><dd>Newsreader (Serife mit optischen Größen) für Ortsnamen, Tagesnummern und Überschriften, kursiv für Ziffern und Wochentage. Source Sans 3 für Bedienung und Messwerte, mit Tabellenziffern.</dd>
+    <dt>Form &amp; Material</dt><dd>Papierflächen mit feiner Körnung, Radius 4–6 px, doppelte Linie unter Kopf und Zeitleiste wie im Buchsatz. Schatten warm und tief, nur für das Blatt, weil es wirklich über der Karte liegt.</dd>
+    <dt>Zahlen &amp; Icons</dt><dd>Rangziffern als rote kursive Zahlen (Reiseführer-Nummerierung), daneben Punkte statt Ringen. Messwerte als kurzer Satz mit Einheit („6,4 h Sonne · 10 °C · 0,7 mm Regen“). Regen als blaugraue Lasur auf der Karte. Kaum Icons, nur in Knöpfen.</dd>
+    <dt>Bewegung</dt><dd>Gemächlich, aber nicht langsam: Blatt 280 ms mit der iOS-Schubladenkurve, die Routenlinie zeichnet sich beim ersten Anzeigen einmal selbst (600 ms), danach nie wieder. Bei reduzierter Bewegung erscheint sie sofort.</dd>
+  </dl>
+  <div class="specimen C" style="padding-left:2px">
+    <div class="serif" style="font-size:28px;font-weight:500;line-height:1.15"><em style="color:var(--C-stamp)">2</em> Neuenburg am Rhein</div>
+    <div style="font-size:15px;color:var(--C-ink2)">45 Punkte · 3,5 h Sonne · 11 °C · 5,8 mm Regen · 15 km/h</div>
+    <div class="serif" style="font-size:16px;font-style:italic">Samstag, 24. bis Montag, 26. Oktober</div>
+  </div>
+  <p class="swl">Hell</p>
+  <div class="sw"><span><i style="background:#f3ecdf"></i>Papier #f3ecdf</span><span><i style="background:#eae0cc"></i>Papier 2 #eae0cc</span><span><i style="background:#2b2119"></i>Tinte #2b2119</span><span><i style="background:#655546"></i>Tinte 2 #655546</span><span><i style="background:#a33c29"></i>Stempel #a33c29</span><span><i style="background:#4d6c8c"></i>Regen #4d6c8c</span></div>
+  <p class="swl">Dunkel</p>
+  <div class="sw"><span><i style="background:#1d1915"></i>Papier #1d1915</span><span><i style="background:#26201a"></i>Papier 2 #26201a</span><span><i style="background:#efe5d3"></i>Tinte #efe5d3</span><span><i style="background:#bba98f"></i>Tinte 2 #bba98f</span><span><i style="background:#e3846c"></i>Stempel #e3846c</span><span><i style="background:#93b3d1"></i>Regen #93b3d1</span></div>
+
+  <div class="frames">
+    <figure>
+      <div class="ph C" style="--sh:272px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#C-fov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum paper"><div><div class="t1">Rund um Freiburg</div><div class="t2">Sa 24.–Mo 26. Okt · Sightseeing</div></div><span class="ed">Ändern</span></div>
+        <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+        <div class="sheet paper"><div class="grab"></div>
+          <div class="h">Zehn Orte</div>
+          <div class="hsub">sortiert nach Punkten (0–100, mehr ist besser)</div>
+          <div class="e"><span class="no">1</span><span class="nm">Ettenheim</span><span class="pt">58<small>Punkte</small></span><span class="d">6,4 h Sonne · 10 °C · 0,7 mm Regen · 17 km/h</span></div>
+          <div class="e"><span class="no">2</span><span class="nm">Neuenburg am Rhein</span><span class="pt">45<small>Punkte</small></span><span class="d">3,5 h Sonne · 11 °C · 5,8 mm Regen · 15 km/h</span></div>
+          <div class="e"><span class="no">3</span><span class="nm">Müllheim</span><span class="pt">43<small>Punkte</small></span><span class="d">3,3 h Sonne · 11 °C · 6,1 mm Regen · 17 km/h</span></div>
+        </div>
+        <div class="dock"><button class="play" aria-label="Abspielen"><svg width="18" height="18"><use href="#i-play"/></svg></button>
+          <div class="tl"><div class="ro"><b>Sonntag, 16 Uhr</b><span>Vorhersage</span></div>
+            <div class="days"><span>Sa 24.</span><span class="on">So 25.</span><span>Mo 26.</span></div>
+            <svg class="rul" viewBox="0 24 300 16" aria-hidden="true"><path class="tick" d="M12.5 30v4M25.0 30v4M37.5 30v4M50.0 30v4M62.5 30v4M75.0 30v4M87.5 30v4M112.5 30v4M125.0 30v4M137.5 30v4M150.0 30v4M162.5 30v4M175.0 30v4M187.5 30v4M212.5 30v4M225.0 30v4M237.5 30v4M250.0 30v4M262.5 30v4M275.0 30v4M287.5 30v4"/><path class="day" d="M0 24V38M100 24V38M200 24V38M300 24V38"/><line class="base" x1="0" y1="30" x2="300" y2="30"/><line class="now" x1="42" y1="24" x2="42" y2="34"/><line class="ndl" x1="167" y1="24" x2="167" y2="40"/></svg></div></div>
+        <div class="hi"></div>
+      </div>
+      <figcaption><b>C · b Ergebnisse.</b> Nummerierte Einträge wie im Reiseführer. Der aktive Tag ist rot, die Nadel zeigt die Stunde. Regen liegt als Lasur auf der Karte.</figcaption>
+    </figure>
+    <figure>
+      <div class="ph C" style="--sh:136px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#C-rov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum paper"><div><div class="t1">Von Freiburg nach Mulhouse</div><div class="t2">Sa 24.–Mo 26. Okt · 3 Stopps · 63 km</div></div><span class="ed">Ändern</span></div>
+        <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+        <div class="sheet paper"><div class="grab"></div>
+          <div class="stop"><div class="k"><em>Tag 2</em> Sonntag, 25. Oktober · 1 Nacht</div>
+            <div class="nm">Neuenburg am Rhein</div>
+            <div class="d">51 Punkte · 3,2 h Sonne · 15 °C<br>2,2 mm Regen · Wind 20 km/h</div></div></div>
+        <div class="dock"><button class="play" aria-label="Pause"><svg width="18" height="18"><use href="#i-pause"/></svg></button>
+          <div class="tl"><div class="ro"><b>Sonntag, 10:20</b><span>unterwegs nach Neuenburg</span></div>
+            <div class="days"><span>Sa 24.</span><span class="on">So 25.</span><span>Mo 26.</span></div>
+            <svg class="rul" viewBox="0 24 300 16" aria-hidden="true"><path class="tick" d="M12.5 30v4M25.0 30v4M37.5 30v4M50.0 30v4M62.5 30v4M75.0 30v4M87.5 30v4M112.5 30v4M125.0 30v4M137.5 30v4M150.0 30v4M162.5 30v4M175.0 30v4M187.5 30v4M212.5 30v4M225.0 30v4M237.5 30v4M250.0 30v4M262.5 30v4M275.0 30v4M287.5 30v4"/><path class="day" d="M0 24V38M100 24V38M200 24V38M300 24V38"/><line class="base" x1="0" y1="30" x2="300" y2="30"/><circle class="stp" cx="42" cy="30" r="3.5"/><circle class="stp" cx="150" cy="30" r="3.5"/><circle class="stp" cx="250" cy="30" r="3.5"/><line class="ndl" x1="143" y1="24" x2="143" y2="40"/></svg></div></div>
+        <div class="hi"></div>
+      </div>
+      <figcaption><b>C · c Route abspielen.</b> Die rote Linie ist gefahren, die gepunktete liegt noch vor dir. Der Camper ist eine kleine Tuschezeichnung.</figcaption>
+    </figure>
+  </div>
+  <figure>
+    <div class="dk C">
+      <div class="map"><svg viewBox="-480 -10 1100 687.5" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#geo"/><use href="#C-fov"/></svg></div>
+      <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+      <div class="panel paper">
+        <div class="sum paper"><div><div class="t1">Rund um Freiburg</div><div class="t2">Sa 24.–Mo 26. Okt · Sightseeing</div></div><span class="ed">Ändern</span></div>
+        <div class="h">Zehn Orte</div>
+        <div class="hsub">sortiert nach Punkten (0–100, mehr ist besser)</div>
+        <div class="e"><span class="no">1</span><span class="nm">Ettenheim</span><span class="pt">58<small>Punkte</small></span><span class="d">6,4 h Sonne · 10 °C · 0,7 mm Regen · 17 km/h</span></div>
+        <div class="e"><span class="no">2</span><span class="nm">Neuenburg am Rhein</span><span class="pt">45<small>Punkte</small></span><span class="d">3,5 h Sonne · 11 °C · 5,8 mm Regen · 15 km/h</span></div>
+        <div class="e"><span class="no">3</span><span class="nm">Müllheim</span><span class="pt">43<small>Punkte</small></span><span class="d">3,3 h Sonne · 11 °C · 6,1 mm Regen · 17 km/h</span></div>
+        <div class="e ske"><span class="no">4</span><span class="nm"><i style="width:140px"></i></span><span class="pt"></span><span class="d"><i style="width:240px"></i></span></div>
+        <div class="e ske"><span class="no">5</span><span class="nm"><i style="width:100px"></i></span><span class="pt"></span><span class="d"><i style="width:230px"></i></span></div>
+        <div class="hsub" style="border:0;padding-top:10px">Einträge 4–10: Platzhalter</div>
+      </div>
+      <div class="dock"><button class="play" aria-label="Abspielen"><svg width="18" height="18"><use href="#i-play"/></svg></button>
+        <div class="tl"><div class="ro"><b>Sonntag, 16 Uhr</b><span>Vorhersage · Wolken: Open-Meteo, Regen: DWD</span></div>
+          <div class="days"><span>Samstag, 24.</span><span class="on">Sonntag, 25.</span><span>Montag, 26.</span></div>
+          <svg class="rul" viewBox="0 24 960 16" preserveAspectRatio="none" aria-hidden="true"><path class="tick" d="M40 30v4M80 30v4M120 30v4M160 30v4M200 30v4M240 30v4M280 30v4M360 30v4M400 30v4M440 30v4M480 30v4M520 30v4M560 30v4M600 30v4M680 30v4M720 30v4M760 30v4M800 30v4M840 30v4M880 30v4M920 30v4"/><path class="day" d="M0 24V38M320 24V38M640 24V38M960 24V38"/><line class="base" x1="0" y1="30" x2="960" y2="30"/><line class="now" x1="133" y1="24" x2="133" y2="34"/><line class="ndl" x1="533" y1="24" x2="533" y2="40"/></svg></div></div>
+    </div>
+    <figcaption><b>C · Desktop, Ergebnisse</b> (1440 × 900, verkleinert). Links eine Reiseführer-Seite, rechts die Karte. Die Zeitleiste ist ein Lineal mit roter Nadel.</figcaption>
+  </figure>
+
+  <!-- ───────────── 4 ───────────── -->
+  <h2 id="vergleich"><span class="n">4</span>Vergleich und Empfehlung</h2>
+  <div class="scroll">
+  <table class="cmp">
+    <thead><tr><th></th><th>A · Wetterkarte</th><th>B · Ruhig &amp; nativ</th><th>C · Reisejournal</th></tr></thead>
+    <tbody>
+      <tr><th>Charakter</th><td>Sachlich, fachkundig, eigenständig. Sieht nach Wetter aus, nicht nach App-Vorlage.</td><td>Unauffällig, vertraut, schnell. Die Marke tritt zurück.</td><td>Warm, persönlich, erzählend. Am stärksten bei der Route.</td></tr>
+      <tr><th>Aufwand in der bestehenden React-App</th><td><b>Mittel.</b> Zwei Schriften (über @fontsource, wie heute), neue Tokens, Ergebnisliste als Tabelle, eigener Kartenstil in Papier und Tinte. Höhenlinien brauchen eine zusätzliche Kachelquelle (optional).</td><td><b>Klein.</b> Systemschrift, Tokens austauschen, Glas nur noch an drei Stellen. Vorhandene Kartenstile (hell/dunkel) reichen fast. Das Blatt mit Federn hat die App im Kern schon.</td><td><b>Groß.</b> Zwei Schriften, Papierflächen, eigener warmer Kartenstil, Tagesplan-Layout. Die Lasur-Optik für Regen muss auf der echten Kartenebene nachgebaut werden.</td></tr>
+      <tr><th>Risiken</th><td>Tabelle bei 320 px Breite sehr eng (Spalten müssen dann umbrechen). Kann kühl wirken. Kartenstil muss zum Papierton passen, sonst bricht die Wirkung.</td><td>Wenig Wiedererkennung; Gefahr, wieder generisch auszusehen, wenn später Deko dazukommt. Glas kostet auf alten Android-Geräten Leistung.</td><td>Ergebnis-Suche wirkt verspielter als nötig. Papierkörnung und Lasur kosten Leistung auf der Karte. Serifen bei kleinen Größen in der Sonne prüfen.</td></tr>
+      <tr><th>Am besten für</th><td>Nutzer, die vergleichen und den Zahlen trauen wollen. Wenn WeatherChaser als „das Werkzeug“ wahrgenommen werden soll.</td><td>Schnellen Start mit wenig Risiko und Nutzer, die nur die Antwort wollen.</td><td>Camper-Reisende, die planen, teilen und sich erinnern wollen. Marketing und Teilen.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <h3>Meine Empfehlung</h3>
+  <p><b>Zuerst den mobilen Umbau aus Abschnitt 2 umsetzen, dann Richtung A „Wetterkarte“ als Stil.</b> Der Umbau löst dein Hauptproblem (zu viele Optionen, Zeitleiste nicht unten) unabhängig vom Stil und lässt sich einzeln prüfen. A ist die einzige Richtung, deren Aussehen direkt aus dem Inhalt kommt: Stationskreise, Isolinien und eine Zeitachse mit Regenbalken erklären das Wetter, statt es zu dekorieren. Das ist der stärkste Gegenentwurf zu „sieht KI-gemacht aus“. Die Blatt-Mechanik (Höhen, Federn, Einrasten) übernimmt A aus B; sie ist ohnehin Teil des gemeinsamen Umbaus.</p>
+  <p>Wenn es schnell und risikoarm gehen soll, ist B die sichere Wahl. C würde ich als Ansicht für geteilte Routen im Hinterkopf behalten, nicht als Grundstil.</p>
+  <h3>Nächster Schritt</h3>
+  <ol class="tight">
+    <li>Du wählst eine Richtung (oder „A mit X aus C“).</li>
+    <li>Ich schreibe ein Ticket „Mobile Kartenansicht: Zeitleiste als Fuß, ein Blatt, Einstellungen an einem Ort“ mit Akzeptanzkriterien und den vier Zuständen a–d, Status „Spec Ready“ erst nach deinem OK.</li>
+    <li>Ein zweites Ticket für Tokens und Schriften der gewählten Richtung, inklusive deutscher Zahlenformate (Komma) und neuer Übersetzungsschlüssel für DE und EN.</li>
+  </ol>
+
+  <h3 id="selbstpruefung">Selbstprüfung der Mockups</h3>
+  <p>Ich habe die Mockups mit der Prüfliste aus „audit-ai-design-slop“ gegengeprüft (Deko-Stapel, Wiederholungs-Muster, Etiketten-Lärm, Schein-Belege, Bedienfehler, Überlauf). Was ich danach geändert habe:</p>
+  <ul class="tight" id="audit-list">
+    <li><b>Verdeckter Ortsname:</b> „Ettenheim“ lag unter den Kartenknöpfen. Beschriftung auf die linke Seite gelegt.</li>
+    <li><b>Falscher Auswahlzustand:</b> Die erste Zeile in B sah markiert aus, weil eine Klasse des Dokuments in die Mockups durchschlug. Klasse umbenannt; jetzt ist nur die Akzentfarbe der Zahl das Signal.</li>
+    <li><b>Abgeschnittener Text:</b> Im Start-Drahtmodell und in A war die letzte Zeile im Blatt abgeschnitten. Blatthöhen angepasst; ein Skript prüft jetzt Überlauf in allen 13 Rahmen (Ergebnis: keiner).</li>
+    <li><b>Doppelte Angaben:</b> A wiederholte das Datum der Kopfzeile über der Tabelle, C den Ort („rund um Freiburg“) in Kopfzeile und Überschrift. Gestrichen bzw. durch einen echten Hinweis ersetzt.</li>
+    <li><b>Zu kleine Tippflächen:</b> Kartenknöpfe und Abspielknopf in A und C von 40–42 px auf 44 px vergrößert.</li>
+    <li><b>Deko ohne Aufgabe:</b> Papierkörnung von den Kartenknöpfen in C entfernt (bleibt nur auf Blatt und Kopfzeile); Wolkenschleier in B abgeschwächt; Regenflächen von Ellipsen zu unregelmäßigen Formen, damit sie nach Wetter aussehen statt nach Zielscheibe.</li>
+    <li><b>Desktop-Karte zu stark vergrößert:</b> Ortsnamen waren 1,7-mal so groß wie die Schrift der Liste. Kartenausschnitt erweitert.</li>
+    <li><b>Dokument auf dem Handy:</b> Die feste Kopfleiste nahm 15 % des Bildschirms ein; unter 700 px scrollt sie jetzt mit.</li>
+    <li><b>Bewusst behalten:</b> Glas in B an genau drei Stellen (Kopfzeile, Kartenknöpfe, Blatt), weil dort wirklich etwas über der Karte liegt; der weiche Regen-Verlauf in B, weil er Daten zeigt.</li>
+  </ul>
+
+  <p class="foot">Gestaltungsgrundlagen (als Leitlinien gelesen, nicht kopiert): Emil Kowalski, <a href="https://github.com/emilkowalski/skills">github.com/emilkowalski/skills</a> (design-eng, apple-design, mobile-native) · ConardLi, <a href="https://github.com/ConardLi/garden-skills">github.com/ConardLi/garden-skills</a> (web-design-engineer) · Meng To, <a href="https://github.com/MengTo/Skills">github.com/MengTo/Skills</a> (no-ai-design-slop, audit-ai-design-slop, Stilvorlagen paper-technical, editorial-tech, book-serif-index, beige minimal, high-contrast skeuomorphic). Kartengeometrie frei gezeichnet nach der Lage der Orte am Oberrhein, keine Kartendaten.</p>
+</main>
+
+<script>
+(function(){
+  var b=document.getElementById('themeBtn'),r=document.documentElement,order=['system','light','dark'],names={system:'System',light:'Hell',dark:'Dunkel'};
+  function cur(){return r.dataset.theme||'system';}
+  function show(){b.textContent='Darstellung: '+names[cur()];}
+  b.addEventListener('click',function(){var n=order[(order.indexOf(cur())+1)%3];if(n==='system')delete r.dataset.theme;else r.dataset.theme=n;try{n==='system'?localStorage.removeItem('wc-design-theme'):localStorage.setItem('wc-design-theme',n);}catch(e){}show();});
+  show();
+})();
+</script>
+</body>
+</html>

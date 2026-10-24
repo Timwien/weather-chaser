@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Designansätze v2 Outdoor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400..800&family=Big+Shoulders+Display:wght@600..900&family=Caprasimo&family=Overpass:wght@400..800&family=Patrick+Hand&family=Schibsted+Grotesk:wght@400..800&family=Shantell+Sans:wght,BNCE@400..800,-100..100&family=Young+Serif&display=swap">
+<script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('wc-design-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<style>
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:110px}
+:root{
+  color-scheme:light;
+  --d-bg:#f6f4ee;--d-surface:#ffffff;--d-text:#1b1c1e;--d-muted:#585c60;--d-rule:#d9d6cc;--d-accent:#0b6a5a;--d-note:#ece9df;
+  /* C+ · Feldbuch */
+  --P-paper:#f8f3e6;--P-paper2:#efe6d0;--P-grid:rgba(70,100,160,.11);--P-margin:rgba(224,80,42,.34);--P-ink:#24263a;--P-ink2:#5b5d70;--P-rule:#d6c9ad;--P-marker:#e0502a;--P-markerInk:#fffaf0;--P-sticker:#ffd23f;--P-stickerInk:#24263a;--P-cut:#ffffff;--P-rain:#2f67c9;--P-tape:#8fd0c2;--P-blend:multiply;--P-dim:rgba(36,38,58,.30);
+  --P-land:#f3ecdb;--P-contour:#e2d5b8;--P-road:#d3c19b;--P-road2:#e5d9bf;--P-water:#86a9cf;--P-wlabel:#3f66a0;--P-border:#b6a684;--P-town:#24263a;--P-label:#383a4e;--P-halo:#f3ecdb;
+  /* D · Wegweiser */
+  --D-sign:#ffcc00;--D-signInk:#141414;--D-plate:#ffffff;--D-sheet:#f6f4ec;--D-ink:#141414;--D-ink2:#575349;--D-rule:#d9d3c3;--D-red:#d22a1d;--D-white:#ffffff;--D-rain:#2f7fc8;--D-post:#9a9ea3;
+  --D-land:#f4f1e6;--D-contour:#d9bf98;--D-road:#ddd2ba;--D-road2:#e9e2d0;--D-water:#4f95d0;--D-wlabel:#2d6ea8;--D-border:#8f8778;--D-town:#141414;--D-label:#2a2924;--D-halo:#f4f1e6;
+  /* E · Nationalpark-Poster */
+  --E-paper:#f1e6cc;--E-paper2:#e7d7b3;--E-green:#1f4a3a;--E-orange:#ee7d2b;--E-blue:#3c7bb6;--E-ink:#1a3b2f;--E-ink2:#4f6156;--E-rule:rgba(31,74,58,.24);--E-cream:#f6ecd5;--E-blend:multiply;--E-grainop:.14;
+  --E-land:#efe5ca;--E-contour:#e3d6b4;--E-road:#d6c49c;--E-road2:#e2d4b2;--E-water:#3c7bb6;--E-wlabel:#2c6496;--E-border:#a8996f;--E-town:#1a3b2f;--E-label:#24443a;--E-halo:#efe5ca;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --d-bg:#121416;--d-surface:#1b1e21;--d-text:#e8e8e4;--d-muted:#a3a8ad;--d-rule:#2e3236;--d-accent:#6cc9b6;--d-note:#1e2226;
+  --P-paper:#22201c;--P-paper2:#2b2823;--P-grid:rgba(190,200,255,.07);--P-margin:rgba(255,123,79,.32);--P-ink:#f0e9d8;--P-ink2:#b8b0a0;--P-rule:#433c32;--P-marker:#ff7b4f;--P-markerInk:#22201c;--P-sticker:#f2c744;--P-stickerInk:#22201c;--P-cut:#efe4cc;--P-rain:#8db3ff;--P-tape:#4f8a7f;--P-blend:screen;--P-dim:rgba(0,0,0,.45);
+  --P-land:#1c1a17;--P-contour:#2d2923;--P-road:#4a4236;--P-road2:#35302a;--P-water:#3d5a80;--P-wlabel:#8db3ff;--P-border:#5b5243;--P-town:#f0e9d8;--P-label:#d9d1bf;--P-halo:#1c1a17;
+  --D-sign:#ffcc00;--D-signInk:#141414;--D-plate:#1d1e1c;--D-sheet:#161715;--D-ink:#f1efe6;--D-ink2:#aaa699;--D-rule:#34352f;--D-red:#ff5a4a;--D-white:#f1efe6;--D-rain:#6fb2ff;--D-post:#6d7176;
+  --D-land:#121311;--D-contour:#46392a;--D-road:#3a3b36;--D-road2:#2a2b27;--D-water:#2e5f8c;--D-wlabel:#7fb3e6;--D-border:#5e5a50;--D-town:#f1efe6;--D-label:#d6d3c8;--D-halo:#121311;
+  --E-paper:#11201a;--E-paper2:#172a22;--E-green:#2b5b48;--E-orange:#f39a45;--E-blue:#79abd9;--E-ink:#f0e4c8;--E-ink2:#b7b39c;--E-rule:rgba(240,228,200,.16);--E-cream:#f6ecd5;--E-blend:screen;--E-grainop:.10;
+  --E-land:#0f1c17;--E-contour:#1b2e26;--E-road:#2f4238;--E-road2:#22352c;--E-water:#2f5f8a;--E-wlabel:#79abd9;--E-border:#4c5a4b;--E-town:#f0e4c8;--E-label:#d8cfb4;--E-halo:#0f1c17;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --d-bg:#121416;--d-surface:#1b1e21;--d-text:#e8e8e4;--d-muted:#a3a8ad;--d-rule:#2e3236;--d-accent:#6cc9b6;--d-note:#1e2226;
+  --P-paper:#22201c;--P-paper2:#2b2823;--P-grid:rgba(190,200,255,.07);--P-margin:rgba(255,123,79,.32);--P-ink:#f0e9d8;--P-ink2:#b8b0a0;--P-rule:#433c32;--P-marker:#ff7b4f;--P-markerInk:#22201c;--P-sticker:#f2c744;--P-stickerInk:#22201c;--P-cut:#efe4cc;--P-rain:#8db3ff;--P-tape:#4f8a7f;--P-blend:screen;--P-dim:rgba(0,0,0,.45);
+  --P-land:#1c1a17;--P-contour:#2d2923;--P-road:#4a4236;--P-road2:#35302a;--P-water:#3d5a80;--P-wlabel:#8db3ff;--P-border:#5b5243;--P-town:#f0e9d8;--P-label:#d9d1bf;--P-halo:#1c1a17;
+  --D-sign:#ffcc00;--D-signInk:#141414;--D-plate:#1d1e1c;--D-sheet:#161715;--D-ink:#f1efe6;--D-ink2:#aaa699;--D-rule:#34352f;--D-red:#ff5a4a;--D-white:#f1efe6;--D-rain:#6fb2ff;--D-post:#6d7176;
+  --D-land:#121311;--D-contour:#46392a;--D-road:#3a3b36;--D-road2:#2a2b27;--D-water:#2e5f8c;--D-wlabel:#7fb3e6;--D-border:#5e5a50;--D-town:#f1efe6;--D-label:#d6d3c8;--D-halo:#121311;
+  --E-paper:#11201a;--E-paper2:#172a22;--E-green:#2b5b48;--E-orange:#f39a45;--E-blue:#79abd9;--E-ink:#f0e4c8;--E-ink2:#b7b39c;--E-rule:rgba(240,228,200,.16);--E-cream:#f6ecd5;--E-blend:screen;--E-grainop:.10;
+  --E-land:#0f1c17;--E-contour:#1b2e26;--E-road:#2f4238;--E-road2:#22352c;--E-water:#2f5f8a;--E-wlabel:#79abd9;--E-border:#4c5a4b;--E-town:#f0e4c8;--E-label:#d8cfb4;--E-halo:#0f1c17;
+}
+
+/* ───────── Document ───────── */
+body{margin:0;background:var(--d-bg);color:var(--d-text);font:400 16px/1.55 "Atkinson Hyperlegible Next",sans-serif}
+a{color:var(--d-accent);text-underline-offset:2px}
+.wrap{max-width:1200px;margin:0 auto;padding:0 16px}
+.doc-top{position:sticky;top:0;z-index:50;background:var(--d-bg);border-bottom:1px solid var(--d-rule)}
+.doc-top .wrap{display:flex;align-items:center;gap:6px 18px;min-height:52px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.doc-top .brand{font-weight:700;font-size:15px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;font-size:14px}
+.tabs a{text-decoration:none;color:var(--d-muted);padding:5px 9px;border-radius:5px;border:1px solid transparent}
+.tabs a:hover{color:var(--d-text)}
+.tabs a[aria-current="true"]{color:var(--d-text);border-color:var(--d-rule);background:var(--d-surface);font-weight:700}
+.theme-btn{display:none;margin-left:auto;font:700 13px/1 "Atkinson Hyperlegible Next",sans-serif;border:1px solid var(--d-rule);background:var(--d-surface);color:var(--d-text);padding:8px 10px;border-radius:6px;cursor:pointer}
+.js .theme-btn{display:inline-block}
+@media (max-width:700px){.doc-top{position:static}}
+[data-show="P"] .dir:not([data-dir="P"]),[data-show="D"] .dir:not([data-dir="D"]),[data-show="E"] .dir:not([data-dir="E"]),[data-show="B"] .dir:not([data-dir="B"]),[data-show="V"] .dir:not([data-dir="V"]){display:none}
+h1{font-size:clamp(30px,4.4vw,44px);line-height:1.08;margin:52px 0 14px;max-width:22ch;text-wrap:balance;font-weight:800}
+.lede{font-size:18px;max-width:62ch}
+.meta{font-size:14px;color:var(--d-muted)}
+h2{font-size:clamp(23px,3vw,30px);line-height:1.15;margin:84px 0 14px;padding-top:18px;border-top:2px solid var(--d-text);text-wrap:balance;font-weight:800}
+h2 .n{color:var(--d-muted);font-weight:400;margin-right:.35em}
+h3{font-size:19px;line-height:1.3;margin:40px 0 8px;font-weight:700}
+p,li{max-width:68ch}
+ul.tight li,ol.tight li{margin:4px 0}
+.thesis{font-size:19px;line-height:1.45;max-width:58ch;margin:4px 0 18px}
+.avoid{font-size:14.5px;background:var(--d-note);padding:12px 16px;border-radius:6px;max-width:80ch}
+.spec{display:grid;grid-template-columns:160px 1fr;gap:10px 24px;margin:16px 0;max-width:920px}
+.spec dt{font-weight:700;font-size:15px}
+.spec dd{margin:0}
+.spec code,code{font:13px ui-monospace,monospace;background:var(--d-note);padding:1px 4px;border-radius:3px;white-space:nowrap}
+@media (max-width:640px){.spec{grid-template-columns:1fr;gap:2px}.spec dd{margin-bottom:12px}.spec code{white-space:normal}}
+.frames{display:flex;flex-wrap:wrap;gap:40px 36px;margin:28px 0 8px;align-items:flex-start}
+figure{margin:0;max-width:100%}
+figcaption{font-size:14px;color:var(--d-muted);margin-top:14px;max-width:404px}
+figcaption b{color:var(--d-text)}
+.wide figcaption{max-width:72ch}
+table.cmp{border-collapse:collapse;width:100%;font-size:15px;margin:16px 0}
+table.cmp th,table.cmp td{text-align:left;vertical-align:top;padding:10px 12px 10px 0;border-bottom:1px solid var(--d-rule)}
+table.cmp thead th{border-bottom:2px solid var(--d-text);font-size:14px}
+table.cmp tbody th{font-weight:700;width:130px}
+.scroll{overflow-x:auto}
+@media (max-width:760px){table.cmp{min-width:720px}}
+.sw{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 4px}
+.sw span{width:96px;font:400 12px/1.3 "Atkinson Hyperlegible Next",sans-serif;color:var(--d-muted)}
+.sw i{display:block;height:36px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(128,128,128,.35);margin-bottom:4px}
+.swl{font-size:13px;font-weight:700;margin:14px 0 0}
+.specimen{border-top:1px solid var(--d-rule);border-bottom:1px solid var(--d-rule);padding:14px 2px;margin:12px 0;display:grid;gap:6px}
+.foot{margin:96px 0 48px;padding-top:16px;border-top:1px solid var(--d-rule);font-size:14px;color:var(--d-muted)}
+.motion{display:flex;flex-wrap:wrap;gap:14px;margin:18px 0 6px}
+.motion figure{width:150px}
+.motion .mf{width:150px;height:104px;border-radius:8px;position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px var(--d-rule)}
+.motion figcaption{font:400 13px/1.4 "Atkinson Hyperlegible Next",sans-serif;word-spacing:0;color:var(--d-muted);margin-top:6px}
+
+/* ───────── Phone and desktop frames ───────── */
+.ph{--dock:124px;width:390px;height:844px;position:relative;overflow:hidden;border-radius:50px;isolation:isolate;margin:7px;
+  box-shadow:0 0 0 7px #16181a,0 0 0 8px #3a3d40,0 30px 50px -26px rgba(0,0,0,.5)}
+@media (max-width:440px){.ph{zoom:.84}}
+@media (max-width:374px){.ph{zoom:.76}}
+.ph .map,.dk .map{position:absolute;inset:0;z-index:0}
+.map svg{display:block;width:100%;height:100%}
+.ph .sb{position:absolute;z-index:6;top:0;left:0;right:0;height:50px;display:flex;justify-content:space-between;align-items:center;padding:12px 28px 0 40px;font-size:16px;font-weight:700}
+.ph .sb svg{display:block}
+.ph .hi{position:absolute;z-index:9;bottom:8px;left:50%;width:134px;height:5px;margin-left:-67px;border-radius:3px}
+.ph .sum{position:absolute;z-index:4;top:54px;left:12px;right:12px}
+.ph .stack{position:absolute;z-index:4;right:12px;top:126px;display:flex;flex-direction:column}
+.ph .sheet{position:absolute;z-index:3;left:0;right:0;bottom:var(--dock);height:var(--sh,240px);overflow:hidden}
+.ph .dock{position:absolute;z-index:4;left:0;right:0;bottom:0;height:var(--dock);padding:10px 16px 34px;display:flex;gap:12px}
+.ph button,.dk button{font:inherit;color:inherit;cursor:default;-webkit-tap-highlight-color:transparent}
+.dk{width:1440px;height:900px;position:relative;overflow:hidden;border-radius:10px;zoom:.8;box-shadow:0 0 0 1px rgba(0,0,0,.22),0 24px 44px -26px rgba(0,0,0,.5);isolation:isolate}
+@media (max-width:1215px){.dk{zoom:.6}}
+@media (max-width:900px){.dk{zoom:.45}}
+@media (max-width:700px){.dk{zoom:.34}}
+@media (max-width:520px){.dk{zoom:.24}}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;display:block}
+.dim{position:absolute;inset:0;z-index:2}
+
+/* ───────── C+ · Feldbuch ───────── */
+.P{--m-land:var(--P-land);--m-contour:var(--P-contour);--m-road:var(--P-road);--m-road2:var(--P-road2);--m-water:var(--P-water);--m-wlabel:var(--P-wlabel);--m-border:var(--P-border);--m-town:var(--P-town);--m-label:var(--P-label);--m-halo:var(--P-halo);--m-fs:11.5px;--m-cw:.9px;--m-rw:1.8px;--m-ww:2.6px;--m-font:"Atkinson Hyperlegible Next",sans-serif;
+  --dock:132px;font-family:"Atkinson Hyperlegible Next",sans-serif;color:var(--P-ink);font-variant-numeric:tabular-nums}
+.P .hand,.P .sum .t1,.P .h,.P .stk,.P .pt,.P .days,.P .stop .k,.P .stop .nm,.P .tab,.P .cta{font-family:"Shantell Sans",cursive;font-variation-settings:"BNCE" 35}
+.P .note{font-family:"Patrick Hand",cursive}
+.P .sb{color:var(--P-ink)}.P .hi{background:var(--P-ink)}
+.P .karo{background-color:var(--P-paper);background-image:linear-gradient(var(--P-grid) 1px,transparent 1px),linear-gradient(90deg,var(--P-grid) 1px,transparent 1px);background-size:16px 16px;background-position:-1px -1px}
+.P .sum{background:var(--P-paper);border-radius:4px;padding:8px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 0 0 1px var(--P-rule),0 8px 18px -10px rgba(40,30,10,.55);transform:rotate(-.6deg)}
+.P .sum .t1{font-size:18px;font-weight:700;line-height:1.2}
+.P .sum .t2{font-size:13px;color:var(--P-ink2);line-height:1.35}
+.P .sum .ed{margin-left:auto;font-size:14px;font-weight:700;color:var(--P-marker)}
+.P .stack{gap:8px}
+.P .stack button{width:44px;height:44px;border:0;border-radius:12px;background:var(--P-paper);display:grid;place-items:center;padding:0;color:var(--P-ink);box-shadow:0 0 0 1px var(--P-rule),0 4px 10px -6px rgba(40,30,10,.5)}
+.P .sheet{border-radius:16px 16px 0 0;box-shadow:0 -1px 0 var(--P-rule),0 -12px 26px -16px rgba(40,30,10,.55)}
+.P .sheet::before{content:"";position:absolute;top:0;bottom:0;left:52px;border-left:1.5px solid var(--P-margin)}
+.P .grab{width:36px;height:4px;border-radius:2px;background:var(--P-ink2);opacity:.4;margin:8px auto 4px}
+.P .hd{display:flex;align-items:baseline;justify-content:space-between;padding:2px 16px 0 64px}
+.P .h{font-size:24px;font-weight:700;line-height:1.2}
+.P .sort{font-size:14px;color:var(--P-ink2)}
+.P .sort b{color:var(--P-ink);font-weight:700;border-bottom:2px solid var(--P-marker)}
+.P .hd+.note{margin:0;padding:0 16px 6px 64px;font-size:16px;color:var(--P-ink2);line-height:1.2}
+.P .list{list-style:none;margin:0;padding:0}
+.P .e{display:grid;grid-template-columns:52px 1fr 50px;align-items:center;min-height:64px;padding-right:12px;border-top:1px dashed var(--P-rule);position:relative}
+.P .stk{width:30px;height:30px;border-radius:50%;background:var(--P-sticker);color:var(--P-stickerInk);font-size:16px;font-weight:800;line-height:30px;text-align:center;justify-self:center;box-shadow:0 0 0 2.5px var(--P-cut),0 2px 4px 1px rgba(0,0,0,.28);transform:rotate(var(--r,0deg))}
+.P .tx{padding-left:12px;min-width:0}
+.P .tx b{display:block;font-size:17px;font-weight:700;line-height:1.25;white-space:nowrap}
+.P .tx small{display:block;font-size:13.5px;color:var(--P-ink2);line-height:1.35;white-space:nowrap}
+.P .dood{width:24px;height:24px;display:inline-block;vertical-align:-5px;margin-left:6px}
+.P .pt{font-size:24px;font-weight:700;text-align:right;position:relative;line-height:1}
+.P .pt .ring{position:absolute;right:-9px;top:-11px;width:54px;height:44px;overflow:visible}
+.P .more{padding:10px 16px 0 64px;font-size:14px;color:var(--P-ink2);border-top:1px dashed var(--P-rule)}
+.P .dock{background:var(--P-paper2);border-top:2px dashed var(--P-rule);align-items:center;padding:8px 16px 34px}
+.P .play{width:50px;height:50px;border-radius:52% 48% 50% 50% / 48% 52% 48% 52%;background:var(--P-marker);border:0;display:grid;place-items:center;flex:none;padding:0;box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.P .play svg{fill:var(--P-markerInk)}
+.P .tl{flex:1;min-width:0}
+.P .ro{display:flex;justify-content:space-between;font-size:13px;color:var(--P-ink2);gap:8px}
+.P .ro b{color:var(--P-ink);font-weight:700}
+.P .days{display:grid;grid-template-columns:repeat(3,1fr);font-size:15px;font-weight:600;line-height:1.3;margin:5px 0 0;position:relative;z-index:0}
+.P .days span{position:relative;justify-self:start;padding:0 8px}
+.P .days .on::before{content:"";position:absolute;inset:-1px 0;z-index:-1;background:repeating-linear-gradient(135deg,var(--P-tape) 0 5px,color-mix(in srgb,var(--P-tape) 70%,#fff) 5px 8px);opacity:.9;transform:rotate(-3deg);clip-path:polygon(3% 0,97% 6%,100% 30%,98% 55%,100% 100%,2% 94%,0 65%,3% 40%)}
+.P .rul{display:block;width:100%;height:26px;overflow:visible}
+.P .rul .base{fill:none;stroke:var(--P-ink);stroke-width:1.4;stroke-linecap:round}
+.P .rul .tick{stroke:var(--P-ink2);stroke-width:1;stroke-linecap:round}
+.P .rul .day{stroke:var(--P-ink);stroke-width:1.4;stroke-linecap:round}
+.P .rul .past{fill:var(--P-ink);opacity:.08}
+.P .stop{padding:4px 16px 0 64px}
+.P .stop .k{font-size:15px;font-weight:700;color:var(--P-marker)}
+.P .stop .k span{color:var(--P-ink2);font-weight:500}
+.P .stop .nm{font-size:22px;font-weight:700;line-height:1.15;margin:1px 0 4px;display:flex;align-items:center;gap:10px}
+.P .stop .d{font-size:14px;color:var(--P-ink2);line-height:1.45}
+.P .stop .stk{position:absolute;left:11px;top:24px}
+/* settings */
+.P .dim{background:var(--P-dim)}
+.P .tabs2{display:flex;gap:6px;padding:4px 16px 0 64px;border-bottom:1.5px solid var(--P-ink)}
+.P .tab{padding:7px 14px 5px;border-radius:10px 10px 0 0;background:var(--P-paper2);font-size:15px;font-weight:700;box-shadow:inset 0 0 0 1px var(--P-rule);margin-bottom:-1.5px}
+.P .tab.on{background:var(--P-sticker);color:var(--P-stickerInk);box-shadow:inset 0 0 0 1.5px var(--P-ink)}
+.P .opt{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0 16px 0 64px;min-height:50px;border-bottom:1px dashed var(--P-rule);font-size:15.5px}
+.P .opt span{color:var(--P-ink2);font-size:14.5px;text-align:right}
+.P .lbl{padding:14px 16px 6px 64px;font-size:20px;line-height:1.1;color:var(--P-ink2)}
+.P .chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 12px 64px;border-bottom:1px dashed var(--P-rule)}
+.P .chip{font-size:14.5px;padding:8px 12px;text-align:center;border:1.5px solid var(--P-ink);border-radius:255px 15px 225px 15px/15px 225px 15px 255px;background:var(--P-paper)}
+.P .chip.on{background:var(--P-sticker);color:var(--P-stickerInk);font-weight:700}
+.P .tog{width:46px;height:28px;border:1.5px solid var(--P-ink);border-radius:255px 25px 225px 25px/25px 225px 25px 255px;background:var(--P-tape);position:relative;flex:none}
+.P .tog::after{content:"";position:absolute;right:3px;top:3px;width:19px;height:19px;border-radius:50%;background:var(--P-paper);box-shadow:0 0 0 1.5px var(--P-ink)}
+.P .cta{flex:1;height:54px;border:0;border-radius:255px 18px 225px 18px/18px 225px 18px 255px;background:var(--P-marker);color:var(--P-markerInk);font-size:19px;font-weight:700;display:grid;place-items:center}
+.P.dk .panel{position:absolute;z-index:3;left:0;top:0;bottom:0;width:440px;box-shadow:1px 0 0 var(--P-rule),12px 0 30px -18px rgba(40,30,10,.5);padding:22px 0 0;overflow:hidden}
+.P.dk .panel::before{content:"";position:absolute;top:0;bottom:0;left:52px;border-left:1.5px solid var(--P-margin)}
+.P.dk .sum{position:relative;margin:0 18px 22px 64px;transform:rotate(-.6deg)}
+.P.dk .ske .tx b,.P.dk .ske .tx small{color:transparent}
+.P.dk .ske i{display:block;height:8px;border-radius:4px;background:var(--P-rule);margin:5px 0}
+.P.dk .dock{position:absolute;z-index:4;left:440px;right:0;bottom:0;height:96px;padding:10px 28px 14px;display:flex;gap:18px;align-items:center}
+.P.dk .stack{position:absolute;right:20px;top:20px;z-index:4}
+
+/* ───────── D · Wegweiser ───────── */
+.D{--m-land:var(--D-land);--m-contour:var(--D-contour);--m-road:var(--D-road);--m-road2:var(--D-road2);--m-water:var(--D-water);--m-wlabel:var(--D-wlabel);--m-border:var(--D-border);--m-town:var(--D-town);--m-label:var(--D-label);--m-halo:var(--D-halo);--m-fs:11.5px;--m-cw:1.1px;--m-rw:2.4px;--m-ww:3px;--m-font:"Overpass",sans-serif;
+  --dock:124px;font-family:"Overpass",sans-serif;color:var(--D-ink);font-variant-numeric:tabular-nums;word-spacing:.08em}
+.D .sign,.D .sum .t1,.D .h,.D .arm .nm,.D .scale .dl{font-family:"Big Shoulders Display",sans-serif}
+.D .sb{color:var(--D-ink)}.D .hi{background:var(--D-ink)}
+.D .sum{background:var(--D-plate);border:2px solid var(--D-ink);border-radius:4px;padding:7px 12px 6px;display:flex;align-items:center;gap:10px}
+.D .sum .t1{font-size:23px;font-weight:800;line-height:1.05}
+.D .sum .alt{font:600 12px "Overpass",sans-serif;color:var(--D-ink2);margin-left:6px;letter-spacing:0}
+.D .sum .t2{font-size:13px;color:var(--D-ink2);line-height:1.35;margin-top:2px}
+.D .sum .ed{margin-left:auto;font-size:13.5px;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.D .stack{border:2px solid var(--D-ink);border-radius:4px;background:var(--D-plate);top:132px}
+.D .stack button{width:44px;height:44px;border:0;background:none;display:grid;place-items:center;padding:0;color:var(--D-ink)}
+.D .stack button+button{border-top:2px solid var(--D-ink)}
+.D .stack .ico{stroke-width:2}
+.D .sheet{background:var(--D-sheet);border-radius:10px 10px 0 0;box-shadow:0 0 0 2px var(--D-ink)}
+.D .grab{width:40px;height:4px;border-radius:2px;background:var(--D-ink2);margin:8px auto 2px;opacity:.6}
+.D .hd{display:flex;align-items:baseline;justify-content:space-between;padding:0 16px 6px}
+.D .h{font-size:27px;font-weight:800;line-height:1.1}
+.D .sort{font-size:14px;font-weight:700}
+.D .post{position:relative;padding:2px 16px 0 30px}
+.D .post::before{content:"";position:absolute;left:16px;top:-4px;bottom:-40px;width:9px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,var(--D-post),color-mix(in srgb,var(--D-post) 55%,#fff) 45%,var(--D-post))}
+.D .arm{position:relative;height:46px;display:flex;align-items:center;gap:10px;padding:0 30px 0 12px;background:var(--D-sign);color:var(--D-signInk);clip-path:polygon(0 0,calc(100% - 22px) 0,100% 50%,calc(100% - 22px) 100%,0 100%)}
+.D .arm .nm{font-size:25px;font-weight:800;line-height:1;flex:1;white-space:nowrap;padding-top:2px}
+.D .arm .km{font-size:13px;font-weight:600;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.D .arm .km svg{width:12px;height:12px;fill:currentColor}
+.D .arm .sc{font-size:23px;font-weight:800;min-width:30px;text-align:right;line-height:1}
+.D .armw.sel{filter:drop-shadow(1.5px 0 0 var(--D-ink)) drop-shadow(-1.5px 0 0 var(--D-ink)) drop-shadow(0 1.5px 0 var(--D-ink)) drop-shadow(0 -1.5px 0 var(--D-ink))}
+.D .armw.sel .arm::after{content:"";position:absolute;right:0;top:0;bottom:0;width:22px;background:linear-gradient(#fff 0 33%,#d22a1d 33% 67%,#fff 67%)}
+.D .arm.dim2{background:color-mix(in srgb,var(--D-sign) 45%,var(--D-sheet));height:38px}
+.D .arm.dim2 .nm{font-size:21px}
+.D .det{font-size:13.5px;color:var(--D-ink2);padding:4px 0 11px 12px;white-space:nowrap}
+.D .dock{background:var(--D-sheet);border-top:2px solid var(--D-ink);align-items:center;padding:8px 16px 34px}
+.D .play{width:46px;height:46px;border-radius:4px;background:var(--D-sign);box-shadow:inset 0 0 0 2px #141414;border:0;display:grid;place-items:center;flex:none;padding:0}
+.D .play svg{fill:#141414}
+.D .sep{font-style:normal;margin:0 .6em 0 .25em}
+.D .tl{flex:1;min-width:0}
+.D .ro{display:flex;justify-content:space-between;font-size:13px;color:var(--D-ink2);margin-bottom:2px;gap:8px}
+.D .ro b{color:var(--D-ink);font-weight:800}
+.D .scale{display:block;width:100%;height:42px;overflow:visible}
+.D .scale .blk{fill:var(--D-ink)}
+.D .scale .frame{fill:none;stroke:var(--D-ink);stroke-width:1.2}
+.D .scale .dl{fill:var(--D-ink);font-size:14px;font-weight:800}
+.D .scale .now{stroke:var(--D-ink2);stroke-width:1.2;stroke-dasharray:2 2}
+.D .scale .ptr{fill:var(--D-sign);stroke:var(--D-ink);stroke-width:1.4;stroke-linejoin:round}
+.D .scale .rh{fill:var(--D-sign);stroke:var(--D-ink);stroke-width:1.2}
+.D .scale .rhn{font:800 9px "Overpass",sans-serif;fill:#141414;text-anchor:middle}
+.D.dk .panel{position:absolute;z-index:3;left:0;top:0;bottom:0;width:440px;background:var(--D-sheet);border-right:2px solid var(--D-ink);padding:22px 0 0;overflow:hidden}
+.D.dk .sum{position:relative;margin:0 20px 18px}
+.D.dk .ske .arm{background:color-mix(in srgb,var(--D-sign) 30%,var(--D-sheet))}
+.D.dk .ske .det{color:transparent}
+.D.dk .dock{position:absolute;z-index:4;left:440px;right:0;bottom:0;height:100px;padding:10px 28px 14px;display:flex;gap:18px;align-items:center}
+.D.dk .stack{position:absolute;right:20px;top:20px;z-index:4}
+
+/* ───────── E · Nationalpark-Poster ───────── */
+.E{--m-land:var(--E-land);--m-contour:var(--E-contour);--m-road:var(--E-road);--m-road2:var(--E-road2);--m-water:var(--E-water);--m-wlabel:var(--E-wlabel);--m-border:var(--E-border);--m-town:var(--E-town);--m-label:var(--E-label);--m-halo:var(--E-halo);--m-fs:11.5px;--m-cw:.9px;--m-rw:2px;--m-ww:3px;--m-font:"Schibsted Grotesk",sans-serif;
+  --dock:124px;font-family:"Schibsted Grotesk",sans-serif;color:var(--E-ink)}
+.E .pt,.E .trk text{font-variant-numeric:tabular-nums}
+.E .serif,.E .sum .t1,.E .h,.E .tx b,.E .pt,.E .stop .nm{font-family:"Young Serif",serif;font-weight:400}
+.E .logo{font-family:"Caprasimo",serif;font-weight:400}
+.E .sb{color:var(--E-ink)}.E .hi{background:var(--E-ink)}
+.E .grain::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:var(--E-grainop);mix-blend-mode:var(--E-blend);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .2 0 0 0 0 .15 0 0 0 1.4 -.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.E .sum{background:var(--E-paper);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 0 0 2px var(--E-green),4px 4px 0 2px var(--E-orange)}
+.E .sum .t1{font-size:19px;line-height:1.2}
+.E .sum .t2{font-size:13px;color:var(--E-ink2);line-height:1.35}
+.E .sum .ed{margin-left:auto;font-size:13.5px;font-weight:700;color:var(--E-ink);text-decoration:underline;text-decoration-color:var(--E-orange);text-decoration-thickness:2px;text-underline-offset:3px}
+.E .stack{gap:10px;top:132px}
+.E .stack button{width:44px;height:44px;border:0;border-radius:50%;background:var(--E-paper);display:grid;place-items:center;padding:0;color:var(--E-ink);box-shadow:0 0 0 2px var(--E-green),3px 3px 0 2px var(--E-orange)}
+.E .stack .ico{stroke-width:2}
+.E .sheet{background:var(--E-paper);border-radius:18px 18px 0 0;box-shadow:0 0 0 2px var(--E-green);overflow:visible}
+.E .sheet .clip{position:absolute;z-index:1;inset:0;border-radius:18px 18px 0 0;overflow:hidden}
+.E .band{background:var(--E-green);color:var(--E-cream);display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;position:relative}
+.E .band .h{font-size:27px;line-height:1.1;position:relative;z-index:2}
+.E .band .sort{font-size:14px;font-weight:700;position:relative;z-index:2;margin-right:62px}
+.E .band .grab{position:absolute;left:50%;top:6px;width:38px;height:4px;margin-left:-19px;border-radius:2px;background:var(--E-cream);opacity:.45}
+.E .sunhd{position:absolute;z-index:0;right:16px;top:-34px;width:66px;height:66px;pointer-events:none}
+.E .e{display:grid;grid-template-columns:40px 1fr 38px;gap:0 10px;align-items:center;padding:10px 16px;border-bottom:2px solid var(--E-rule)}
+.E .sym{width:38px;height:38px;display:block}
+.E .tx{min-width:0}
+.E .tx b{display:block;font-size:19px;line-height:1.2;white-space:nowrap}
+.E .tx small{display:block;font-size:13px;color:var(--E-ink2);line-height:1.35;white-space:nowrap}
+.E .pt{font-size:28px;line-height:1;text-align:right}
+.E .pt small{display:block;font:700 11px "Schibsted Grotesk",sans-serif;color:var(--E-ink2);margin-top:3px}
+.E .dock{background:var(--E-paper2);border-top:2px solid var(--E-green);align-items:center;padding:8px 16px 34px}
+.E .play{width:50px;height:50px;border-radius:50%;background:var(--E-orange);border:0;display:grid;place-items:center;flex:none;padding:0;box-shadow:0 0 0 2px var(--E-green)}
+.E .play svg{fill:var(--E-green)}
+.E .tl{flex:1;min-width:0;position:relative;z-index:1}
+.E .ro{display:flex;justify-content:space-between;font-size:13px;color:var(--E-ink2);margin-bottom:4px;gap:8px}
+.E .ro b{color:var(--E-ink);font-weight:700}
+.E .trk{display:block;width:100%;height:38px;overflow:visible}
+.E .trk .base{stroke:var(--E-rule);stroke-width:7;stroke-linecap:round}
+.E .trk .fill{stroke:var(--E-orange);stroke-width:7;stroke-linecap:round}
+.E .trk .tk{stroke:var(--E-green);stroke-width:2;stroke-linecap:round}
+.E .trk text{font:700 11.5px "Schibsted Grotesk",sans-serif;fill:var(--E-ink2);letter-spacing:.04em}
+.E .stop{padding:0 18px}
+.E .stop .k{font-size:13.5px;font-weight:700;color:var(--E-ink2)}
+.E .stop .nm{font-size:25px;line-height:1.15;margin:2px 0 3px}
+.E .stop .d{font-size:14px;color:var(--E-ink2)}
+.E .leg{display:block;width:100%;height:76px}
+.E.dk .panel{position:absolute;z-index:3;left:0;top:0;bottom:0;width:440px;background:var(--E-paper);box-shadow:2px 0 0 var(--E-green);overflow:hidden}
+.E.dk .top{position:relative;background:var(--E-green);color:var(--E-cream);padding:22px 22px 18px}
+.E.dk .top .logo{font-size:30px;line-height:1}
+.E.dk .sum{position:relative;margin:16px 0 0;box-shadow:none;background:color-mix(in srgb,var(--E-cream) 12%,transparent);color:var(--E-cream)}
+.E.dk .sum .t2,.E.dk .sum .ed{color:var(--E-cream)}
+.E.dk .hd2{display:flex;justify-content:space-between;align-items:baseline;padding:18px 22px 6px}
+.E.dk .hd2 .h{font-size:26px}
+.E.dk .ske .tx b,.E.dk .ske .tx small,.E.dk .ske .pt{color:transparent}
+.E.dk .ske i{display:block;height:8px;border-radius:4px;background:var(--E-rule);margin:6px 0}
+.E.dk .dock{position:absolute;z-index:4;left:442px;right:0;bottom:0;height:100px;padding:10px 28px 14px;display:flex;gap:18px;align-items:center}
+.E.dk .stack{position:absolute;right:22px;top:22px;z-index:4}
+.E .empty{width:390px;max-width:calc(100vw - 32px);border-radius:18px;overflow:hidden;box-shadow:0 0 0 2px var(--E-green);background:var(--E-paper)}
+.E .empty .scene{display:block;width:100%;height:120px}
+.E .empty .q{font-family:"Young Serif",serif;font-size:25px;padding:10px 18px 4px}
+.E .empty .ch{display:block;padding:12px 18px;border-top:2px solid var(--E-rule)}
+.E .empty .ch b{display:block;font-size:16.5px}
+.E .empty .ch small{display:block;font-size:13.5px;color:var(--E-ink2)}
+
+/* ───────── B note ───────── */
+.Bspec{font-family:"Schibsted Grotesk",sans-serif;font-variant-numeric:tabular-nums}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+</style>
+</head>
+<body>
+
+<!-- Shared map geometry: Upper Rhine between Sélestat, Freiburg and Basel (same as v1). Colours and fonts come from CSS variables of the frame that uses it. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+<defs>
+  <filter id="P-wob" x="-10%" y="-40%" width="120%" height="180%"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="3"/></filter>
+  <filter id="P-wob2" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="8" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="6"/></filter>
+  <filter id="P-sh" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.1" flood-color="#000" flood-opacity=".32"/></filter>
+  <pattern id="P-hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><line x1="1" y1="0" x2="1" y2="7" style="stroke:var(--P-rain);stroke-width:1.2"/></pattern>
+  <pattern id="P-hatch2" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><line x1="1" y1="0" x2="1" y2="7" style="stroke:var(--P-rain);stroke-width:1.2"/></pattern>
+  <pattern id="D-dots" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.1" style="fill:var(--D-rain)"/></pattern>
+  <pattern id="D-dots2" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.1" style="fill:var(--D-rain)"/><circle cx="0" cy="0" r="1.1" style="fill:var(--D-rain)"/><circle cx="6" cy="6" r="1.1" style="fill:var(--D-rain)"/><circle cx="0" cy="6" r="1.1" style="fill:var(--D-rain)"/><circle cx="6" cy="0" r="1.1" style="fill:var(--D-rain)"/></pattern>
+
+  <g id="geo">
+    <rect x="-640" y="-100" width="1800" height="1100" style="fill:var(--m-land)"/>
+    <g style="fill:none;stroke:var(--m-contour);stroke-width:var(--m-cw)">
+<path d="M468 350C470 353 470 358 470 361C470 365 468 369 467 372C465 375 463 378 461 381C459 383 456 386 454 387C451 388 448 388 445 389C442 390 440 390 437 391C435 392 433 394 430 394C427 395 424 395 422 394C419 393 417 391 415 389C413 387 411 385 408 384C406 383 402 383 399 381C396 379 392 377 391 374C389 370 389 365 390 361C391 357 393 353 395 350C396 347 397 344 398 341C399 338 399 335 400 332C401 329 402 326 403 324C405 321 406 318 408 315C409 312 411 308 413 306C415 304 418 302 421 301C424 300 427 302 430 302C433 303 435 304 438 305C441 305 444 305 447 306C450 307 453 309 454 312C456 315 456 320 457 324C457 327 456 331 457 334C458 337 460 338 462 341C464 344 467 347 468 350Z"/>
+<path d="M511 344C509 351 505 357 502 364C500 371 500 377 498 383C496 390 496 398 492 403C489 408 483 412 478 414C472 416 466 414 461 416C456 417 453 419 448 423C444 426 439 433 434 437C429 440 422 443 416 443C410 443 404 440 399 437C394 434 388 429 385 423C381 418 377 411 376 404C374 396 375 388 374 381C374 374 375 368 374 362C373 355 369 350 367 344C365 338 362 330 362 323C362 316 365 309 368 304C371 298 376 294 380 289C383 283 385 276 388 270C391 264 394 254 398 250C403 245 410 243 416 243C422 244 429 249 434 253C439 256 444 261 448 264C453 267 457 269 461 271C466 274 470 276 474 279C479 282 483 285 488 289C493 292 500 296 504 301C508 306 513 313 514 321C515 328 513 337 511 344Z"/>
+<path d="M551 338C547 349 542 359 538 369C535 378 532 387 528 396C524 405 520 413 516 421C512 430 508 437 503 447C499 458 496 471 490 481C484 492 476 505 467 509C459 513 447 511 438 506C429 502 421 488 414 480C406 473 401 467 393 462C386 457 377 457 370 452C363 447 356 439 352 430C347 421 347 408 345 398C343 387 342 378 339 368C336 358 330 349 327 338C323 327 320 314 320 302C320 290 323 277 326 266C330 255 335 244 341 235C347 226 355 218 364 214C372 210 384 211 393 212C401 213 410 219 417 218C425 217 430 212 438 207C446 203 455 191 463 189C472 187 483 188 490 193C498 198 504 210 510 218C516 227 520 235 527 244C533 252 542 258 547 268C552 278 557 290 557 302C558 313 554 327 551 338Z"/>
+<path d="M571 332C575 346 587 362 592 379C596 396 601 418 598 435C596 451 584 465 575 477C566 488 553 495 543 504C532 513 523 524 512 531C502 538 490 546 478 548C466 550 453 545 442 542C431 538 420 531 410 526C399 520 389 517 379 510C370 503 361 494 352 485C344 476 338 464 329 455C320 445 309 438 298 427C287 415 271 403 264 387C258 372 255 349 259 332C263 315 278 298 288 284C297 270 310 262 317 250C324 238 326 225 331 212C336 198 340 182 348 171C356 161 367 154 377 148C387 141 398 139 409 133C420 128 430 120 442 116C454 112 467 109 479 111C491 113 503 120 515 126C526 133 537 142 547 152C557 163 568 174 573 189C578 204 580 225 579 242C578 259 570 278 569 293C567 308 567 318 571 332Z"/>
+<path d="M661 326C664 348 665 372 661 394C657 415 647 435 638 454C629 472 619 489 610 506C600 524 592 545 580 558C568 571 551 582 536 583C520 585 501 572 486 567C471 562 460 552 446 555C432 558 420 574 404 583C387 591 365 607 348 606C331 605 313 592 301 577C289 562 282 536 274 515C267 494 261 473 256 452C252 431 248 410 247 389C247 368 251 346 253 326C256 306 260 288 263 268C266 249 266 228 270 209C275 190 282 170 291 155C300 140 314 131 325 117C337 104 347 92 359 75C370 59 380 31 395 18C410 4 429 -11 446 -8C463 -6 481 16 494 33C508 51 515 81 525 98C536 115 544 126 555 136C567 147 582 152 593 164C605 176 615 191 624 208C633 224 639 244 645 263C651 283 659 304 661 326Z"/>
+<path d="M746 320C747 349 737 383 724 407C710 431 682 447 665 464C648 481 632 492 620 509C608 526 602 548 591 567C581 586 570 608 556 625C542 643 525 658 508 673C490 687 470 704 450 710C430 716 406 718 386 709C367 700 349 676 334 656C319 636 309 610 295 591C281 572 264 560 251 541C237 522 220 502 214 478C209 454 213 421 216 394C219 368 233 344 234 320C235 296 229 276 224 248C219 221 205 186 204 155C203 124 208 89 220 64C231 40 253 23 272 10C291 -4 313 -12 333 -17C354 -23 374 -25 394 -23C413 -20 432 -9 450 -3C468 3 482 11 500 14C518 17 537 10 556 13C575 17 598 20 614 33C630 47 641 74 651 97C661 119 665 145 676 169C686 192 703 210 715 236C727 261 745 291 746 320Z"/>
+<path d="M-37 300C-37 304 -34 308 -33 313C-31 318 -30 324 -30 329C-31 333 -33 338 -36 341C-38 344 -41 346 -44 349C-47 352 -49 354 -52 356C-55 358 -58 360 -61 361C-64 361 -67 360 -70 359C-73 358 -76 356 -78 355C-81 354 -84 353 -86 351C-89 349 -91 346 -93 343C-95 341 -96 337 -99 334C-101 331 -103 329 -106 326C-109 323 -113 320 -115 315C-117 311 -118 305 -117 300C-117 295 -113 290 -111 286C-108 282 -105 280 -102 277C-100 273 -100 270 -98 266C-97 263 -96 258 -94 255C-92 252 -89 250 -87 248C-84 246 -81 245 -79 244C-76 242 -73 240 -70 239C-67 238 -64 237 -61 238C-57 239 -54 241 -52 243C-49 244 -46 247 -43 249C-41 252 -38 255 -36 259C-34 263 -34 269 -34 274C-34 279 -37 284 -37 289C-38 293 -38 296 -37 300Z"/>
+<path d="M22 305C23 314 24 325 22 334C21 343 17 352 14 360C10 368 6 376 2 383C-3 389 -7 397 -12 402C-18 406 -25 408 -32 408C-38 409 -45 403 -51 403C-57 403 -61 403 -67 406C-73 410 -79 420 -86 423C-93 427 -103 432 -109 430C-116 427 -122 418 -127 411C-131 403 -133 391 -136 382C-138 373 -141 366 -144 357C-146 349 -149 340 -150 332C-150 323 -149 314 -148 305C-147 296 -145 289 -143 280C-142 272 -141 264 -139 256C-137 248 -135 240 -131 233C-128 226 -123 221 -118 214C-114 207 -110 200 -106 192C-101 185 -95 173 -89 169C-83 165 -74 163 -67 166C-60 170 -54 182 -48 189C-43 197 -40 208 -36 213C-31 219 -26 220 -21 223C-15 226 -8 228 -3 233C2 238 6 245 10 253C13 261 14 270 16 278C18 287 21 296 22 305Z"/>
+<path d="M85 310C81 324 67 338 59 348C50 359 40 365 35 375C30 386 31 397 28 411C26 424 26 443 21 456C16 468 7 478 -2 486C-11 493 -22 495 -33 499C-43 502 -53 506 -64 507C-75 508 -86 508 -96 503C-106 499 -116 490 -124 481C-133 473 -140 463 -147 453C-154 443 -162 434 -167 423C-173 412 -176 398 -178 385C-179 372 -176 358 -177 345C-178 333 -180 323 -185 310C-189 297 -200 282 -204 266C-208 250 -212 229 -209 215C-205 200 -193 188 -183 180C-173 172 -158 171 -148 166C-137 162 -129 157 -119 152C-110 147 -102 140 -93 138C-83 135 -73 136 -64 137C-55 138 -46 141 -36 143C-27 145 -17 144 -7 148C3 151 13 156 21 164C30 171 36 182 44 192C51 203 58 213 65 225C73 236 83 249 86 263C89 277 90 296 85 310Z"/>
+<path d="M119 315C120 333 118 350 117 368C116 387 116 406 112 425C109 443 104 464 96 480C88 495 75 508 63 520C52 532 39 543 26 553C13 564 -0 578 -15 582C-29 586 -47 586 -61 577C-75 569 -88 546 -99 532C-110 518 -115 502 -127 495C-138 488 -152 494 -168 491C-183 489 -205 490 -219 480C-232 471 -244 453 -251 435C-257 417 -257 394 -259 374C-261 354 -262 335 -261 315C-260 295 -259 275 -254 257C-249 239 -239 223 -230 208C-221 193 -211 181 -201 168C-192 155 -184 140 -174 129C-163 118 -151 108 -139 103C-126 97 -112 99 -99 95C-86 90 -75 86 -61 77C-47 69 -31 50 -14 45C2 39 24 36 38 45C52 54 62 80 69 100C76 121 75 149 78 169C82 188 86 202 92 218C97 234 107 247 111 263C116 279 118 297 119 315Z"/>
+
+    </g>
+    <g style="fill:none;stroke:var(--m-road2);stroke-width:1.3;stroke-linecap:round">
+      <path d="M342 284C300 276 250 262 202 261"/><path d="M87 233C130 240 170 252 202 261"/>
+      <path d="M342 284C390 300 440 322 498 334C540 342 580 348 640 352"/><path d="M264 323C272 334 276 340 280 345"/>
+      <path d="M243 496C232 506 220 516 207 524"/><path d="M77 418C40 406 0 396 -48 384C-90 374 -140 366 -220 360"/>
+      <path d="M9 328C30 360 55 395 77 418"/><path d="M342 211C344 240 343 262 342 284"/><path d="M264 323C250 345 238 365 228 384"/>
+    </g>
+    <g style="fill:none;stroke:var(--m-road);stroke-width:var(--m-rw);stroke-linecap:round">
+      <path d="M226 900C228 700 232 600 236 520C238 460 236 420 240 384C246 340 280 320 300 300C312 288 314 260 316 220C318 180 318 150 320 132C322 90 326 40 330 -20"/>
+      <path d="M-60 600C10 520 60 460 77 418C92 380 96 300 97 233C100 190 118 160 140 132C160 100 176 50 186 -20"/>
+      <path d="M77 418C110 410 150 396 191 388C205 386 222 385 240 384"/>
+    </g>
+    <path d="M-260 560C-60 540 60 530 150 528C180 526 200 524 207 524C260 520 320 516 420 520C500 524 560 530 680 540" style="fill:none;stroke:var(--m-border);stroke-width:1.1;stroke-dasharray:6 4"/>
+    <g style="fill:none;stroke:var(--m-water);stroke-linecap:round">
+      <path d="M206 920C204 760 212 640 205 540C200 470 186 430 180 384C175 340 186 300 190 261C195 220 210 170 222 132C232 90 238 40 244 -20" style="stroke-width:var(--m-ww)"/>
+      <path d="M50 540C64 470 72 440 77 418C82 360 82 300 85 233C88 180 110 150 132 132C150 110 162 60 168 -20" style="stroke-width:1.3"/>
+      <path d="M440 304C390 293 356 287 342 284C318 280 300 262 280 246C262 232 246 220 228 196C222 180 220 160 222 140" style="stroke-width:1.3"/>
+    </g>
+    <text x="168" y="336" transform="rotate(-84 168 336)" style="fill:var(--m-wlabel);font-family:var(--m-font);font-style:italic;font-size:11.5px;letter-spacing:.12em">Rhein</text>
+    <g style="fill:var(--m-town)">
+      <circle cx="134" cy="132" r="2.4"/><circle cx="321" cy="132" r="2.4"/><circle cx="342" cy="211" r="2.4"/><circle cx="87" cy="233" r="2.8"/>
+      <circle cx="202" cy="261" r="2.4"/><circle cx="342" cy="284" r="3.4"/><circle cx="264" cy="323" r="2.4"/><circle cx="280" cy="345" r="2.4"/>
+      <circle cx="228" cy="384" r="2.4"/><circle cx="191" cy="384" r="2.4"/><circle cx="77" cy="418" r="3.4"/><circle cx="9" cy="328" r="2.4"/>
+      <circle cx="243" cy="496" r="2.4"/><circle cx="207" cy="524" r="3.4"/><circle cx="498" cy="334" r="2.4"/><circle cx="-48" cy="384" r="2.4"/>
+    </g>
+    <g style="fill:var(--m-label);font-family:var(--m-font);font-size:var(--m-fs);paint-order:stroke;stroke:var(--m-halo);stroke-width:3px;stroke-linejoin:round">
+      <text x="146" y="136">Sélestat</text><text x="309" y="136" text-anchor="end">Ettenheim</text><text x="330" y="215" text-anchor="end">Emmendingen</text>
+      <text x="99" y="237">Colmar</text><text x="190" y="265" text-anchor="end">Breisach</text>
+      <text x="342" y="305" text-anchor="middle" style="font-weight:700;font-size:12.5px">Freiburg</text>
+      <text x="276" y="327">Bad Krozingen</text><text x="292" y="349">Staufen</text><text x="240" y="388">Müllheim</text>
+      <text x="179" y="388" text-anchor="end">Neuenburg am Rhein</text>
+      <text x="86" y="436" style="font-weight:700;font-size:12.5px">Mulhouse</text><text x="21" y="332">Guebwiller</text>
+      <text x="255" y="500">Lörrach</text><text x="219" y="529" style="font-weight:700;font-size:12.5px">Basel</text>
+      <text x="510" y="338">Titisee</text><text x="-36" y="388">Thann</text>
+    </g>
+  </g>
+
+  <!-- rain shapes: south-west front for the finder state, east cell for the route state; route legs -->
+  <path id="rf-o" d="M291 412C287 420 278 426 272 433C267 440 265 447 258 454C252 461 244 469 232 473C220 478 201 480 186 480C170 480 153 476 139 475C125 474 115 472 102 473C88 473 73 477 57 477C41 477 20 478 4 475C-12 472 -27 466 -39 460C-51 454 -61 446 -68 438C-75 430 -82 421 -82 412C-81 403 -74 393 -63 387C-51 380 -28 375 -10 372C7 369 27 371 40 369C54 367 60 364 70 360C80 356 87 348 99 344C112 339 128 334 144 333C159 332 177 335 192 337C208 340 223 344 237 348C251 353 267 358 277 364C288 371 297 379 299 387C302 395 296 404 291 412Z"/>
+  <path id="rf-i" d="M183 424C179 427 176 429 175 432C173 434 174 437 173 440C171 443 169 446 166 449C162 452 157 454 151 457C146 460 139 463 131 465C123 467 113 469 104 469C95 469 84 467 77 465C70 462 66 456 63 452C60 449 61 444 59 441C58 438 55 436 52 433C50 430 45 427 44 424C43 421 44 417 46 414C48 412 53 409 57 406C61 404 64 401 69 398C73 396 78 392 84 390C90 388 98 387 106 386C114 386 122 387 130 387C138 388 145 388 154 389C162 390 172 390 179 392C187 394 195 397 198 401C201 404 199 410 196 414C194 417 186 421 183 424Z"/>
+  <path id="rr-o" d="M656 282C651 295 636 307 626 317C616 327 604 334 595 343C586 352 581 362 571 370C562 377 550 386 537 389C525 393 509 392 495 391C481 390 469 386 456 384C444 382 431 382 419 379C406 376 392 373 381 367C371 361 363 351 355 343C347 334 343 324 335 314C328 304 317 294 310 282C303 270 293 253 294 240C295 227 304 211 317 202C330 193 354 190 371 188C388 185 407 189 421 190C436 190 446 190 458 189C470 189 481 188 492 188C504 189 515 191 527 193C539 195 551 197 565 200C580 203 599 205 614 212C628 219 647 229 654 241C661 252 661 269 656 282Z"/>
+  <path id="rr-i" d="M580 276C578 282 574 287 570 292C567 297 564 301 560 305C555 309 549 312 543 314C538 316 531 316 525 317C519 319 515 319 509 322C503 324 497 330 489 333C481 336 470 341 461 341C452 341 442 337 436 332C430 328 427 319 425 313C423 306 423 299 424 293C424 287 424 281 427 276C429 271 432 266 436 262C440 258 446 255 450 251C454 248 456 245 460 241C463 236 465 230 469 225C474 220 481 215 488 213C495 211 504 212 512 214C519 215 525 220 532 223C538 226 545 228 551 231C558 234 566 237 572 241C577 245 581 252 583 257C584 263 582 270 580 276Z"/>
+  <path id="rt-a" d="M342 284C322 290 304 298 296 306C284 318 272 333 262 348"/>
+  <path id="rt-b" d="M262 348C254 360 246 372 240 384C226 386 206 387 191 387C150 396 112 410 77 418"/>
+
+  <!-- C+ · Feldbuch pieces -->
+  <symbol id="P-sun" viewBox="0 0 30 30"><path d="M15 9.6c3-.2 5.5 2.3 5.4 5.3-.1 3-2.5 5.3-5.5 5.2-2.9-.1-5.1-2.5-5-5.4.1-2.7 2.3-5 5.1-5.1z" style="fill:var(--P-sticker);stroke:var(--P-ink);stroke-width:1.5"/><path d="M15 3.2v3M15.2 23.8v3M3.3 15h3M23.7 15.2h3M6.6 6.8l2.1 2.1M21.3 21.4l2.1 2M6.8 23.3l2-2.1M21.5 8.7l2-2" style="fill:none;stroke:var(--P-ink);stroke-width:1.6;stroke-linecap:round"/></symbol>
+  <symbol id="P-rain" viewBox="0 0 30 30"><path d="M9 19.5c-2.8 0-4.6-1.9-4.5-4.2.1-2.2 2-3.8 4.2-3.6.7-3.1 3.2-5 6.2-4.9 3.1.1 5.4 2.5 5.6 5.4 2.3-.1 4.2 1.6 4.2 3.7 0 2.1-1.7 3.6-4 3.6z" style="fill:var(--P-paper);stroke:var(--P-ink);stroke-width:1.5;stroke-linejoin:round"/><path d="M10 22.6l-1.2 3.4M15 22.6l-1.2 3.4M20 22.6l-1.2 3.4" style="stroke:var(--P-rain);stroke-width:2;stroke-linecap:round"/></symbol>
+  <symbol id="P-mix" viewBox="0 0 30 30"><path d="M19.5 5.6c2.6-.1 4.6 1.9 4.5 4.4-.1 2.4-2.1 4.3-4.6 4.2-2.4-.1-4.2-2-4.1-4.4.1-2.3 1.9-4.1 4.2-4.2z" style="fill:var(--P-sticker);stroke:var(--P-ink);stroke-width:1.5"/><path d="M19.6 1.3v2M26.9 10h-1.8M25 4.4l-1.4 1.4" style="stroke:var(--P-ink);stroke-width:1.5;stroke-linecap:round"/><path d="M8 22c-2.8 0-4.6-1.9-4.5-4.2.1-2.2 2-3.8 4.2-3.6.7-3.1 3.2-5 6.2-4.9 3.1.1 5.4 2.5 5.6 5.4 2.3-.1 4.2 1.6 4.2 3.7 0 2.1-1.7 3.6-4 3.6z" style="fill:var(--P-paper);stroke:var(--P-ink);stroke-width:1.5;stroke-linejoin:round"/><path d="M13 25l-1.1 3" style="stroke:var(--P-rain);stroke-width:2;stroke-linecap:round"/></symbol>
+  <symbol id="P-ring" viewBox="0 0 54 44"><path d="M40 7C31 2 13 4 7 13 1 22 7 34 22 37c14 3 27-2 30-11 3-8-3-15-13-18-6-2-13-1-18 1" style="fill:none;stroke:var(--P-marker);stroke-width:2.3;stroke-linecap:round"/></symbol>
+  <g id="P-van">
+    <path d="M-14 5V-3C-14-6.5-11.5-9-8-9H5C8.5-9 11-6.5 12.5-3L14 1V5C14 6.2 13.2 7 12 7H-12C-13.2 7-14 6.2-14 5Z" style="fill:var(--P-marker);stroke:var(--P-ink);stroke-width:1.4;stroke-linejoin:round"/>
+    <path d="M-13.3 0H13.6" style="stroke:var(--P-cut);stroke-width:2.4"/>
+    <path d="M-10.5-6.5h6v4h-6zM-1.5-6.5H4c1.6 0 3 1.3 3.6 2.8L8-2.5h-9.5z" style="fill:var(--P-cut);stroke:var(--P-ink);stroke-width:1.1;stroke-linejoin:round"/>
+    <circle cx="-7.5" cy="7.5" r="3.2" style="fill:var(--P-ink)"/><circle cx="7.5" cy="7.5" r="3.2" style="fill:var(--P-ink)"/>
+    <circle cx="-7.5" cy="7.5" r="1.1" style="fill:var(--P-cut)"/><circle cx="7.5" cy="7.5" r="1.1" style="fill:var(--P-cut)"/>
+  </g>
+  <g id="P-star"><path d="M0-8L2.06-2.83L7.61-2.47L3.33 1.08L4.7 6.47L0 3.5L-4.7 6.47L-3.33 1.08L-7.61-2.47L-2.06-2.83Z" style="fill:var(--P-marker);stroke:var(--P-ink);stroke-width:1.1;stroke-linejoin:round"/></g>
+
+  <g id="P-fov">
+    <g filter="url(#P-wob2)">
+      <use href="#rf-o" style="fill:url(#P-hatch);stroke:var(--P-rain);stroke-width:1.5;opacity:.7"/>
+      <use href="#rf-i" style="fill:url(#P-hatch2);stroke:var(--P-rain);stroke-width:1.3;opacity:.75"/>
+    </g>
+    <text x="70" y="362" transform="rotate(-5 70 362)" style="font:400 15px 'Patrick Hand',cursive;fill:var(--P-rain);paint-order:stroke;stroke:var(--P-land);stroke-width:3px">Regen, bis 5 mm</text>
+    <use href="#P-star" transform="translate(342 284)"/>
+    <g style="font:800 13px 'Shantell Sans',cursive;text-anchor:middle;fill:var(--P-stickerInk)">
+      <g transform="translate(321 132) rotate(-8)"><circle r="11" filter="url(#P-sh)" style="fill:var(--P-sticker);stroke:var(--P-cut);stroke-width:2.5"/><text y="4.5">1</text></g>
+      <g transform="translate(191 384) rotate(6)"><circle r="11" filter="url(#P-sh)" style="fill:var(--P-sticker);stroke:var(--P-cut);stroke-width:2.5"/><text y="4.5">2</text></g>
+      <g transform="translate(228 384) rotate(-4)"><circle r="11" filter="url(#P-sh)" style="fill:var(--P-sticker);stroke:var(--P-cut);stroke-width:2.5"/><text y="4.5">3</text></g>
+    </g>
+  </g>
+  <g id="P-rov">
+    <g filter="url(#P-wob2)">
+      <use href="#rr-o" style="fill:url(#P-hatch);stroke:var(--P-rain);stroke-width:1.5;opacity:.65"/>
+      <use href="#rr-i" style="fill:url(#P-hatch2);stroke:var(--P-rain);stroke-width:1.3;opacity:.7"/>
+    </g>
+    <text x="298" y="446" transform="rotate(-4 298 446)" style="font:400 15px 'Patrick Hand',cursive;fill:var(--P-rain);paint-order:stroke;stroke:var(--P-land);stroke-width:3px">zieht nach Osten</text>
+    <path d="M394 436c6-1 10-2 14-4m-5-3 5 3-4 4" filter="url(#P-wob)" style="fill:none;stroke:var(--P-rain);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round"/>
+    <g filter="url(#P-wob)">
+      <use href="#rt-b" style="fill:none;stroke:var(--P-ink2);stroke-width:2.2;stroke-dasharray:1 6;stroke-linecap:round"/>
+      <use href="#rt-a" style="fill:none;stroke:var(--P-marker);stroke-width:6.5;stroke-linecap:round;opacity:.9;mix-blend-mode:var(--P-blend)"/>
+    </g>
+    <g style="font:800 13px 'Shantell Sans',cursive;text-anchor:middle;fill:var(--P-stickerInk)">
+      <g transform="translate(342 284) rotate(-7)"><circle r="11" filter="url(#P-sh)" style="fill:var(--P-sticker);stroke:var(--P-cut);stroke-width:2.5"/><text y="4.5">1</text></g>
+      <g transform="translate(191 387) rotate(5)"><circle r="11" filter="url(#P-sh)" style="fill:var(--P-sticker);stroke:var(--P-cut);stroke-width:2.5"/><text y="4.5">2</text></g>
+      <g transform="translate(77 418) rotate(-4)"><circle r="11" filter="url(#P-sh)" style="fill:var(--P-sticker);stroke:var(--P-cut);stroke-width:2.5"/><text y="4.5">3</text></g>
+    </g>
+    <g transform="translate(262 344)">
+      <path d="M17-4h7M18 1h8M16 6h6" style="fill:none;stroke:var(--P-ink2);stroke-width:1.5;stroke-linecap:round"/>
+      <g transform="scale(-1.2 1.2) rotate(4)"><use href="#P-van"/></g>
+    </g>
+  </g>
+
+  <!-- D · Wegweiser pieces -->
+  <symbol id="D-camper" viewBox="0 0 24 24"><path d="M2.5 17V8.6c0-1.1.9-2 2-2H13l1.4 2.4H19c1 0 1.8.6 2.1 1.5l1.2 3.6c.1.3.2.6.2.9V17z" style="fill:#141414"/><rect x="5" y="9.2" width="4.2" height="3" rx=".6" style="fill:#fff"/><path d="M15.6 10.6h3c.5 0 .9.3 1 .7l.5 1.7h-4.5z" style="fill:#fff"/><circle cx="7" cy="17.6" r="2.4" style="fill:#141414;stroke:#fff;stroke-width:1.2"/><circle cx="18" cy="17.6" r="2.4" style="fill:#141414;stroke:#fff;stroke-width:1.2"/></symbol>
+  <symbol id="D-arr" viewBox="0 0 12 12"><path d="M6 .8 10.2 11 6 8.6 1.8 11Z"/></symbol>
+  <g id="D-fov">
+    <use href="#rf-o" style="fill:url(#D-dots);stroke:var(--D-rain);stroke-width:1.3"/>
+    <use href="#rf-i" style="fill:url(#D-dots2);stroke:var(--D-rain);stroke-width:1.3"/>
+    <rect x="337" y="279" width="10" height="10" style="fill:var(--D-plate);stroke:var(--D-ink);stroke-width:2"/>
+    <g style="stroke:#141414;stroke-width:1">
+      <polygon points="327,124 355,124 362,132 355,140 327,140" style="fill:#ffcc00"/>
+      <polygon points="355,124 362,132 355,140" style="fill:#fff;stroke:none"/>
+      <polygon points="355,129.33 359.67,129.33 362,132 359.67,134.67 355,134.67" style="fill:#d22a1d;stroke:none"/>
+      <polygon points="327,124 355,124 362,132 355,140 327,140" style="fill:none"/>
+      <path d="M191 381V368M228 381V368" style="stroke:var(--D-ink);stroke-width:2"/>
+      <polygon points="194,352 166,352 159,360 166,368 194,368" style="fill:#ffcc00"/>
+      <polygon points="225,352 253,352 260,360 253,368 225,368" style="fill:#ffcc00"/>
+    </g>
+    <g style="font:800 11.5px 'Overpass',sans-serif;fill:#141414;text-anchor:middle">
+      <text x="341" y="136.3">58</text><text x="179" y="364.3">45</text><text x="240" y="364.3">43</text>
+    </g>
+  </g>
+  <g id="D-rov">
+    <use href="#rr-o" style="fill:url(#D-dots);stroke:var(--D-rain);stroke-width:1.3"/>
+    <use href="#rr-i" style="fill:url(#D-dots2);stroke:var(--D-rain);stroke-width:1.3"/>
+    <use href="#rt-b" style="fill:none;stroke:var(--D-white);stroke-width:6;stroke-linecap:round"/>
+    <use href="#rt-b" style="fill:none;stroke:var(--D-ink);stroke-width:2.4;stroke-dasharray:6 5"/>
+    <use href="#rt-a" style="fill:none;stroke:var(--D-white);stroke-width:10;stroke-linecap:round"/>
+    <use href="#rt-a" style="fill:none;stroke:var(--D-red);stroke-width:3.6;stroke-linecap:round"/>
+    <g style="fill:#ffcc00;stroke:#141414;stroke-width:1.5">
+      <rect x="-9" y="-9" width="18" height="18" transform="translate(342 284) rotate(45)"/>
+      <rect x="-9" y="-9" width="18" height="18" transform="translate(191 387) rotate(45)"/>
+      <rect x="-9" y="-9" width="18" height="18" transform="translate(77 418) rotate(45)"/>
+    </g>
+    <g style="font:800 14px 'Big Shoulders Display',sans-serif;fill:#141414;text-anchor:middle">
+      <text x="342" y="289">1</text><text x="191" y="392">2</text><text x="77" y="423">3</text>
+    </g>
+    <g transform="translate(262 348)"><rect x="-16" y="-16" width="32" height="32" rx="5" style="fill:#fff;stroke:#141414;stroke-width:2.2"/><use href="#D-camper" x="-12" y="-12" width="24" height="24"/></g>
+  </g>
+
+  <!-- E · Nationalpark-Poster pieces -->
+  <symbol id="E-sun" viewBox="0 0 40 40"><g style="fill:var(--E-orange)"><circle cx="20" cy="20" r="9"/><path d="M38 20L31.25 17.61L31.25 22.39ZM32.73 32.73L29.65 26.27L26.27 29.65ZM20 38L22.39 31.25L17.61 31.25ZM7.27 32.73L13.73 29.65L10.35 26.27ZM2 20L8.75 22.39L8.75 17.61ZM7.27 7.27L10.35 13.73L13.73 10.35ZM20 2L17.61 8.75L22.39 8.75ZM32.73 7.27L26.27 10.35L29.65 13.73Z"/></g></symbol>
+  <symbol id="E-rain" viewBox="0 0 40 40"><path d="M11 26C6.6 26 4 23.3 4 20s2.7-6 6.3-6c1-4.6 4.8-7.5 9.4-7.5 4.9 0 8.6 3.4 9.2 8 3.7.1 6.6 2.6 6.6 5.8 0 3.2-2.8 5.7-6.4 5.7z" style="fill:var(--E-ink)"/><g style="fill:var(--E-blue);mix-blend-mode:var(--E-blend)"><path d="M13 22c2.4 3.6 3.6 5.8 3.6 7.5a3.6 3.6 0 0 1-7.2 0c0-1.7 1.2-3.9 3.6-7.5z"/><path d="M21 25c2.4 3.6 3.6 5.8 3.6 7.5a3.6 3.6 0 0 1-7.2 0c0-1.7 1.2-3.9 3.6-7.5z"/><path d="M29 22c2.4 3.6 3.6 5.8 3.6 7.5a3.6 3.6 0 0 1-7.2 0c0-1.7 1.2-3.9 3.6-7.5z"/></g></symbol>
+  <symbol id="E-mix" viewBox="0 0 40 40"><use href="#E-sun" x="12" y="0" width="26" height="26"/><path d="M10 31C5.9 31 3.5 28.5 3.5 25.4s2.5-5.6 5.9-5.6c.9-4.3 4.5-7 8.8-7 4.6 0 8 3.2 8.6 7.5 3.4.1 6.2 2.4 6.2 5.4 0 3-2.6 5.3-6 5.3z" style="fill:var(--E-ink);mix-blend-mode:var(--E-blend)"/><path d="M16 29c2.2 3.3 3.3 5.3 3.3 6.9a3.3 3.3 0 0 1-6.6 0c0-1.6 1.1-3.6 3.3-6.9z" style="fill:var(--E-blue);mix-blend-mode:var(--E-blend)"/></symbol>
+  <g id="E-van"><rect x="-16" y="-9" width="30" height="15" rx="4" style="fill:var(--E-orange)"/><path d="M-16-1.5h30" style="stroke:var(--E-cream);stroke-width:2.4"/><rect x="-12.5" y="-6" width="7" height="3.6" rx="1" style="fill:var(--E-green)"/><rect x="-3" y="-6" width="7" height="3.6" rx="1" style="fill:var(--E-green)"/><path d="M7-6h2.5c1.5 0 2.6 1 3.1 2.4L13-2.4H7z" style="fill:var(--E-green)"/><circle cx="-9" cy="7" r="3.6" style="fill:var(--E-green)"/><circle cx="7" cy="7" r="3.6" style="fill:var(--E-green)"/></g>
+  <g id="E-fov">
+    <use href="#rf-o" style="fill:var(--E-blue);opacity:.38;mix-blend-mode:var(--E-blend)"/>
+    <use href="#rf-i" style="fill:var(--E-blue);opacity:.38;mix-blend-mode:var(--E-blend)"/>
+    <circle cx="342" cy="284" r="6" style="fill:var(--E-paper);stroke:var(--E-ink);stroke-width:2.6"/>
+    <use href="#E-sun" x="306" y="117" width="30" height="30"/>
+    <use href="#E-rain" x="178" y="353" width="26" height="26"/>
+    <use href="#E-rain" x="215" y="353" width="26" height="26"/>
+    <g style="font:800 12.5px 'Schibsted Grotesk',sans-serif;fill:var(--E-ink);paint-order:stroke;stroke:var(--E-land);stroke-width:3.5px;stroke-linejoin:round">
+      <text x="339" y="137">58</text><text x="191" y="352" text-anchor="middle">45</text><text x="228" y="352" text-anchor="middle">43</text>
+    </g>
+  </g>
+  <g id="E-rov">
+    <use href="#rr-o" style="fill:var(--E-blue);opacity:.36;mix-blend-mode:var(--E-blend)"/>
+    <use href="#rr-i" style="fill:var(--E-blue);opacity:.36;mix-blend-mode:var(--E-blend)"/>
+    <use href="#rt-b" style="fill:none;stroke:var(--E-ink);stroke-width:2.6;stroke-dasharray:2 6;stroke-linecap:round"/>
+    <use href="#rt-a" style="fill:none;stroke:var(--E-orange);stroke-width:7;stroke-linecap:round;mix-blend-mode:var(--E-blend)"/>
+    <g style="font:800 12px 'Schibsted Grotesk',sans-serif;text-anchor:middle">
+      <circle cx="342" cy="284" r="11" style="fill:var(--E-orange);stroke:var(--E-ink);stroke-width:2"/><text x="342" y="288.5" style="fill:var(--E-ink)">1</text>
+      <circle cx="191" cy="387" r="11" style="fill:var(--E-ink)"/><text x="191" y="391.5" style="fill:var(--E-paper)">2</text>
+      <circle cx="77" cy="418" r="11" style="fill:var(--E-ink)"/><text x="77" y="422.5" style="fill:var(--E-paper)">3</text>
+    </g>
+    <ellipse cx="262" cy="357" rx="15" ry="3" style="fill:var(--E-ink);opacity:.25"/>
+    <g transform="translate(262 346) scale(-1.15 1.15)"><use href="#E-van"/></g>
+  </g>
+
+  <!-- icons -->
+  <symbol id="sbar" viewBox="0 0 68 12"><g fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="10" y="3" width="3" height="9" rx=".7"/><rect x="15" y="0" width="3" height="12" rx=".7"/></g><path d="M27 4.5a8 8 0 0 1 11 0M29.3 7a4.6 4.6 0 0 1 6.4 0" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/><circle cx="32.5" cy="10" r="1.3" fill="currentColor"/><rect x="43.5" y=".5" width="21" height="11" rx="3" fill="none" stroke="currentColor" opacity=".45"/><rect x="45.5" y="2.5" width="15" height="7" rx="1.5" fill="currentColor"/><rect x="65.5" y="4" width="1.6" height="4" rx=".7" fill="currentColor" opacity=".45"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 4 3 9l9 5 9-5-9-5Z"/><path d="m3 14 9 5 9-5"/></symbol>
+  <symbol id="i-loc" viewBox="0 0 24 24"><path d="M20 4 4 11l7 2 2 7 7-16Z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 4.8v14.4L19.5 12z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="3.8" height="14" rx="1"/><rect x="13.7" y="5" width="3.8" height="14" rx="1"/></symbol>
+</defs>
+</svg>
+
+<header class="doc-top">
+  <div class="wrap">
+    <span class="brand">WeatherChaser · Designansätze v2</span>
+    <nav class="tabs" aria-label="Richtungen">
+      <a href="#start" data-tab="all" aria-current="true">Alle</a><a href="#c-plus" data-tab="P">C+ Feldbuch</a><a href="#d-wegweiser" data-tab="D">D Wegweiser</a><a href="#e-poster" data-tab="E">E Nationalpark-Poster</a><a href="#b-nativ" data-tab="B">B Ruhig &amp; nativ</a><a href="#vergleich" data-tab="V">Vergleich</a>
+    </nav>
+    <button class="theme-btn" type="button" id="themeBtn" aria-live="polite">Darstellung: System</button>
+  </div>
+</header>
+
+<main class="wrap" id="start">
+  <h1>Drei verspielte Richtungen für Wandernde und Vanreisende</h1>
+  <p class="lede">Zweiter Vorschlag, kein Code. Inhalt und mobiler Umbau sind dieselben wie in v1. Neu sind eine feste Schriftregel und der klare Blick auf die Zielgruppe: Leute, die draußen unterwegs sind.</p>
+  <p class="meta">Stand 24.10.2026 · baut auf <a href="261024_Designans%C3%A4tze%20WeatherChaser.html">v1 „Designansätze WeatherChaser“</a> auf · Wetterwerte sind dieselben Beispielwerte aus den Testläufen vom 22.10., keine Prognose.</p>
+
+  <h2 id="neu"><span class="n">1</span>Was sich seit v1 geändert hat</h2>
+  <ul class="tight">
+    <li><b>Dein Feedback:</b> B und C waren am besten, C vielleicht insgesamt, weil es zu Wandernden und Vanreisenden passt, aber es sollte verspielter sein. Deshalb gibt es hier <b>C+</b> (dieselbe Idee, deutlich verspielter) und zwei neue Richtungen <b>D</b> und <b>E</b>, die bewusst nichts mit einem Reisejournal zu tun haben.</li>
+    <li><b>Schriftregel:</b> Keine Schriften mehr, die man von KI-generierten Seiten kennt. Newsreader aus v1-C fällt damit weg. Alle Schriften hier stammen aus der Recherche, sind frei lizenziert (OFL), haben Umlaute und lassen sich in der App über @fontsource selbst hosten.</li>
+    <li><b>Zielgruppe:</b> Jede Richtung ist an etwas angelehnt, das Wandernde und Vanreisende aus dem Alltag kennen: Tourenheft, Wanderwegweiser, Nationalpark-Plakat. Verspielt heißt hier: Die Form trägt Bedeutung (Rang, Stopp, Auswahl, Zeit), nicht zusätzlicher Schmuck.</li>
+    <li><b>Unverändert aus v1 (gilt für alle Richtungen):</b> eine Kopfzeile oben, die die Einstellungen öffnet; die Karte füllt den Bildschirm; nur zwei Kartenknöpfe (Ebene, Standort); ein Blatt mit drei Höhen, dessen fester Fuß die Zeitleiste in der Daumenzone ist; ein Abspielknopf für Wetterverlauf und Route, Stopps als Marken auf dem Schieber; Suche und Kartenebene im selben Blatt, Seltenes eingeklappt.</li>
+  </ul>
+  <p class="avoid"><b>Nicht verwendet:</b> Inter, Space Grotesk, Instrument Serif, JetBrains Mono, Fraunces, Newsreader, Playfair, Clash Display, Satoshi, Cabinet Grotesk, IBM Plex, Source Sans 3, Bricolage, Roboto/Open Sans/Lato/Arial, Geist, DM Sans/Serif, Manrope, Outfit, Plus Jakarta Sans, Sora, Poppins, General Sans, Lora. Begründung: <a href="261024_Recherche%20Schriften.md">Recherche Schriften</a>. Auch dieses Dokument selbst ist in Atkinson Hyperlegible Next gesetzt.</p>
+
+  <!-- ───────────── C+ ───────────── -->
+  <section class="dir" data-dir="P" id="c-plus">
+  <h2><span class="n">C+</span>Feldbuch: das Reisejournal, verspielter</h2>
+  <p class="thesis">Dein Reise-Notizbuch: Die Route ist mit Filzstift eingezeichnet, die Orte kleben als Sticker, und das Wetter ist kurz hingekritzelt.</p>
+  <dl class="spec">
+    <dt>Warum es passt</dt><dd>Viele Wandernde und Vanreisende führen ein Tourenheft. Karopapier mit rotem Rand kennt jeder aus der Schule, Sticker und Filzstift auch. Das ist persönlich und gut gelaunt. Die Messwerte stehen trotzdem in einer sehr gut lesbaren Druckschrift.</dd>
+    <dt>Anders als v1-C</dt><dd>C war ein gedruckter Reiseführer: Serife, Rot, ruhig. C+ ist selbst gemacht: Handschrift-Akzente, Sticker, ein Streifen Klebeband, kleine Kritzeleien. Gleiche Idee (die Reise als Tagebuch), andere Hand.</dd>
+    <dt>Schriften</dt><dd><b>Shantell Sans</b> für Überschriften, Rangzahlen, Tage und Scores: eine Filzstift-Schrift mit leichtem „Hüpfen“ (Achse BNCE 35). <b>Atkinson Hyperlegible Next</b> für Bedienung und alle Messwerte, mit Tabellenziffern. <b>Patrick Hand</b> nur für kurze Randnotizen („zieht nach Osten“). Regel: Handschrift nie unter 15 px und nie für Messwerte.<br>Pakete: <code>@fontsource-variable/shantell-sans</code> <code>@fontsource-variable/atkinson-hyperlegible-next</code> <code>@fontsource/patrick-hand</code></dd>
+    <dt>Form &amp; Material</dt><dd>Blatt und Desktop-Seite sind Karopapier; der rote Heftrand ist die Spalte für die Rang-Sticker. Sticker sind rund, gelb, mit weißem Schnittrand und leicht schief geklebt. Die Kopfzeile ist ein Zettel, minimal schräg. Knöpfe und Chips haben einen unregelmäßigen, „gezeichneten“ Rand. Die Zeitleiste ist durch eine Perforation abgetrennt, wie ein Abreißstreifen.</dd>
+    <dt>Zahlen &amp; Icons</dt><dd>Messwerte als ein Satz: „6,4 h Sonne · 10° · 0,7 mm · 17 km/h“. Neben dem Ortsnamen eine Kritzelei für das vorherrschende Wetter (Sonne, Wolke mit Regen, Mischung). Regen auf der Karte ist blaue Bleistift-Schraffur, doppelt schraffiert bei mehr Regen. Die gefahrene Strecke ist Filzstift, der Rest Bleistift-Punkte.</dd>
+    <dt>Schmuck mit Aufgabe</dt><dd>Genau drei: Der <b>Kringel</b> markiert den besten Ort. Das <b>Klebeband</b> markiert den aktiven Tag in der Zeitleiste. Der <b>Stern</b> markiert den Suchort. Sonst nichts, kein Stempel, keine Ränder.</dd>
+    <dt>Bewegung</dt><dd>Beim Abspielen wippt der Camper (±3°, 400 ms je Wipper, ease-in-out), solange er fährt, und steht bei Pause still. So sieht man „läuft gerade“ ohne Text. Bei reduzierter Bewegung: kein Wippen, der Camper springt von Stopp zu Stopp.</dd>
+  </dl>
+  <div class="specimen P">
+    <div class="hand" style="font-size:26px;font-weight:700;line-height:1.15">Neuenburg am Rhein</div>
+    <div style="font-size:15px">45 Punkte · 3,5 h Sonne · 11° · 5,8 mm · 15 km/h</div>
+    <div class="note" style="font-size:17px;color:var(--P-rain)">Regen zieht nach Osten</div>
+  </div>
+  <p class="swl">Hell</p>
+  <div class="sw"><span><i style="background:#f8f3e6"></i>Papier #f8f3e6</span><span><i style="background:#efe6d0"></i>Papier 2 #efe6d0</span><span><i style="background:#24263a"></i>Tinte #24263a</span><span><i style="background:#e0502a"></i>Filzstift #e0502a</span><span><i style="background:#ffd23f"></i>Sticker #ffd23f</span><span><i style="background:#2f67c9"></i>Regen #2f67c9</span><span><i style="background:#8fd0c2"></i>Klebeband #8fd0c2</span></div>
+  <p class="swl">Dunkel („Stirnlampe“)</p>
+  <div class="sw"><span><i style="background:#22201c"></i>Papier #22201c</span><span><i style="background:#2b2823"></i>Papier 2 #2b2823</span><span><i style="background:#f0e9d8"></i>Tinte #f0e9d8</span><span><i style="background:#ff7b4f"></i>Filzstift #ff7b4f</span><span><i style="background:#f2c744"></i>Sticker #f2c744</span><span><i style="background:#8db3ff"></i>Regen #8db3ff</span><span><i style="background:#4f8a7f"></i>Klebeband #4f8a7f</span></div>
+
+  <div class="frames">
+    <figure>
+      <div class="ph P" style="--sh:292px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#P-fov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum"><div><div class="t1">Rund um Freiburg</div><div class="t2">Sa 24.–Mo 26. Okt · Sightseeing</div></div><span class="ed">ändern</span></div>
+        <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+        <div class="sheet karo"><div class="grab"></div>
+          <div class="hd"><div class="h">10 Orte</div><span class="sort">sortiert: <b>Punkte</b> ▾</span></div>
+          <p class="note">Punkte 0–100, mehr ist besser</p>
+          <ol class="list">
+            <li class="e"><span class="stk" style="--r:-7deg">1</span><div class="tx"><b>Ettenheim<svg class="dood" aria-label="sonnig"><use href="#P-sun"/></svg></b><small>6,4 h Sonne · 10° · 0,7 mm · 17 km/h</small></div><span class="pt">58<svg class="ring" aria-hidden="true"><use href="#P-ring"/></svg></span></li>
+            <li class="e"><span class="stk" style="--r:5deg">2</span><div class="tx"><b>Neuenburg am Rhein<svg class="dood" aria-label="Regen"><use href="#P-rain"/></svg></b><small>3,5 h Sonne · 11° · 5,8 mm · 15 km/h</small></div><span class="pt">45</span></li>
+            <li class="e"><span class="stk" style="--r:-3deg">3</span><div class="tx"><b>Müllheim<svg class="dood" aria-label="Regen"><use href="#P-rain"/></svg></b><small>3,3 h Sonne · 11° · 6,1 mm · 17 km/h</small></div><span class="pt">43</span></li>
+          </ol>
+        </div>
+        <div class="dock"><button class="play" aria-label="Abspielen"><svg width="20" height="20"><use href="#i-play"/></svg></button>
+          <div class="tl"><div class="ro"><b>So 25. Okt · 16 Uhr</b><span>Vorhersage</span></div>
+            <div class="days"><span>Sa 24.</span><span class="on">So 25.</span><span>Mo 26.</span></div>
+            <svg class="rul" viewBox="0 0 300 26" aria-hidden="true"><rect class="past" x="0" y="4" width="42" height="13" rx="2"/><path class="base" d="M1 10.5C50 9.6 100 11.2 150 10.4S250 9.8 299 10.6" filter="url(#P-wob)"/><path class="tick" d="M12.5 8v5M25.0 8v5M37.5 8v5M50.0 8v5M62.5 8v5M75.0 8v5M87.5 8v5M112.5 8v5M125.0 8v5M137.5 8v5M150.0 8v5M162.5 8v5M175.0 8v5M187.5 8v5M212.5 8v5M225.0 8v5M237.5 8v5M250.0 8v5M262.5 8v5M275.0 8v5M287.5 8v5"/><path class="day" d="M1 4.5v12M100 4.5v12M200 4.5v12M299 4.5v12"/><circle cx="167" cy="10.5" r="9" filter="url(#P-sh)" style="fill:var(--P-sticker);stroke:var(--P-cut);stroke-width:2.5"/></svg>
+          </div></div>
+        <div class="hi"></div>
+      </div>
+      <figcaption><b>C+ · b Ergebnisse.</b> Rang-Sticker im Heftrand, Wetter als Kritzelei neben dem Namen, der beste Ort ist eingekringelt. Regen ist blaue Schraffur. Klebeband markiert den aktiven Tag, der gelbe Punkt ist der Schieber.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="ph P" style="--sh:150px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#P-rov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum"><div><div class="t1">Von Freiburg nach Mulhouse</div><div class="t2">Sa 24.–Mo 26. Okt · 3 Stopps · 63 km</div></div><span class="ed">ändern</span></div>
+        <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+        <div class="sheet karo"><div class="grab"></div>
+          <div class="stop"><span class="stk" style="--r:5deg">2</span><div class="k">Tag 2 <span>· So 25. Okt · 1 Nacht</span></div>
+            <div class="nm">Neuenburg am Rhein <svg class="dood" style="width:28px;height:28px;margin:0" aria-label="wechselhaft"><use href="#P-mix"/></svg></div>
+            <div class="d">51 Punkte · 3,2 h Sonne · 15°<br>2,2 mm · Wind 20 km/h</div></div></div>
+        <div class="dock"><button class="play" aria-label="Pause"><svg width="20" height="20"><use href="#i-pause"/></svg></button>
+          <div class="tl"><div class="ro"><b>So 25. Okt · 10:20</b><span>unterwegs nach Neuenburg</span></div>
+            <div class="days"><span>Sa 24.</span><span class="on">So 25.</span><span>Mo 26.</span></div>
+            <svg class="rul" viewBox="0 0 300 26" aria-hidden="true"><path class="base" d="M1 12C50 11.1 100 12.7 150 11.9S250 11.3 299 12.1" filter="url(#P-wob)"/><path class="tick" d="M12.5 9.5v5M25.0 9.5v5M37.5 9.5v5M50.0 9.5v5M62.5 9.5v5M75.0 9.5v5M87.5 9.5v5M112.5 9.5v5M125.0 9.5v5M137.5 9.5v5M150.0 9.5v5M162.5 9.5v5M175.0 9.5v5M187.5 9.5v5M212.5 9.5v5M225.0 9.5v5M237.5 9.5v5M250.0 9.5v5M262.5 9.5v5M275.0 9.5v5M287.5 9.5v5"/><path class="day" d="M1 6v12M100 6v12M200 6v12M299 6v12"/>
+              <g style="font:800 8.5px 'Shantell Sans',cursive;text-anchor:middle;fill:var(--P-stickerInk)"><g transform="translate(42 21)"><circle r="6.2" style="fill:var(--P-sticker);stroke:var(--P-cut);stroke-width:1.6"/><text y="3">1</text></g><g transform="translate(150 21)"><circle r="6.2" style="fill:var(--P-sticker);stroke:var(--P-cut);stroke-width:1.6"/><text y="3">2</text></g><g transform="translate(250 21)"><circle r="6.2" style="fill:var(--P-sticker);stroke:var(--P-cut);stroke-width:1.6"/><text y="3">3</text></g></g>
+              <g transform="translate(143 4.2) scale(.62)"><use href="#P-van"/></g></svg>
+          </div></div>
+        <div class="hi"></div>
+      </div>
+      <figcaption><b>C+ · c Route abspielen.</b> Filzstift = gefahren, Bleistift-Punkte = kommt noch. Der Camper ist zugleich der Schieber der Zeitleiste; die Stopp-Sticker darunter springen beim Antippen zum Stopp.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="ph P" style="--dock:104px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/></g></svg></div>
+        <div class="dim"></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sheet karo" style="top:56px;height:auto"><div class="grab"></div>
+          <div class="hd"><div class="h">Suche anpassen</div><span class="sort"><b>Fertig</b></span></div>
+          <div class="tabs2" style="margin-top:8px"><span class="tab on">Bestes Wetter</span><span class="tab">Route</span></div>
+          <div class="opt">Ort oder Gebiet <span>Freiburg im Breisgau ›</span></div>
+          <div class="opt">Zeitraum <span>Sa 24.–Mo 26. Okt ›</span></div>
+          <div class="lbl note">Wetterprofil</div>
+          <div class="chips"><span class="chip">Strand</span><span class="chip">Wandern</span><span class="chip on">Sightseeing</span><span class="chip">Eigenes</span></div>
+          <div class="opt">Weitere Optionen <span>Umkreis 40 km, Tageszeit ›</span></div>
+          <div class="lbl note">Kartenebene</div>
+          <div class="opt">Wolken &amp; Regen <span class="tog" role="img" aria-label="an"></span></div>
+          <div class="opt">Legende und Quellen <span>›</span></div>
+        </div>
+        <div class="dock" style="z-index:5"><button class="cta">Wetter vergleichen</button></div>
+        <div class="hi"></div>
+      </div>
+      <figcaption><b>C+ · d Einstellungen.</b> Modus als Register-Reiter, Profil als gezeichnete Chips (gewählt = Sticker-Gelb). Kartenebene im selben Blatt. Der Fuß wird zum Hauptknopf in der Daumenzone.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Bewegung: Camper wippt beim Fahren</h3>
+  <div class="motion P" role="img" aria-label="Drei Momentaufnahmen: Camper neigt sich nach links, steht gerade, neigt sich nach rechts">
+    <figure><div class="mf karo"><svg viewBox="0 0 150 104" width="150" height="104"><path d="M10 74C50 70 100 76 140 72" style="fill:none;stroke:var(--P-marker);stroke-width:5;stroke-linecap:round;opacity:.9"/><g transform="translate(60 60) rotate(-3) scale(1.4)"><use href="#P-van"/></g></svg></div><figcaption>0 ms · −3°</figcaption></figure>
+    <figure><div class="mf karo"><svg viewBox="0 0 150 104" width="150" height="104"><path d="M10 74C50 70 100 76 140 72" style="fill:none;stroke:var(--P-marker);stroke-width:5;stroke-linecap:round;opacity:.9"/><g transform="translate(75 58) scale(1.4)"><use href="#P-van"/></g></svg></div><figcaption>200 ms · 0°, 1 px hoch</figcaption></figure>
+    <figure><div class="mf karo"><svg viewBox="0 0 150 104" width="150" height="104"><path d="M10 74C50 70 100 76 140 72" style="fill:none;stroke:var(--P-marker);stroke-width:5;stroke-linecap:round;opacity:.9"/><g transform="translate(90 60) rotate(3) scale(1.4)"><use href="#P-van"/></g></svg></div><figcaption>400 ms · +3°</figcaption></figure>
+  </div>
+
+  <figure class="wide" style="margin-top:28px">
+    <div class="dk P">
+      <div class="map"><svg viewBox="-480 -10 1100 687.5" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#geo"/><use href="#P-fov"/></svg></div>
+      <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+      <div class="panel karo">
+        <div class="sum"><div><div class="t1">Rund um Freiburg</div><div class="t2">Sa 24.–Mo 26. Okt · Sightseeing</div></div><span class="ed">ändern</span></div>
+        <div class="hd"><div class="h">10 Orte</div><span class="sort">sortiert: <b>Punkte</b> ▾</span></div>
+        <p class="note" style="margin:0;padding:0 16px 6px 64px;font-size:16px;color:var(--P-ink2)">Punkte 0–100, mehr ist besser</p>
+        <ol class="list">
+          <li class="e"><span class="stk" style="--r:-7deg">1</span><div class="tx"><b>Ettenheim<svg class="dood" aria-label="sonnig"><use href="#P-sun"/></svg></b><small>6,4 h Sonne · 10° · 0,7 mm · 17 km/h</small></div><span class="pt">58<svg class="ring" aria-hidden="true"><use href="#P-ring"/></svg></span></li>
+          <li class="e"><span class="stk" style="--r:5deg">2</span><div class="tx"><b>Neuenburg am Rhein<svg class="dood" aria-label="Regen"><use href="#P-rain"/></svg></b><small>3,5 h Sonne · 11° · 5,8 mm · 15 km/h</small></div><span class="pt">45</span></li>
+          <li class="e"><span class="stk" style="--r:-3deg">3</span><div class="tx"><b>Müllheim<svg class="dood" aria-label="Regen"><use href="#P-rain"/></svg></b><small>3,3 h Sonne · 11° · 6,1 mm · 17 km/h</small></div><span class="pt">43</span></li>
+          <li class="e ske"><span class="stk" style="--r:4deg">4</span><div class="tx"><i style="width:120px"></i><i style="width:210px"></i></div><span class="pt"></span></li>
+          <li class="e ske"><span class="stk" style="--r:-5deg">5</span><div class="tx"><i style="width:90px"></i><i style="width:200px"></i></div><span class="pt"></span></li>
+          <li class="e ske"><span class="stk" style="--r:2deg">6</span><div class="tx"><i style="width:140px"></i><i style="width:205px"></i></div><span class="pt"></span></li>
+        </ol>
+        <div class="more">Einträge 4–10: Platzhalter</div>
+      </div>
+      <div class="dock"><button class="play" aria-label="Abspielen"><svg width="20" height="20"><use href="#i-play"/></svg></button>
+        <div class="tl"><div class="ro"><b>So 25. Okt · 16 Uhr</b><span>Vorhersage · Wolken: Open-Meteo, Regen: DWD</span></div>
+          <div class="days"><span>Samstag, 24.</span><span class="on">Sonntag, 25.</span><span>Montag, 26.</span></div>
+          <svg class="rul" viewBox="0 0 876 26" aria-hidden="true"><rect class="past" x="0" y="4" width="122" height="13" rx="2"/><path class="base" d="M1 10.5C150 9.6 290 11.2 440 10.4S730 9.8 875 10.6" filter="url(#P-wob)"/><path class="tick" d="M36.5 8v5M73.0 8v5M109.5 8v5M146.0 8v5M182.5 8v5M219.0 8v5M255.5 8v5M328.5 8v5M365.0 8v5M401.5 8v5M438.0 8v5M474.5 8v5M511.0 8v5M547.5 8v5M620.5 8v5M657.0 8v5M693.5 8v5M730.0 8v5M766.5 8v5M803.0 8v5M839.5 8v5"/><path class="day" d="M1 4.5v12M292 4.5v12M584 4.5v12M875 4.5v12"/><circle cx="487" cy="10.5" r="9" filter="url(#P-sh)" style="fill:var(--P-sticker);stroke:var(--P-cut);stroke-width:2.5"/></svg>
+        </div></div>
+    </div>
+    <figcaption><b>C+ · Desktop, Ergebnisse</b> (1440 × 900, verkleinert). Links eine Heftseite mit Rand, rechts die Karte. Die Zeitleiste ist der Abreißstreifen unter der Karte.</figcaption>
+  </figure>
+  </section>
+
+  <!-- ───────────── D ───────────── -->
+  <section class="dir" data-dir="D" id="d-wegweiser">
+  <h2><span class="n">D</span>Wegweiser</h2>
+  <p class="thesis">Die App spricht die Sprache der Wanderwege: gelbe Wegweiser mit Ziel und Zahl, weiß-rot-weiße Markierung, Höhenlinien.</p>
+  <dl class="spec">
+    <dt>Warum es passt</dt><dd>Gelbe Wegweiser kennt jeder, der in der Schweiz oder im Schwarzwald wandert. Ein Wegweiser beantwortet genau die Frage der App: Wohin, und wie gut? „Ettenheim · 58“ liest sich wie „Ettenheim · 2 h 15 min“. Für Vanreisende kommt das Wohnmobil-Piktogramm aus dem Straßenverkehr dazu. Verspielt ist die Form, nicht die Deko.</dd>
+    <dt>Schriften</dt><dd><b>Big Shoulders Display</b> (schmal und kräftig wie Schilderschrift) für Ortsnamen auf den Armen, Tage und Überschriften. <b>Overpass</b> (angelehnt an die US-Autobahnschrift) für Bedienung und alle Zahlen, mit Tabellenziffern. Big Shoulders hat keine Tabellenziffern und wird deshalb nie für Zahlen in Spalten benutzt.<br>Pakete: <code>@fontsource-variable/big-shoulders-display</code> <code>@fontsource-variable/overpass</code></dd>
+    <dt>Form &amp; Material</dt><dd>Wegweiser-Arme mit Spitze (eine Form, per clip-path), die Kopfzeile als weiße Standorttafel mit schwarzem Rand und Höhenangabe. 2-px-Konturen statt Schatten, Radius 4 px. Ein grauer Mast links hält die Arme zusammen; so wird die Liste zu einem einzigen Wegweiser.</dd>
+    <dt>Zahlen &amp; Icons</dt><dd>Jeder Arm: Ort, Luftlinie mit Himmelsrichtung, Score. Darunter die Messwerte. Der gewählte Ort trägt die weiß-rot-weiße Spitze der Bergwanderwege, in Liste und Karte. Auf der Karte zeigen kleine Fähnchen mit dem Score. Regen ist ein blaues Punktraster wie Gewässer auf Topokarten. Stopps sind gelbe Rauten (wie die Wegzeichen im Schwarzwald), die gefahrene Strecke ist weiß-rot-weiß markiert, der Camper ist ein Verkehrszeichen. Die Zeitleiste ist ein Maßstabsbalken mit schwarz-weißen Blöcken à 6 Stunden.</dd>
+    <dt>Ehrlich bleiben</dt><dd>Die Entfernungen sind Luftlinie ab Freiburg, aus den Koordinaten gerechnet und gerundet (Ettenheim 29 km N, Neuenburg 30 km SW, Müllheim 27 km SW). Fahrzeiten zeigt D nicht, weil die App sie für den Wetter-Finder nicht berechnet.</dd>
+    <dt>Bewegung</dt><dd>Beim Umsortieren klappen die Arme um den Mast wie ein drehbarer Wegweiser: Jeder Arm dreht 90° weg, die neue Reihenfolge dreht zurück (je 110 ms, 30 ms versetzt, ease-out). Man sieht: Die Reihenfolge hat sich geändert, nicht der Inhalt. Bei reduzierter Bewegung: kurzes Überblenden (150 ms).</dd>
+  </dl>
+  <div class="specimen D">
+    <div style="display:flex;max-width:360px"><div class="arm"><span class="nm">Neuenburg am Rhein</span><span class="sc">45</span></div></div>
+    <div style="font-size:15px">3,5 h Sonne<i class="sep">·</i>11°<i class="sep">·</i>5,8 mm<i class="sep">·</i>15 km/h<i class="sep">·</i>30 km Luftlinie</div>
+  </div>
+  <p class="swl">Hell</p>
+  <div class="sw"><span><i style="background:#ffcc00"></i>Wegweiser #ffcc00</span><span><i style="background:#141414"></i>Schrift #141414</span><span><i style="background:#ffffff"></i>Tafel #ffffff</span><span><i style="background:#f6f4ec"></i>Blatt #f6f4ec</span><span><i style="background:#d22a1d"></i>Markierung #d22a1d</span><span><i style="background:#d9bf98"></i>Höhenlinie #d9bf98</span><span><i style="background:#2f7fc8"></i>Regen #2f7fc8</span></div>
+  <p class="swl">Dunkel („Nachtwanderung“: Schilder bleiben gelb wie reflektierend)</p>
+  <div class="sw"><span><i style="background:#ffcc00"></i>Wegweiser #ffcc00</span><span><i style="background:#f1efe6"></i>Schrift #f1efe6</span><span><i style="background:#1d1e1c"></i>Tafel #1d1e1c</span><span><i style="background:#161715"></i>Blatt #161715</span><span><i style="background:#ff5a4a"></i>Markierung #ff5a4a</span><span><i style="background:#46392a"></i>Höhenlinie #46392a</span><span><i style="background:#6fb2ff"></i>Regen #6fb2ff</span></div>
+
+  <div class="frames">
+    <figure>
+      <div class="ph D" style="--sh:308px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#D-fov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum"><div><div class="t1">Freiburg im Breisgau<span class="alt">278 m</span></div><div class="t2">Sa 24.–Mo 26. Okt<i class="sep">·</i>Sightseeing</div></div><span class="ed">ändern</span></div>
+        <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+        <div class="sheet"><div class="grab"></div>
+          <div class="hd"><div class="h">10 Ziele</div><span class="sort">Punkte ▾</span></div>
+          <div class="post">
+            <div class="armw sel"><div class="arm"><span class="nm">Ettenheim</span><span class="km"><svg style="transform:rotate(-6deg)"><use href="#D-arr"/></svg>29 km</span><span class="sc">58</span></div></div>
+            <div class="det">6,4 h Sonne<i class="sep">·</i>10°<i class="sep">·</i>0,7 mm<i class="sep">·</i>17 km/h</div>
+            <div class="arm"><span class="nm">Neuenburg am Rhein</span><span class="km"><svg style="transform:rotate(227deg)"><use href="#D-arr"/></svg>30 km</span><span class="sc">45</span></div>
+            <div class="det">3,5 h Sonne<i class="sep">·</i>11°<i class="sep">·</i>5,8 mm<i class="sep">·</i>15 km/h</div>
+            <div class="arm"><span class="nm">Müllheim</span><span class="km"><svg style="transform:rotate(218deg)"><use href="#D-arr"/></svg>27 km</span><span class="sc">43</span></div>
+            <div class="det">3,3 h Sonne<i class="sep">·</i>11°<i class="sep">·</i>6,1 mm<i class="sep">·</i>17 km/h</div>
+          </div>
+        </div>
+        <div class="dock"><button class="play" aria-label="Abspielen"><svg width="20" height="20"><use href="#i-play"/></svg></button>
+          <div class="tl"><div class="ro"><b>So 25.10.<i class="sep">·</i>16:00</b><span>Vorhersage</span></div>
+            <svg class="scale" viewBox="0 0 300 42" aria-hidden="true"><g class="blk"><rect x="0.0" y="12" width="25.0" height="7"/><rect x="50.0" y="12" width="25.0" height="7"/><rect x="100.0" y="12" width="25.0" height="7"/><rect x="150.0" y="12" width="25.0" height="7"/><rect x="200.0" y="12" width="25.0" height="7"/><rect x="250.0" y="12" width="25.0" height="7"/></g><rect class="frame" x=".6" y="12" width="298.8" height="7"/><line class="now" x1="42" y1="5" x2="42" y2="24"/><line x1="167" y1="9" x2="167" y2="23" style="stroke:var(--D-ink);stroke-width:2"/><path class="ptr" d="M159.5 1h15l-7.5 9z"/><text class="dl" x="0" y="38">SA 24.</text><text class="dl" x="100" y="38">SO 25.</text><text class="dl" x="200" y="38">MO 26.</text></svg>
+          </div></div>
+        <div class="hi"></div>
+      </div>
+      <figcaption><b>D · b Ergebnisse.</b> Die Liste ist ein Wegweiser: ein Arm pro Ort mit Luftlinie, Richtung und Score. Weiß-rot-weiß = gewählt. Die Zeitleiste ist ein Maßstabsbalken, das gelbe Dreieck ist der Schieber.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="ph D" style="--sh:184px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#D-rov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum"><div><div class="t1">Freiburg → Mulhouse</div><div class="t2">Sa 24.–Mo 26. Okt<i class="sep">·</i>3 Stopps<i class="sep">·</i>63 km</div></div><span class="ed">ändern</span></div>
+        <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+        <div class="sheet"><div class="grab"></div>
+          <div class="hd"><div class="h" style="font-size:21px">Tag 2 · So 25. Okt · 1 Nacht</div></div>
+          <div class="post">
+            <div class="armw sel"><div class="arm"><span class="nm">Neuenburg am Rhein</span><span class="sc">51</span></div></div>
+            <div class="det">3,2 h Sonne<i class="sep">·</i>15°<i class="sep">·</i>2,2 mm<i class="sep">·</i>20 km/h</div>
+            <div class="arm dim2"><span class="nm">Mulhouse · Tag 3</span></div>
+          </div>
+        </div>
+        <div class="dock"><button class="play" aria-label="Pause"><svg width="20" height="20"><use href="#i-pause"/></svg></button>
+          <div class="tl"><div class="ro"><b>So 25.10.<i class="sep">·</i>10:20</b><span>unterwegs nach Neuenburg</span></div>
+            <svg class="scale" viewBox="0 0 300 42" aria-hidden="true"><g class="blk"><rect x="0.0" y="12" width="25.0" height="7"/><rect x="50.0" y="12" width="25.0" height="7"/><rect x="100.0" y="12" width="25.0" height="7"/><rect x="150.0" y="12" width="25.0" height="7"/><rect x="200.0" y="12" width="25.0" height="7"/><rect x="250.0" y="12" width="25.0" height="7"/></g><rect class="frame" x=".6" y="12" width="298.8" height="7"/><g><path class="rh" d="M42 20l6 6-6 6-6-6z"/><path class="rh" d="M150 20l6 6-6 6-6-6z"/><path class="rh" d="M250 20l6 6-6 6-6-6z"/><text class="rhn" x="42" y="29.3">1</text><text class="rhn" x="150" y="29.3">2</text><text class="rhn" x="250" y="29.3">3</text></g><line x1="143" y1="9" x2="143" y2="21" style="stroke:var(--D-ink);stroke-width:2"/><path class="ptr" d="M135.5 1h15l-7.5 9z"/><text class="dl" x="0" y="40">SA 24.</text><text class="dl" x="100" y="40">SO 25.</text><text class="dl" x="200" y="40">MO 26.</text></svg>
+          </div></div>
+        <div class="hi"></div>
+      </div>
+      <figcaption><b>D · c Route abspielen.</b> Gefahrenes ist weiß-rot-weiß markiert wie ein Wanderweg, der Rest gestrichelt. Stopps sind gelbe Rauten auf Karte und Maßstab, der Camper ist ein Verkehrszeichen. Im Blatt: aktueller Stopp als Arm, der nächste blass darunter.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Bewegung: Arme klappen beim Umsortieren</h3>
+  <div class="motion D" role="img" aria-label="Drei Momentaufnahmen: Arme nach Punkten sortiert, Arme halb gedreht, Arme nach Temperatur sortiert">
+    <figure><div class="mf" style="background:var(--D-sheet)"><svg viewBox="0 0 150 104" width="150" height="104"><rect x="14" y="8" width="5" height="96" style="fill:var(--D-post)"/><g style="fill:#ffcc00"><polygon points="19,14 124,14 134,24 124,34 19,34"/><polygon points="19,42 124,42 134,52 124,62 19,62"/><polygon points="19,70 124,70 134,80 124,90 19,90"/></g><g style="font:800 13px 'Big Shoulders Display',sans-serif;fill:#141414"><text x="25" y="29">Ettenheim</text><text x="25" y="57">Neuenburg</text><text x="25" y="85">Müllheim</text></g><g style="font:800 11px 'Overpass',sans-serif;fill:#141414;text-anchor:end"><text x="120" y="28.5">58</text><text x="120" y="56.5">45</text><text x="120" y="84.5">43</text></g></svg></div><figcaption>0 ms · nach Punkten</figcaption></figure>
+    <figure><div class="mf" style="background:var(--D-sheet)"><svg viewBox="0 0 150 104" width="150" height="104"><rect x="14" y="8" width="5" height="96" style="fill:var(--D-post)"/><g style="fill:#ffcc00"><polygon points="19,14 44,16 47,24 44,32 19,34"/><polygon points="19,42 52,44 55,52 52,60 19,62"/><polygon points="19,70 60,72 63,80 60,88 19,90"/></g><g style="fill:#b38f00"><rect x="19" y="14" width="3" height="20"/><rect x="19" y="42" width="3" height="20"/><rect x="19" y="70" width="3" height="20"/></g></svg></div><figcaption>110 ms · Arme gedreht, 30 ms versetzt</figcaption></figure>
+    <figure><div class="mf" style="background:var(--D-sheet)"><svg viewBox="0 0 150 104" width="150" height="104"><rect x="14" y="8" width="5" height="96" style="fill:var(--D-post)"/><g style="fill:#ffcc00"><polygon points="19,14 124,14 134,24 124,34 19,34"/><polygon points="19,42 124,42 134,52 124,62 19,62"/><polygon points="19,70 124,70 134,80 124,90 19,90"/></g><g style="font:800 13px 'Big Shoulders Display',sans-serif;fill:#141414"><text x="25" y="29">Neuenburg</text><text x="25" y="57">Müllheim</text><text x="25" y="85">Ettenheim</text></g><g style="font:800 11px 'Overpass',sans-serif;fill:#141414;text-anchor:end"><text x="120" y="28.5">11°</text><text x="120" y="56.5">11°</text><text x="120" y="84.5">10°</text></g></svg></div><figcaption>220 ms · nach Temperatur</figcaption></figure>
+  </div>
+
+  <figure class="wide" style="margin-top:28px">
+    <div class="dk D">
+      <div class="map"><svg viewBox="-480 -10 1100 687.5" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#geo"/><use href="#D-fov"/></svg></div>
+      <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+      <div class="panel">
+        <div class="sum"><div><div class="t1">Freiburg im Breisgau<span class="alt">278 m</span></div><div class="t2">Sa 24.–Mo 26. Okt<i class="sep">·</i>Sightseeing</div></div><span class="ed">ändern</span></div>
+        <div class="hd"><div class="h">10 Ziele</div><span class="sort">Punkte ▾</span></div>
+        <div class="post">
+          <div class="armw sel"><div class="arm"><span class="nm">Ettenheim</span><span class="km"><svg style="transform:rotate(-6deg)"><use href="#D-arr"/></svg>29 km</span><span class="sc">58</span></div></div>
+          <div class="det">6,4 h Sonne<i class="sep">·</i>10°<i class="sep">·</i>0,7 mm<i class="sep">·</i>17 km/h</div>
+          <div class="arm"><span class="nm">Neuenburg am Rhein</span><span class="km"><svg style="transform:rotate(227deg)"><use href="#D-arr"/></svg>30 km</span><span class="sc">45</span></div>
+          <div class="det">3,5 h Sonne<i class="sep">·</i>11°<i class="sep">·</i>5,8 mm<i class="sep">·</i>15 km/h</div>
+          <div class="arm"><span class="nm">Müllheim</span><span class="km"><svg style="transform:rotate(218deg)"><use href="#D-arr"/></svg>27 km</span><span class="sc">43</span></div>
+          <div class="det">3,3 h Sonne<i class="sep">·</i>11°<i class="sep">·</i>6,1 mm<i class="sep">·</i>17 km/h</div>
+          <div class="ske"><div class="arm"></div><div class="det">–</div><div class="arm"></div><div class="det">–</div><div class="arm"></div><div class="det">Ziele 4–10: Platzhalter</div></div>
+        </div>
+      </div>
+      <div class="dock"><button class="play" aria-label="Abspielen"><svg width="20" height="20"><use href="#i-play"/></svg></button>
+        <div class="tl"><div class="ro"><b>So 25.10.<i class="sep">·</i>16:00</b><span>Vorhersage<i class="sep">·</i>Wolken: Open-Meteo, Regen: DWD</span></div>
+          <svg class="scale" viewBox="0 0 880 42" aria-hidden="true"><g class="blk"><rect x="0.0" y="12" width="73.3" height="7"/><rect x="146.7" y="12" width="73.3" height="7"/><rect x="293.3" y="12" width="73.3" height="7"/><rect x="440.0" y="12" width="73.3" height="7"/><rect x="586.7" y="12" width="73.3" height="7"/><rect x="733.3" y="12" width="73.3" height="7"/></g><rect class="frame" x=".6" y="12" width="878.8" height="7"/><line class="now" x1="122" y1="5" x2="122" y2="24"/><line x1="489" y1="9" x2="489" y2="23" style="stroke:var(--D-ink);stroke-width:2"/><path class="ptr" d="M481.5 1h15l-7.5 9z"/><text class="dl" x="0" y="38">SAMSTAG 24.</text><text class="dl" x="293" y="38">SONNTAG 25.</text><text class="dl" x="587" y="38">MONTAG 26.</text></svg>
+        </div></div>
+    </div>
+    <figcaption><b>D · Desktop, Ergebnisse</b> (1440 × 900, verkleinert). Der Wegweiser steht links am Kartenrand, der Maßstabsbalken läuft unter der ganzen Karte.</figcaption>
+  </figure>
+  </section>
+
+  <!-- ───────────── E ───────────── -->
+  <section class="dir" data-dir="E" id="e-poster">
+  <h2><span class="n">E</span>Nationalpark-Poster</h2>
+  <p class="thesis">Wie ein Siebdruck-Plakat aus dem Nationalpark: drei kräftige Farben, die sich überlagern, und das Wetter als einfache, fette Zeichen.</p>
+  <dl class="spec">
+    <dt>Warum es passt</dt><dd>Retro-Plakate von Nationalparks hängen in vielen Vans und Hütten; sie stehen für Draußensein und Fernweh. Ein Plakat arbeitet mit wenigen Farben und klaren Zeichen. Das passt zu einer App, die eine Antwort gibt: Sonne hier, Regen da.</dd>
+    <dt>Schriften</dt><dd><b>Young Serif</b> (warm, 70er-Jahre) für Ortsnamen, Überschriften und Scores; sie hat Tabellenziffern, aber nur einen Schnitt. <b>Caprasimo</b> nur für das Logo und große Leerzustände. <b>Schibsted Grotesk</b> für Bedienung und Messwerte, mit Tabellenziffern.<br>Pakete: <code>@fontsource/young-serif</code> <code>@fontsource/caprasimo</code> <code>@fontsource-variable/schibsted-grotesk</code></dd>
+    <dt>Form &amp; Material</dt><dd>Drei Druckfarben auf Papier: Tannengrün, Sonnenorange, Himmelblau. Wo sie sich überlagern, mischen sie sich wie im Siebdruck (mix-blend-mode multiply, im Dunkelmodus screen). Schwebende Teile haben einen versetzten orangen Rand statt Schatten, wie ein leicht verrutschter Druck; das ist die einzige Tiefe in E. Körnung nur auf Kopfband und Zeitleiste, nie auf der Karte. Runde, kräftige Formen, Radius 8–18 px.</dd>
+    <dt>Zahlen &amp; Icons</dt><dd>Ein großes Wetterzeichen pro Ort (Sonne, Wolke mit Tropfen, Mischung), der Score groß in Young Serif. Die Sonne über dem Kopfband zeigt das Wetter des besten Orts; wäre der beste Ort verregnet, stünde dort eine Wolke. Die Karte bleibt ruhig: helles Papier, Regen als blaue Lasur, Zeichen nur an den Ergebnisorten. Beim Abspielen zeigt ein kleines Plakat im Blatt die aktuelle Etappe mit dem Camper.</dd>
+    <dt>Bewegung</dt><dd>Erreicht der Camper einen Stopp, wird der Tag gestempelt: Der Stempel fällt von 1,25 auf 1 (160 ms, ease-out) und dreht dabei auf −6°. Das bestätigt „angekommen“. Bei reduzierter Bewegung erscheint der Stempel ohne Skalierung.</dd>
+  </dl>
+  <div class="specimen E">
+    <div class="logo" style="font-size:34px;line-height:1;color:var(--E-ink)">WeatherChaser</div>
+    <div class="serif" style="font-size:26px;line-height:1.15">Neuenburg am Rhein <span style="color:var(--E-orange)">45</span></div>
+    <div style="font-size:15px">3,5 h Sonne · 11° · 5,8 mm · 15 km/h</div>
+  </div>
+  <p class="swl">Hell</p>
+  <div class="sw"><span><i style="background:#f1e6cc"></i>Papier #f1e6cc</span><span><i style="background:#1f4a3a"></i>Tannengrün #1f4a3a</span><span><i style="background:#ee7d2b"></i>Sonne #ee7d2b</span><span><i style="background:#3c7bb6"></i>Himmel #3c7bb6</span><span><i style="background:#1a3b2f"></i>Text #1a3b2f</span><span><i style="background:#f6ecd5"></i>Creme #f6ecd5</span></div>
+  <p class="swl">Dunkel („Nachtplakat“, Überdruck mit screen)</p>
+  <div class="sw"><span><i style="background:#11201a"></i>Papier #11201a</span><span><i style="background:#2b5b48"></i>Tannengrün #2b5b48</span><span><i style="background:#f39a45"></i>Sonne #f39a45</span><span><i style="background:#79abd9"></i>Himmel #79abd9</span><span><i style="background:#f0e4c8"></i>Text #f0e4c8</span><span><i style="background:#f6ecd5"></i>Creme #f6ecd5</span></div>
+
+  <div class="frames">
+    <figure>
+      <div class="ph E" style="--sh:252px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#E-fov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum"><div><div class="t1">Rund um Freiburg</div><div class="t2">Sa 24.–Mo 26. Okt · Sightseeing</div></div><span class="ed">ändern</span></div>
+        <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+        <div class="sheet"><svg class="sunhd" viewBox="0 0 40 40" aria-hidden="true"><use href="#E-sun"/></svg>
+          <div class="clip">
+            <div class="band grain"><span class="grab"></span><span class="h">10 Orte</span><span class="sort">Punkte ▾</span></div>
+            <div class="e"><svg class="sym" aria-label="sonnig"><use href="#E-sun"/></svg><div class="tx"><b>Ettenheim</b><small>6,4 h Sonne · 10° · 0,7 mm · 17 km/h</small></div><span class="pt">58</span></div>
+            <div class="e"><svg class="sym" aria-label="Regen"><use href="#E-rain"/></svg><div class="tx"><b>Neuenburg am Rhein</b><small>3,5 h Sonne · 11° · 5,8 mm · 15 km/h</small></div><span class="pt">45</span></div>
+            <div class="e"><svg class="sym" aria-label="Regen"><use href="#E-rain"/></svg><div class="tx"><b>Müllheim</b><small>3,3 h Sonne · 11° · 6,1 mm · 17 km/h</small></div><span class="pt">43</span></div>
+          </div>
+        </div>
+        <div class="dock grain"><button class="play" aria-label="Abspielen"><svg width="20" height="20"><use href="#i-play"/></svg></button>
+          <div class="tl"><div class="ro"><b>So 25. Okt, 16:00</b><span>Vorhersage</span></div>
+            <svg class="trk" viewBox="0 0 300 38" aria-hidden="true"><line class="base" x1="4" y1="11" x2="296" y2="11"/><line class="fill" x1="4" y1="11" x2="167" y2="11"/><path class="tk" d="M100 4v14M200 4v14"/><circle cx="167" cy="11" r="11" style="fill:var(--E-paper);stroke:var(--E-green);stroke-width:2.5"/><use href="#E-sun" x="157" y="1" width="20" height="20"/><text x="0" y="35">SA 24.</text><text x="100" y="35">SO 25.</text><text x="200" y="35">MO 26.</text></svg>
+          </div></div>
+        <div class="hi"></div>
+      </div>
+      <figcaption><b>E · b Ergebnisse.</b> Kopfband wie ein Plakattitel; die Sonne darüber überdruckt Band und Karte und zeigt das Wetter des besten Orts. Ein Zeichen und ein großer Score pro Ort. Der Schieber ist eine kleine Sonne.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="ph E" style="--sh:184px">
+        <div class="map"><svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(-40 0)"><use href="#geo"/><use href="#E-rov"/></g></svg></div>
+        <div class="sb"><span>9:41</span><svg width="68" height="12"><use href="#sbar"/></svg></div>
+        <div class="sum"><div><div class="t1">Von Freiburg nach Mulhouse</div><div class="t2">Sa 24.–Mo 26. Okt · 3 Stopps · 63 km</div></div><span class="ed">ändern</span></div>
+        <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+        <div class="sheet"><div class="clip">
+          <svg class="leg" viewBox="0 0 390 76" preserveAspectRatio="none" aria-label="Etappe Freiburg bis Neuenburg am Rhein, Camper kurz vor dem Ziel">
+            <rect width="390" height="76" style="fill:var(--E-paper2)"/>
+            <circle cx="300" cy="24" r="16" style="fill:var(--E-orange)"/>
+            <path d="M0 50C40 30 80 24 120 38S200 22 250 34 330 26 390 36V76H0z" style="fill:var(--E-green)"/>
+            <path d="M0 60C60 48 120 52 180 58S300 46 390 54V76H0z" style="fill:var(--E-blue);mix-blend-mode:var(--E-blend);opacity:.9"/>
+            <path d="M18 66H372" style="stroke:var(--E-cream);stroke-width:2.5;stroke-dasharray:7 5"/>
+            <circle cx="18" cy="66" r="5" style="fill:var(--E-cream)"/><circle cx="372" cy="66" r="5" style="fill:var(--E-cream)"/>
+            <g transform="translate(336 58) scale(.9)"><use href="#E-van"/></g>
+            <g style="font:700 11px 'Schibsted Grotesk',sans-serif;fill:var(--E-cream)"><text x="12" y="54">Freiburg</text><text x="372" y="46" text-anchor="end">Neuenburg</text></g>
+            <g transform="translate(46 30) rotate(-8)" style="fill:none;stroke:var(--E-orange);stroke-width:2"><circle r="17"/><circle r="13" style="stroke-width:1;stroke-dasharray:2 2"/><text y="4" style="fill:var(--E-orange);stroke:none;font:800 10px 'Schibsted Grotesk',sans-serif;text-anchor:middle">TAG 1</text></g>
+          </svg>
+          <span style="position:absolute;left:50%;top:6px;width:38px;height:4px;margin-left:-19px;border-radius:2px;background:var(--E-ink);opacity:.35"></span>
+          <div class="stop" style="padding-top:10px"><div class="k">Tag 2 · So 25. Okt · 1 Nacht</div>
+            <div class="nm">Neuenburg am Rhein</div>
+            <div class="d">51 Punkte · 3,2 h Sonne · 15° · 2,2 mm · 20 km/h</div></div>
+        </div></div>
+        <div class="dock grain"><button class="play" aria-label="Pause"><svg width="20" height="20"><use href="#i-pause"/></svg></button>
+          <div class="tl"><div class="ro"><b>So 25. Okt, 10:20</b><span>unterwegs nach Neuenburg</span></div>
+            <svg class="trk" viewBox="0 0 300 38" aria-hidden="true"><line class="base" x1="4" y1="13" x2="296" y2="13"/><line class="fill" x1="4" y1="13" x2="143" y2="13"/><path class="tk" d="M100 6v14M200 6v14"/><circle cx="42" cy="13" r="5.5" style="fill:var(--E-orange);stroke:var(--E-green);stroke-width:2"/><circle cx="150" cy="13" r="5.5" style="fill:var(--E-paper);stroke:var(--E-green);stroke-width:2"/><circle cx="250" cy="13" r="5.5" style="fill:var(--E-paper);stroke:var(--E-green);stroke-width:2"/><g transform="translate(132 4) scale(.62)"><use href="#E-van"/></g><text x="0" y="35">SA 24.</text><text x="100" y="35">SO 25.</text><text x="200" y="35">MO 26.</text></svg>
+          </div></div>
+        <div class="hi"></div>
+      </div>
+      <figcaption><b>E · c Route abspielen.</b> Oben im Blatt die Etappe als Mini-Plakat: Hügel und Sonne überdrucken sich, der Camper ist kurz vor Neuenburg, Tag 1 ist schon gestempelt. Auf der Karte überdruckt die orange Strecke die Regenzelle.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="E"><div class="empty">
+        <svg class="scene" viewBox="0 0 390 120" preserveAspectRatio="none" aria-hidden="true"><rect width="390" height="120" style="fill:var(--E-paper2)"/><circle cx="280" cy="62" r="30" style="fill:var(--E-orange)"/><path d="M0 96L70 46l50 32 62-54 80 64 48-28 80 40V120H0z" style="fill:var(--E-green);mix-blend-mode:var(--E-blend)"/><path d="M0 104C80 90 160 100 230 96S340 88 390 98V120H0z" style="fill:var(--E-blue);mix-blend-mode:var(--E-blend);opacity:.85"/><text x="20" y="38" style="fill:var(--E-ink);font:28px 'Caprasimo',serif">WeatherChaser</text></svg>
+        <div class="q">Wohin soll’s gehen?</div>
+        <div class="ch"><b>Bestes Wetter finden</b><small>Orte rund um einen Ort oder in einem Gebiet vergleichen</small></div>
+        <div class="ch"><b>Beste Route planen</b><small>Mehrtägige Route, die dem guten Wetter folgt</small></div>
+      </div></div>
+      <figcaption><b>E · a Start (Ausschnitt des Blatts).</b> Hier darf das Plakat laut sein: Logo in Caprasimo, Berge und Sonne im Überdruck. Darunter die zwei Einstiege aus v1.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Bewegung: Stempel, wenn ein Stopp erreicht ist</h3>
+  <div class="motion E" role="img" aria-label="Drei Momentaufnahmen: Stempel groß und blass, Stempel trifft auf, Stempel liegt schräg und deckend">
+    <figure><div class="mf" style="background:var(--E-paper2)"><svg viewBox="0 0 150 104" width="150" height="104"><g transform="translate(75 52) scale(1.25)" style="opacity:.25;fill:none;stroke:var(--E-orange);stroke-width:2"><circle r="26"/><text y="5" style="fill:var(--E-orange);stroke:none;font:800 13px 'Schibsted Grotesk',sans-serif;text-anchor:middle">TAG 2</text></g></svg></div><figcaption>0 ms · 1,25, blass</figcaption></figure>
+    <figure><div class="mf" style="background:var(--E-paper2)"><svg viewBox="0 0 150 104" width="150" height="104"><g transform="translate(75 52) rotate(-3) scale(1.06)" style="opacity:.85;fill:none;stroke:var(--E-orange);stroke-width:2.4"><circle r="26"/><text y="5" style="fill:var(--E-orange);stroke:none;font:800 13px 'Schibsted Grotesk',sans-serif;text-anchor:middle">TAG 2</text></g></svg></div><figcaption>100 ms · trifft auf</figcaption></figure>
+    <figure><div class="mf" style="background:var(--E-paper2)"><svg viewBox="0 0 150 104" width="150" height="104"><g transform="translate(75 52) rotate(-6)" style="fill:none;stroke:var(--E-orange);stroke-width:2.4"><circle r="26"/><circle r="20" style="stroke-width:1.2;stroke-dasharray:2 2"/><text y="5" style="fill:var(--E-orange);stroke:none;font:800 13px 'Schibsted Grotesk',sans-serif;text-anchor:middle">TAG 2</text></g></svg></div><figcaption>160 ms · −6°, deckend</figcaption></figure>
+  </div>
+
+  <figure class="wide" style="margin-top:28px">
+    <div class="dk E">
+      <div class="map"><svg viewBox="-480 -10 1100 687.5" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#geo"/><use href="#E-fov"/></svg></div>
+      <div class="stack"><button aria-label="Wolken und Regen"><svg class="ico"><use href="#i-layers"/></svg></button><button aria-label="Mein Standort"><svg class="ico"><use href="#i-loc"/></svg></button></div>
+      <div class="panel">
+        <div class="top grain"><div class="logo">WeatherChaser</div>
+          <div class="sum"><div><div class="t1">Rund um Freiburg</div><div class="t2">Sa 24.–Mo 26. Okt · Sightseeing</div></div><span class="ed">ändern</span></div></div>
+        <div class="hd2"><span class="h serif">10 Orte</span><span style="font-size:14px;font-weight:700">Punkte ▾</span></div>
+        <div class="e"><svg class="sym" aria-label="sonnig"><use href="#E-sun"/></svg><div class="tx"><b>Ettenheim</b><small>6,4 h Sonne · 10° · 0,7 mm · 17 km/h</small></div><span class="pt">58</span></div>
+        <div class="e"><svg class="sym" aria-label="Regen"><use href="#E-rain"/></svg><div class="tx"><b>Neuenburg am Rhein</b><small>3,5 h Sonne · 11° · 5,8 mm · 15 km/h</small></div><span class="pt">45</span></div>
+        <div class="e"><svg class="sym" aria-label="Regen"><use href="#E-rain"/></svg><div class="tx"><b>Müllheim</b><small>3,3 h Sonne · 11° · 6,1 mm · 17 km/h</small></div><span class="pt">43</span></div>
+        <div class="e ske"><span></span><div class="tx"><i style="width:130px"></i><i style="width:220px"></i></div><span class="pt"></span></div>
+        <div class="e ske"><span></span><div class="tx"><i style="width:100px"></i><i style="width:210px"></i></div><span class="pt"></span></div>
+        <div style="padding:12px 22px;font-size:14px;color:var(--E-ink2)">Orte 4–10: Platzhalter</div>
+      </div>
+      <div class="dock grain"><button class="play" aria-label="Abspielen"><svg width="20" height="20"><use href="#i-play"/></svg></button>
+        <div class="tl"><div class="ro"><b>So 25. Okt, 16:00</b><span>Vorhersage · Wolken: Open-Meteo, Regen: DWD</span></div>
+          <svg class="trk" viewBox="0 0 874 38" aria-hidden="true"><line class="base" x1="4" y1="11" x2="870" y2="11"/><line class="fill" x1="4" y1="11" x2="486" y2="11"/><path class="tk" d="M291 4v14M583 4v14"/><circle cx="486" cy="11" r="11" style="fill:var(--E-paper);stroke:var(--E-green);stroke-width:2.5"/><use href="#E-sun" x="476" y="1" width="20" height="20"/><text x="0" y="35">SAMSTAG 24.</text><text x="291" y="35">SONNTAG 25.</text><text x="583" y="35">MONTAG 26.</text></svg>
+        </div></div>
+    </div>
+    <figcaption><b>E · Desktop, Ergebnisse</b> (1440 × 900, verkleinert). Die Seitenleiste beginnt mit einem grünen Plakatkopf mit Logo; darunter ruhige Liste, rechts die Karte ohne Körnung.</figcaption>
+  </figure>
+  </section>
+
+  <!-- ───────────── B ───────────── -->
+  <section class="dir" data-dir="B" id="b-nativ">
+  <h2><span class="n">B</span>Ruhig &amp; nativ bleibt die Rückfallebene</h2>
+  <p>B aus v1 ist weiter gültig, wenn es schnell und risikoarm gehen soll: gleicher Umbau, Verhalten wie Apple- oder Google-Karten, eine Akzentfarbe. Mockups und Farben stehen in v1.</p>
+  <ul class="tight">
+    <li><b>iOS:</b> Die Systemschrift (SF Pro) ist dort echt nativ und kein KI-Merkmal. Sie bleibt.</li>
+    <li><b>Web und Android:</b> statt Roboto <b>Schibsted Grotesk</b> (<code>@fontsource-variable/schibsted-grotesk</code>), Tabellenziffern, gleiche Größen wie in v1: 22/700 Titel, 17/400 Zeile, 13/400 Details.</li>
+    <li><b>Was B nicht leistet:</b> Es ist nicht verspielt. Für die Outdoor-Zielgruppe ist es die sichere, aber blasse Wahl.</li>
+  </ul>
+  <div class="specimen Bspec">
+    <div style="font-size:22px;font-weight:700">Neuenburg am Rhein</div>
+    <div style="font-size:17px"><b style="font-weight:600">45</b> · 3,5 h Sonne · 11° · 5,8 mm · 15 km/h</div>
+    <div style="font-size:13px;color:var(--d-muted)">Sa 24.–Mo 26. Okt · Sightseeing</div>
+  </div>
+  </section>
+
+  <!-- ───────────── Vergleich ───────────── -->
+  <section class="dir" data-dir="V" id="vergleich">
+  <h2><span class="n">2</span>Vergleich und Empfehlung</h2>
+  <div class="scroll">
+  <table class="cmp">
+    <thead><tr><th></th><th>C+ · Feldbuch</th><th>D · Wegweiser</th><th>E · Nationalpark-Poster</th><th>B · Ruhig &amp; nativ</th></tr></thead>
+    <tbody>
+      <tr><th>Charakter</th><td>Persönlich, gut gelaunt, selbst gemacht.</td><td>Klar, robust, sofort als „Wandern“ lesbar.</td><td>Warm, nostalgisch, plakativ.</td><td>Unauffällig, vertraut.</td></tr>
+      <tr><th>Verspieltheit</th><td><b>Hoch.</b> Handschrift, Sticker, Kritzeleien, Klebeband.</td><td><b>Mittel bis hoch.</b> Über Formen: Arme, Rauten, Maßstab, Verkehrszeichen.</td><td><b>Hoch in Kopf, Start und Abspielen</b>, ruhig in Liste und Karte.</td><td>Niedrig.</td></tr>
+      <tr><th>Lesbarkeit der Daten</th><td>Gut, solange die Regel hält: Messwerte nur in Atkinson. Viele Sticker und Schraffur machen die Karte unruhiger.</td><td><b>Sehr gut.</b> Ein Arm = ein Ort, Score immer an derselben Stelle, Overpass mit Tabellenziffern.</td><td>Gut in der Liste (große Zeichen, große Zahl). Überdruck kann Kontraste auf der Karte senken.</td><td>Sehr gut.</td></tr>
+      <tr><th>Dunkelmodus</th><td>Mittel. Papier und Sticker wirken nachts weniger natürlich; Schraffur muss heller werden.</td><td><b>Sehr gut.</b> Gelbe Schilder auf Dunkel sind wie reflektierende Wegweiser bei Nacht.</td><td>Mittel. Überdruck muss von multiply auf screen wechseln; jede Mischfarbe neu prüfen.</td><td>Sehr gut (Systemfarben).</td></tr>
+      <tr><th>Aufwand in der React-App</th><td><b>Mittel bis groß.</b> Drei Schriften (@fontsource), Karopapier und Sticker als CSS, Wackel-Filter und Schraffur auf der Kartenebene (MapLibre: Füllmuster statt SVG-Filter).</td><td><b>Mittel.</b> Zwei Schriften, Arm-Form per clip-path, Rauten und Fähnchen als Karten-Symbole, Maßstab als SVG. Kein Filter, keine Körnung.</td><td><b>Groß.</b> Drei Schriften, Körnung, Überdruck auf echten Kartenebenen (Blend-Modi in MapLibre nur eingeschränkt), Etappen-Plakat und Stempel.</td><td><b>Klein.</b> Tokens tauschen, eine Schrift für Web/Android.</td></tr>
+      <tr><th>Risiken</th><td>Kann kindlich wirken, wenn mehr Deko dazukommt. Handschrift ermüdet bei langen Listen. Displacement-Filter kosten auf alten Handys Leistung.</td><td>Schild-Optik könnte mit echter Wanderweg-Beschilderung verwechselt werden (deshalb nie echte Wegzeiten zeigen). Schmale Schrift bei sehr langen Ortsnamen (über 22 Zeichen) kürzen.</td><td>Viel Stil für wenige Bildschirme; die Liste ist fast B. Plakat-Look kann sich schnell abnutzen.</td><td>Wenig Wiedererkennung, für die Zielgruppe blass.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <h3>Meine Empfehlung</h3>
+  <p><b>D „Wegweiser“ als App-Stil.</b> D ist verspielt, ohne Schmuck hinzuzufügen: Jede Form ist eine Information. Der Arm ist der Listeneintrag, die Raute ist der Stopp, die weiß-rot-weiße Spitze ist die Auswahl, der Maßstabsbalken ist die Zeit. Damit bleibt D bei Daten so lesbar wie B, ist nachts am stärksten und mit mittlerem Aufwand umsetzbar. Für Wandernde ist es sofort vertraut.</p>
+  <p>Wenn du lieber nah an deinem Favoriten C bleibst, ist <b>C+</b> die richtige Wahl. Dann nur mit zwei festen Regeln: Messwerte nie in Handschrift, und höchstens drei Schmuckelemente mit Aufgabe (Kringel, Klebeband, Stern). <b>E</b> würde ich nicht als Grundstil nehmen, aber das Plakat für den Startbildschirm und für geteilte Routen im Hinterkopf behalten.</p>
+  <h3>Nächster Schritt</h3>
+  <ol class="tight">
+    <li>Du wählst D, C+ oder eine Kombination (z. B. „D, Startbildschirm aus E“).</li>
+    <li>Ich schreibe das Ticket für den mobilen Umbau aus v1 (gilt für jede Richtung), Status „Spec Ready“ erst nach deinem OK.</li>
+    <li>Ein zweites Ticket für Schriften (@fontsource), Tokens hell/dunkel und Formen der gewählten Richtung, mit DE- und EN-Übersetzungsschlüsseln und deutschen Zahlenformaten.</li>
+  </ol>
+  </section>
+
+  <h3 id="selbstpruefung">Selbstprüfung der Mockups</h3>
+  <p>Geprüft mit der Prüfliste „audit-ai-design-slop“ (Deko-Stapel, Wiederholung, Etiketten-Lärm, Schein-Belege, Bedienfehler, Überlauf) und einem Skript, das Schriften, Überlauf und abgeschnittenen Text in allen Rahmen misst. Was ich danach geändert habe:</p>
+  <ul class="tight" id="audit-list">
+    <li><b>Zeitleiste oben statt unten (E):</b> Eine Regel für die Körnung hat die Position des Fußes überschrieben; der Fuß lag im Mockup über der Kopfzeile. Regel entfernt, Fuß sitzt wieder in der Daumenzone.</li>
+    <li><b>Schwarzer Fleck statt Sonne (E):</b> Orange im Überdruck auf dunklem Grün ergab fast Schwarz. Die Sonne geht jetzt hinter dem Kopfband auf; Überdruck nur noch dort, wo er etwas zeigt (Strecke über Regen, Berge vor Sonne).</li>
+    <li><b>Zerrissene Zahlen (E):</b> Die Tabellenziffern von Schibsted machten aus „6,4 h“ „6 , 4 h“. Tabellenziffern nur noch für Scores und Zeitachse.</li>
+    <li><b>Unsichtbare Auswahl (D):</b> Das Weiß der weiß-rot-weißen Spitze verschwand auf dem hellen Blatt. Der gewählte Arm hat jetzt zusätzlich eine schwarze Kontur, in Liste und Karte.</li>
+    <li><b>Kleben der Trennpunkte (D):</b> In Overpass sah „Sonne · 10°“ wie „Sonne ·10°“ aus. Trennpunkte mit festem Abstand gesetzt.</li>
+    <li><b>Schwacher Abspielknopf im Dunkeln (D):</b> Heller Knopf mit gelbem Symbol hatte zu wenig Kontrast. Jetzt ein gelbes Schild mit schwarzem Symbol, hell wie dunkel.</li>
+    <li><b>Umbrüche (C+):</b> Profil-Chips brachen 3 + 1 um, der Stoppname „Neuenburg am Rhein“ in zwei Zeilen. Chips als 2 × 2-Raster, Name von 25 auf 22 px.</li>
+    <li><b>Überlauf:</b> Im Wegweiser-Blatt war die letzte Messzeile abgeschnitten, das Klebeband ragte aus seiner Zelle, und die Startkarte aus E machte die Seite auf dem Handy breiter als 390 px. Alle drei behoben; das Prüfskript meldet jetzt keinen Überlauf in den 10 Rahmen, hell und dunkel.</li>
+    <li><b>Bewusst behalten:</b> der minimal schräge Zettel als Kopfzeile in C+ (trägt den Notizbuch-Charakter, Text bleibt scharf); Körnung in E nur auf Kopfband und Zeitleiste; genau drei Schmuckelemente in C+. Offen: Der Camper verdeckt in allen Richtungen kurz das Wort „Bad Krozingen“; die echte Karte blendet kollidierende Beschriftungen ohnehin aus.</li>
+  </ul>
+
+  <p class="foot">Gestaltungsgrundlagen (als Leitlinien gelesen, nicht kopiert): Emil Kowalski, <a href="https://github.com/emilkowalski/skills">github.com/emilkowalski/skills</a> · ConardLi, <a href="https://github.com/ConardLi/garden-skills">github.com/ConardLi/garden-skills</a> · Meng To, <a href="https://github.com/MengTo/Skills">github.com/MengTo/Skills</a> (no-ai-design-slop, audit-ai-design-slop). Kartengeometrie frei gezeichnet nach der Lage der Orte am Oberrhein, keine Kartendaten. Höhe Freiburg (278 m) und Luftlinien aus öffentlichen Koordinaten, gerundet.</p>
+</main>
+
+<script>
+(function(){
+  var b=document.getElementById('themeBtn'),r=document.documentElement,order=['system','light','dark'],names={system:'System',light:'Hell',dark:'Dunkel'};
+  function cur(){return r.dataset.theme||'system';}
+  function show(){b.textContent='Darstellung: '+names[cur()];}
+  b.addEventListener('click',function(){var n=order[(order.indexOf(cur())+1)%3];if(n==='system')delete r.dataset.theme;else r.dataset.theme=n;try{n==='system'?localStorage.removeItem('wc-design-theme'):localStorage.setItem('wc-design-theme',n);}catch(e){}show();});
+  show();
+  var main=document.querySelector('main'),tabs=document.querySelectorAll('.tabs a');
+  for(var i=0;i<tabs.length;i++){tabs[i].addEventListener('click',function(){var k=this.dataset.tab;if(k==='all')delete main.dataset.show;else main.dataset.show=k;for(var j=0;j<tabs.length;j++)tabs[j].setAttribute('aria-current',tabs[j]===this?'true':'false');});}
+})();
+</script>
+</body>
+</html>
